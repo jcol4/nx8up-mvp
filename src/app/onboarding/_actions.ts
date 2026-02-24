@@ -3,12 +3,11 @@
 import { auth, clerkClient } from '@clerk/nextjs/server'
 
 export const completeOnboarding = async (formData: FormData) => {
-  const { isAuthenticated, userId } = await auth()
+  const { userId } = await auth()
 
-  if (!isAuthenticated) {
+  if (!userId) {
     return { error: 'No logged in user' }
   }
-  const client = await clerkClient()
 
   const dob = formData.get('userDateOfBirth') as string
 
@@ -21,10 +20,12 @@ export const completeOnboarding = async (formData: FormData) => {
   if (age < 18) return { error: 'You must be 18 or older to use this app' }
 
   try {
+    const client = await clerkClient()
     const res = await client.users.updateUser(userId, {
       publicMetadata: { 
         onboardingComplete: true, 
-        ageVerified: true 
+        ageVerified: true,
+        role: 'creator',
       },
     })
     return { message: res.publicMetadata }
