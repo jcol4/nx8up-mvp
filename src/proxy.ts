@@ -22,7 +22,7 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
     //not signed in - direct to signin
     if (!userId) {
-        return redirectToSignIn({ returnBackUrl: req.url })
+        return redirectToSignIn()
     }
 
     //signed in but not onboarded, redirect to onboarding
