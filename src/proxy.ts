@@ -3,7 +3,8 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from 'next/server'
 
 const isAdminRoute = createRouteMatcher(['/admin(.*)'])
-const isCreatorRoute = createRouteMatcher(['/dashboard(.*)'])
+const isCreatorRoute = createRouteMatcher(['/creator(.*)'])
+const isSponsorRoute = createRouteMatcher(['/sponsor(.*)'])
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
 
 const isPublicRoute = createRouteMatcher([
@@ -38,6 +39,10 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
     if (isCreatorRoute(req) && role !== 'creator' && role !== 'admin') {
         return NextResponse.redirect(new URL('/', req.url))    
+    }
+    // sponsor only routes
+    if (isSponsorRoute(req) && role !== 'sponsor' && role !== 'admin') {
+        return NextResponse.redirect(new URL('/', req.url))
     }
 
     return NextResponse.next()
