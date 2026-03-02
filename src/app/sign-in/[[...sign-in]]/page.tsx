@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { EmailCodeFactor } from '@clerk/types'
 import AuthLayout from '@/components/AuthLayout'
+import { getUserRole } from '@/lib/get-role'
 
 export default function SignInPage() {
   const { isLoaded, signIn, setActive } = useSignIn()
@@ -20,20 +21,25 @@ export default function SignInPage() {
   const [pendingSessionId, setPendingSessionId] = React.useState<string | null>(null)
   const router = useRouter()
 
-  const VERIFICATION_OPT_OUT_KEY = 'nx8up_verificationOptOut'
+  // Fetch role from server action and redirect accordingly
+  const redirectByRole = async () => {
+    const role = await getUserRole()
+    if (role === 'admin') router.push('/admin')
+    else if (role === 'creator') router.push('/creator')
+    else if (role === 'sponsor') router.push('/sponsor')
+    else router.push('/')
+  }
 
   const handleOptOutChoice = async (optOut: boolean) => {
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem(VERIFICATION_OPT_OUT_KEY, String(optOut))
-      } catch {
-        /* ignore */
-      }
+        localStorage.setItem('nx8up_verificationOptOut', String(optOut))
+      } catch { /* ignore */ }
     }
     if (pendingSessionId && setActive) {
       await setActive({ session: pendingSessionId })
     }
-    router.push('/')
+    await redirectByRole()
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,9 +50,10 @@ export default function SignInPage() {
 
     try {
       const result = await signIn.create({ identifier: identifier.trim(), password })
+
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId })
-        router.push('/')
+        await redirectByRole()
       } else if (result.status === 'needs_second_factor') {
         const emailCodeFactor = result.supportedSecondFactors?.find(
           (factor): factor is EmailCodeFactor => factor.strategy === 'email_code'
@@ -103,10 +110,11 @@ export default function SignInPage() {
     }
   }
 
+  // ── Opt-out prompt screen ──────────────────────────────────────────────────
   if (showOptOutPrompt) {
     return (
       <AuthLayout>
-        <div className="nx-badge">Verification complete</div>
+        <div className="nx-badge">Verification Complete</div>
         <h1 className="nx-title">Skip verification <span>next time?</span></h1>
         <p className="nx-subtitle">
           Would you like to skip email verification when signing in from this device in the future?
@@ -115,11 +123,7 @@ export default function SignInPage() {
         <div className="nx-divider" />
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <button
-            className="nx-submit"
-            type="button"
-            onClick={() => handleOptOutChoice(true)}
-          >
+          <button className="nx-submit" type="button" onClick={() => handleOptOutChoice(true)}>
             <span className="nx-submit-inner">
               Yes, skip verification
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -140,14 +144,13 @@ export default function SignInPage() {
     )
   }
 
+  // ── Email code screen ──────────────────────────────────────────────────────
   if (showEmailCode) {
     return (
       <AuthLayout>
         <div className="nx-badge">Verify Email</div>
-        <h1 className="nx-title">Check your <span>email</span></h1>
-        <p className="nx-subtitle">
-          We sent a verification code to your email. Enter it below.
-        </p>
+        <h1 className="nx-title">Check your <span>Email</span></h1>
+        <p className="nx-subtitle">We sent a verification code to your email. Enter it below.</p>
 
         <div className="nx-divider" />
 
@@ -163,23 +166,25 @@ export default function SignInPage() {
           )}
 
           <div className="nx-field">
-            <label className="nx-label" htmlFor="code">Verification code</label>
+            <label className="nx-label" htmlFor="code">Verification Code</label>
             <div className="nx-input-wrap">
               <input
                 id="code"
-                className="nx-input"
+                className="nx-input nx-input--code"
                 type="text"
                 inputMode="numeric"
+                maxLength={6}
                 autoComplete="one-time-code"
                 value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="Enter 6-digit code"
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                placeholder="000000"
                 required
+                autoFocus
               />
             </div>
           </div>
 
-          <button className="nx-submit" type="submit" disabled={isLoading || !isLoaded}>
+          <button className="nx-submit" type="submit" disabled={isLoading || !isLoaded || code.length < 6}>
             <span className="nx-submit-inner">
               {isLoading ? (
                 <><span className="nx-spinner" /> Verifying...</>
@@ -198,8 +203,8 @@ export default function SignInPage() {
         <div className="nx-footer">
           <button
             type="button"
-            onClick={() => { setShowEmailCode(false); setCode(''); setError(''); }}
-            className="text-[#00c8ff] hover:underline bg-transparent border-none cursor-pointer p-0 font-inherit"
+            className="nx-text-btn"
+            onClick={() => { setShowEmailCode(false); setCode(''); setError('') }}
           >
             ← Back to sign in
           </button>
@@ -208,6 +213,7 @@ export default function SignInPage() {
     )
   }
 
+  // ── Main sign-in screen ────────────────────────────────────────────────────
   return (
     <AuthLayout>
       <div className="nx-badge">Player Login</div>
