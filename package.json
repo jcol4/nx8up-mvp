@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.38.1",
+    "@next/env": "^16.1.6",
+    "@prisma/adapter-neon": "^7.4.2",
     "@prisma/client": "^7.4.2",
     "@supabase/supabase-js": "^2.98.0",
     "next": "16.1.6",

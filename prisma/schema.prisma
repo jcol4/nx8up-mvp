@@ -1,14 +1,111 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model content_creators {
+  id              String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerk_user_id   String                 @unique
+  email           String                 @unique
+  age             Int?
+  location        String?
+  language        String[]
+  platform        String[]
+  average_viewers Int?
+  subs_followers  Int?
+  engagement_rate Decimal?               @db.Decimal(5, 2)
+  content_type    String[]
+  game_category   String[]
+  created_at      DateTime?              @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?              @default(now()) @db.Timestamptz(6)
+  applications    mission_applications[]
+
+  @@index([average_viewers])
+  @@index([content_type], type: Gin)
+  @@index([engagement_rate])
+  @@index([game_category], type: Gin)
+  @@index([language], type: Gin)
+  @@index([platform], type: Gin)
+  @@index([subs_followers])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model sponsors {
+  id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerk_user_id       String     @unique
+  email               String     @unique
+  company_name        String?
+  location            String?
+  language            String[]
+  budget_min          Int?
+  budget_max          Int?
+  min_avg_viewers     Int?
+  min_subs_followers  Int?
+  min_engagement_rate Decimal?   @db.Decimal(5, 2)
+  platform            String[]
+  content_type        String[]
+  game_category       String[]
+  created_at          DateTime?  @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime?  @default(now()) @db.Timestamptz(6)
+  missions            missions[]
+
+  @@index([budget_max])
+  @@index([budget_min])
+  @@index([content_type], type: Gin)
+  @@index([game_category], type: Gin)
+  @@index([language], type: Gin)
+  @@index([min_avg_viewers])
+  @@index([min_engagement_rate])
+  @@index([min_subs_followers])
+  @@index([platform], type: Gin)
+}
+
+model missions {
+  id                  String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sponsor_id          String                 @db.Uuid
+  title               String
+  description         String?
+  status              String                 @default("draft")
+  budget              Int?
+  platform            String[]
+  content_type        String[]
+  game_category       String[]
+  min_avg_viewers     Int?
+  min_subs_followers  Int?
+  min_engagement_rate Decimal?               @db.Decimal(5, 2)
+  creative_package    String[]
+  deadline            DateTime?              @db.Timestamptz(6)
+  created_at          DateTime?              @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime?              @default(now()) @db.Timestamptz(6)
+  sponsor             sponsors               @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
+  applications        mission_applications[]
+
+  @@index([status])
+  @@index([sponsor_id])
+  @@index([platform], type: Gin)
+  @@index([content_type], type: Gin)
+  @@index([game_category], type: Gin)
+  @@index([deadline])
+}
+
+model mission_applications {
+  id           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  mission_id   String           @db.Uuid
+  creator_id   String           @db.Uuid
+  status       String           @default("pending")
+  message      String?
+  submitted_at DateTime?        @default(now()) @db.Timestamptz(6)
+  mission      missions         @relation(fields: [mission_id], references: [id], onDelete: Cascade)
+  creator      content_creators @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+
+  @@unique([mission_id, creator_id])
+  @@index([mission_id])
+  @@index([creator_id])
+  @@index([status])
 }
