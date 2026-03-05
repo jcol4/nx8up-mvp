@@ -23,6 +23,7 @@ export default function SignInPage() {
 
   // Fetch role from server action and redirect accordingly
   const redirectByRole = async () => {
+    await new Promise(resolve => setTimeout(resolve, 150))
     const role = await getUserRole()
     if (role === 'admin') router.push('/admin')
     else if (role === 'creator') router.push('/creator')
