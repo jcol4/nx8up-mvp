@@ -5,6 +5,8 @@ import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { completeOnboarding } from './_actions'
 import AuthLayout from '@/components/AuthLayout'
+import NXDatePicker from '@/components/NXDatePicker'
+
 
 export default function OnboardingComponent() {
   const [error, setError] = React.useState('')
@@ -18,7 +20,10 @@ export default function OnboardingComponent() {
     const res = await completeOnboarding(formData)
     if (res?.message) {
       await user?.reload()
-      router.push('/')
+      const role = (res.message as any)?.role
+      if (role === 'creator') router.push('/creator')
+      else if (role === 'sponsor') router.push('/sponsor')
+      else router.push('/')
     }
     if (res?.error) {
       setError(res?.error)
@@ -39,16 +44,13 @@ export default function OnboardingComponent() {
       <form action={handleSubmit}>
         <div className="nx-field">
           <label className="nx-label" htmlFor="userDateOfBirth">Date of Birth</label>
-          <div className="nx-input-wrap">
-            <input
-              id="userDateOfBirth"
-              className="nx-input"
-              type="date"
-              name="userDateOfBirth"
-              max={new Date().toISOString().split('T')[0]}
-              required
-            />
-          </div>
+            <div className="nx-input-wrap">
+              <NXDatePicker
+                name="userDateOfBirth"
+                max={new Date().toISOString().split('T')[0]}
+                required
+              />
+            </div>
           <p className="nx-hint">Must be 18 or older to access platform</p>
         </div>
 
@@ -72,6 +74,18 @@ export default function OnboardingComponent() {
           </div>
         </div>
 
+        <div className="nx-field">
+          <label className="nx-label">I am a</label>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#c8dff0' }}>
+              <input type="radio" name="role" value="creator" required /> Creator
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#c8dff0' }}>
+              <input type="radio" name="role" value="sponsor" required /> Sponsor
+            </label>
+          </div>
+        </div>
+
         <button className="nx-submit" type="submit" disabled={isLoading}>
           <span className="nx-submit-inner">
             {isLoading ? (
@@ -87,8 +101,6 @@ export default function OnboardingComponent() {
           </span>
         </button>
       </form>
-
-      <p className="nx-footer">Date of birth used for verification only</p>
     </AuthLayout>
   )
 }
