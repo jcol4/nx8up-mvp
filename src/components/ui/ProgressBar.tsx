@@ -15,7 +15,9 @@ export default function ProgressBar({
   className = "",
 }: Props) {
   const percent = max > 0 ? Math.min(100, (value / max) * 100) : 0;
-  const hClass = height === "sm" ? "h-1.5" : "h-2";
+  const hClass = height === "sm" ? "h-1.5" : "h-2.5";
+  // Track: visible on both light and dark (e.g. creator dashboard) backgrounds
+  const trackClass = "rounded-full overflow-hidden bg-white/15 border border-white/10";
 
   const fillClass =
     variant === "gradient"
@@ -25,9 +27,9 @@ export default function ProgressBar({
         : className || "bg-gradient-to-r from-[#eab308] to-[#22c55e]";
 
   return (
-    <div className={`${hClass} rounded-full bg-black/30 overflow-hidden`}>
+    <div className={`w-full ${hClass} ${trackClass}`} role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={max}>
       <div
-        className={`h-full rounded-full transition-all duration-300 ${fillClass}`}
+        className={`h-full min-w-0 rounded-full transition-all duration-300 ${fillClass}`}
         style={{ width: `${percent}%` }}
       />
     </div>

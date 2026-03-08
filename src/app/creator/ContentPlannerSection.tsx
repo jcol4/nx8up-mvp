@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateContentPlannerNotes } from './_actions'
 import type { ContentPlannerNotes } from './_actions'
+import Panel from '@/components/shared/Panel'
+import FormTextarea from '@/components/ui/FormTextarea'
 import TabBar from '@/components/ui/TabBar'
 import SecondaryButton from '@/components/ui/SecondaryButton'
 
@@ -69,8 +71,7 @@ export default function ContentPlannerSection({ initialNotes }: Props) {
   const items = PLANNER_BY_TAB[activeTab]
 
   return (
-    <section className="cr-panel flex flex-col">
-      <h2 className="cr-panel-title">Content Planner</h2>
+    <Panel variant="creator" title="Content Planner" className="flex flex-col">
       <TabBar tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} className="mb-4" />
       <div className="flex-1 min-h-0 flex flex-col gap-3 overflow-hidden">
         <div className="space-y-3 overflow-y-auto max-h-[160px] pr-1 shrink-0">
@@ -90,11 +91,12 @@ export default function ContentPlannerSection({ initialNotes }: Props) {
         </div>
         <div className="flex-1 min-h-0 flex flex-col shrink-0">
           <label className="block text-xs font-medium cr-text-muted mb-1.5">Notes</label>
-          <textarea
+          <FormTextarea
+            variant="creator"
             value={localNotes}
             onChange={(e) => handleNotesChange(e.target.value)}
             placeholder="Add notes for this tab..."
-            className="w-full px-3 py-2 rounded-lg cr-border border cr-bg-inner cr-text placeholder-[#3a5570] focus:outline-none focus:ring-1 focus:ring-[#00c8ff]/50 text-sm resize-none min-h-[80px]"
+            className="px-3 py-2 text-sm resize-none"
             rows={3}
           />
           {isSaving && (
@@ -103,6 +105,6 @@ export default function ContentPlannerSection({ initialNotes }: Props) {
         </div>
       </div>
       <SecondaryButton className="mt-4">Manage my deals</SecondaryButton>
-    </section>
+    </Panel>
   )
 }

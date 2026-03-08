@@ -1,6 +1,7 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import HomeQuickAccessCard from '@/components/shared/HomeQuickAccessCard'
 
 export default async function HomePage() {
   const { userId, sessionClaims } = await auth()
@@ -415,131 +416,100 @@ export default async function HomePage() {
             {/* Creator links */}
             {(role === 'creator' || role === 'admin') && (
               <>
-                <Link href="/creator/academy" className="home-card">
-                  <div className="home-card-icon">
+                <HomeQuickAccessCard
+                  href="/creator/academy"
+                  title="Academy"
+                  description="Continue your lessons and earn XP"
+                  icon={
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                       <path d="M9 2L16 6v6l-7 4-7-4V6l7-4z" stroke="#00c8ff" strokeWidth="1.2" strokeLinejoin="round"/>
                       <path d="M9 2v10M2 6l7 4 7-4" stroke="#00c8ff" strokeWidth="1.2"/>
                     </svg>
-                  </div>
-                  <div className="home-card-title">Academy</div>
-                  <div className="home-card-desc">Continue your lessons and earn XP</div>
-                  <span className="home-card-arrow">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M3 11L11 3M11 3H5M11 3v6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-                    </svg>
-                  </span>
-                </Link>
-
-                <Link href="/creator/profile" className="home-card">
-                  <div className="home-card-icon">
+                  }
+                />
+                <HomeQuickAccessCard
+                  href="/creator/profile"
+                  title="Profile"
+                  description="Manage your creator profile and media kit"
+                  icon={
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                       <circle cx="9" cy="6" r="3" stroke="#00c8ff" strokeWidth="1.2"/>
                       <path d="M2 16c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="#00c8ff" strokeWidth="1.2" strokeLinecap="round"/>
                     </svg>
-                  </div>
-                  <div className="home-card-title">Profile</div>
-                  <div className="home-card-desc">Manage your creator profile and media kit</div>
-                  <span className="home-card-arrow">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M3 11L11 3M11 3H5M11 3v6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-                    </svg>
-                  </span>
-                </Link>
+                  }
+                />
               </>
             )}
 
             {/* Sponsor links */}
             {(role === 'sponsor' || role === 'admin') && (
               <>
-                <Link href="/sponsor/missions" className="home-card">
-                  <div className="home-card-icon">
+                <HomeQuickAccessCard
+                  href="/sponsor/missions"
+                  title="My Missions"
+                  description="View and manage your active missions"
+                  icon={
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                       <path d="M9 2l2 5h5l-4 3 1.5 5L9 12l-4.5 3L6 10 2 7h5L9 2z" stroke="#7b4fff" strokeWidth="1.2" strokeLinejoin="round"/>
                     </svg>
-                  </div>
-                  <div className="home-card-title">My Missions</div>
-                  <div className="home-card-desc">View and manage your active missions</div>
-                  <span className="home-card-arrow">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M3 11L11 3M11 3H5M11 3v6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-                    </svg>
-                  </span>
-                </Link>
-
-                <Link href="/sponsor/creators" className="home-card">
-                  <div className="home-card-icon">
+                  }
+                />
+                <HomeQuickAccessCard
+                  href="/sponsor/creators"
+                  title="Browse Creators"
+                  description="Find and connect with creators"
+                  icon={
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                       <circle cx="6" cy="6" r="2.5" stroke="#7b4fff" strokeWidth="1.2"/>
                       <circle cx="12" cy="6" r="2.5" stroke="#7b4fff" strokeWidth="1.2"/>
                       <path d="M1 15c0-2.761 2.239-4 5-4s5 1.239 5 4" stroke="#7b4fff" strokeWidth="1.2" strokeLinecap="round"/>
                       <path d="M12 11c1.5 0 4 .8 4 4" stroke="#7b4fff" strokeWidth="1.2" strokeLinecap="round"/>
                     </svg>
-                  </div>
-                  <div className="home-card-title">Browse Creators</div>
-                  <div className="home-card-desc">Find and connect with creators</div>
-                  <span className="home-card-arrow">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M3 11L11 3M11 3H5M11 3v6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-                    </svg>
-                  </span>
-                </Link>
+                  }
+                />
               </>
             )}
 
             {/* Admin links */}
             {role === 'admin' && (
               <>
-                <Link href="/admin/creators" className="home-card">
-                  <div className="home-card-icon">
+                <HomeQuickAccessCard
+                  href="/admin/creators"
+                  title="Manage Creators"
+                  description="View and manage all creator accounts"
+                  icon={
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                       <circle cx="9" cy="6" r="3" stroke="#ff6b8a" strokeWidth="1.2"/>
                       <path d="M2 16c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="#ff6b8a" strokeWidth="1.2" strokeLinecap="round"/>
                     </svg>
-                  </div>
-                  <div className="home-card-title">Manage Creators</div>
-                  <div className="home-card-desc">View and manage all creator accounts</div>
-                  <span className="home-card-arrow">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M3 11L11 3M11 3H5M11 3v6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-                    </svg>
-                  </span>
-                </Link>
-
-                <Link href="/admin/reports" className="home-card">
-                  <div className="home-card-icon">
+                  }
+                />
+                <HomeQuickAccessCard
+                  href="/admin/reports"
+                  title="Reports"
+                  description="Platform analytics and insights"
+                  icon={
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                       <rect x="2" y="2" width="14" height="14" rx="2" stroke="#ff6b8a" strokeWidth="1.2"/>
                       <path d="M5 12l3-4 3 2 3-5" stroke="#ff6b8a" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                  </div>
-                  <div className="home-card-title">Reports</div>
-                  <div className="home-card-desc">Platform analytics and insights</div>
-                  <span className="home-card-arrow">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M3 11L11 3M11 3H5M11 3v6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-                    </svg>
-                  </span>
-                </Link>
+                  }
+                />
               </>
             )}
 
             {/* Shared for all roles */}
-            <Link href="/onboarding" className="home-card">
-              <div className="home-card-icon">
+            <HomeQuickAccessCard
+              href="/onboarding"
+              title="Settings"
+              description="Update your account and preferences"
+              icon={
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                   <circle cx="9" cy="9" r="7" stroke="#3a5570" strokeWidth="1.2"/>
                   <path d="M9 6v4M9 12v.5" stroke="#3a5570" strokeWidth="1.2" strokeLinecap="round"/>
                 </svg>
-              </div>
-              <div className="home-card-title">Settings</div>
-              <div className="home-card-desc">Update your account and preferences</div>
-              <span className="home-card-arrow">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M3 11L11 3M11 3H5M11 3v6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-                </svg>
-              </span>
-            </Link>
+              }
+            />
           </div>
         </div>
       </div>

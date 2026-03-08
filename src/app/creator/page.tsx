@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import { getCreatorXp, getCreatorCalendarTasks, getCreatorNotifications } from "./_actions";
 import { getUserDisplayInfo } from "@/lib/get-user-display-info";
 import CreatorTopBar from "@/components/creator/CreatorTopBar";
@@ -11,13 +12,16 @@ import ContentPlannerSection from "./ContentPlannerSection";
 import { getContentPlannerNotes } from "./_actions";
 
 export default async function CreatorDashboardPage() {
-  const [displayInfo, xpState, calendarTasks, notifications, contentPlannerNotes] = await Promise.all([
-    getUserDisplayInfo(),
-    getCreatorXp(),
-    getCreatorCalendarTasks(),
-    getCreatorNotifications(),
-    getContentPlannerNotes(),
-  ]);
+  const [authResult, displayInfo, xpState, calendarTasks, notifications, contentPlannerNotes] =
+    await Promise.all([
+      auth(),
+      getUserDisplayInfo(),
+      getCreatorXp(),
+      getCreatorCalendarTasks(),
+      getCreatorNotifications(),
+      getContentPlannerNotes(),
+    ]);
+  const role = (authResult.sessionClaims?.metadata as { role?: string } | undefined)?.role;
   const { displayName, username } = displayInfo;
   return (
     <>
@@ -30,6 +34,7 @@ export default async function CreatorDashboardPage() {
               username={username}
               variant="creator"
               editProfileLink="/creator/profile"
+              role={role}
             />
           </div>
         }

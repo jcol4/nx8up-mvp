@@ -1,18 +1,17 @@
 import Link from 'next/link'
 import { LESSONS } from '@/lib/academy-lessons'
+import Panel from '@/components/shared/Panel'
 
 const NEXT_LESSON = LESSONS[0]
 
 export default function CreatorAcademySection() {
   return (
-    <section className="cr-panel">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <h2 className="cr-panel-title mb-0">Academy</h2>
-          <Link href="/creator/academy" className="text-xs cr-accent hover:underline">
-            View all
-          </Link>
-        </div>
+    <Panel
+      variant="creator"
+      title="Academy"
+      href="/creator/academy"
+      linkLabel="View all"
+      headerRight={
         <div className="flex gap-1.5" aria-label="Lesson progress">
           {LESSONS.map((_, i) => (
             <span
@@ -23,7 +22,8 @@ export default function CreatorAcademySection() {
             />
           ))}
         </div>
-      </div>
+      }
+    >
       <p className="text-xs cr-accent uppercase tracking-wider mb-3">Next lesson</p>
       <Link
         href={`/creator/academy/${NEXT_LESSON.id}`}
@@ -49,6 +49,6 @@ export default function CreatorAcademySection() {
       >
         Start
       </Link>
-    </section>
+    </Panel>
   )
 }

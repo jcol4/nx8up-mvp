@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { BackLink } from '@/components/shared'
 import { DashboardPanel } from '@/components/dashboard'
 import AdminHeader from '../AdminHeader'
 
@@ -10,9 +10,7 @@ export default function AdminMissionsPage() {
         <div className="max-w-4xl mx-auto">
           <DashboardPanel title="Missions">
             <p className="dash-text-muted text-sm">Mission management coming soon.</p>
-            <Link href="/admin" className="text-sm dash-accent hover:underline mt-4 inline-block">
-              ← Back to Dashboard
-            </Link>
+            <BackLink href="/admin" className="mt-4" />
           </DashboardPanel>
         </div>
       </div>

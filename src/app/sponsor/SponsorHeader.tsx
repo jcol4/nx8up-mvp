@@ -1,8 +1,11 @@
 import Link from 'next/link'
+import { auth } from '@clerk/nextjs/server'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import UserProfileBlock from '@/components/shared/UserProfileBlock'
 
 export default async function SponsorHeader() {
+  const { sessionClaims } = await auth()
+  const role = (sessionClaims?.metadata as { role?: string } | undefined)?.role
   const { displayName, username } = await getUserDisplayInfo()
   const userName = displayName || username || 'Sponsor'
 
@@ -29,6 +32,8 @@ export default async function SponsorHeader() {
           displayName={displayName}
           username={username}
           variant="admin"
+          editProfileLink="/sponsor/profile"
+          role={role}
         />
       </div>
     </header>

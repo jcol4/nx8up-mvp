@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import { DashboardPanel } from '@/components/dashboard'
 import { DEFAULT_CONTENT_CATEGORIES } from '@/lib/creator-profile'
+import Alert from '@/components/ui/Alert'
+import FormInput from '@/components/ui/FormInput'
+import FormTextarea from '@/components/ui/FormTextarea'
 
-const inputClass =
-  'w-full px-4 py-2.5 rounded-lg dash-border border dash-bg-inner dash-text placeholder-[#3a5570] focus:outline-none focus:ring-1 focus:ring-[#00c8ff]/50'
 const labelClass = 'block text-sm font-medium dash-text-muted mb-1.5'
 
 export default function SponsorPostMissionSection() {
@@ -42,22 +43,22 @@ export default function SponsorPostMissionSection() {
     <DashboardPanel title="Post Mission">
       <form onSubmit={handleSubmit} className="space-y-4">
         {success && (
-          <div className="p-3 rounded-lg bg-[#22c55e]/10 border border-[#22c55e]/30 dash-success text-sm">
+          <Alert variant="success">
             Mission posted! Creators matching your criteria will be notified.
-          </div>
+          </Alert>
         )}
 
         <div>
           <label htmlFor="mission-title" className={labelClass}>
             Mission title
           </label>
-          <input
+          <FormInput
             id="mission-title"
             type="text"
+            variant="dashboard"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Valorant Challenge, Product Review"
-            className={inputClass}
             maxLength={80}
             required
           />
@@ -67,12 +68,12 @@ export default function SponsorPostMissionSection() {
           <label htmlFor="mission-desc" className={labelClass}>
             Description
           </label>
-          <textarea
+          <FormTextarea
             id="mission-desc"
+            variant="dashboard"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="What should creators do? Include deliverables, timeline..."
-            className={`${inputClass} min-h-[80px] resize-y`}
             maxLength={500}
             rows={3}
           />
@@ -83,28 +84,28 @@ export default function SponsorPostMissionSection() {
             <label htmlFor="mission-budget" className={labelClass}>
               Budget ($)
             </label>
-            <input
+            <FormInput
               id="mission-budget"
               type="text"
               inputMode="numeric"
+              variant="dashboard"
               value={budget}
               onChange={(e) => setBudget(e.target.value)}
               placeholder="e.g. 500"
-              className={inputClass}
             />
           </div>
           <div>
             <label htmlFor="mission-followers" className={labelClass}>
               Min. followers (optional)
             </label>
-            <input
+            <FormInput
               id="mission-followers"
               type="text"
               inputMode="numeric"
+              variant="dashboard"
               value={minFollowers}
               onChange={(e) => setMinFollowers(e.target.value)}
               placeholder="e.g. 1000"
-              className={inputClass}
             />
           </div>
         </div>

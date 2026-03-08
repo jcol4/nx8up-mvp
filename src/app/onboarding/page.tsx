@@ -4,8 +4,8 @@ import * as React from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { completeOnboarding } from './_actions'
-import AuthLayout from '@/components/AuthLayout'
-import NXDatePicker from '@/components/NXDatePicker'
+import { AuthLayout } from '@/components/layout'
+import { NXDatePicker } from '@/components/ui'
 
 
 export default function OnboardingComponent() {

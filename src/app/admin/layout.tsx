@@ -2,12 +2,18 @@ import type { Metadata } from 'next'
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import DashboardStyles from '@/components/dashboard/DashboardStyles'
-import AdminSidebar from './AdminSidebar'
+import { DashboardSidebar } from '@/components/dashboard'
 
 export const metadata: Metadata = {
   title: 'Admin Hub | Nx8up',
   description: 'Admin dashboard',
 }
+
+const SECTION_NAV_ITEMS = [
+  { href: '/creator', label: 'Creator' },
+  { href: '/sponsor', label: 'Sponsor' },
+  { href: '/admin', label: 'Admin' },
+]
 
 const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard' },
@@ -40,13 +46,51 @@ export default async function AdminLayout({
   if (role !== 'admin') redirect('/')
 
   const stats = userId ? await getAdminUserStats() : null
+  const s = stats ?? {
+    followers: '24.3K',
+    subscribers: '18.9K',
+    nextPayout: '$4,200',
+    steamLinked: true,
+  }
+
+  const statsNode = (
+    <div className="px-4 pt-4 pb-4">
+      <p className="text-xs font-semibold dash-text-muted uppercase tracking-wider mb-3">
+        My Stats
+      </p>
+      <div className="space-y-2 text-sm">
+        <div className="flex items-center gap-2 dash-text-muted">
+          <span>📺</span>
+          <span>{s.followers} Followers</span>
+        </div>
+        <div className="flex items-center gap-2 dash-text-muted">
+          <span>▶</span>
+          <span>{s.subscribers} Subscribers</span>
+        </div>
+        <div className={`flex items-center gap-2 ${s.steamLinked ? 'dash-success' : 'dash-text-muted'}`}>
+          <span>{s.steamLinked ? '✓' : '○'}</span>
+          <span>Steam Profile {s.steamLinked ? 'Linked' : 'Not linked'}</span>
+        </div>
+        <div className="flex items-center gap-2 dash-text-muted">
+          <span>Next Payout:</span>
+          <span className="dash-text-bright font-semibold">{s.nextPayout}</span>
+        </div>
+      </div>
+    </div>
+  )
 
   return (
     <>
       <DashboardStyles />
       <div className="dash-root">
         <div className="relative z-10 flex min-h-screen">
-          <AdminSidebar navItems={NAV_ITEMS} stats={stats} />
+          <DashboardSidebar
+            logoHref="/admin"
+            sectionNavItems={SECTION_NAV_ITEMS}
+            sectionTitle="Admin"
+            navItems={NAV_ITEMS}
+            statsNode={statsNode}
+          />
           <main className="flex-1 flex flex-col min-w-0">
             {children}
           </main>

@@ -14,11 +14,12 @@ type Stats = {
 }
 
 type Props = {
+  sectionNavItems?: NavItemType[]
   navItems: NavItemType[]
   stats?: Stats | null
 }
 
-export default function AdminSidebar({ navItems, stats }: Props) {
+export default function AdminSidebar({ sectionNavItems, navItems, stats }: Props) {
   const s = stats ?? {
     followers: '24.3K',
     subscribers: '18.9K',
@@ -101,7 +102,29 @@ export default function AdminSidebar({ navItems, stats }: Props) {
         </div>
       )}
 
-      <nav className={`flex-1 px-2 py-4 space-y-1 overflow-hidden ${collapsed ? 'flex flex-col items-center' : ''}`}>
+      <nav className={`flex-1 px-2 py-4 space-y-1 overflow-y-auto overflow-x-hidden ${collapsed ? 'flex flex-col items-center' : ''}`}>
+        {sectionNavItems && sectionNavItems.length > 0 && (
+          <div className={collapsed ? 'flex flex-col items-center gap-1' : 'mb-4'}>
+            {!collapsed && (
+              <p className="text-xs font-semibold dash-text-muted uppercase tracking-wider mb-2 px-2">
+                Sections
+              </p>
+            )}
+            {sectionNavItems.map((item) => (
+              <NavItem
+                key={item.href}
+                href={item.href}
+                label={item.label}
+                collapsed={collapsed}
+              />
+            ))}
+          </div>
+        )}
+        {!collapsed && (
+          <p className="text-xs font-semibold dash-text-muted uppercase tracking-wider mb-2 px-2">
+            Admin
+          </p>
+        )}
         {navItems.map((item) => (
           <NavItem
             key={item.href}

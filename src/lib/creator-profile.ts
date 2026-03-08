@@ -3,6 +3,14 @@ export type CreatorProfile = {
   bio?: string
   categories?: string[]
   urls?: { label?: string; url: string }[]
+  /** From DB (content_creators) */
+  location?: string
+  country?: string
+  state?: string
+  city?: string
+  platform?: string[]
+  game_category?: string[]
+  language?: string[]
 }
 
 export const DEFAULT_CONTENT_CATEGORIES = [
