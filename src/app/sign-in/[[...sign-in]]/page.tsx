@@ -5,7 +5,7 @@ import { useSignIn } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { EmailCodeFactor } from '@clerk/types'
-import AuthLayout from '@/components/AuthLayout'
+import { AuthLayout } from '@/components/layout'
 import { getUserRole } from '@/lib/get-role'
 
 export default function SignInPage() {

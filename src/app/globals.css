@@ -24,3 +24,66 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Clerk UserButton popover & UserProfile modal – match NX8UP theme */
+.cl-userButtonPopoverCard,
+.cl-userButtonPopoverCard .cl-card {
+  background: #0a1223 !important;
+  border: 1px solid rgba(0, 200, 255, 0.18) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+}
+.cl-userButtonPopoverCard .cl-userPreviewMainIdentifier,
+.cl-userButtonPopoverCard .cl-userPreviewSecondaryIdentifier {
+  color: #ffffff !important;
+}
+.cl-userButtonPopoverCard .cl-menuList,
+.cl-userButtonPopoverCard [data-localization-key],
+.cl-userButtonPopoverCard button,
+.cl-userButtonPopoverCard a,
+.cl-userButtonPopoverCard span,
+.cl-userButtonPopoverCard .cl-menuButton {
+  color: #ffffff !important;
+}
+.cl-userButtonPopoverCard button svg,
+.cl-userButtonPopoverCard .cl-menuButton svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+.cl-userButtonPopoverCard button:hover,
+.cl-userButtonPopoverCard .cl-menuButton:hover {
+  background: rgba(0, 200, 255, 0.08) !important;
+  color: #00c8ff !important;
+}
+.cl-userButtonPopoverCard button:hover svg,
+.cl-userButtonPopoverCard .cl-menuButton:hover svg {
+  color: #00c8ff !important;
+  fill: #00c8ff !important;
+}
+.cl-userButtonPopoverCard .cl-footer {
+  display: none !important;
+}
+.cl-modalContent,
+.cl-profileSection {
+  background: #0a1223 !important;
+  color: #c8dff0 !important;
+  border-color: rgba(0, 200, 255, 0.18) !important;
+}
+.cl-formFieldInput,
+.cl-formFieldInput input {
+  background: rgba(0, 200, 255, 0.05) !important;
+  border-color: rgba(0, 200, 255, 0.18) !important;
+  color: #c8dff0 !important;
+}
+.cl-profileSectionTitle {
+  color: #e8f4ff !important;
+}
+.cl-formFieldLabel {
+  color: #4a6080 !important;
+}
+.cl-navbarButton {
+  color: #c8dff0 !important;
+}
+.cl-navbarButton:hover {
+  background: rgba(0, 200, 255, 0.08) !important;
+  color: #00c8ff !important;
+}

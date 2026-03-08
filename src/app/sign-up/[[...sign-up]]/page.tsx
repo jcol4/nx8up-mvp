@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useSignUp } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import AuthLayout from '@/components/AuthLayout'
+import { AuthLayout } from '@/components/layout'
 
 export default function SignUpPage() {
   const { isLoaded, signUp, setActive } = useSignUp()
