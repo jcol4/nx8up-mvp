@@ -1,6 +1,7 @@
 import type { CreatorXpState } from '@/lib/creator-xp'
 import type { CalendarTasksMap } from './_actions'
 import CreatorCalendarSection from './CreatorCalendarSection'
+import Panel from '@/components/shared/Panel'
 import ProgressBar from '@/components/ui/ProgressBar'
 
 type Props = {
@@ -13,7 +14,7 @@ export default function CreatorProgressPanel({ xpState, calendarTasks }: Props) 
   const progressPercent = xpForNext > 0 ? Math.min(100, (xp / xpForNext) * 100) : 0
 
   return (
-    <section className="cr-panel">
+    <Panel variant="creator">
       <div className="flex items-center gap-3 mb-4">
         <span className="text-2xl">🏆</span>
         <div>
@@ -32,6 +33,6 @@ export default function CreatorProgressPanel({ xpState, calendarTasks }: Props) 
         Progress this week
       </p>
       <CreatorCalendarSection calendarTasks={calendarTasks} />
-    </section>
+    </Panel>
   )
 }

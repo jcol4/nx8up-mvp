@@ -9,6 +9,7 @@ import {
   toggleCreatorDayTask,
   type CalendarTask,
 } from './_actions'
+import FormInput from '@/components/ui/FormInput'
 
 type Props = {
   dateKey: string
@@ -67,9 +68,6 @@ export default function CreatorDayTasks({ dateKey, selectedDate, tasks }: Props)
     router.refresh()
   }
 
-  const inputClass =
-    'flex-1 px-3 py-1.5 rounded-lg cr-border border cr-bg-inner cr-text text-sm placeholder-[#3a5570] focus:outline-none focus:ring-1 focus:ring-[#00c8ff]/50'
-
   return (
     <div className="mt-4">
       <p className="text-xs cr-text-muted mb-2">Tasks for {dateLabel}</p>
@@ -92,15 +90,16 @@ export default function CreatorDayTasks({ dateKey, selectedDate, tasks }: Props)
             </button>
             {editingId === t.id ? (
               <div className="flex-1 flex gap-1">
-                <input
+                <FormInput
                   type="text"
+                  variant="creator"
+                  className="flex-1 px-3 py-1.5 text-sm"
                   value={editText}
                   onChange={(e) => setEditText(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleSaveEdit()
                     if (e.key === 'Escape') handleCancelEdit()
                   }}
-                  className={inputClass}
                   autoFocus
                 />
                 <button
@@ -142,12 +141,13 @@ export default function CreatorDayTasks({ dateKey, selectedDate, tasks }: Props)
         ))}
       </ul>
       <form onSubmit={handleAdd} className="mt-2 flex gap-2">
-        <input
+        <FormInput
           type="text"
+          variant="creator"
+          className="flex-1 px-3 py-1.5 text-sm"
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
           placeholder="Add task..."
-          className={inputClass}
         />
         <button
           type="submit"

@@ -1,5 +1,5 @@
+import { BackLink } from '@/components/shared'
 import SponsorHeader from '../SponsorHeader'
-import Link from 'next/link'
 
 export default function SponsorCreatorsPage() {
   return (
@@ -11,12 +11,7 @@ export default function SponsorCreatorsPage() {
           <p className="dash-text-muted text-sm mb-6">
             Browse creators who match your mission targeting criteria.
           </p>
-          <Link
-            href="/sponsor"
-            className="text-sm dash-accent hover:underline"
-          >
-            ← Back to Dashboard
-          </Link>
+          <BackLink href="/sponsor" />
         </div>
       </div>
     </>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Panel from '@/components/shared/Panel'
 import TabBar from '@/components/ui/TabBar'
 import ProgressBar from '@/components/ui/ProgressBar'
 import SecondaryButton from '@/components/ui/SecondaryButton'
@@ -29,8 +30,7 @@ export default function DealsAndCampaignsSection() {
   const deals = DEALS_BY_TAB[activeTab]
 
   return (
-    <section className="cr-panel flex flex-col">
-      <h2 className="cr-panel-title">Deals & Campaigns</h2>
+    <Panel variant="creator" title="Deals & Campaigns" className="flex flex-col">
       <TabBar tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} className="mb-4" />
       <ul className="space-y-3 flex-1 min-h-0 overflow-y-auto max-h-[280px] pr-1">
         {deals.map((d, i) => (
@@ -49,6 +49,6 @@ export default function DealsAndCampaignsSection() {
         ))}
       </ul>
       <SecondaryButton className="mt-4">Manage my deals</SecondaryButton>
-    </section>
+    </Panel>
   )
 }

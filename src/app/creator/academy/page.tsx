@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { LESSONS } from '@/lib/academy-lessons'
 import CreatorTopBar from '@/components/creator/CreatorTopBar'
+import Panel from '@/components/shared/Panel'
 
 function getVideoId(url: string): string {
   return url.split('/').pop()?.split('?')[0] ?? ''
@@ -21,8 +22,7 @@ export default function AcademyPage() {
       />
 
       <main className="max-w-3xl mx-auto p-6 sm:p-8">
-        <div className="cr-panel">
-          <h1 className="cr-panel-title">Academy</h1>
+        <Panel variant="creator" as="div" title="Academy" titleLevel={1}>
           <p className="text-sm cr-text-muted mb-6">
             Step-by-step lessons to grow your creator business.
           </p>
@@ -50,7 +50,7 @@ export default function AcademyPage() {
               </Link>
             ))}
           </div>
-        </div>
+        </Panel>
       </main>
     </>
   )

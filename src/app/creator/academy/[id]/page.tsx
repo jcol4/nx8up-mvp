@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getLesson, LESSONS } from '@/lib/academy-lessons'
 import CreatorTopBar from '@/components/creator/CreatorTopBar'
+import Panel from '@/components/shared/Panel'
 
 type Props = {
   params: Promise<{ id: string }>
@@ -28,9 +29,12 @@ export default async function AcademyLessonPage({ params }: Props) {
       />
 
       <main className="max-w-3xl mx-auto p-6 sm:p-8">
-        <div className="cr-panel">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="cr-panel-title mb-0">{lesson.title}</h1>
+        <Panel
+          variant="creator"
+          as="div"
+          title={lesson.title}
+          titleLevel={1}
+          headerRight={
             <div className="flex gap-1.5" aria-label="Lesson progress">
               {LESSONS.map((_, i) => (
                 <Link
@@ -43,7 +47,8 @@ export default async function AcademyLessonPage({ params }: Props) {
                 />
               ))}
             </div>
-          </div>
+          }
+        >
           <p className="text-xs cr-accent mb-4">+ {lesson.category} · {lesson.xpReward} XP</p>
 
           {/* Video */}
@@ -93,7 +98,7 @@ export default async function AcademyLessonPage({ params }: Props) {
               Back to Dashboard
             </Link>
           </div>
-        </div>
+        </Panel>
       </main>
     </>
   )

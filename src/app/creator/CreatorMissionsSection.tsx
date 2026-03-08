@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { addCreatorXp } from './_actions'
+import Panel from '@/components/shared/Panel'
 import ProgressBar from '@/components/ui/ProgressBar'
 
 // TODO: Replace with actual missions, if steps eg 0/2 make working progress bar
@@ -20,8 +21,7 @@ export default function CreatorMissionsSection() {
   }
 
   return (
-    <section className="cr-panel">
-      <h2 className="cr-panel-title">Today&apos;s Missions</h2>
+    <Panel variant="creator" title="Today's Missions">
       <ul className="space-y-3 flex-1">
         {MISSIONS.map((m, i) => (
           <li
@@ -47,6 +47,6 @@ export default function CreatorMissionsSection() {
           </li>
         ))}
       </ul>
-    </section>
+    </Panel>
   )
 }
