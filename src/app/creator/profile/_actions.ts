@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import type { CreatorProfile } from '@/lib/creator-profile'
 import { prisma } from '@/lib/prisma'
 import { parseLocation } from '@/lib/location-options'
+import { getTwitchUserByLogin, getTwitchUserById, isTwitchDataStale } from '@/lib/twitch'
 
 export async function getCreatorProfile(): Promise<CreatorProfile | null> {
   const { userId } = await auth()
@@ -167,5 +168,121 @@ export async function deleteCreatorProfile(): Promise<{ error?: string }> {
     return {}
   } catch {
     return { error: 'Failed to delete profile' }
+  }
+}
+
+export async function linkTwitchAccount(formData: FormData) {
+  const { userId } = await auth()
+  if (!userId) return { error: 'Not authenticated' }
+
+  const username = (formData.get('twitch_username') as string)?.trim()
+  if (!username) return { error: 'Please enter a Twitch username' }
+
+  try {
+    // Check if this Twitch username is already linked to another account
+    const twitchUser = await getTwitchUserByLogin(username)
+
+    if (!twitchUser) {
+      return { error: `Twitch account "${username}" not found. Check the username and try again.` }
+    }
+
+    const existingLink = await prisma.content_creators.findFirst({
+      where: {
+        twitch_id: twitchUser.id,
+        NOT: { clerk_user_id: userId },
+      },
+    })
+
+    if (existingLink) {
+      return { error: 'This Twitch account is already linked to another NX8UP profile.' }
+    }
+
+    // Store Twitch data
+    await prisma.content_creators.update({
+      where: { clerk_user_id: userId },
+      data: {
+        twitch_username: twitchUser.login,
+        twitch_id: twitchUser.id,
+        twitch_broadcaster_type: twitchUser.broadcaster_type,
+        twitch_description: twitchUser.description,
+        twitch_profile_image: twitchUser.profile_image_url,
+        twitch_created_at: new Date(twitchUser.created_at),
+        twitch_synced_at: new Date(),
+      },
+    })
+
+    return {
+      success: true,
+      twitch: {
+        username: twitchUser.login,
+        display_name: twitchUser.display_name,
+        broadcaster_type: twitchUser.broadcaster_type,
+        profile_image: twitchUser.profile_image_url,
+        description: twitchUser.description,
+      },
+    }
+  } catch (err: any) {
+    console.error('linkTwitchAccount error:', err)
+    return { error: 'Failed to link Twitch account. Please try again.' }
+  }
+}
+
+// Unlink Twitch account
+export async function unlinkTwitchAccount() {
+  const { userId } = await auth()
+  if (!userId) return { error: 'Not authenticated' }
+
+  try {
+    await prisma.content_creators.update({
+      where: { clerk_user_id: userId },
+      data: {
+        twitch_username: null,
+        twitch_id: null,
+        twitch_broadcaster_type: null,
+        twitch_description: null,
+        twitch_profile_image: null,
+        twitch_created_at: null,
+        twitch_synced_at: null,
+      },
+    })
+
+    return { success: true }
+  } catch (err: any) {
+    console.error('unlinkTwitchAccount error:', err)
+    return { error: 'Failed to unlink Twitch account.' }
+  }
+}
+
+// Refresh Twitch data if stale — call this on profile view
+export async function refreshTwitchDataIfStale(userId: string) {
+  try {
+    const creator = await prisma.content_creators.findUnique({
+      where: { clerk_user_id: userId },
+      select: {
+        twitch_id: true,
+        twitch_synced_at: true,
+      },
+    })
+
+    if (!creator?.twitch_id) return // no Twitch linked
+
+    if (!isTwitchDataStale(creator.twitch_synced_at)) return // data is fresh
+
+    const twitchUser = await getTwitchUserById(creator.twitch_id)
+    if (!twitchUser) return
+
+    await prisma.content_creators.update({
+      where: { clerk_user_id: userId },
+      data: {
+        twitch_username: twitchUser.login,
+        twitch_broadcaster_type: twitchUser.broadcaster_type,
+        twitch_description: twitchUser.description,
+        twitch_profile_image: twitchUser.profile_image_url,
+        twitch_synced_at: new Date(),
+      },
+    })
+  } catch (err) {
+    console.error('refreshTwitchDataIfStale error:', err)
+    // Silent fail — stale data is better than a broken page
   }
 }

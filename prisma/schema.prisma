@@ -21,6 +21,13 @@ model content_creators {
   engagement_rate Decimal?               @db.Decimal(5, 2)
   content_type    String[]
   game_category   String[]
+  twitch_username      String?
+  twitch_id            String?           @unique
+  twitch_broadcaster_type String?
+  twitch_description   String?
+  twitch_profile_image String?
+  twitch_created_at    DateTime?         @db.Timestamptz(6)
+  twitch_synced_at     DateTime?         @db.Timestamptz(6)
   created_at      DateTime?              @default(now()) @db.Timestamptz(6)
   updated_at      DateTime?              @default(now()) @db.Timestamptz(6)
   applications    mission_applications[]
@@ -32,6 +39,8 @@ model content_creators {
   @@index([language], type: Gin)
   @@index([platform], type: Gin)
   @@index([subs_followers])
+  @@index([twitch_id])
+  @@index([twitch_broadcaster_type])
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
