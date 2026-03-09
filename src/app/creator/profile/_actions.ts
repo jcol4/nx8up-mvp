@@ -5,7 +5,13 @@ import { revalidatePath } from 'next/cache'
 import type { CreatorProfile } from '@/lib/creator-profile'
 import { prisma } from '@/lib/prisma'
 import { parseLocation } from '@/lib/location-options'
-import { getTwitchUserByLogin, getTwitchUserById, isTwitchDataStale } from '@/lib/twitch'
+import { 
+  getTwitchUserByLogin, 
+  getTwitchUserById, 
+  getTwitchFollowerCount,
+  getTwitchStreamStats,
+  isTwitchDataStale 
+} from '@/lib/twitch'
 
 export async function getCreatorProfile(): Promise<CreatorProfile | null> {
   const { userId } = await auth()
@@ -179,9 +185,7 @@ export async function linkTwitchAccount(formData: FormData) {
   if (!username) return { error: 'Please enter a Twitch username' }
 
   try {
-    // Check if this Twitch username is already linked to another account
     const twitchUser = await getTwitchUserByLogin(username)
-
     if (!twitchUser) {
       return { error: `Twitch account "${username}" not found. Check the username and try again.` }
     }
@@ -197,7 +201,12 @@ export async function linkTwitchAccount(formData: FormData) {
       return { error: 'This Twitch account is already linked to another NX8UP profile.' }
     }
 
-    // Store Twitch data
+    // Fetch stats immediately on link — don't wait for stale check
+    const [followerCount, streamStats] = await Promise.all([
+      getTwitchFollowerCount(twitchUser.id),
+      getTwitchStreamStats(twitchUser.id),
+    ])
+
     await prisma.content_creators.update({
       where: { clerk_user_id: userId },
       data: {
@@ -208,6 +217,10 @@ export async function linkTwitchAccount(formData: FormData) {
         twitch_profile_image: twitchUser.profile_image_url,
         twitch_created_at: new Date(twitchUser.created_at),
         twitch_synced_at: new Date(),
+        // Stats
+        subs_followers: followerCount,
+        average_viewers: streamStats.average_viewers,
+        most_played_games: streamStats.most_played_games,
       },
     })
 
@@ -265,20 +278,30 @@ export async function refreshTwitchDataIfStale(userId: string) {
     })
 
     if (!creator?.twitch_id) return // no Twitch linked
-
     if (!isTwitchDataStale(creator.twitch_synced_at)) return // data is fresh
 
-    const twitchUser = await getTwitchUserById(creator.twitch_id)
+    // Fetch all data in parallel
+    const [twitchUser, followerCount, streamStats] = await Promise.all([
+      getTwitchUserById(creator.twitch_id),
+      getTwitchFollowerCount(creator.twitch_id),
+      getTwitchStreamStats(creator.twitch_id),
+    ])
+
     if (!twitchUser) return
 
     await prisma.content_creators.update({
       where: { clerk_user_id: userId },
       data: {
+        // Profile fields
         twitch_username: twitchUser.login,
         twitch_broadcaster_type: twitchUser.broadcaster_type,
         twitch_description: twitchUser.description,
         twitch_profile_image: twitchUser.profile_image_url,
         twitch_synced_at: new Date(),
+        // Stats
+        subs_followers: followerCount,
+        average_viewers: streamStats.average_viewers,
+        most_played_games: streamStats.most_played_games,
       },
     })
   } catch (err) {
