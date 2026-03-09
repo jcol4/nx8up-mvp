@@ -1,11 +1,12 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { getCreatorProfile, refreshTwitchDataIfStale } from './_actions'
+import { getCreatorProfile, refreshTwitchDataIfStale, refreshYouTubeDataIfStale } from './_actions'
 import CreatorTopBar from '@/components/creator/CreatorTopBar'
 import CreatorProfileForm from './CreatorProfileForm'
 import Panel from '@/components/shared/Panel'
 import TwitchConnect from '@/components/creator/TwitchConnect'
+import YouTubeConnect from '@/components/creator/YoutubeConnect'
 import { DEFAULT_CONTENT_CATEGORIES } from '@/lib/creator-profile'
 import { prisma } from '@/lib/prisma'
 
@@ -16,7 +17,10 @@ export default async function CreatorProfilePage() {
   if (role !== 'creator' && role !== 'admin') redirect('/')
 
   // Refresh stale Twitch data silently before render
-  await refreshTwitchDataIfStale(userId)
+  await Promise.all([
+    refreshTwitchDataIfStale(userId),
+    refreshYouTubeDataIfStale(userId),  // add this
+  ])
 
   const [profile, creator] = await Promise.all([
     getCreatorProfile(),
@@ -28,6 +32,12 @@ export default async function CreatorProfilePage() {
         twitch_profile_image: true,
         twitch_description: true,
         twitch_synced_at: true,
+        youtube_handle: true,
+        youtube_channel_name: true,
+        youtube_subscribers: true,
+        youtube_avg_views: true,
+        youtube_top_categories: true,
+        youtube_synced_at: true,        
       },
     }),
   ])
@@ -45,6 +55,8 @@ export default async function CreatorProfilePage() {
         }
       />
 
+
+
       <main className="max-w-3xl mx-auto p-6 sm:p-8 space-y-6">
         {/* Twitch connection */}
         <Panel variant="creator" as="div" title="Connected Accounts" titleLevel={2}>
@@ -57,6 +69,16 @@ export default async function CreatorProfilePage() {
               synced_at: creator?.twitch_synced_at ?? null,
             }}
           />
+          <YouTubeConnect
+            initial={{
+              handle: creator?.youtube_handle ?? null,
+              channel_name: creator?.youtube_channel_name ?? null,
+              subscribers: creator?.youtube_subscribers ?? null,
+              avg_views: creator?.youtube_avg_views ?? null,
+              top_categories: creator?.youtube_top_categories ?? [],
+              synced_at: creator?.youtube_synced_at ?? null,
+            }}
+        />
         </Panel>
 
         {/* Profile form */}
@@ -67,6 +89,7 @@ export default async function CreatorProfilePage() {
           <CreatorProfileForm
             profile={profile}
             categoriesOptions={DEFAULT_CONTENT_CATEGORIES}
+            twitchBroadcasterType={creator?.twitch_broadcaster_type ?? null}
           />
         </Panel>
       </main>

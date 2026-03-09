@@ -11,6 +11,9 @@ export type CreatorProfile = {
   platform?: string[]
   game_category?: string[]
   language?: string[]
+  most_played_games?: string[]
+  average_viewers?: number
+  subs_followers?: number  
 }
 
 export const DEFAULT_CONTENT_CATEGORIES = [
@@ -24,3 +27,11 @@ export const DEFAULT_CONTENT_CATEGORIES = [
   'Other',
 ] as const
 
+export function suggestContentTypes(broadcasterType: string | null | undefined): string[] {
+  if (!broadcasterType) return []
+
+  if (broadcasterType === 'partner' || broadcasterType === 'affiliate') {
+    return ['Gaming']
+  }
+  return []
+}

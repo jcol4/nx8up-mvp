@@ -174,6 +174,9 @@ export async function getTwitchStreamStats(
   // Fall back to all available VODs if none in window (infrequent streamers)
   const target = recent.length > 0 ? recent : videos
 
+  console.log('Twitch VODs fetched:', videos.length, 'for userId:', userId)
+  console.log('Sample VOD:', videos[0])
+
   // Compute average viewers weighted by stream duration
   // Longer streams carry more weight — avoids short clip outliers skewing the average
   let totalWeightedViews = 0
@@ -200,7 +203,8 @@ export async function getTwitchStreamStats(
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([id]) => id)
-
+    
+  console.log('Game IDs found:', topGameIds)
   const most_played_games = await resolveGameNames(topGameIds, token)
 
   return { average_viewers, most_played_games }

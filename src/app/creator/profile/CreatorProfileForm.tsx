@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateCreatorProfile, deleteCreatorProfile } from './_actions'
 import type { CreatorProfile } from '@/lib/creator-profile'
+import { suggestContentTypes } from '@/lib/creator-profile'
 import {
   COUNTRIES,
   US_STATES,
@@ -21,6 +22,7 @@ import SecondaryButton from '@/components/ui/SecondaryButton'
 type Props = {
   profile: CreatorProfile | null
   categoriesOptions: readonly string[]
+  twitchBroadcasterType?: string | null
 }
 
 function stateOptionsForCountry(country: string): readonly string[] {
@@ -30,7 +32,7 @@ function stateOptionsForCountry(country: string): readonly string[] {
   return []
 }
 
-export default function CreatorProfileForm({ profile, categoriesOptions }: Props) {
+export default function CreatorProfileForm({ profile, categoriesOptions, twitchBroadcasterType }: Props) {
   const router = useRouter()
   const [displayName, setDisplayName] = useState(profile?.displayName ?? '')
   const [bio, setBio] = useState(profile?.bio ?? '')
@@ -42,7 +44,15 @@ export default function CreatorProfileForm({ profile, categoriesOptions }: Props
   const [state, setState] = useState(profile?.state ?? '')
   const [city, setCity] = useState(profile?.city ?? '')
   const [platform, setPlatform] = useState<string[]>(profile?.platform ?? [])
-  const [gameTags, setGameTags] = useState<string[]>(profile?.game_category ?? [])
+  const [gameTags, setGameTags] = useState<string[]>(
+    // Seed from game_category if set, otherwise fall back to most_played_games from Twitch
+    profile?.game_category?.length
+      ? profile.game_category
+      : (profile?.most_played_games ?? [])
+  )
+  const [averageViewers, setAverageViewers] = useState<number | ''>(profile?.average_viewers ?? '')
+  const [subsFollowers, setSubsFollowers] = useState<number | ''>(profile?.subs_followers ?? '')
+  const twitchSynced = !!twitchBroadcasterType
   const [gameTagInput, setGameTagInput] = useState('')
   const [language, setLanguage] = useState<string[]>(profile?.language ?? [])
   const [error, setError] = useState('')
@@ -50,6 +60,32 @@ export default function CreatorProfileForm({ profile, categoriesOptions }: Props
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  // Twitch-derived suggestions
+  const twitchGameSuggestions = profile?.most_played_games ?? []
+  const twitchContentSuggestions = suggestContentTypes(twitchBroadcasterType)
+  const hasUnusedGameSuggestions = twitchGameSuggestions.some((g) => !gameTags.includes(g))
+  const hasUnusedContentSuggestions = twitchContentSuggestions.some((c) => !categories.includes(c))
+
+  const applyGameSuggestions = () => {
+    setGameTags((prev) => {
+      const merged = [...prev]
+      for (const g of twitchGameSuggestions) {
+        if (!merged.includes(g)) merged.push(g)
+      }
+      return merged
+    })
+  }
+
+  const applyContentSuggestions = () => {
+    setCategories((prev) => {
+      const merged = [...prev]
+      for (const c of twitchContentSuggestions) {
+        if (!merged.includes(c)) merged.push(c)
+      }
+      return merged
+    })
+  }
 
   const toggleCategory = (cat: string) => {
     setCategories((prev) =>
@@ -91,9 +127,7 @@ export default function CreatorProfileForm({ profile, categoriesOptions }: Props
 
   const updateUrl = (index: number, field: 'label' | 'url', value: string) => {
     setUrls((prev) =>
-      prev.map((u, i) =>
-        i === index ? { ...u, [field]: value } : u
-      )
+      prev.map((u, i) => (i === index ? { ...u, [field]: value } : u))
     )
   }
 
@@ -120,7 +154,9 @@ export default function CreatorProfileForm({ profile, categoriesOptions }: Props
       .filter((u) => u.url)
     const invalidUrl = filledUrls.find((u) => !isValidUrl(u.url))
     if (invalidUrl) {
-      setError(`"${invalidUrl.url}" is not a valid URL. Use a proper link like https://twitch.tv/you or https://youtube.com/@you`)
+      setError(
+        `"${invalidUrl.url}" is not a valid URL. Use a proper link like https://twitch.tv/you or https://youtube.com/@you`
+      )
       return
     }
     setIsSaving(true)
@@ -139,6 +175,9 @@ export default function CreatorProfileForm({ profile, categoriesOptions }: Props
       platform,
       game_category: gameTags,
       language,
+      average_viewers: averageViewers === '' ? undefined : averageViewers,
+      subs_followers: subsFollowers === '' ? undefined : subsFollowers,
+      most_played_games: gameTags,
     })
     setIsSaving(false)
     if (res.error) {
@@ -149,7 +188,7 @@ export default function CreatorProfileForm({ profile, categoriesOptions }: Props
     }
   }
 
-    const handleDelete = async () => {
+  const handleDelete = async () => {
     setError('')
     setIsDeleting(true)
     const res = await deleteCreatorProfile()
@@ -177,9 +216,7 @@ export default function CreatorProfileForm({ profile, categoriesOptions }: Props
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {error && <Alert variant="error">{error}</Alert>}
-      {success && (
-        <Alert variant="success">Profile saved successfully.</Alert>
-      )}
+      {success && <Alert variant="success">Profile saved successfully.</Alert>}
 
       <div>
         <label htmlFor="displayName" className={labelClass}>
@@ -270,9 +307,70 @@ export default function CreatorProfileForm({ profile, categoriesOptions }: Props
         </div>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className={labelClass}>Average Viewers</label>
+          <FormInput
+            type="number"
+            variant="creator"
+            value={averageViewers}
+            onChange={(e) => setAverageViewers(e.target.value === '' ? '' : Number(e.target.value))}
+            placeholder="e.g. 5000"
+            min={0}
+          />
+          {twitchSynced && (
+            <p className="text-xs text-[#7b4fff] mt-1">
+              ⚠ Auto-filled from Twitch — approximate, based on VOD views
+            </p>
+          )}
+        </div>
+        <div>
+          <label className={labelClass}>Followers / Subscribers</label>
+          <FormInput
+            type="number"
+            variant="creator"
+            value={subsFollowers}
+            onChange={(e) => setSubsFollowers(e.target.value === '' ? '' : Number(e.target.value))}
+            placeholder="e.g. 50000"
+            min={0}
+          />
+          {twitchSynced && (
+            <p className="text-xs text-[#00c8ff] mt-1">
+              ✓ Synced from Twitch
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Games / Genres */}
       <div>
         <label className={labelClass}>Games / Genres</label>
-        <p className="text-xs cr-text-muted mb-2">Add tags (e.g. FPS, MOBA, RPG). Press Enter or click Add.</p>
+        <p className="text-xs cr-text-muted mb-2">
+          Add tags (e.g. FPS, MOBA, RPG). Press Enter or click Add.
+        </p>
+
+        {/* Twitch suggestion banner */}
+        {twitchGameSuggestions.length > 0 && hasUnusedGameSuggestions && (
+          <div className="flex items-center gap-3 mb-3 px-3 py-2 rounded-lg bg-[#7b4fff]/10 border border-[#7b4fff]/30">
+            <svg className="w-4 h-4 text-[#7b4fff] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
+            </svg>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-[#c8dff0]">
+                From Twitch: {twitchGameSuggestions.join(', ')}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={applyGameSuggestions}
+              className="text-xs text-[#7b4fff] hover:text-[#9b6fff] font-medium shrink-0 transition-colors"
+            >
+              Apply
+            </button>
+          </div>
+        )}
+
         <div className="flex flex-wrap gap-2 mb-2">
           {gameTags.map((t) => (
             <span
@@ -350,8 +448,31 @@ export default function CreatorProfileForm({ profile, categoriesOptions }: Props
         />
       </div>
 
+      {/* Content categories */}
       <div>
         <label className={labelClass}>Content categories</label>
+
+        {/* Twitch suggestion banner */}
+        {twitchContentSuggestions.length > 0 && hasUnusedContentSuggestions && (
+          <div className="flex items-center gap-3 mb-3 px-3 py-2 rounded-lg bg-[#7b4fff]/10 border border-[#7b4fff]/30">
+            <svg className="w-4 h-4 text-[#7b4fff] shrink-0" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
+            </svg>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-[#c8dff0]">
+                Suggested from Twitch: {twitchContentSuggestions.join(', ')}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={applyContentSuggestions}
+              className="text-xs text-[#7b4fff] hover:text-[#9b6fff] font-medium shrink-0 transition-colors"
+            >
+              Apply
+            </button>
+          </div>
+        )}
+
         <div className="flex flex-wrap gap-2">
           {categoriesOptions.map((cat) => (
             <button
