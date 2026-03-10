@@ -490,59 +490,6 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
           ))}
         </div>
       </div>
-
-      <div>
-        <div className="flex items-center justify-between mb-1.5">
-          <label className={labelClass}>Links</label>
-          <button
-            type="button"
-            onClick={addUrl}
-            className="text-xs cr-accent hover:underline"
-          >
-            + Add link
-          </button>
-        </div>
-        <p className="text-xs cr-text-muted mb-2">
-          Add Twitch, YouTube, social profiles, or any URL tied to you.
-        </p>
-        <div className="space-y-4">
-          {urls.map((u, i) => (
-            <div key={i} className="p-3 rounded-lg cr-border border cr-bg-inner space-y-2">
-              <div className="flex gap-2 items-center">
-                <FormInput
-                  type="text"
-                  variant="creator"
-                  value={u.label ?? ''}
-                  onChange={(e) => updateUrl(i, 'label', e.target.value)}
-                  placeholder="Label (e.g. Twitch)"
-                  className="w-full sm:w-36"
-                  maxLength={20}
-                />
-                <button
-                  type="button"
-                  onClick={() => removeUrl(i)}
-                  disabled={urls.length <= 1}
-                  className="p-2.5 rounded-lg cr-text-muted hover:text-red-400 hover:bg-red-500/10 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors shrink-0"
-                  aria-label="Remove link"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
-              <FormInput
-                type="text"
-                inputMode="url"
-                variant="creator"
-                value={u.url}
-                onChange={(e) => updateUrl(i, 'url', e.target.value)}
-                placeholder="https://... or example.com"
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
       <div className="flex flex-col sm:flex-row gap-3 pt-4">
         <button
           type="submit"

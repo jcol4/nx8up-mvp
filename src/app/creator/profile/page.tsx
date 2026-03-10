@@ -19,7 +19,7 @@ export default async function CreatorProfilePage() {
   // Refresh stale Twitch data silently before render
   await Promise.all([
     refreshTwitchDataIfStale(userId),
-    refreshYouTubeDataIfStale(userId),  // add this
+    refreshYouTubeDataIfStale(userId),
   ])
 
   const [profile, creator] = await Promise.all([
@@ -54,8 +54,6 @@ export default async function CreatorProfilePage() {
           </Link>
         }
       />
-
-
 
       <main className="max-w-3xl mx-auto p-6 sm:p-8 space-y-6">
         {/* Twitch connection */}
