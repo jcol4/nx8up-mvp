@@ -6,7 +6,7 @@ import { DashboardSidebar } from '@/components/dashboard'
 
 export const metadata: Metadata = {
   title: 'Sponsor Hub | Nx8up',
-  description: 'Post missions and reach creators',
+  description: 'Post campaigns and reach creators',
 }
 
 const ALL_SECTION_NAV_ITEMS = [
@@ -22,7 +22,7 @@ const SPONSOR_ONLY_SECTION_NAV_ITEMS = [
 const NAV_ITEMS = [
   { href: '/sponsor', label: 'Dashboard' },
   { href: '/sponsor/profile', label: 'Profile' },
-  { href: '/sponsor/missions', label: 'My Missions' },
+  { href: '/sponsor/campaigns', label: 'My Campaigns' },
   { href: '/sponsor/creators', label: 'Creators' },
 ]
 
@@ -30,7 +30,7 @@ async function getSponsorStats() {
   const { userId } = await auth()
   if (!userId) return null
   return {
-    activeMissions: 3,
+    activeCampaigns: 3,
     totalBudget: '$12,500',
     creatorsReached: 24,
   }
@@ -45,7 +45,7 @@ export default async function SponsorLayout({
   if (role !== 'sponsor' && role !== 'admin') redirect('/')
 
   const stats = await getSponsorStats()
-  const s = stats ?? { activeMissions: 3, totalBudget: '$12,500', creatorsReached: 24 }
+  const s = stats ?? { activeCampaigns: 3, totalBudget: '$12,500', creatorsReached: 24 }
   const sectionNavItems = role === 'admin' ? ALL_SECTION_NAV_ITEMS : SPONSOR_ONLY_SECTION_NAV_ITEMS
 
   const statsNode = (
@@ -56,7 +56,7 @@ export default async function SponsorLayout({
       <div className="space-y-2 text-sm">
         <div className="flex items-center gap-2 dash-text-muted">
           <span>🎯</span>
-          <span>{s.activeMissions} Active Missions</span>
+          <span>{s.activeCampaigns} Active Campaigns</span>
         </div>
         <div className="flex items-center gap-2 dash-text-muted">
           <span>💰</span>

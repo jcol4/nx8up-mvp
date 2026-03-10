@@ -17,7 +17,7 @@ export default async function SponsorProfilePage() {
             Manage your sponsor profile. This section will include company info, targeting preferences, and more.
           </p>
           <p className="text-sm dash-text-muted">
-            Coming soon. For now, use the sidebar to access Dashboard, My Missions, and Creators.
+            Coming soon. For now, use the sidebar to access Dashboard, My Campaigns, and Creators.
           </p>
           <BackLink href="/sponsor" className="mt-4" />
         </div>

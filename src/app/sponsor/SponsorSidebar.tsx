@@ -7,7 +7,7 @@ import { DashboardLogo, NavItem } from '@/components/dashboard'
 type NavItemType = { href: string; label: string }
 
 type Stats = {
-  activeMissions: number
+  activeCampaigns: number
   totalBudget: string
   creatorsReached: number
 }
@@ -19,7 +19,7 @@ type Props = {
 
 export default function SponsorSidebar({ navItems, stats }: Props) {
   const s = stats ?? {
-    activeMissions: 3,
+    activeCampaigns: 3,
     totalBudget: '$12,500',
     creatorsReached: 24,
   }
@@ -75,7 +75,7 @@ export default function SponsorSidebar({ navItems, stats }: Props) {
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2 dash-text-muted">
               <span>🎯</span>
-              <span>{s.activeMissions} Active Missions</span>
+              <span>{s.activeCampaigns} Active Campaigns</span>
             </div>
             <div className="flex items-center gap-2 dash-text-muted">
               <span>💰</span>
@@ -102,7 +102,7 @@ export default function SponsorSidebar({ navItems, stats }: Props) {
 
       {collapsed && (
         <div className="p-2 border-t border-white/10 flex flex-col items-center gap-2 text-xs dash-text-muted shrink-0">
-          <span title={`${s.activeMissions} Active Missions`}>🎯</span>
+          <span title={`${s.activeCampaigns} Active Campaigns`}>🎯</span>
           <span title={`Budget: ${s.totalBudget}`} className="dash-text-bright font-semibold">{s.totalBudget}</span>
           <span title={`${s.creatorsReached} Creators Reached`}>👥</span>
         </div>

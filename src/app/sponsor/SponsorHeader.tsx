@@ -16,7 +16,7 @@ export default async function SponsorHeader() {
           Welcome, <span className="dash-text-bright font-semibold">{userName}!</span>
         </span>
         <div className="hidden md:flex items-center gap-4 text-xs dash-text-muted">
-          <span>Active Missions: <span className="dash-accent font-semibold">3</span></span>
+          <span>Active Campaigns: <span className="dash-accent font-semibold">3</span></span>
           <span>Creators Reached: <span className="dash-purple font-semibold">24</span></span>
           <span>Budget: <span className="dash-success font-semibold">$12,500</span></span>
         </div>

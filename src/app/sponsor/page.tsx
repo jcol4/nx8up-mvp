@@ -1,6 +1,6 @@
 import SponsorHeader from './SponsorHeader'
-import SponsorPostMissionSection from './SponsorPostMissionSection'
-import SponsorMyMissionsSection from './SponsorMyMissionsSection'
+import SponsorPostCampaignSection from './SponsorPostCampaignSection'
+import SponsorMyCampaignsSection from './SponsorMyCampaignsSection'
 import SponsorMatchedCreatorsSection from './SponsorMatchedCreatorsSection'
 
 export default function SponsorDashboardPage() {
@@ -10,13 +10,13 @@ export default function SponsorDashboardPage() {
       <div className="flex-1 p-6 overflow-auto">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Post Mission - spans full width */}
+            {/* Post Campaign - spans full width */}
             <div className="lg:col-span-2">
-              <SponsorPostMissionSection />
+              <SponsorPostCampaignSection />
             </div>
 
-            {/* My Missions + Matched Creators */}
-            <SponsorMyMissionsSection />
+            {/* My Campaigns + Matched Creators */}
+            <SponsorMyCampaignsSection />
             <SponsorMatchedCreatorsSection />
           </div>
         </div>

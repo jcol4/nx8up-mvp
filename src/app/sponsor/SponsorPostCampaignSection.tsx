@@ -9,7 +9,7 @@ import FormTextarea from '@/components/ui/FormTextarea'
 
 const labelClass = 'block text-sm font-medium dash-text-muted mb-1.5'
 
-export default function SponsorPostMissionSection() {
+export default function SponsorPostCampaignSection() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [budget, setBudget] = useState('')
@@ -40,20 +40,20 @@ export default function SponsorPostMissionSection() {
   }
 
   return (
-    <DashboardPanel title="Post Mission">
+    <DashboardPanel title="Post Campaign">
       <form onSubmit={handleSubmit} className="space-y-4">
         {success && (
           <Alert variant="success">
-            Mission posted! Creators matching your criteria will be notified.
+            Campaign posted! Creators matching your criteria will be notified.
           </Alert>
         )}
 
         <div>
-          <label htmlFor="mission-title" className={labelClass}>
-            Mission title
+          <label htmlFor="campaign-title" className={labelClass}>
+            Campaign title
           </label>
           <FormInput
-            id="mission-title"
+            id="campaign-title"
             type="text"
             variant="dashboard"
             value={title}
@@ -65,11 +65,11 @@ export default function SponsorPostMissionSection() {
         </div>
 
         <div>
-          <label htmlFor="mission-desc" className={labelClass}>
+          <label htmlFor="campaign-desc" className={labelClass}>
             Description
           </label>
           <FormTextarea
-            id="mission-desc"
+            id="campaign-desc"
             variant="dashboard"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -81,11 +81,11 @@ export default function SponsorPostMissionSection() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="mission-budget" className={labelClass}>
+            <label htmlFor="campaign-budget" className={labelClass}>
               Budget ($)
             </label>
             <FormInput
-              id="mission-budget"
+              id="campaign-budget"
               type="text"
               inputMode="numeric"
               variant="dashboard"
@@ -95,11 +95,11 @@ export default function SponsorPostMissionSection() {
             />
           </div>
           <div>
-            <label htmlFor="mission-followers" className={labelClass}>
+            <label htmlFor="campaign-followers" className={labelClass}>
               Min. followers (optional)
             </label>
             <FormInput
-              id="mission-followers"
+              id="campaign-followers"
               type="text"
               inputMode="numeric"
               variant="dashboard"
@@ -138,7 +138,7 @@ export default function SponsorPostMissionSection() {
           disabled={isSubmitting}
           className="py-2.5 px-5 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
         >
-          {isSubmitting ? 'Posting...' : 'Post Mission'}
+          {isSubmitting ? 'Posting...' : 'Post Campaign'}
         </button>
       </form>
     </DashboardPanel>

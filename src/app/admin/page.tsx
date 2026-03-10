@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import AdminHeader from './AdminHeader'
-import AdminActiveMissions from './AdminActiveMissions'
+import AdminActiveCampaigns from './AdminActiveCampaigns'
 import AdminQuickInsights from './AdminQuickInsights'
 import AdminVerificationQueue from './AdminVerificationQueue'
 import AdminCreatorAcademy from './AdminCreatorAcademy'
@@ -14,8 +14,8 @@ export default function AdminDashboardPage() {
         <div className="max-w-7xl mx-auto">
           {/* Grid: 2 columns on lg, 1 on mobile */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Row 1: Active Missions + Quick Insights */}
-            <AdminActiveMissions />
+            {/* Row 1: Active Campaigns + Quick Insights */}
+            <AdminActiveCampaigns />
             <AdminQuickInsights />
 
             {/* Row 2: Verification Queue */}

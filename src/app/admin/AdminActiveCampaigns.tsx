@@ -7,16 +7,16 @@ const MISSIONS = [
   { title: 'Tech Gadget Promo', imageUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&h=250&fit=crop' },
 ]
 
-export default function AdminActiveMissions() {
+export default function AdminActiveCampaigns() {
   return (
-    <DashboardPanel title="Active Missions" href="/admin/missions" linkLabel="View all">
+    <DashboardPanel title="Active Campaigns" href="/admin/campaigns" linkLabel="View all">
       <div className="flex gap-3 overflow-x-auto pb-2 -mx-1">
         {MISSIONS.map((m, i) => (
           <CardWithImage
             key={i}
             title={m.title}
             imageUrl={m.imageUrl}
-            href="/admin/missions"
+            href="/admin/campaigns"
             className="flex-shrink-0 w-[140px]"
             cornerBadge={
               <span className="w-6 h-6 rounded-full bg-[#22c55e]/90 flex items-center justify-center text-white text-xs">
@@ -26,7 +26,7 @@ export default function AdminActiveMissions() {
           />
         ))}
         <Link
-          href="/admin/missions/new"
+          href="/admin/campaigns/new"
           className="flex-shrink-0 w-[140px] min-h-[100px] dash-border border border-dashed rounded-lg flex items-center justify-center dash-text-muted hover:dash-accent hover:border-[#00c8ff]/30 transition-colors"
         >
           <span className="text-3xl">+</span>

@@ -7,14 +7,14 @@ const MOCK_MISSIONS = [
   { id: '3', title: 'Stream Overlay Promo', budget: '$120', categories: ['Gaming'], status: 'Pending', applicants: 3 },
 ]
 
-export default function SponsorMyMissionsSection() {
+export default function SponsorMyCampaignsSection() {
   return (
-    <DashboardPanel title="My Missions" href="/sponsor/missions" linkLabel="View all">
+    <DashboardPanel title="My Campaigns" href="/sponsor/campaigns" linkLabel="View all">
       <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1">
         {MOCK_MISSIONS.map((m) => (
           <Link
             key={m.id}
-            href={`/sponsor/missions/${m.id}`}
+            href={`/sponsor/campaigns/${m.id}`}
             className="block p-3 rounded-lg dash-border border dash-bg-inner hover:border-[#00c8ff]/30 transition-colors"
           >
             <div className="flex items-start justify-between gap-2">

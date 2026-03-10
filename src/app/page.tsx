@@ -385,7 +385,7 @@ export default async function HomePage() {
             Your <span>Hub</span>
           </h1>
           <p className="home-subtitle">
-            Access your dashboard, manage your missions, and track your progress — all in one place.
+            Access your dashboard, manage your campaigns, and track your progress — all in one place.
           </p>
 
           {/* Primary dashboard CTA */}
@@ -445,9 +445,9 @@ export default async function HomePage() {
             {(role === 'sponsor' || role === 'admin') && (
               <>
                 <HomeQuickAccessCard
-                  href="/sponsor/missions"
-                  title="My Missions"
-                  description="View and manage your active missions"
+                  href="/sponsor/campaigns"
+                  title="My Campaigns"
+                  description="View and manage your active campaigns"
                   icon={
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                       <path d="M9 2l2 5h5l-4 3 1.5 5L9 12l-4.5 3L6 10 2 7h5L9 2z" stroke="#7b4fff" strokeWidth="1.2" strokeLinejoin="round"/>

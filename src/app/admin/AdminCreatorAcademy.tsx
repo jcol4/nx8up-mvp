@@ -40,7 +40,7 @@ export default function AdminCreatorAcademy() {
           ✓ Goal Reached! 500 Followers
         </span>
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#7b4fff]/10 border border-[#7b4fff]/20 text-[#7b4fff] text-xs font-medium">
-          ✓ 1st Mission Completed
+          ✓ 1st Campaign Completed
         </span>
       </div>
     </DashboardPanel>

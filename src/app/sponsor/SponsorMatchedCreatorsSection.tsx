@@ -11,7 +11,7 @@ export default function SponsorMatchedCreatorsSection() {
   return (
     <DashboardPanel title="Matched Creators" href="/sponsor/creators" linkLabel="Browse all">
       <p className="text-xs dash-text-muted mb-3">
-        Creators who match your mission targeting criteria.
+        Creators who match your campaign targeting criteria.
       </p>
       <div className="space-y-3 max-h-[240px] overflow-y-auto pr-1">
         {MOCK_CREATORS.map((c) => (

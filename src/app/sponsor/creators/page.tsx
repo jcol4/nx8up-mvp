@@ -9,7 +9,7 @@ export default function SponsorCreatorsPage() {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-xl font-semibold dash-text-bright mb-4">Creators</h1>
           <p className="dash-text-muted text-sm mb-6">
-            Browse creators who match your mission targeting criteria.
+            Browse creators who match your campaign targeting criteria.
           </p>
           <BackLink href="/sponsor" />
         </div>
