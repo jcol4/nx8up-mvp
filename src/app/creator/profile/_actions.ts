@@ -74,7 +74,7 @@ export async function getCreatorProfile(): Promise<CreatorProfile | null> {
     game_category: fromDb?.game_category?.length ? fromDb.game_category : undefined,
     language: fromDb?.language?.length ? fromDb.language : undefined,
     // Twitch-derived — used to pre-populate form suggestions
-    average_viewers: fromDb?.average_viewers ?? undefined,
+    average_vod_views: fromDb?.average_vod_views ?? undefined,
     subs_followers: fromDb?.subs_followers ?? undefined,
   }
 }
@@ -134,7 +134,7 @@ export async function updateCreatorProfile(data: CreatorProfile): Promise<{ erro
         language,
         content_type,
         updated_at: new Date(),
-        average_viewers: data.average_viewers ?? null,
+        average_vod_views: data.average_vod_views ?? null,
         subs_followers: data.subs_followers ?? null,  
       },
     })
@@ -235,7 +235,7 @@ export async function linkTwitchAccount(formData: FormData) {
         twitch_synced_at: new Date(),
         // Stats
         subs_followers: followerCount,
-        average_viewers: streamStats.average_viewers,
+        average_vod_views: streamStats.average_vod_views,
       },
     })
 
@@ -314,7 +314,7 @@ export async function refreshTwitchDataIfStale(userId: string) {
         twitch_profile_image: twitchUser.profile_image_url,
         twitch_synced_at: new Date(),
         subs_followers: followerCount,
-        average_viewers: streamStats.average_viewers,
+        average_vod_views: streamStats.average_vod_views,
       },
     })
   } catch (err) {

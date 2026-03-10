@@ -50,7 +50,7 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
       ? profile.game_category
       : (profile?.most_played_games ?? [])
   )
-  const [averageViewers, setAverageViewers] = useState<number | ''>(profile?.average_viewers ?? '')
+  const [averageViewers, setAverageViewers] = useState<number | ''>(profile?.average_vod_views ?? '')
   const [subsFollowers, setSubsFollowers] = useState<number | ''>(profile?.subs_followers ?? '')
   const twitchSynced = !!twitchBroadcasterType
   const [gameTagInput, setGameTagInput] = useState('')
@@ -175,7 +175,7 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
       platform,
       game_category: gameTags,
       language,
-      average_viewers: averageViewers === '' ? undefined : averageViewers,
+      average_vod_views: averageViewers === '' ? undefined : averageViewers,
       subs_followers: subsFollowers === '' ? undefined : subsFollowers,
       most_played_games: gameTags,
     })
@@ -310,7 +310,7 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelClass}>Average Viewers</label>
+          <label className={labelClass}>Average VOD Views</label>
           <FormInput
             type="number"
             variant="creator"
@@ -321,7 +321,7 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
           />
           {twitchSynced && (
             <p className="text-xs text-[#7b4fff] mt-1">
-              ⚠ Auto-filled from Twitch — approximate, based on VOD views
+              ⚠ Auto-filled from Twitch — total VOD views, not concurrent viewers
             </p>
           )}
         </div>

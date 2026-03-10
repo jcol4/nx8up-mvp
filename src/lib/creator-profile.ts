@@ -12,7 +12,7 @@ export type CreatorProfile = {
   game_category?: string[]
   language?: string[]
   most_played_games?: string[]
-  average_viewers?: number
+  average_vod_views?: number
   subs_followers?: number  
 }
 

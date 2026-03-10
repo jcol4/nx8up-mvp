@@ -145,7 +145,7 @@ async function resolveGameNames(gameIds: string[], token: string): Promise<strin
 export async function getTwitchStreamStats(
   userId: string,
   lookbackDays = 28
-): Promise<{ average_viewers: number; most_played_games: string[] }> {
+): Promise<{ average_vod_views: number; most_played_games: string[] }> {
   const token = await getAppToken()
 
   const res = await fetch(
@@ -164,52 +164,31 @@ export async function getTwitchStreamStats(
   const videos: TwitchVideo[] = data.data ?? []
 
   if (videos.length === 0) {
-    return { average_viewers: 0, most_played_games: [] }
+    return { average_vod_views: 0, most_played_games: [] }
   }
 
-  // Filter to rolling lookback window
   const cutoff = Date.now() - lookbackDays * 24 * 60 * 60 * 1000
   const recent = videos.filter((v) => new Date(v.created_at).getTime() > cutoff)
-
-  // Fall back to all available VODs if none in window (infrequent streamers)
   const target = recent.length > 0 ? recent : videos
 
-  console.log('Twitch VODs fetched:', videos.length, 'for userId:', userId)
-  console.log('Sample VOD:', videos[0])
+  const total_views = target.reduce((sum, v) => sum + v.view_count, 0)
+  const average_vod_views = Math.round(total_views / target.length)
 
-  // Compute average viewers weighted by stream duration
-  // Longer streams carry more weight — avoids short clip outliers skewing the average
-  let totalWeightedViews = 0
-  let totalSeconds = 0
-
-  for (const v of target) {
-    const seconds = parseDuration(v.duration)
-    totalWeightedViews += v.view_count * seconds
-    totalSeconds += seconds
-  }
-
-  const average_viewers =
-    totalSeconds > 0 ? Math.round(totalWeightedViews / totalSeconds) : 0
-
-  // Compute most played games by total stream time — game_id '' means untagged, skip
   const gameSeconds: Record<string, number> = {}
   for (const v of target) {
     if (!v.game_id) continue
     gameSeconds[v.game_id] = (gameSeconds[v.game_id] ?? 0) + parseDuration(v.duration)
   }
 
-  // Top 5 by time played
   const topGameIds = Object.entries(gameSeconds)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([id]) => id)
-    
-  console.log('Game IDs found:', topGameIds)
+
   const most_played_games = await resolveGameNames(topGameIds, token)
 
-  return { average_viewers, most_played_games }
+  return { average_vod_views, most_played_games }
 }
-
 // Checks if cached data is stale (older than threshold in hours)
 export function isTwitchDataStale(syncedAt: Date | null, thresholdHours = 24): boolean {
   if (!syncedAt) return true

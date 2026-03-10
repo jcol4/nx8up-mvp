@@ -16,7 +16,7 @@ model content_creators {
   location        String?
   language        String[]
   platform        String[]
-  average_viewers Int?
+  average_vod_views Int?
   subs_followers  Int?
   engagement_rate Decimal?               @db.Decimal(5, 2)
   content_type    String[]
@@ -39,7 +39,7 @@ model content_creators {
   updated_at      DateTime?              @default(now()) @db.Timestamptz(6)
   applications    mission_applications[]
 
-  @@index([average_viewers])
+  @@index([average_vod_views])
   @@index([content_type], type: Gin)
   @@index([engagement_rate])
   @@index([game_category], type: Gin)
