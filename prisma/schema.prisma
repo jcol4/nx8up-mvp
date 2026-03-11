@@ -9,32 +9,32 @@ datasource db {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model content_creators {
-  id                      String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  clerk_user_id           String                 @unique
-  email                   String                 @unique
+  id                      String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerk_user_id           String                  @unique
+  email                   String                  @unique
   age                     Int?
   location                String?
   language                String[]
   platform                String[]
   subs_followers          Int?
-  engagement_rate         Decimal?               @db.Decimal(5, 2)
+  engagement_rate         Decimal?                @db.Decimal(5, 2)
   content_type            String[]
   game_category           String[]
-  created_at              DateTime?              @default(now()) @db.Timestamptz(6)
-  updated_at              DateTime?              @default(now()) @db.Timestamptz(6)
+  created_at              DateTime?               @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime?               @default(now()) @db.Timestamptz(6)
   twitch_broadcaster_type String?
-  twitch_created_at       DateTime?              @db.Timestamptz(6)
+  twitch_created_at       DateTime?               @db.Timestamptz(6)
   twitch_description      String?
-  twitch_id               String?                @unique
+  twitch_id               String?                 @unique
   twitch_profile_image    String?
-  twitch_synced_at        DateTime?              @db.Timestamptz(6)
+  twitch_synced_at        DateTime?               @db.Timestamptz(6)
   twitch_username         String?
   youtube_avg_views       Int?
-  youtube_channel_id      String?                @unique
+  youtube_channel_id      String?                 @unique
   youtube_channel_name    String?
   youtube_handle          String?
   youtube_subscribers     Int?
-  youtube_synced_at       DateTime?              @db.Timestamptz(6)
+  youtube_synced_at       DateTime?               @db.Timestamptz(6)
   youtube_top_categories  String[]
   average_vod_views       Int?
   applications            campaign_applications[]
@@ -53,9 +53,9 @@ model content_creators {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model sponsors {
-  id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  clerk_user_id       String     @unique
-  email               String     @unique
+  id                  String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerk_user_id       String      @unique
+  email               String      @unique
   company_name        String?
   location            String?
   language            String[]
@@ -63,13 +63,13 @@ model sponsors {
   budget_max          Int?
   min_avg_viewers     Int?
   min_subs_followers  Int?
-  min_engagement_rate Decimal?   @db.Decimal(5, 2)
+  min_engagement_rate Decimal?    @db.Decimal(5, 2)
   platform            String[]
   content_type        String[]
   game_category       String[]
-  created_at          DateTime?  @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime?  @default(now()) @db.Timestamptz(6)
-  campaigns            campaigns[]
+  created_at          DateTime?   @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime?   @default(now()) @db.Timestamptz(6)
+  campaigns           campaigns[]
 
   @@index([budget_max])
   @@index([budget_min])
@@ -82,25 +82,33 @@ model sponsors {
   @@index([platform], type: Gin)
 }
 
+model admins {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerk_user_id String    @unique
+  email         String    @unique
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime? @default(now()) @db.Timestamptz(6)
+}
+
 model campaigns {
-  id                  String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sponsor_id          String                 @db.Uuid
+  id                  String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sponsor_id          String                  @db.Uuid
   title               String
   description         String?
-  status              String                 @default("draft")
+  status              String                  @default("draft")
   budget              Int?
   platform            String[]
   content_type        String[]
   game_category       String[]
   min_avg_viewers     Int?
   min_subs_followers  Int?
-  min_engagement_rate Decimal?               @db.Decimal(5, 2)
+  min_engagement_rate Decimal?                @db.Decimal(5, 2)
   creative_package    String[]
-  deadline            DateTime?              @db.Timestamptz(6)
-  created_at          DateTime?              @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime?              @default(now()) @db.Timestamptz(6)
+  deadline            DateTime?               @db.Timestamptz(6)
+  created_at          DateTime?               @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime?               @default(now()) @db.Timestamptz(6)
   applications        campaign_applications[]
-  sponsor             sponsors               @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
+  sponsor             sponsors                @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
 
   @@index([status])
   @@index([sponsor_id])
@@ -112,13 +120,13 @@ model campaigns {
 
 model campaign_applications {
   id           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  campaign_id   String           @db.Uuid
+  campaign_id  String           @db.Uuid
   creator_id   String           @db.Uuid
   status       String           @default("pending")
   message      String?
   submitted_at DateTime?        @default(now()) @db.Timestamptz(6)
+  campaign     campaigns        @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
   creator      content_creators @relation(fields: [creator_id], references: [id], onDelete: Cascade)
-  campaign      campaigns         @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
 
   @@unique([campaign_id, creator_id])
   @@index([campaign_id])
