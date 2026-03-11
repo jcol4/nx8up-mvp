@@ -36,23 +36,6 @@ export default function DashboardStyles() {
         z-index: 10;
       }
 
-      .dash-logo {
-        font-family: 'Rajdhani', sans-serif;
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: #fff;
-        letter-spacing: 0.15em;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        text-decoration: none;
-      }
-
-      .dash-logo-icon { display: flex; gap: 2px; align-items: center; }
-      .dash-logo-icon span { display: block; width: 3px; height: 14px; background: #00c8ff; border-radius: 1px; }
-      .dash-logo-icon span:nth-child(2) { height: 10px; opacity: 0.7; }
-      .dash-logo-icon span:nth-child(3) { height: 16px; }
-
       .dash-panel {
         background: rgba(10,18,35,0.8);
         border: 1px solid rgba(0,200,255,0.12);

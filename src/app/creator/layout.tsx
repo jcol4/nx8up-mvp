@@ -1,13 +1,14 @@
-import type { Metadata } from "next";
-import { auth, clerkClient } from '@clerk/nextjs/server'
+import type { Metadata } from 'next'
+import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import DashboardStyles from '@/components/dashboard/DashboardStyles'
 import { DashboardSidebar } from '@/components/dashboard'
+import { prisma } from '@/lib/prisma'
 
 export const metadata: Metadata = {
-  title: "Creator Dashboard | Nx8up",
-  description: "Creator dashboard",
-};
+  title: 'Creator Dashboard | NX8UP',
+  description: 'Creator dashboard',
+}
 
 const ALL_SECTION_NAV_ITEMS = [
   { href: '/creator', label: 'Creator' },
@@ -25,58 +26,74 @@ const NAV_ITEMS = [
   { href: '/creator/academy', label: 'Academy' },
 ]
 
-async function getCreatorStats() {
-  const { userId } = await auth()
-  if (!userId) return null
-  const client = await clerkClient()
-  const user = await client.users.getUser(userId)
-  const meta = user.publicMetadata as Record<string, unknown> | null
-  return {
-    followers: (meta?.creatorFollowers as string) || '24.3K',
-    subscribers: (meta?.creatorSubscribers as string) || '18.9K',
-    nextPayout: (meta?.creatorNextPayout as string) || '$4,200',
-    steamLinked: meta?.steamLinked === true,
-  }
-}
-
 export default async function CreatorLayout({
   children,
-}: { children: React.ReactNode }) {
+}: {
+  children: React.ReactNode
+}) {
   const { sessionClaims, userId } = await auth()
   const role = (sessionClaims?.metadata as { role?: string })?.role
   if (!userId) redirect('/sign-in')
   if (role !== 'creator' && role !== 'admin') redirect('/')
 
-  const stats = await getCreatorStats()
-  const s = stats ?? {
-    followers: '24.3K',
-    subscribers: '18.9K',
-    nextPayout: '$4,200',
-    steamLinked: true,
-  }
-  const sectionNavItems = role === 'admin' ? ALL_SECTION_NAV_ITEMS : CREATOR_ONLY_SECTION_NAV_ITEMS
+  const sectionNavItems =
+    role === 'admin' ? ALL_SECTION_NAV_ITEMS : CREATOR_ONLY_SECTION_NAV_ITEMS
+
+  // Fetch real creator stats from DB
+  const creator = await prisma.content_creators.findUnique({
+    where: { clerk_user_id: userId },
+    select: {
+      subs_followers: true,
+      average_vod_views: true,
+      twitch_username: true,
+      youtube_channel_name: true,
+      youtube_avg_views: true,
+      youtube_subscribers: true,
+      _count: { select: { applications: true } },
+    },
+  })
 
   const statsNode = (
-    <div className="px-4 pt-4 pb-4">
+    <div className="px-4 pt-3 pb-4">
       <p className="text-xs font-semibold dash-text-muted uppercase tracking-wider mb-3">
         My Stats
       </p>
       <div className="space-y-2 text-sm">
-        <div className="flex items-center gap-2 dash-text-muted">
-          <span>📺</span>
-          <span>{s.followers} Followers</span>
+        <div className="flex items-center justify-between">
+          <span className="dash-text-muted">Twitch Followers</span>
+          <span className="dash-text-bright font-semibold">
+            {creator?.subs_followers != null
+              ? creator.subs_followers.toLocaleString()
+              : '—'}
+          </span>
         </div>
-        <div className="flex items-center gap-2 dash-text-muted">
-          <span>▶</span>
-          <span>{s.subscribers} Subscribers</span>
+        <div className="flex items-center justify-between">
+          <span className="dash-text-muted">Avg VOD views</span>
+          <span className="dash-text-bright font-semibold">
+            {creator?.average_vod_views != null
+              ? creator.average_vod_views.toLocaleString()
+              : '—'}
+          </span>
         </div>
-        <div className={`flex items-center gap-2 ${s.steamLinked ? 'dash-success' : 'dash-text-muted'}`}>
-          <span>{s.steamLinked ? '✓' : '○'}</span>
-          <span>Steam Profile {s.steamLinked ? 'Linked' : 'Not linked'}</span>
+        <div className="flex items-center justify-between">
+          <span className="dash-text-muted">Twitch</span>
+          {creator?.twitch_username ? (
+            <span className="text-[#7b4fff] font-medium">
+              @{creator.twitch_username}
+            </span>
+          ) : (
+            <span className="dash-text-muted italic text-xs">Not linked</span>
+          )}
         </div>
-        <div className="flex items-center gap-2 dash-text-muted">
-          <span>Next Payout:</span>
-          <span className="dash-text-bright font-semibold">{s.nextPayout}</span>
+        <div className="flex items-center justify-between">
+          <span className="dash-text-muted">YouTube</span>
+          {creator?.youtube_channel_name ? (
+            <span className="text-[#ff4444] font-medium">
+              @{creator.youtube_channel_name}
+            </span>
+          ) : (
+            <span className="dash-text-muted italic text-xs">Not linked</span>
+          )}
         </div>
       </div>
     </div>
@@ -119,11 +136,6 @@ export default async function CreatorLayout({
           z-index: 10;
           overflow: visible;
         }
-        .cr-logo { font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; font-weight: 700; color: #fff; letter-spacing: 0.15em; display: flex; align-items: center; gap: 8px; }
-        .cr-logo-icon { display: flex; gap: 2px; align-items: center; }
-        .cr-logo-icon span { display: block; width: 3px; height: 14px; background: #00c8ff; border-radius: 1px; }
-        .cr-logo-icon span:nth-child(2) { height: 10px; opacity: 0.7; }
-        .cr-logo-icon span:nth-child(3) { height: 16px; }
         .cr-panel {
           background: rgba(10,18,35,0.8);
           border: 1px solid rgba(0,200,255,0.12);
@@ -167,5 +179,5 @@ export default async function CreatorLayout({
         </div>
       </div>
     </>
-  );
+  )
 }

@@ -1,23 +1,25 @@
-import Link from "next/link";
+import Image from 'next/image'
+import Link from 'next/link'
 
 type Props = {
-  href?: string;
-  /** "creator" for cr-logo, "admin" for dash-logo */
-  variant?: "creator" | "admin";
-  className?: string;
-};
+  href?: string
+  size?: 'sm' | 'md' | 'lg'
+  className?: string
+}
 
-export default function Logo({ href = "/creator", variant = "creator", className = "" }: Props) {
-  const logoClass = variant === "creator" ? "cr-logo" : "dash-logo";
-  const iconClass = variant === "creator" ? "cr-logo-icon" : "dash-logo-icon";
+const sizes = { sm: 28, md: 40, lg: 56 }
+
+export default function Logo({ href = '/', size = 'md', className = '' }: Props) {
+  const px = sizes[size]
   return (
-    <Link href={href} className={`${logoClass} ${className}`.trim()}>
-      <div className={iconClass}>
-        <span />
-        <span />
-        <span />
-      </div>
-      NX8UP
+    <Link href={href} className={className}>
+      <Image
+        src="/nx8up_logo_transparent.png"
+        alt="NX8UP"
+        width={px}
+        height={px}
+        priority
+      />
     </Link>
-  );
+  )
 }

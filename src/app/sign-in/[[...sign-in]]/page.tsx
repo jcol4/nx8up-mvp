@@ -7,6 +7,7 @@ import Link from 'next/link'
 import type { EmailCodeFactor } from '@clerk/types'
 import { AuthLayout } from '@/components/layout'
 import { getUserRole } from '@/lib/get-role'
+import Image from 'next/image'
 
 export default function SignInPage() {
   const { isLoaded, signIn, setActive } = useSignIn()

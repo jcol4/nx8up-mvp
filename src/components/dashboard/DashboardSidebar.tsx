@@ -30,15 +30,7 @@ export default function DashboardSidebar({
       }`}
     >
       <div className={`flex items-center ${collapsed ? 'justify-center p-2' : 'justify-between p-4'}`}>
-        {collapsed ? (
-          <Link href={logoHref} className="dash-logo text-xl">
-            <span className="dash-logo-icon">
-              <span /><span /><span />
-            </span>
-          </Link>
-        ) : (
-          <DashboardLogo href={logoHref} className="flex-1 min-w-0" />
-        )}
+        <DashboardLogo href={logoHref} className="flex-1 min-w-0" />
         {!collapsed && (
           <button
             type="button"
@@ -65,13 +57,19 @@ export default function DashboardSidebar({
         )}
       </div>
 
-      {!collapsed && statsNode && (
-        <div className="shrink-0 border-b border-white/10">
-          {statsNode}
+      {/* Stats block — fixed min-height so nav position never shifts between roles */}
+      {!collapsed && (
+        <div
+          className="shrink-0 border-b border-white/10"
+          style={{ minHeight: '180px' }}
+        >
+          {statsNode ?? null}
         </div>
       )}
 
       <nav className={`flex-1 flex flex-col min-h-0 px-2 py-4 ${collapsed ? 'items-center' : ''}`}>
+
+        {/* Sections */}
         <div className={`space-y-1 overflow-y-auto overflow-x-hidden shrink-0 ${collapsed ? 'flex flex-col items-center gap-1' : ''}`}>
           {!collapsed && (
             <p className="text-xs font-semibold dash-text-muted uppercase tracking-wider mb-2 px-2">
@@ -87,12 +85,14 @@ export default function DashboardSidebar({
             />
           ))}
         </div>
-        {!collapsed && (
-          <>
-            <p className="text-xs font-semibold dash-text-muted uppercase tracking-wider mb-2 px-2 shrink-0">
+
+        {/* Role-specific nav — pushed down with mt-6 */}
+        {!collapsed && navItems.length > 0 && (
+          <div className="mt-6 shrink-0">
+            <p className="text-xs font-semibold dash-text-muted uppercase tracking-wider mb-2 px-2">
               {sectionTitle}
             </p>
-            <div className="space-y-1 shrink-0">
+            <div className="space-y-1">
               {navItems.map((item) => (
                 <NavItem
                   key={item.href}
@@ -102,15 +102,26 @@ export default function DashboardSidebar({
                 />
               ))}
             </div>
-          </>
+          </div>
         )}
-        {/* Clickable empty area: clicking toggles sidebar open/close */}
+
+        {/* Clickable empty area toggles sidebar */}
         <button
           type="button"
           className="flex-1 min-h-[60px] w-full cursor-default"
           onClick={() => setCollapsed((c) => !c)}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         />
+
+        {/* Profile — pinned to bottom */}
+        <div className={`shrink-0 border-t border-white/10 pt-2 ${collapsed ? 'flex justify-center' : ''}`}>
+          <NavItem
+            href={`${logoHref}/profile`}
+            label="Profile"
+            collapsed={collapsed}
+          />
+        </div>
+
       </nav>
 
       {collapsed && statsNode && (

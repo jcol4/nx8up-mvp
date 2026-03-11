@@ -2,6 +2,8 @@ import { auth, currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import HomeQuickAccessCard from '@/components/shared/HomeQuickAccessCard'
+import Image from 'next/image'
+import { SignOutButton } from '@clerk/nextjs'
 
 export default async function HomePage() {
   const { userId, sessionClaims } = await auth()
@@ -75,23 +77,6 @@ export default async function HomePage() {
           padding: 0 2rem;
           z-index: 10;
         }
-
-        .home-logo {
-          font-family: 'Rajdhani', sans-serif;
-          font-size: 1.4rem;
-          font-weight: 700;
-          color: #fff;
-          letter-spacing: 0.15em;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          text-decoration: none;
-        }
-
-        .home-logo-icon { display: flex; gap: 2px; align-items: center; }
-        .home-logo-icon span { display: block; width: 3px; height: 14px; background: #00c8ff; border-radius: 1px; }
-        .home-logo-icon span:nth-child(2) { height: 10px; opacity: 0.7; }
-        .home-logo-icon span:nth-child(3) { height: 16px; }
 
         .home-topbar-right {
           display: flex;
@@ -355,11 +340,8 @@ export default async function HomePage() {
 
       <div className="home-root">
         <div className="home-topbar">
-          <Link href="/" className="home-logo">
-            <div className="home-logo-icon">
-              <span /><span /><span />
-            </div>
-            NX8UP
+          <Link href="/">
+            <Image src="/nx8up_logo_transparent.png" alt="NX8UP" width={56} height={56} priority />
           </Link>
           <div className="home-topbar-right">
             {role && (
@@ -374,8 +356,10 @@ export default async function HomePage() {
                 {role}
               </span>
             )}
-            <Link href="/sign-out" className="home-sign-out">Sign out</Link>
-          </div>
+          <SignOutButton>
+            <button type="button" className="home-sign-out">Sign out</button>
+          </SignOutButton>          
+        </div>
         </div>
 
         <div className="home-body">
