@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import DashboardStyles from '@/components/dashboard/DashboardStyles'
 import AdminSidebar from './AdminSidebar'
 import { prisma } from '@/lib/prisma'
+import AdminHeader from './AdminHeader'
 
 export const metadata: Metadata = {
   title: 'Admin Hub | nx8up',
@@ -60,9 +61,10 @@ export default async function AdminLayout({
             navItems={NAV_ITEMS}
             stats={stats}
           />
-          <main className="flex-1 flex flex-col min-w-0">
-            {children}
-          </main>
+        <main className="flex-1 flex flex-col min-w-0">
+          <AdminHeader />
+          {children}
+        </main>
         </div>
       </div>
     </>

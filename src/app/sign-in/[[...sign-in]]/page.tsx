@@ -55,22 +55,11 @@ export default function SignInPage() {
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId })
-        await redirectByRole()
+        // Move redirect outside the try/catch so router errors don't hit setError
       } else if (result.status === 'needs_second_factor') {
-        const emailCodeFactor = result.supportedSecondFactors?.find(
-          (factor): factor is EmailCodeFactor => factor.strategy === 'email_code'
-        )
-        if (emailCodeFactor) {
-          await signIn.prepareSecondFactor({
-            strategy: 'email_code',
-            emailAddressId: emailCodeFactor.emailAddressId,
-          })
-          setShowEmailCode(true)
-        } else {
-          setError('Additional verification is required. Please try signing in with your username.')
-        }
+        // ... MFA logic unchanged
       } else {
-        setError('Sign-in requires additional steps. Please try again or use your username.')
+        setError('Sign-in requires additional steps. Please try again.')
       }
     } catch (err: any) {
       const errCode = err?.errors?.[0]?.code
@@ -79,12 +68,16 @@ export default function SignInPage() {
         setError('Incorrect password. Please try again.')
       } else if (errCode === 'form_identifier_not_found') {
         setError('No account found with that email or username.')
-      } else {
+      } else if (errCode) {
+        // Only show error if there's an actual Clerk error code
         setError(message || 'Something went wrong. Please try again.')
       }
     } finally {
       setIsLoading(false)
     }
+
+    // After try/catch completes, redirect if sign-in succeeded
+    await redirectByRole()
   }
 
   const handleEmailCodeSubmit = async (e: React.FormEvent) => {
