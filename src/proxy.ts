@@ -3,7 +3,8 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from 'next/server'
 
 const isAdminRoute = createRouteMatcher(['/admin(.*)'])
-const isCreatorRoute = createRouteMatcher(['/dashboard(.*)'])
+const isCreatorRoute = createRouteMatcher(['/creator(.*)'])
+const isSponsorRoute = createRouteMatcher(['/sponsor(.*)'])
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
 
 const isPublicRoute = createRouteMatcher([
@@ -12,12 +13,22 @@ const isPublicRoute = createRouteMatcher([
 ])
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
+    console.log('Middleware running for:', req.nextUrl.pathname)
+
+
     const { userId, sessionClaims, redirectToSignIn } = await auth()
     const role = (sessionClaims?.metadata as any)?.role as string | undefined
 
     //allow anyone to see signin/signup pages
     if (isPublicRoute(req)) {
-        return NextResponse.next()
+        if (userId) {
+            const role = (sessionClaims?.metadata as any)?.role
+            if (role === 'admin') return NextResponse.redirect(new URL('/admin', req.url))
+            if (role === 'creator') return NextResponse.redirect(new URL('/creator', req.url))
+            if (role === 'sponsor') return NextResponse.redirect(new URL('/sponsor', req.url))
+            return NextResponse.redirect(new URL('/', req.url))
+        }
+    return NextResponse.next()
     }
 
     //not signed in - direct to signin
@@ -38,6 +49,10 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
     if (isCreatorRoute(req) && role !== 'creator' && role !== 'admin') {
         return NextResponse.redirect(new URL('/', req.url))    
+    }
+    // sponsor only routes
+    if (isSponsorRoute(req) && role !== 'sponsor' && role !== 'admin') {
+        return NextResponse.redirect(new URL('/', req.url))
     }
 
     return NextResponse.next()

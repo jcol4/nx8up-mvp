@@ -1,0 +1,19 @@
+import { BackLink } from '@/components/shared'
+import SponsorHeader from '../SponsorHeader'
+
+export default function SponsorCreatorsPage() {
+  return (
+    <>
+      <SponsorHeader />
+      <div className="flex-1 p-6 overflow-auto">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-xl font-semibold dash-text-bright mb-4">Creators</h1>
+          <p className="dash-text-muted text-sm mb-6">
+            Browse creators who match your campaign targeting criteria.
+          </p>
+          <BackLink href="/sponsor" />
+        </div>
+      </div>
+    </>
+  )
+}
