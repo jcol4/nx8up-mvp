@@ -7,12 +7,11 @@ import SponsorHeader from '../../../../SponsorHeader'
 import ApplicationDecisionButtons from '@/components/sponsor/ApplicationDecisionButtons'
 
 type Props = {
-  params: { id?: string; applicationId?: string }
+  params: Promise<{ id?: string; applicationId?: string }>
 }
 
 export default async function ApplicationReviewPage({ params }: Props) {
-  const campaignId = params.id
-  const applicationId = params.applicationId
+  const { id: campaignId, applicationId } = await params
 
   // Guard: if URL params are missing, 404
   if (!campaignId || !applicationId) {
