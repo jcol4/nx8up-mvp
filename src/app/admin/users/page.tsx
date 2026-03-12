@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import AdminUserRoleButton from './AdminUserRoleButton'
 
-export const metadata = { title: 'Users — NX8UP Admin' }
+export const metadata = { title: 'Users — nx8up Admin' }
 
 const PAGE_SIZE = 25
 

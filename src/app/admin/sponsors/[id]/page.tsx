@@ -3,7 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
-export const metadata = { title: 'Sponsor Detail — NX8UP Admin' }
+export const metadata = { title: 'Sponsor Detail — nx8up Admin' }
 
 type Props = { params: Promise<{ id: string }> }
 

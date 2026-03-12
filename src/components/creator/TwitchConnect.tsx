@@ -51,7 +51,7 @@ export default function TwitchConnect({ initial }: TwitchConnectProps) {
   }
 
   const handleUnlink = async () => {
-    if (!confirm('Unlink your Twitch account from NX8UP?')) return
+    if (!confirm('Unlink your Twitch account from nx8up?')) return
     setIsUnlinking(true)
     const res = await unlinkTwitchAccount()
     if (res.error) {

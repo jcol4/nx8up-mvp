@@ -15,7 +15,7 @@ export default function Logo({ href = '/', size = 'md', className = '' }: Props)
     <Link href={href} className={className}>
       <Image
         src="/nx8up_logo_transparent.png"
-        alt="NX8UP"
+        alt="nx8up"
         width={px}
         height={px}
         priority

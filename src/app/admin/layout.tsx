@@ -6,7 +6,7 @@ import AdminSidebar from './AdminSidebar'
 import { prisma } from '@/lib/prisma'
 
 export const metadata: Metadata = {
-  title: 'Admin Hub | NX8UP',
+  title: 'Admin Hub | nx8up',
   description: 'Admin dashboard',
 }
 

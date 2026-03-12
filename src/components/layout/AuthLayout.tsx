@@ -423,7 +423,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
       <div className="nx-topbar">
         <Link href="/">
-          <Image src="/nx8up_logo_transparent.png" alt="NX8UP" width={48} height={48} priority />
+          <Image src="/nx8up_logo_transparent.png" alt="nx8up" width={48} height={48} priority />
         </Link>
       </div>
 

@@ -6,7 +6,7 @@ import { DashboardSidebar } from '@/components/dashboard'
 import { prisma } from '@/lib/prisma'
 
 export const metadata: Metadata = {
-  title: 'Creator Dashboard | NX8UP',
+  title: 'Creator Dashboard | nx8up',
   description: 'Creator dashboard',
 }
 

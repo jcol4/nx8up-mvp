@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
-export const metadata = { title: 'Sponsors — NX8UP Admin' }
+export const metadata = { title: 'Sponsors — nx8up Admin' }
 
 export default async function AdminSponsorsPage() {
   const { sessionClaims } = await auth()

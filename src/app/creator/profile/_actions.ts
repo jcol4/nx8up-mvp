@@ -214,7 +214,7 @@ export async function linkTwitchAccount(formData: FormData) {
     })
 
     if (existingLink) {
-      return { error: 'This Twitch account is already linked to another NX8UP profile.' }
+      return { error: 'This Twitch account is already linked to another nx8up profile.' }
     }
 
     // Fetch stats immediately on link — don't wait for stale check
@@ -351,7 +351,7 @@ export async function linkYouTubeAccount(formData: FormData) {
     })
 
     if (existingLink) {
-      return { error: 'This YouTube channel is already linked to another NX8UP profile.' }
+      return { error: 'This YouTube channel is already linked to another nx8up profile.' }
     }
 
     // Fetch stats immediately on link

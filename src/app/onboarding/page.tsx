@@ -36,7 +36,7 @@ export default function OnboardingComponent() {
       <div className="nx-badge">Age Verification</div>
       <h1 className="nx-title">Access <span>Protocol</span></h1>
       <p className="nx-subtitle">
-        NX8UP is restricted to users 18 and older. Confirm your date of birth to unlock your account and begin your missions.
+        nx8up is restricted to users 18 and older. Confirm your date of birth to unlock your account and begin your missions.
       </p>
 
       <div className="nx-divider" />

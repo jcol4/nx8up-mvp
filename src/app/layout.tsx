@@ -20,7 +20,7 @@ export const metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
   ),  
-  title: 'NX8UP',
+  title: 'nx8up',
   icons: { 
     icon: '/icon.png',
     shortcut: '/icon.png',

@@ -130,7 +130,7 @@ export default function SignUpPage() {
         <>
           <div className="nx-badge">New Player</div>
           <h1 className="nx-title">Create <span>Account</span></h1>
-          <p className="nx-subtitle">Join NX8UP to start earning XP, landing deals, and levelling up your brand.</p>
+          <p className="nx-subtitle">Join nx8up to start earning XP, landing deals, and levelling up your brand.</p>
 
           <div className="nx-divider" />
 

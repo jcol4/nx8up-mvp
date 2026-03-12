@@ -25,7 +25,7 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Clerk UserButton popover & UserProfile modal – match NX8UP theme */
+/* Clerk UserButton popover & UserProfile modal – match nx8up theme */
 .cl-userButtonPopoverCard,
 .cl-userButtonPopoverCard .cl-card {
   background: #0a1223 !important;

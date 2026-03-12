@@ -51,7 +51,7 @@ export default function YouTubeConnect({ initial }: YouTubeConnectProps) {
   }
 
   const handleUnlink = async () => {
-    if (!confirm('Unlink your YouTube channel from NX8UP?')) return
+    if (!confirm('Unlink your YouTube channel from nx8up?')) return
     setIsUnlinking(true)
     const res = await unlinkYouTubeAccount()
     if (res.error) {

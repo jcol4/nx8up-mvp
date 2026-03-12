@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
-export const metadata = { title: 'Applications — NX8UP Admin' }
+export const metadata = { title: 'Applications — nx8up Admin' }
 
 const PAGE_SIZE = 25
 

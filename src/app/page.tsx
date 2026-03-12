@@ -341,7 +341,7 @@ export default async function HomePage() {
       <div className="home-root">
         <div className="home-topbar">
           <Link href="/">
-            <Image src="/nx8up_logo_transparent.png" alt="NX8UP" width={56} height={56} priority />
+            <Image src="/nx8up_logo_transparent.png" alt="nx8up" width={56} height={56} priority />
           </Link>
           <div className="home-topbar-right">
             {role && (
