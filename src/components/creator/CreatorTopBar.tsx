@@ -57,13 +57,6 @@ export default async function CreatorTopBar({ rightContent }: Props) {
       </div>
 
       <div className="flex items-center gap-3">
-        <UserProfileBlock
-          displayName={displayName}
-          username={username}
-          variant="creator"
-          editProfileLink="/creator/profile"
-          role={role}
-        />
         {rightContent}
       </div>
     </header>
