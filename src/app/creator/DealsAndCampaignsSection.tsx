@@ -48,7 +48,12 @@ export default function DealsAndCampaignsSection() {
           </li>
         ))}
       </ul>
-      <SecondaryButton className="mt-4">Manage my deals</SecondaryButton>
+      <a
+        href="/creator/campaigns"
+        className="mt-4 w-full text-center py-2 px-3 rounded-lg text-xs font-medium border cr-border cr-text-muted hover:border-[rgba(0,200,255,0.3)] hover:cr-text transition-colors"
+      >
+        Manage Deals
+      </a>
     </Panel>
   )
 }
