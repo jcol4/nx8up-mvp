@@ -5,7 +5,6 @@ import AdminHeader from '../AdminHeader'
 export default function AdminCampaignsPage() {
   return (
     <>
-      <AdminHeader />
       <div className="flex-1 p-6">
         <div className="max-w-4xl mx-auto">
           <DashboardPanel title="Campaigns">
