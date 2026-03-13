@@ -23,9 +23,9 @@ export default function ApplicationDecisionButtons({ applicationId, campaignId, 
   }
 
   return (
-    <div className="flex gap-2 mt-3">
+    <div className="flex flex-wrap items-center gap-2 mt-3">
       <SecondaryButton
-        className="w-auto px-3 py-1.5"
+        className="!w-auto shrink-0 px-3 py-1.5 text-xs"
         disabled={isPending || currentStatus === 'accepted'}
         onClick={() => handleUpdate('accepted')}
       >
@@ -33,7 +33,7 @@ export default function ApplicationDecisionButtons({ applicationId, campaignId, 
       </SecondaryButton>
       <SecondaryButton
         variant="danger"
-        className="w-auto px-3 py-1.5"
+        className="!w-auto shrink-0 px-3 py-1.5 text-xs"
         disabled={isPending || currentStatus === 'rejected'}
         onClick={() => handleUpdate('rejected')}
       >
