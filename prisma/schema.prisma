@@ -22,23 +22,42 @@ model content_creators {
   game_category           String[]
   created_at              DateTime?               @default(now()) @db.Timestamptz(6)
   updated_at              DateTime?               @default(now()) @db.Timestamptz(6)
-  twitch_broadcaster_type String?
-  twitch_created_at       DateTime?               @db.Timestamptz(6)
-  twitch_description      String?
+
+  // ── Twitch ──────────────────────────────────────────────────────────────────
   twitch_id               String?                 @unique
-  twitch_profile_image    String?
-  twitch_synced_at        DateTime?               @db.Timestamptz(6)
   twitch_username         String?
-  youtube_avg_views       Int?
+  twitch_broadcaster_type String?
+  twitch_description      String?
+  twitch_profile_image    String?
+  twitch_created_at       DateTime?               @db.Timestamptz(6)
+  twitch_synced_at        DateTime?               @db.Timestamptz(6)
+  average_vod_views       Int?
+  twitch_subscriber_count Int?                    // Paid subs — only available via OAuth
+
+  // Twitch OAuth tokens (encrypted at rest)
+  twitch_access_token     String?
+  twitch_refresh_token    String?
+  twitch_token_expires_at DateTime?               @db.Timestamptz(6)
+
+  // ── YouTube ─────────────────────────────────────────────────────────────────
   youtube_channel_id      String?                 @unique
   youtube_channel_name    String?
   youtube_handle          String?
   youtube_subscribers     Int?
-  youtube_synced_at       DateTime?               @db.Timestamptz(6)
+  youtube_avg_views       Int?
   youtube_top_categories  String[]
-  average_vod_views       Int?
+  youtube_synced_at       DateTime?               @db.Timestamptz(6)
+  youtube_watch_time_hours Int?                   // Only available via OAuth + Analytics API
+
+  // YouTube OAuth tokens (encrypted at rest)
+  youtube_access_token    String?
+  youtube_refresh_token   String?
+  youtube_token_expires_at DateTime?              @db.Timestamptz(6)
+
+  // ── Relations ───────────────────────────────────────────────────────────────
   applications            campaign_applications[]
 
+  // ── Indexes ─────────────────────────────────────────────────────────────────
   @@index([average_vod_views])
   @@index([content_type], type: Gin)
   @@index([engagement_rate])
@@ -48,6 +67,8 @@ model content_creators {
   @@index([subs_followers])
   @@index([twitch_id])
   @@index([twitch_broadcaster_type])
+  @@index([youtube_channel_id])
+  @@index([youtube_subscribers])
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.

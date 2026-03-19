@@ -193,6 +193,7 @@ export async function deleteCreatorProfile(): Promise<{ error?: string }> {
   }
 }
 
+/*
 export async function linkTwitchAccount(formData: FormData) {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
@@ -254,6 +255,7 @@ export async function linkTwitchAccount(formData: FormData) {
     return { error: 'Failed to link Twitch account. Please try again.' }
   }
 }
+*/
 
 // Unlink Twitch account
 export async function unlinkTwitchAccount() {
@@ -325,7 +327,7 @@ export async function refreshTwitchDataIfStale(userId: string) {
 // ADD these functions to src/app/creator/profile/_actions.ts
 // Also add this import at the top of _actions.ts:
 // import { getYouTubeChannelByHandle, getYouTubeChannelById, getYouTubeChannelStats, isYouTubeDataStale } from '@/lib/youtube'
-
+/*
 export async function linkYouTubeAccount(formData: FormData) {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
@@ -385,6 +387,7 @@ export async function linkYouTubeAccount(formData: FormData) {
     return { error: 'Failed to link YouTube account. Please try again.' }
   }
 }
+*/
 
 export async function unlinkYouTubeAccount() {
   const { userId } = await auth()

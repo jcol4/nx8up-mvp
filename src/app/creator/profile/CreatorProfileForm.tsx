@@ -23,6 +23,8 @@ type Props = {
   profile: CreatorProfile | null
   categoriesOptions: readonly string[]
   twitchBroadcasterType?: string | null
+  twitchUsername?: string | null
+  youtubeChannelName?: string | null
 }
 
 function stateOptionsForCountry(country: string): readonly string[] {
@@ -32,27 +34,22 @@ function stateOptionsForCountry(country: string): readonly string[] {
   return []
 }
 
-export default function CreatorProfileForm({ profile, categoriesOptions, twitchBroadcasterType }: Props) {
+export default function CreatorProfileForm({
+  profile,
+  categoriesOptions,
+  twitchBroadcasterType,
+  twitchUsername,
+  youtubeChannelName,
+}: Props) {
   const router = useRouter()
   const [displayName, setDisplayName] = useState(profile?.displayName ?? '')
   const [bio, setBio] = useState(profile?.bio ?? '')
   const [categories, setCategories] = useState<string[]>(profile?.categories ?? [])
-  const [urls, setUrls] = useState<{ label?: string; url: string }[]>(
-    profile?.urls?.length ? profile.urls : [{ url: '' }]
-  )
   const [country, setCountry] = useState(profile?.country ?? '')
   const [state, setState] = useState(profile?.state ?? '')
   const [city, setCity] = useState(profile?.city ?? '')
   const [platform, setPlatform] = useState<string[]>(profile?.platform ?? [])
-  const [gameTags, setGameTags] = useState<string[]>(
-    // Seed from game_category if set, otherwise fall back to most_played_games from Twitch
-    profile?.game_category?.length
-      ? profile.game_category
-      : (profile?.most_played_games ?? [])
-  )
-  const [averageViewers, setAverageViewers] = useState<number | ''>(profile?.average_vod_views ?? '')
-  const [subsFollowers, setSubsFollowers] = useState<number | ''>(profile?.subs_followers ?? '')
-  const twitchSynced = !!twitchBroadcasterType
+  const [gameTags, setGameTags] = useState<string[]>(profile?.game_category ?? [])
   const [gameTagInput, setGameTagInput] = useState('')
   const [language, setLanguage] = useState<string[]>(profile?.language ?? [])
   const [error, setError] = useState('')
@@ -61,21 +58,12 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
-  // Twitch-derived suggestions
-  const twitchGameSuggestions = profile?.most_played_games ?? []
-  const twitchContentSuggestions = suggestContentTypes(twitchBroadcasterType)
-  const hasUnusedGameSuggestions = twitchGameSuggestions.some((g) => !gameTags.includes(g))
-  const hasUnusedContentSuggestions = twitchContentSuggestions.some((c) => !categories.includes(c))
+  const twitchSynced = !!twitchUsername
+  const youtubeSynced = !!youtubeChannelName
 
-  const applyGameSuggestions = () => {
-    setGameTags((prev) => {
-      const merged = [...prev]
-      for (const g of twitchGameSuggestions) {
-        if (!merged.includes(g)) merged.push(g)
-      }
-      return merged
-    })
-  }
+  // Twitch-derived suggestions
+  const twitchContentSuggestions = suggestContentTypes(twitchBroadcasterType)
+  const hasUnusedContentSuggestions = twitchContentSuggestions.some((c) => !categories.includes(c))
 
   const applyContentSuggestions = () => {
     setCategories((prev) => {
@@ -87,17 +75,11 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
     })
   }
 
-  const toggleCategory = (cat: string) => {
-    setCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
-    )
-  }
+  const toggleCategory = (cat: string) =>
+    setCategories((prev) => prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat])
 
-  const togglePlatform = (p: string) => {
-    setPlatform((prev) =>
-      prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
-    )
-  }
+  const togglePlatform = (p: string) =>
+    setPlatform((prev) => prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p])
 
   const addGameTag = () => {
     const t = gameTagInput.trim()
@@ -107,77 +89,26 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
     }
   }
 
-  const removeGameTag = (t: string) => {
-    setGameTags((prev) => prev.filter((x) => x !== t))
-  }
+  const removeGameTag = (t: string) => setGameTags((prev) => prev.filter((x) => x !== t))
 
-  const toggleLanguage = (lang: string) => {
-    setLanguage((prev) =>
-      prev.includes(lang) ? prev.filter((x) => x !== lang) : [...prev, lang]
-    )
-  }
-
-  const addUrl = () => {
-    setUrls((prev) => [...prev, { url: '' }])
-  }
-
-  const removeUrl = (index: number) => {
-    setUrls((prev) => prev.filter((_, i) => i !== index))
-  }
-
-  const updateUrl = (index: number, field: 'label' | 'url', value: string) => {
-    setUrls((prev) =>
-      prev.map((u, i) => (i === index ? { ...u, [field]: value } : u))
-    )
-  }
-
-  const isValidUrl = (s: string): boolean => {
-    const trimmed = s.trim()
-    if (!trimmed) return false
-    try {
-      const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
-      const u = new URL(withProtocol)
-      if (u.protocol !== 'http:' && u.protocol !== 'https:') return false
-      const host = u.hostname.toLowerCase()
-      return host === 'localhost' || host.includes('.')
-    } catch {
-      return false
-    }
-  }
+  const toggleLanguage = (lang: string) =>
+    setLanguage((prev) => prev.includes(lang) ? prev.filter((x) => x !== lang) : [...prev, lang])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setSuccess(false)
-    const filledUrls = urls
-      .map((u) => ({ label: u.label?.trim() || undefined, url: u.url.trim() }))
-      .filter((u) => u.url)
-    const invalidUrl = filledUrls.find((u) => !isValidUrl(u.url))
-    if (invalidUrl) {
-      setError(
-        `"${invalidUrl.url}" is not a valid URL. Use a proper link like https://twitch.tv/you or https://youtube.com/@you`
-      )
-      return
-    }
     setIsSaving(true)
-    const validUrls = filledUrls.map((u) => ({
-      label: u.label,
-      url: /^https?:\/\//i.test(u.url) ? u.url : `https://${u.url}`,
-    }))
     const res = await updateCreatorProfile({
       displayName,
       bio,
       categories,
-      urls: validUrls,
       country,
       state,
       city,
       platform,
       game_category: gameTags,
       language,
-      average_vod_views: averageViewers === '' ? undefined : averageViewers,
-      subs_followers: subsFollowers === '' ? undefined : subsFollowers,
-      most_played_games: gameTags,
     })
     setIsSaving(false)
     if (res.error) {
@@ -200,7 +131,6 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
       setDisplayName('')
       setBio('')
       setCategories([])
-      setUrls([{ url: '' }])
       setCountry('')
       setState('')
       setCity('')
@@ -218,10 +148,9 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
       {error && <Alert variant="error">{error}</Alert>}
       {success && <Alert variant="success">Profile saved successfully.</Alert>}
 
+      {/* Display name */}
       <div>
-        <label htmlFor="displayName" className={labelClass}>
-          Display name
-        </label>
+        <label htmlFor="displayName" className={labelClass}>Display name</label>
         <FormInput
           id="displayName"
           type="text"
@@ -233,19 +162,15 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
         />
       </div>
 
+      {/* Location */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label htmlFor="country" className={labelClass}>
-            Country
-          </label>
+          <label htmlFor="country" className={labelClass}>Country</label>
           <FormSelect
             id="country"
             variant="creator"
             value={country}
-            onChange={(e) => {
-              setCountry(e.target.value)
-              setState('')
-            }}
+            onChange={(e) => { setCountry(e.target.value); setState('') }}
           >
             <option value="">Select country</option>
             {COUNTRIES.map((c) => (
@@ -255,9 +180,7 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
         </div>
         {stateOptionsForCountry(country).length > 0 && (
           <div>
-            <label htmlFor="state" className={labelClass}>
-              State / Province / Region
-            </label>
+            <label htmlFor="state" className={labelClass}>State / Province / Region</label>
             <FormSelect
               id="state"
               variant="creator"
@@ -272,9 +195,7 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
           </div>
         )}
         <div>
-          <label htmlFor="city" className={labelClass}>
-            City
-          </label>
+          <label htmlFor="city" className={labelClass}>City</label>
           <FormInput
             id="city"
             type="text"
@@ -286,6 +207,7 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
         </div>
       </div>
 
+      {/* Platform */}
       <div>
         <label className={labelClass}>Platform</label>
         <p className="text-xs cr-text-muted mb-2">Where do you create content?</p>
@@ -307,41 +229,31 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Average VOD Views</label>
-          <FormInput
-            type="number"
-            variant="creator"
-            value={averageViewers}
-            onChange={(e) => setAverageViewers(e.target.value === '' ? '' : Number(e.target.value))}
-            placeholder="e.g. 5000"
-            min={0}
-          />
+      {/* OAuth synced stats notice */}
+      {(twitchSynced || youtubeSynced) && (
+        <div className="p-3 rounded-lg bg-white/[0.02] border border-white/5 space-y-1.5">
+          <p className="text-xs font-medium cr-text-muted uppercase tracking-wider mb-2">
+            Synced via OAuth
+          </p>
           {twitchSynced && (
-            <p className="text-xs text-[#7b4fff] mt-1">
-              ⚠ Auto-filled from Twitch — total VOD views, not concurrent viewers
+            <p className="text-xs cr-text-muted">
+              <span className="text-[#7b4fff]">Twitch</span>
+              {' '}— followers and VOD views sync automatically from{' '}
+              <span className="text-[#c8dff0]">@{twitchUsername}</span>.
             </p>
           )}
-        </div>
-        <div>
-          <label className={labelClass}>Followers / Subscribers</label>
-          <FormInput
-            type="number"
-            variant="creator"
-            value={subsFollowers}
-            onChange={(e) => setSubsFollowers(e.target.value === '' ? '' : Number(e.target.value))}
-            placeholder="e.g. 50000"
-            min={0}
-          />
-          {twitchSynced && (
-            <p className="text-xs text-[#00c8ff] mt-1">
-              ✓ Synced from Twitch
+          {youtubeSynced && (
+            <p className="text-xs cr-text-muted">
+              <span className="text-[#ff4444]">YouTube</span>
+              {' '}— subscribers, avg views, and watch time sync automatically from{' '}
+              <span className="text-[#c8dff0]">{youtubeChannelName}</span>.
             </p>
           )}
+          <p className="text-xs text-white/20 mt-1">
+            To update these stats, unlink and relink your account on the platform cards above.
+          </p>
         </div>
-      </div>
+      )}
 
       {/* Games / Genres */}
       <div>
@@ -349,28 +261,6 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
         <p className="text-xs cr-text-muted mb-2">
           Add tags (e.g. FPS, MOBA, RPG). Press Enter or click Add.
         </p>
-
-        {/* Twitch suggestion banner */}
-        {twitchGameSuggestions.length > 0 && hasUnusedGameSuggestions && (
-          <div className="flex items-center gap-3 mb-3 px-3 py-2 rounded-lg bg-[#7b4fff]/10 border border-[#7b4fff]/30">
-            <svg className="w-4 h-4 text-[#7b4fff] shrink-0" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
-            </svg>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-[#c8dff0]">
-                From Twitch: {twitchGameSuggestions.join(', ')}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={applyGameSuggestions}
-              className="text-xs text-[#7b4fff] hover:text-[#9b6fff] font-medium shrink-0 transition-colors"
-            >
-              Apply
-            </button>
-          </div>
-        )}
-
         <div className="flex flex-wrap gap-2 mb-2">
           {gameTags.map((t) => (
             <span
@@ -411,6 +301,7 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
         </div>
       </div>
 
+      {/* Languages */}
       <div>
         <label className={labelClass}>Languages</label>
         <p className="text-xs cr-text-muted mb-2">Languages you create content in.</p>
@@ -432,10 +323,9 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
         </div>
       </div>
 
+      {/* Bio */}
       <div>
-        <label htmlFor="bio" className={labelClass}>
-          Bio
-        </label>
+        <label htmlFor="bio" className={labelClass}>Bio</label>
         <FormTextarea
           id="bio"
           variant="creator"
@@ -452,7 +342,6 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
       <div>
         <label className={labelClass}>Content categories</label>
 
-        {/* Twitch suggestion banner */}
         {twitchContentSuggestions.length > 0 && hasUnusedContentSuggestions && (
           <div className="flex items-center gap-3 mb-3 px-3 py-2 rounded-lg bg-[#7b4fff]/10 border border-[#7b4fff]/30">
             <svg className="w-4 h-4 text-[#7b4fff] shrink-0" viewBox="0 0 24 24" fill="currentColor">
@@ -490,6 +379,8 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
           ))}
         </div>
       </div>
+
+      {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 pt-4">
         <button
           type="submit"
@@ -521,10 +412,7 @@ export default function CreatorProfileForm({ profile, categoriesOptions, twitchB
               This will remove all your profile info. You can add it again anytime.
             </p>
             <div className="flex gap-3">
-              <SecondaryButton
-                className="flex-1 min-w-0"
-                onClick={() => setShowDeleteConfirm(false)}
-              >
+              <SecondaryButton className="flex-1 min-w-0" onClick={() => setShowDeleteConfirm(false)}>
                 Cancel
               </SecondaryButton>
               <SecondaryButton

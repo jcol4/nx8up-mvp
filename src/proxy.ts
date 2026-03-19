@@ -15,7 +15,9 @@ const isPublicRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req: NextRequest) => {
     console.log('Middleware running for:', req.nextUrl.pathname)
 
-
+    // These routes handle their own auth
+    if (req.nextUrl.pathname.startsWith('/api/auth/')) return NextResponse.next()
+        
     const { userId, sessionClaims, redirectToSignIn } = await auth()
     const role = (sessionClaims?.metadata as any)?.role as string | undefined
 
