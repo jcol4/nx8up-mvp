@@ -14,6 +14,13 @@ export default async function HomePage() {
   const role = (sessionClaims?.metadata as any)?.role as string | undefined
   const username = user?.username ?? user?.firstName ?? 'Player'
 
+  if (userId) {
+    if (role === 'admin') redirect('/admin')
+    if (role === 'creator') redirect('/creator')
+    if (role === 'sponsor') redirect('/sponsor')
+    redirect('/onboarding')
+  }
+  
   const dashboardLink =
     role === 'admin' ? '/admin' :
     role === 'creator' ? '/creator' :
