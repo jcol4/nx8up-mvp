@@ -10,6 +10,7 @@ import CreatorNotifications from "./CreatorNotifications";
 import DealsAndCampaignsSection from "./DealsAndCampaignsSection";
 import ContentPlannerSection from "./ContentPlannerSection";
 import { getContentPlannerNotes } from "./_actions";
+import { prisma } from "@/lib/prisma";
 
 export default async function CreatorDashboardPage() {
   const [authResult, displayInfo, xpState, calendarTasks, notifications, contentPlannerNotes] =
@@ -22,6 +23,21 @@ export default async function CreatorDashboardPage() {
       getContentPlannerNotes(),
     ]);
   const role = (authResult.sessionClaims?.metadata as { role?: string } | undefined)?.role;
+
+  // Fetch creator's campaign applications for the Campaigns panel
+  const { userId } = authResult
+  const campaignApplications = userId
+    ? await prisma.campaign_applications.findMany({
+        where: { creator: { clerk_user_id: userId } },
+        include: {
+          campaign: {
+            include: { sponsor: { select: { company_name: true } } },
+          },
+        },
+        orderBy: { submitted_at: 'desc' },
+        take: 20,
+      })
+    : []
   const { displayName, username } = displayInfo;
   return (
     <>
@@ -49,8 +65,8 @@ export default async function CreatorDashboardPage() {
           {/* 2. Central progress & calendar */}
           <CreatorProgressPanel xpState={xpState} calendarTasks={calendarTasks} />
 
-          {/* 3. Deals & Campaigns */}
-          <DealsAndCampaignsSection />
+          {/* 3. Campaigns */}
+          <DealsAndCampaignsSection applications={campaignApplications} />
 
           {/* 4. Academy */}
           <CreatorAcademySection />

@@ -12,8 +12,10 @@ export type CreatorProfile = {
   game_category?: string[]
   language?: string[]
   most_played_games?: string[]
-  average_vod_views?: number
-  subs_followers?: number  
+  /** Audience demographics (creator-entered) */
+  audience_age_min?: number
+  audience_age_max?: number
+  audience_locations?: string[]
 }
 
 export const DEFAULT_CONTENT_CATEGORIES = [

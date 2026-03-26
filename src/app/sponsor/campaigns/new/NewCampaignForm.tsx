@@ -8,6 +8,7 @@ import { DEFAULT_CONTENT_CATEGORIES } from '@/lib/creator-profile'
 import Alert from '@/components/ui/Alert'
 import FormInput from '@/components/ui/FormInput'
 import FormTextarea from '@/components/ui/FormTextarea'
+import NXDatePicker from '@/components/ui/NXDatePicker'
 
 const labelClass = 'block text-sm font-medium dash-text-muted mb-1.5'
 
@@ -134,15 +135,12 @@ export default function NewCampaignForm() {
           />
           </div>
           <div>
-            <label htmlFor="campaign-deadline" className={labelClass}>
-              Deadline
-            </label>
-            <FormInput
-              id="campaign-deadline"
-              type="date"
-              variant="dashboard"
-              value={deadline}
-              onChange={(e) => setDeadline(e.target.value)}
+            <label className={labelClass}>Deadline</label>
+            <NXDatePicker
+              name="deadline"
+              min={new Date().toISOString().split('T')[0]}
+              placeholder="Select deadline"
+              onChange={(val) => setDeadline(val)}
             />
           </div>
         </div>
@@ -161,7 +159,7 @@ export default function NewCampaignForm() {
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   platform.includes(p)
                     ? 'bg-[#00c8ff] text-black'
-                    : 'dash-border border dash-text-muted hover:text-[#c8dff0]'
+                    : 'dash-border border dash-text-muted hover:text-[#c8dff0] hover:border-[rgba(0,200,255,0.3)] hover:bg-[rgba(0,200,255,0.05)]'
                 }`}
               >
                 {p}
@@ -184,7 +182,7 @@ export default function NewCampaignForm() {
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   contentType.includes(cat)
                     ? 'bg-[#00c8ff] text-black'
-                    : 'dash-border border dash-text-muted hover:text-[#c8dff0]'
+                    : 'dash-border border dash-text-muted hover:text-[#c8dff0] hover:border-[rgba(0,200,255,0.3)] hover:bg-[rgba(0,200,255,0.05)]'
                 }`}
               >
                 {cat}
@@ -211,7 +209,7 @@ export default function NewCampaignForm() {
             <button
               type="button"
               onClick={addGameTag}
-              className="px-3 py-1.5 rounded-lg text-sm font-medium dash-border border dash-text-muted hover:text-[#c8dff0]"
+              className="px-3 py-1.5 rounded-lg text-sm font-medium dash-border border dash-text-muted hover:text-[#c8dff0] hover:border-[rgba(0,200,255,0.3)] hover:bg-[rgba(0,200,255,0.05)] transition-colors"
             >
               Add
             </button>

@@ -12,12 +12,13 @@ import {
   getTwitchStreamStats,
   isTwitchDataStale 
 } from '@/lib/twitch'
-import { 
-  getYouTubeChannelByHandle, 
-  getYouTubeChannelById, 
-  getYouTubeChannelStats, 
-  isYouTubeDataStale 
+import {
+  getYouTubeChannelByHandle,
+  getYouTubeChannelById,
+  getYouTubeChannelStats,
+  isYouTubeDataStale
 } from '@/lib/youtube'
+import { decryptToken, encryptToken } from '@/lib/token-encryption'
 
 function isValidUrl(s: string): boolean {
   const trimmed = s?.trim()
@@ -73,9 +74,10 @@ export async function getCreatorProfile(): Promise<CreatorProfile | null> {
     platform: fromDb?.platform?.length ? fromDb.platform : undefined,
     game_category: fromDb?.game_category?.length ? fromDb.game_category : undefined,
     language: fromDb?.language?.length ? fromDb.language : undefined,
-    // Twitch-derived — used to pre-populate form suggestions
-    average_vod_views: fromDb?.average_vod_views ?? undefined,
-    subs_followers: fromDb?.subs_followers ?? undefined,
+    // Audience demographics
+    audience_age_min: fromDb?.audience_age_min ?? undefined,
+    audience_age_max: fromDb?.audience_age_max ?? undefined,
+    audience_locations: fromDb?.audience_locations?.length ? fromDb.audience_locations : undefined,
   }
 }
 
@@ -112,9 +114,8 @@ export async function updateCreatorProfile(data: CreatorProfile): Promise<{ erro
     const game_category = data.game_category?.length ? data.game_category : []
     const language = data.language?.length ? data.language : []
     const content_type = data.categories?.length ? data.categories : []
-    // most_played_games: save whatever the creator has in the form
-    // (could be Twitch-derived, manually edited, or a mix)
     const most_played_games = data.most_played_games?.length ? data.most_played_games : []
+    const audience_locations = data.audience_locations?.length ? data.audience_locations : []
 
     await prisma.content_creators.upsert({
       where: { clerk_user_id: userId },
@@ -126,6 +127,9 @@ export async function updateCreatorProfile(data: CreatorProfile): Promise<{ erro
         game_category,
         language,
         content_type,
+        audience_age_min: data.audience_age_min ?? undefined,
+        audience_age_max: data.audience_age_max ?? undefined,
+        audience_locations,
       },
       update: {
         location: locationStr || undefined,
@@ -134,8 +138,9 @@ export async function updateCreatorProfile(data: CreatorProfile): Promise<{ erro
         language,
         content_type,
         updated_at: new Date(),
-        average_vod_views: data.average_vod_views ?? null,
-        subs_followers: data.subs_followers ?? null,  
+        audience_age_min: data.audience_age_min ?? null,
+        audience_age_max: data.audience_age_max ?? null,
+        audience_locations,
       },
     })
 
@@ -180,6 +185,9 @@ export async function deleteCreatorProfile(): Promise<{ error?: string }> {
         game_category: [],
         language: [],
         content_type: [],
+        audience_age_min: null,
+        audience_age_max: null,
+        audience_locations: [],
         updated_at: new Date(),
       },
     })
@@ -414,13 +422,66 @@ export async function unlinkYouTubeAccount() {
   }
 }
 
+/** Try to get a valid YouTube access token, refreshing it if expired. Returns null on failure. */
+async function getValidYouTubeAccessToken(
+  encryptedAccess: string | null,
+  encryptedRefresh: string | null,
+  expiresAt: Date | null,
+  userId: string
+): Promise<string | null> {
+  if (!encryptedAccess || !encryptedRefresh) return null
+
+  const now = new Date()
+  const isExpired = !expiresAt || expiresAt <= now
+
+  if (!isExpired) {
+    return decryptToken(encryptedAccess)
+  }
+
+  // Token expired — refresh it
+  const refreshToken = decryptToken(encryptedRefresh)
+  if (!refreshToken) return null
+
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: process.env.GOOGLE_CLIENT_ID!,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+      refresh_token: refreshToken,
+      grant_type: 'refresh_token',
+    }),
+  })
+
+  if (!res.ok) return null
+
+  const data = await res.json()
+  const newAccessToken: string = data.access_token
+  const newExpiresIn: number = data.expires_in ?? 3600
+
+  // Persist the new access token
+  await prisma.content_creators.update({
+    where: { clerk_user_id: userId },
+    data: {
+      youtube_access_token: encryptToken(newAccessToken),
+      youtube_token_expires_at: new Date(Date.now() + newExpiresIn * 1000),
+    },
+  })
+
+  return newAccessToken
+}
+
 export async function refreshYouTubeDataIfStale(userId: string) {
+  if (!process.env.YOUTUBE_API_KEY) return
   try {
     const creator = await prisma.content_creators.findUnique({
       where: { clerk_user_id: userId },
       select: {
         youtube_channel_id: true,
         youtube_synced_at: true,
+        youtube_access_token: true,
+        youtube_refresh_token: true,
+        youtube_token_expires_at: true,
       },
     })
 
@@ -434,19 +495,63 @@ export async function refreshYouTubeDataIfStale(userId: string) {
 
     if (!channel) return
 
+    // Attempt to refresh watch time using stored OAuth token
+    let watchTimeHours: number | null = null
+    const accessToken = await getValidYouTubeAccessToken(
+      creator.youtube_access_token,
+      creator.youtube_refresh_token,
+      creator.youtube_token_expires_at,
+      userId
+    )
+
+    let memberCount: number | null = null
+
+    if (accessToken) {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0]
+      const today = new Date().toISOString().split('T')[0]
+
+      const [analyticsRes, membersRes] = await Promise.all([
+        fetch(
+          `https://youtubeanalytics.googleapis.com/v2/reports?ids=channel==${creator.youtube_channel_id}&startDate=${thirtyDaysAgo}&endDate=${today}&metrics=estimatedMinutesWatched&dimensions=day`,
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        ),
+        fetch(
+          'https://www.googleapis.com/youtube/v3/members?part=snippet&mode=listMembers&maxResults=1',
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        ),
+      ])
+
+      if (analyticsRes.ok) {
+        const analyticsData = await analyticsRes.json()
+        const rows: number[][] = analyticsData.rows ?? []
+        const totalMinutes = rows.reduce((sum, row) => sum + (row[1] ?? 0), 0)
+        watchTimeHours = Math.round(totalMinutes / 60)
+      }
+
+      if (membersRes.ok) {
+        const membersData = await membersRes.json()
+        if (typeof membersData.pageInfo?.totalResults === 'number') {
+          memberCount = membersData.pageInfo.totalResults
+        }
+      }
+    }
+
     await prisma.content_creators.update({
       where: { clerk_user_id: userId },
       data: {
         youtube_channel_name: channel.title,
         youtube_handle: channel.handle,
         youtube_subscribers: channel.subscriber_count,
-        youtube_avg_views: stats.avg_views,
+        youtube_avg_views: stats.avg_views || null,
         youtube_top_categories: stats.top_categories,
         youtube_synced_at: new Date(),
+        ...(watchTimeHours !== null ? { youtube_watch_time_hours: watchTimeHours } : {}),
+        ...(memberCount !== null ? { youtube_member_count: memberCount } : {}),
       },
     })
   } catch (err) {
     console.error('refreshYouTubeDataIfStale error:', err)
-    // Silent fail — stale data is better than a broken page
   }
 }

@@ -23,6 +23,7 @@ const CREATOR_ONLY_SECTION_NAV_ITEMS = [
 const NAV_ITEMS = [
   { href: '/creator', label: 'Dashboard' },
   { href: '/creator/profile', label: 'Profile' },
+  { href: '/creator/campaigns', label: 'Campaigns' },
   { href: '/creator/academy', label: 'Academy' },
 ]
 

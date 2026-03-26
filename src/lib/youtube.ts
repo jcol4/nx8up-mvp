@@ -147,7 +147,10 @@ export async function getYouTubeChannelStats(
     { next: { revalidate: 0 } }
   )
 
-  if (!playlistRes.ok) throw new Error(`YouTube playlist error: ${playlistRes.status}`)
+  // 404 means the uploads playlist is private or inaccessible via API key — degrade gracefully
+  if (!playlistRes.ok) {
+    return { avg_views: 0, top_categories: [] }
+  }
 
   const playlistData = await playlistRes.json()
   const videoIds: string[] = (playlistData.items ?? [])

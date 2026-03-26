@@ -1,7 +1,7 @@
 import type { InputHTMLAttributes } from "react";
 
 const BASE_CLASS =
-  "rounded-lg border placeholder-[#3a5570] focus:outline-none focus:ring-1 focus:ring-[#00c8ff]/50";
+  "rounded-lg border placeholder-[#3a5570] focus:outline-none focus:ring-1 focus:ring-[#00c8ff]/50 hover:border-[rgba(0,200,255,0.3)] transition-colors";
 
 const VARIANT_CLASS = {
   creator: "w-full px-4 py-2.5 cr-border border cr-bg-inner cr-text",

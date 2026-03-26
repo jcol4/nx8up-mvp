@@ -173,6 +173,21 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Fetch paying channel member count (requires channel-memberships.creator scope)
+  // Returns null if memberships are not enabled on this channel
+  let memberCount: number | null = null
+  const membersRes = await fetch(
+    `${YT_API_BASE}/members?part=snippet&mode=listMembers&maxResults=1`,
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  )
+  if (membersRes.ok) {
+    const membersData = await membersRes.json()
+    if (typeof membersData.pageInfo?.totalResults === 'number') {
+      memberCount = membersData.pageInfo.totalResults
+    }
+  }
+  // 403 with channelMembershipsNotEnabled is expected for channels without memberships — leave null
+
   // Fetch watch time from YouTube Analytics API
   let watchTimeHours: number | null = null
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -209,6 +224,7 @@ export async function GET(req: NextRequest) {
       youtube_avg_views: avgViews,
       youtube_top_categories: topCategories,
       youtube_watch_time_hours: watchTimeHours,
+      youtube_member_count: memberCount,
       youtube_synced_at: new Date(),
       youtube_access_token: encryptedAccess,
       youtube_refresh_token: encryptedRefresh,
@@ -222,6 +238,7 @@ export async function GET(req: NextRequest) {
       youtube_avg_views: avgViews,
       youtube_top_categories: topCategories,
       youtube_watch_time_hours: watchTimeHours,
+      youtube_member_count: memberCount,
       youtube_synced_at: new Date(),
       youtube_access_token: encryptedAccess,
       youtube_refresh_token: encryptedRefresh,

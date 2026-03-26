@@ -6,11 +6,13 @@ import { cookies } from 'next/headers'
 const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
 
 // Scopes needed:
-// youtube.readonly       — channel info, video stats
-// yt-analytics.readonly  — watch time, demographics
+// youtube.readonly                    — channel info, video stats
+// yt-analytics.readonly               — watch time, demographics
+// youtube.channel-memberships.creator — paying channel member count
 const SCOPES = [
   'https://www.googleapis.com/auth/youtube.readonly',
   'https://www.googleapis.com/auth/yt-analytics.readonly',
+  'https://www.googleapis.com/auth/youtube.channel-memberships.creator',
 ].join(' ')
 
 export async function GET() {

@@ -13,6 +13,12 @@ import {
   CREATOR_PLATFORMS,
   COMMON_LANGUAGES,
 } from '@/lib/location-options'
+
+const AUDIENCE_LOCATION_OPTIONS = [
+  'United States', 'Canada', 'United Kingdom', 'Australia', 'Germany',
+  'France', 'Spain', 'Mexico', 'Brazil', 'Japan', 'South Korea', 'India',
+  'Philippines', 'Indonesia', 'Netherlands', 'Sweden', 'Other',
+] as const
 import Alert from '@/components/ui/Alert'
 import FormInput from '@/components/ui/FormInput'
 import FormTextarea from '@/components/ui/FormTextarea'
@@ -23,8 +29,6 @@ type Props = {
   profile: CreatorProfile | null
   categoriesOptions: readonly string[]
   twitchBroadcasterType?: string | null
-  twitchUsername?: string | null
-  youtubeChannelName?: string | null
 }
 
 function stateOptionsForCountry(country: string): readonly string[] {
@@ -38,8 +42,6 @@ export default function CreatorProfileForm({
   profile,
   categoriesOptions,
   twitchBroadcasterType,
-  twitchUsername,
-  youtubeChannelName,
 }: Props) {
   const router = useRouter()
   const [displayName, setDisplayName] = useState(profile?.displayName ?? '')
@@ -52,14 +54,14 @@ export default function CreatorProfileForm({
   const [gameTags, setGameTags] = useState<string[]>(profile?.game_category ?? [])
   const [gameTagInput, setGameTagInput] = useState('')
   const [language, setLanguage] = useState<string[]>(profile?.language ?? [])
+  const [audienceAgeMin, setAudienceAgeMin] = useState<string>(profile?.audience_age_min?.toString() ?? '')
+  const [audienceAgeMax, setAudienceAgeMax] = useState<string>(profile?.audience_age_max?.toString() ?? '')
+  const [audienceLocations, setAudienceLocations] = useState<string[]>(profile?.audience_locations ?? [])
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-
-  const twitchSynced = !!twitchUsername
-  const youtubeSynced = !!youtubeChannelName
 
   // Twitch-derived suggestions
   const twitchContentSuggestions = suggestContentTypes(twitchBroadcasterType)
@@ -94,6 +96,9 @@ export default function CreatorProfileForm({
   const toggleLanguage = (lang: string) =>
     setLanguage((prev) => prev.includes(lang) ? prev.filter((x) => x !== lang) : [...prev, lang])
 
+  const toggleAudienceLocation = (loc: string) =>
+    setAudienceLocations((prev) => prev.includes(loc) ? prev.filter((x) => x !== loc) : [...prev, loc])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -109,6 +114,9 @@ export default function CreatorProfileForm({
       platform,
       game_category: gameTags,
       language,
+      audience_age_min: audienceAgeMin ? parseInt(audienceAgeMin, 10) : undefined,
+      audience_age_max: audienceAgeMax ? parseInt(audienceAgeMax, 10) : undefined,
+      audience_locations: audienceLocations,
     })
     setIsSaving(false)
     if (res.error) {
@@ -137,6 +145,9 @@ export default function CreatorProfileForm({
       setPlatform([])
       setGameTags([])
       setLanguage([])
+      setAudienceAgeMin('')
+      setAudienceAgeMax('')
+      setAudienceLocations([])
       router.refresh()
     }
   }
@@ -229,32 +240,6 @@ export default function CreatorProfileForm({
         </div>
       </div>
 
-      {/* OAuth synced stats notice */}
-      {(twitchSynced || youtubeSynced) && (
-        <div className="p-3 rounded-lg bg-white/[0.02] border border-white/5 space-y-1.5">
-          <p className="text-xs font-medium cr-text-muted uppercase tracking-wider mb-2">
-            Synced via OAuth
-          </p>
-          {twitchSynced && (
-            <p className="text-xs cr-text-muted">
-              <span className="text-[#7b4fff]">Twitch</span>
-              {' '}— followers and VOD views sync automatically from{' '}
-              <span className="text-[#c8dff0]">@{twitchUsername}</span>.
-            </p>
-          )}
-          {youtubeSynced && (
-            <p className="text-xs cr-text-muted">
-              <span className="text-[#ff4444]">YouTube</span>
-              {' '}— subscribers, avg views, and watch time sync automatically from{' '}
-              <span className="text-[#c8dff0]">{youtubeChannelName}</span>.
-            </p>
-          )}
-          <p className="text-xs text-white/20 mt-1">
-            To update these stats, unlink and relink your account on the platform cards above.
-          </p>
-        </div>
-      )}
-
       {/* Games / Genres */}
       <div>
         <label className={labelClass}>Games / Genres</label>
@@ -320,6 +305,64 @@ export default function CreatorProfileForm({
               {lang}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Audience demographics */}
+      <div className="space-y-4 p-4 rounded-lg bg-white/[0.02] border border-white/5">
+        <p className="text-xs font-medium cr-text-muted uppercase tracking-wider">Audience Demographics</p>
+        <p className="text-xs cr-text-muted -mt-2">
+          Help sponsors understand your audience. These are shown on campaign applications.
+        </p>
+
+        {/* Age range */}
+        <div>
+          <label className={labelClass}>Audience age range</label>
+          <div className="flex items-center gap-3">
+            <FormInput
+              type="number"
+              variant="creator"
+              value={audienceAgeMin}
+              onChange={(e) => setAudienceAgeMin(e.target.value)}
+              placeholder="Min age"
+              min={13}
+              max={65}
+              className="w-28"
+            />
+            <span className="cr-text-muted text-sm">to</span>
+            <FormInput
+              type="number"
+              variant="creator"
+              value={audienceAgeMax}
+              onChange={(e) => setAudienceAgeMax(e.target.value)}
+              placeholder="Max age"
+              min={13}
+              max={65}
+              className="w-28"
+            />
+          </div>
+          <p className="text-xs cr-text-muted mt-1.5">e.g. 18 to 34</p>
+        </div>
+
+        {/* Audience locations */}
+        <div>
+          <label className={labelClass}>Where is your audience mainly from?</label>
+          <div className="flex flex-wrap gap-2">
+            {AUDIENCE_LOCATION_OPTIONS.map((loc) => (
+              <button
+                key={loc}
+                type="button"
+                onClick={() => toggleAudienceLocation(loc)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  audienceLocations.includes(loc)
+                    ? 'bg-[#00c8ff]/20 text-[#00c8ff] border border-[#00c8ff]/40'
+                    : 'cr-border border cr-text-muted hover:text-[#c8dff0]'
+                }`}
+              >
+                {loc}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

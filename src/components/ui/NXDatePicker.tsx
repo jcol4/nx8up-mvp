@@ -6,6 +6,9 @@ interface DatePickerProps {
   name: string
   required?: boolean
   max?: string
+  min?: string         // ISO date string — dates before this are disabled
+  placeholder?: string // Custom placeholder text
+  onChange?: (value: string) => void // Called with YYYY-MM-DD string when a date is picked
 }
 
 const MONTHS = [
@@ -15,13 +18,15 @@ const MONTHS = [
 
 const DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 
-export default function NXDatePicker({ name, required, max }: DatePickerProps) {
+export default function NXDatePicker({ name, required, max, min, placeholder, onChange }: DatePickerProps) {
   const today = new Date()
-  const maxDate = max ? new Date(max) : today
+  today.setHours(0, 0, 0, 0)
+  const maxDate = max ? new Date(max) : new Date(2099, 11, 31)
+  const minDate = min ? new Date(min) : null
 
   const [isOpen, setIsOpen] = React.useState(false)
   const [selected, setSelected] = React.useState<Date | null>(null)
-  const [viewYear, setViewYear] = React.useState(today.getFullYear() - 20)
+  const [viewYear, setViewYear] = React.useState(today.getFullYear())
   const [viewMonth, setViewMonth] = React.useState(today.getMonth())
   const [mode, setMode] = React.useState<'calendar' | 'month' | 'year'>('calendar')
   const ref = React.useRef<HTMLDivElement>(null)
@@ -45,7 +50,11 @@ export default function NXDatePicker({ name, required, max }: DatePickerProps) {
     return new Date(year, month, 1).getDay()
   }
 
-  const isDisabled = (date: Date) => date > maxDate
+  const isDisabled = (date: Date) => {
+    if (date > maxDate) return true
+    if (minDate && date < minDate) return true
+    return false
+  }
 
   const isSelected = (date: Date) => {
     if (!selected) return false
@@ -59,9 +68,15 @@ export default function NXDatePicker({ name, required, max }: DatePickerProps) {
     if (isDisabled(date)) return
     setSelected(date)
     setIsOpen(false)
+    if (onChange) {
+      const formatted = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+      onChange(formatted)
+    }
   }
 
   const prevMonth = () => {
+    const prevDate = new Date(viewYear, viewMonth - 1, 1)
+    if (minDate && prevDate < new Date(minDate.getFullYear(), minDate.getMonth(), 1)) return
     if (viewMonth === 0) {
       setViewMonth(11)
       setViewYear(y => y - 1)
@@ -87,14 +102,14 @@ export default function NXDatePicker({ name, required, max }: DatePickerProps) {
 
   const displayValue = selected
     ? `${MONTHS[selected.getMonth()]} ${selected.getDate()}, ${selected.getFullYear()}`
-    : 'Select date of birth'
+    : (placeholder ?? 'Select date')
 
   const daysInMonth = getDaysInMonth(viewYear, viewMonth)
   const firstDay = getFirstDayOfMonth(viewYear, viewMonth)
 
   // Year range for year picker
-  const startYear = 1940
-  const endYear = maxDate.getFullYear()
+  const startYear = minDate ? minDate.getFullYear() : 1940
+  const endYear = maxDate.getFullYear() === 2099 ? today.getFullYear() + 5 : maxDate.getFullYear()
   const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => endYear - i)
 
   return (
@@ -109,8 +124,7 @@ export default function NXDatePicker({ name, required, max }: DatePickerProps) {
           width: 100%;
           background: rgba(0,200,255,0.03);
           border: 1px solid rgba(0,200,255,0.12);
-          border-left: none;
-          border-radius: 0 6px 6px 0;
+          border-radius: 6px;
           padding: 0.85rem 1rem;
           font-family: 'Exo 2', sans-serif;
           font-size: 0.95rem;
@@ -432,7 +446,12 @@ export default function NXDatePicker({ name, required, max }: DatePickerProps) {
             {mode === 'calendar' && (
               <>
                 <div className="nx-dp-header">
-                  <button type="button" className="nx-dp-nav" onClick={prevMonth}>
+                  <button
+                    type="button"
+                    className="nx-dp-nav"
+                    onClick={prevMonth}
+                    disabled={minDate != null && new Date(viewYear, viewMonth - 1, 1) < new Date(minDate.getFullYear(), minDate.getMonth(), 1)}
+                  >
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                       <path d="M8 2L4 6l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>

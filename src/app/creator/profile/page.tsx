@@ -7,6 +7,7 @@ import CreatorProfileForm from './CreatorProfileForm'
 import Panel from '@/components/shared/Panel'
 import TwitchConnect from '@/components/creator/TwitchConnect'
 import YouTubeConnect from '@/components/creator/YoutubeConnect'
+import CreatorStatsPanel from './CreatorStatsPanel'
 import { DEFAULT_CONTENT_CATEGORIES } from '@/lib/creator-profile'
 import { prisma } from '@/lib/prisma'
 
@@ -27,6 +28,7 @@ export default async function CreatorProfilePage() {
     prisma.content_creators.findUnique({
       where: { clerk_user_id: userId },
       select: {
+        // Identity / connect cards
         twitch_username: true,
         twitch_broadcaster_type: true,
         twitch_profile_image: true,
@@ -34,10 +36,19 @@ export default async function CreatorProfilePage() {
         twitch_synced_at: true,
         youtube_handle: true,
         youtube_channel_name: true,
+        youtube_synced_at: true,
+        // Stats panel — all viewership fields
+        twitch_created_at: true,
+        subs_followers: true,
+        average_vod_views: true,
+        twitch_subscriber_count: true,
+        engagement_rate: true,
+        youtube_channel_id: true,
         youtube_subscribers: true,
         youtube_avg_views: true,
+        youtube_watch_time_hours: true,
+        youtube_member_count: true,
         youtube_top_categories: true,
-        youtube_synced_at: true,        
       },
     }),
   ])
@@ -79,7 +90,7 @@ export default async function CreatorProfilePage() {
         />
         </Panel>
 
-        {/* Profile form */}
+        {/* Combined profile form + viewership stats */}
         <Panel variant="creator" as="div" title="Creator Profile" titleLevel={1}>
           <p className="text-sm cr-text-muted mb-6">
             Manage your public profile. This info helps sponsors find and connect with you.
@@ -89,6 +100,35 @@ export default async function CreatorProfilePage() {
             categoriesOptions={DEFAULT_CONTENT_CATEGORIES}
             twitchBroadcasterType={creator?.twitch_broadcaster_type ?? null}
           />
+
+          {/* Viewership stats — read-only, verified via OAuth */}
+          <div className="mt-8 pt-6 border-t cr-border">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="cr-panel-title mb-0">Viewership Stats</h2>
+              <p className="text-xs cr-text-muted">Auto-synced · read only</p>
+            </div>
+            <CreatorStatsPanel
+              creator={{
+                twitch_username: creator?.twitch_username ?? null,
+                twitch_broadcaster_type: creator?.twitch_broadcaster_type ?? null,
+                twitch_created_at: creator?.twitch_created_at ?? null,
+                twitch_synced_at: creator?.twitch_synced_at ?? null,
+                subs_followers: creator?.subs_followers ?? null,
+                average_vod_views: creator?.average_vod_views ?? null,
+                twitch_subscriber_count: creator?.twitch_subscriber_count ?? null,
+                engagement_rate: creator?.engagement_rate ?? null,
+                youtube_channel_id: creator?.youtube_channel_id ?? null,
+                youtube_channel_name: creator?.youtube_channel_name ?? null,
+                youtube_handle: creator?.youtube_handle ?? null,
+                youtube_subscribers: creator?.youtube_subscribers ?? null,
+                youtube_avg_views: creator?.youtube_avg_views ?? null,
+                youtube_watch_time_hours: creator?.youtube_watch_time_hours ?? null,
+                youtube_member_count: creator?.youtube_member_count ?? null,
+                youtube_top_categories: creator?.youtube_top_categories ?? [],
+                youtube_synced_at: creator?.youtube_synced_at ?? null,
+              }}
+            />
+          </div>
         </Panel>
       </main>
     </>

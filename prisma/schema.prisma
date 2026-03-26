@@ -48,11 +48,17 @@ model content_creators {
   youtube_top_categories  String[]
   youtube_synced_at       DateTime?               @db.Timestamptz(6)
   youtube_watch_time_hours Int?                   // Only available via OAuth + Analytics API
+  youtube_member_count    Int?                    // Paying channel members — requires channel-memberships.creator scope
 
   // YouTube OAuth tokens (encrypted at rest)
   youtube_access_token    String?
   youtube_refresh_token   String?
   youtube_token_expires_at DateTime?              @db.Timestamptz(6)
+
+  // ── Audience Demographics (creator-entered) ──────────────────────────────
+  audience_age_min        Int?                    // Minimum age of primary audience (e.g. 18)
+  audience_age_max        Int?                    // Maximum age of primary audience (e.g. 34)
+  audience_locations      String[]                // Primary audience countries/regions
 
   // ── Relations ───────────────────────────────────────────────────────────────
   applications            campaign_applications[]
@@ -144,7 +150,12 @@ model campaign_applications {
   campaign_id  String           @db.Uuid
   creator_id   String           @db.Uuid
   status       String           @default("pending")
-  message      String?
+  message      String?          // Application pitch / why they're a good fit
+  // Application-specific audience overrides (auto-filled from profile, editable per application)
+  app_audience_age_min  Int?
+  app_audience_age_max  Int?
+  app_audience_locations String[]
+  app_location          String?  // Creator location override for this application
   submitted_at DateTime?        @default(now()) @db.Timestamptz(6)
   campaign     campaigns        @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
   creator      content_creators @relation(fields: [creator_id], references: [id], onDelete: Cascade)

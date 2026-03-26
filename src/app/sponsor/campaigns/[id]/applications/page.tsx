@@ -82,8 +82,23 @@ export default async function CampaignApplicationsPage({ params }: Props) {
                         </span>
                       )}
                     </div>
+                    {/* Quick stats row */}
+                    <div className="flex flex-wrap gap-3 mt-2 text-xs dash-text-muted">
+                      {app.creator.subs_followers != null && (
+                        <span>{app.creator.subs_followers.toLocaleString()} followers</span>
+                      )}
+                      {app.creator.average_vod_views != null && (
+                        <span>{app.creator.average_vod_views.toLocaleString()} avg VOD views</span>
+                      )}
+                      {app.creator.youtube_subscribers != null && (
+                        <span>{app.creator.youtube_subscribers.toLocaleString()} YT subs</span>
+                      )}
+                      {app.creator.platform?.length ? (
+                        <span>{app.creator.platform.join(' · ')}</span>
+                      ) : null}
+                    </div>
                     {app.message && (
-                      <p className="text-sm dash-text-muted mt-2 border-t dash-border pt-2">
+                      <p className="text-sm dash-text-muted mt-2 border-t dash-border pt-2 line-clamp-2">
                         {app.message}
                       </p>
                     )}

@@ -41,9 +41,17 @@ export async function getMyApplication(campaignId: string) {
   })
 }
 
+export type ApplicationData = {
+  message: string
+  audienceAgeMin?: number | null
+  audienceAgeMax?: number | null
+  audienceLocations?: string[]
+  location?: string
+}
+
 export async function applyToCampaign(
   campaignId: string,
-  message: string
+  data: ApplicationData
 ): Promise<{ error?: string; success?: boolean }> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
@@ -63,8 +71,12 @@ export async function applyToCampaign(
     data: {
       campaign_id: campaignId,
       creator_id: creator.id,
-      message: message.trim() || null,
+      message: data.message.trim() || null,
       status: 'pending',
+      app_audience_age_min: data.audienceAgeMin ?? null,
+      app_audience_age_max: data.audienceAgeMax ?? null,
+      app_audience_locations: data.audienceLocations ?? [],
+      app_location: data.location?.trim() || null,
     },
   })
 

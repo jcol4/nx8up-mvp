@@ -4,17 +4,57 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { applyToCampaign } from '../_actions'
 
-export default function ApplyButton({ campaignId }: { campaignId: string }) {
+const AUDIENCE_LOCATION_OPTIONS = [
+  'United States', 'Canada', 'United Kingdom', 'Australia', 'Germany',
+  'France', 'Spain', 'Mexico', 'Brazil', 'Japan', 'South Korea', 'India',
+  'Philippines', 'Indonesia', 'Netherlands', 'Sweden', 'Other',
+] as const
+
+type Props = {
+  campaignId: string
+  profileLocation: string | null
+  profileAudienceAgeMin: number | null
+  profileAudienceAgeMax: number | null
+  profileAudienceLocations: string[]
+}
+
+export default function ApplyButton({
+  campaignId,
+  profileLocation,
+  profileAudienceAgeMin,
+  profileAudienceAgeMax,
+  profileAudienceLocations,
+}: Props) {
   const router = useRouter()
-  const [message, setMessage] = useState('')
+  const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [open, setOpen] = useState(false)
+
+  const [message, setMessage] = useState('')
+  const [location, setLocation] = useState(profileLocation ?? '')
+  const [ageMin, setAgeMin] = useState(profileAudienceAgeMin?.toString() ?? '')
+  const [ageMax, setAgeMax] = useState(profileAudienceAgeMax?.toString() ?? '')
+  const [audienceLocations, setAudienceLocations] = useState<string[]>(profileAudienceLocations)
+
+  const toggleAudienceLocation = (loc: string) =>
+    setAudienceLocations((prev) =>
+      prev.includes(loc) ? prev.filter((x) => x !== loc) : [...prev, loc]
+    )
 
   async function handleApply() {
+    if (!message.trim()) {
+      setError('Please tell the sponsor why you are a great fit.')
+      return
+    }
     setLoading(true)
     setError(null)
-    const res = await applyToCampaign(campaignId, message)
+    const res = await applyToCampaign(campaignId, {
+      message,
+      audienceAgeMin: ageMin ? parseInt(ageMin, 10) : null,
+      audienceAgeMax: ageMax ? parseInt(ageMax, 10) : null,
+      audienceLocations,
+      location,
+    })
     setLoading(false)
     if (res.error) {
       setError(res.error)
@@ -35,17 +75,122 @@ export default function ApplyButton({ campaignId }: { campaignId: string }) {
     )
   }
 
+  const inputClass =
+    'w-full rounded-lg p-3 text-sm cr-border border cr-bg-inner cr-text focus:outline-none focus:border-[#00c8ff]/50'
+  const labelClass = 'block text-xs font-medium cr-text-muted mb-1.5 uppercase tracking-wide'
+
   return (
-    <div className="space-y-3">
-      <textarea
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Optional: tell the sponsor why you're a great fit..."
-        rows={4}
-        className="w-full rounded-lg p-3 text-sm cr-border border cr-bg-inner cr-text resize-none focus:outline-none focus:border-[#00c8ff]/50"
-      />
+    <div className="space-y-4">
+      {/* Pitch */}
+      <div>
+        <label className={labelClass}>Why are you a great fit? *</label>
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Tell the sponsor about your audience, your content style, and why this campaign is a natural match for you..."
+          rows={5}
+          className={`${inputClass} resize-none`}
+          maxLength={1000}
+        />
+        <p className="text-xs cr-text-muted mt-1 text-right">{message.length}/1000</p>
+      </div>
+
+      {/* Location */}
+      <div>
+        <label className={labelClass}>Your location</label>
+        <input
+          type="text"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          placeholder="e.g. Austin, Texas, United States"
+          className={inputClass}
+        />
+        {profileLocation && location !== profileLocation && (
+          <button
+            type="button"
+            onClick={() => setLocation(profileLocation)}
+            className="text-xs text-[#00c8ff] hover:underline mt-1"
+          >
+            Reset to profile location
+          </button>
+        )}
+      </div>
+
+      {/* Audience age range */}
+      <div>
+        <label className={labelClass}>Audience age range</label>
+        <div className="flex items-center gap-3">
+          <input
+            type="number"
+            value={ageMin}
+            onChange={(e) => setAgeMin(e.target.value)}
+            placeholder="Min"
+            min={13}
+            max={65}
+            className={`${inputClass} w-24`}
+          />
+          <span className="cr-text-muted text-sm shrink-0">to</span>
+          <input
+            type="number"
+            value={ageMax}
+            onChange={(e) => setAgeMax(e.target.value)}
+            placeholder="Max"
+            min={13}
+            max={65}
+            className={`${inputClass} w-24`}
+          />
+        </div>
+        {(profileAudienceAgeMin || profileAudienceAgeMax) &&
+          (ageMin !== (profileAudienceAgeMin?.toString() ?? '') ||
+            ageMax !== (profileAudienceAgeMax?.toString() ?? '')) && (
+            <button
+              type="button"
+              onClick={() => {
+                setAgeMin(profileAudienceAgeMin?.toString() ?? '')
+                setAgeMax(profileAudienceAgeMax?.toString() ?? '')
+              }}
+              className="text-xs text-[#00c8ff] hover:underline mt-1"
+            >
+              Reset to profile values
+            </button>
+          )}
+      </div>
+
+      {/* Audience locations */}
+      <div>
+        <label className={labelClass}>Where is your audience mainly from?</label>
+        <div className="flex flex-wrap gap-2">
+          {AUDIENCE_LOCATION_OPTIONS.map((loc) => (
+            <button
+              key={loc}
+              type="button"
+              onClick={() => toggleAudienceLocation(loc)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                audienceLocations.includes(loc)
+                  ? 'bg-[#00c8ff]/20 text-[#00c8ff] border border-[#00c8ff]/40'
+                  : 'cr-border border cr-text-muted hover:text-[#c8dff0]'
+              }`}
+            >
+              {loc}
+            </button>
+          ))}
+        </div>
+        {profileAudienceLocations.length > 0 &&
+          JSON.stringify([...audienceLocations].sort()) !==
+            JSON.stringify([...profileAudienceLocations].sort()) && (
+            <button
+              type="button"
+              onClick={() => setAudienceLocations(profileAudienceLocations)}
+              className="text-xs text-[#00c8ff] hover:underline mt-1.5"
+            >
+              Reset to profile selections
+            </button>
+          )}
+      </div>
+
       {error && <p className="text-xs text-red-400">{error}</p>}
-      <div className="flex gap-2">
+
+      <div className="flex gap-2 pt-1">
         <button
           onClick={() => setOpen(false)}
           className="flex-1 py-2.5 rounded-lg text-sm cr-text-muted border cr-border hover:border-[rgba(0,200,255,0.3)] transition-colors"
