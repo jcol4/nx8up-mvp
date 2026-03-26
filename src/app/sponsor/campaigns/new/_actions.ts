@@ -58,6 +58,9 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
   const game_category = parseStringArray(formData.get('game_category') as string | null)
   const min_avg_viewers = parseOptionalInt(formData.get('min_avg_viewers') as string | null)
   const min_subs_followers = parseOptionalInt(formData.get('min_subs_followers') as string | null)
+  const min_audience_age = parseOptionalInt(formData.get('min_audience_age') as string | null)
+  const max_audience_age = parseOptionalInt(formData.get('max_audience_age') as string | null)
+  const required_audience_locations = parseStringArray(formData.get('required_audience_locations') as string | null)
 
   const campaign = await prisma.campaigns.create({
     data: {
@@ -72,6 +75,9 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
       game_category,
       min_avg_viewers,
       min_subs_followers,
+      min_audience_age,
+      max_audience_age,
+      required_audience_locations,
       creative_package: [],
     },
   })

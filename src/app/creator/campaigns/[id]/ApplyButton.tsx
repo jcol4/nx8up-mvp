@@ -16,6 +16,8 @@ type Props = {
   profileAudienceAgeMin: number | null
   profileAudienceAgeMax: number | null
   profileAudienceLocations: string[]
+  eligible: boolean
+  ineligibleReasons: string[]
 }
 
 export default function ApplyButton({
@@ -24,6 +26,8 @@ export default function ApplyButton({
   profileAudienceAgeMin,
   profileAudienceAgeMax,
   profileAudienceLocations,
+  eligible,
+  ineligibleReasons,
 }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -62,6 +66,23 @@ export default function ApplyButton({
       setOpen(false)
       router.refresh()
     }
+  }
+
+  if (!eligible) {
+    return (
+      <div className="space-y-2">
+        <div className="w-full py-2.5 rounded-lg text-center text-sm font-semibold bg-red-500/10 text-red-400 border border-red-500/20 cursor-not-allowed">
+          Requirements Not Met
+        </div>
+        {ineligibleReasons.length > 0 && (
+          <div className="text-xs text-red-400/70 space-y-0.5">
+            {ineligibleReasons.map((r) => (
+              <p key={r}>· {r}</p>
+            ))}
+          </div>
+        )}
+      </div>
+    )
   }
 
   if (!open) {

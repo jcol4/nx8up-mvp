@@ -3,6 +3,19 @@
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { matchCreatorToCampaign } from '@/lib/matching'
+
+const CREATOR_MATCHING_SELECT = {
+  platform: true,
+  subs_followers: true,
+  youtube_subscribers: true,
+  average_vod_views: true,
+  youtube_avg_views: true,
+  engagement_rate: true,
+  audience_age_min: true,
+  audience_age_max: true,
+  audience_locations: true,
+} as const
 
 export async function getOpenCampaigns(limit = 10) {
   return prisma.campaigns.findMany({
@@ -13,6 +26,34 @@ export async function getOpenCampaigns(limit = 10) {
       sponsor: { select: { company_name: true } },
       _count: { select: { applications: true } },
     },
+  })
+}
+
+export async function getOpenCampaignsWithEligibility(limit = 50) {
+  const { userId } = await auth()
+
+  const [campaigns, creator] = await Promise.all([
+    prisma.campaigns.findMany({
+      where: { status: 'active' },
+      orderBy: { created_at: 'desc' },
+      take: limit,
+      include: {
+        sponsor: { select: { company_name: true } },
+        _count: { select: { applications: true } },
+      },
+    }),
+    userId
+      ? prisma.content_creators.findUnique({
+          where: { clerk_user_id: userId },
+          select: CREATOR_MATCHING_SELECT,
+        })
+      : null,
+  ])
+
+  return campaigns.map((campaign) => {
+    if (!creator) return { campaign, eligible: true, reasons: [] as string[] }
+    const { eligible, reasons } = matchCreatorToCampaign(creator, campaign)
+    return { campaign, eligible, reasons }
   })
 }
 
@@ -58,9 +99,28 @@ export async function applyToCampaign(
 
   const creator = await prisma.content_creators.findUnique({
     where: { clerk_user_id: userId },
-    select: { id: true },
+    select: { id: true, ...CREATOR_MATCHING_SELECT },
   })
   if (!creator) return { error: 'Creator profile not found. Please complete your profile first.' }
+
+  const campaign = await prisma.campaigns.findUnique({
+    where: { id: campaignId },
+    select: {
+      platform: true,
+      min_subs_followers: true,
+      min_avg_viewers: true,
+      min_engagement_rate: true,
+      min_audience_age: true,
+      max_audience_age: true,
+      required_audience_locations: true,
+    },
+  })
+  if (!campaign) return { error: 'Campaign not found.' }
+
+  const { eligible, reasons } = matchCreatorToCampaign(creator, campaign)
+  if (!eligible) {
+    return { error: `You do not meet this campaign's requirements: ${reasons.join('; ')}` }
+  }
 
   const existing = await prisma.campaign_applications.findUnique({
     where: { campaign_id_creator_id: { campaign_id: campaignId, creator_id: creator.id } },

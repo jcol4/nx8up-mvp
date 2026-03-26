@@ -14,6 +14,12 @@ const labelClass = 'block text-sm font-medium dash-text-muted mb-1.5'
 
 const PLATFORMS = ['Twitch', 'YouTube', 'TikTok', 'Instagram', 'Other'] as const
 
+const AUDIENCE_LOCATION_OPTIONS = [
+  'United States', 'Canada', 'United Kingdom', 'Australia', 'Germany',
+  'France', 'Spain', 'Mexico', 'Brazil', 'Japan', 'South Korea', 'India',
+  'Philippines', 'Indonesia', 'Netherlands', 'Sweden', 'Other',
+] as const
+
 export default function NewCampaignForm() {
   const router = useRouter()
   const [title, setTitle] = useState('')
@@ -26,6 +32,9 @@ export default function NewCampaignForm() {
   const [gameCategory, setGameCategory] = useState<string[]>([])
   const [minFollowers, setMinFollowers] = useState('')
   const [minAvgViewers, setMinAvgViewers] = useState('')
+  const [minAudienceAge, setMinAudienceAge] = useState('')
+  const [maxAudienceAge, setMaxAudienceAge] = useState('')
+  const [requiredLocations, setRequiredLocations] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -65,6 +74,9 @@ export default function NewCampaignForm() {
     formData.set('game_category', JSON.stringify(gameCategory))
     formData.set('min_subs_followers', minFollowers.trim())
     formData.set('min_avg_viewers', minAvgViewers.trim())
+    formData.set('min_audience_age', minAudienceAge.trim())
+    formData.set('max_audience_age', maxAudienceAge.trim())
+    formData.set('required_audience_locations', JSON.stringify(requiredLocations))
 
     const res = await createCampaign(formData)
     setIsSubmitting(false)
@@ -264,6 +276,61 @@ export default function NewCampaignForm() {
               onChange={(e) => setMinAvgViewers(e.target.value)}
               placeholder="e.g. 500"
             />
+          </div>
+        </div>
+
+        <div>
+          <label className={labelClass}>Target audience age range</label>
+          <p className="text-xs dash-text-muted mb-2">
+            Only creators whose audience age overlaps this range will be eligible.
+          </p>
+          <div className="flex items-center gap-3">
+            <FormInput
+              type="text"
+              inputMode="numeric"
+              variant="dashboard"
+              value={minAudienceAge}
+              onChange={(e) => setMinAudienceAge(e.target.value.replace(/[^\d]/g, ''))}
+              placeholder="Min age"
+              className="w-28"
+            />
+            <span className="dash-text-muted text-sm shrink-0">to</span>
+            <FormInput
+              type="text"
+              inputMode="numeric"
+              variant="dashboard"
+              value={maxAudienceAge}
+              onChange={(e) => setMaxAudienceAge(e.target.value.replace(/[^\d]/g, ''))}
+              placeholder="Max age"
+              className="w-28"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className={labelClass}>Required audience locations</label>
+          <p className="text-xs dash-text-muted mb-2">
+            Creators must have audiences in at least one of the selected regions.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {AUDIENCE_LOCATION_OPTIONS.map((loc) => (
+              <button
+                key={loc}
+                type="button"
+                onClick={() =>
+                  setRequiredLocations((prev) =>
+                    prev.includes(loc) ? prev.filter((x) => x !== loc) : [...prev, loc]
+                  )
+                }
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  requiredLocations.includes(loc)
+                    ? 'bg-[#00c8ff] text-black'
+                    : 'dash-border border dash-text-muted hover:text-[#c8dff0] hover:border-[rgba(0,200,255,0.3)] hover:bg-[rgba(0,200,255,0.05)]'
+                }`}
+              >
+                {loc}
+              </button>
+            ))}
           </div>
         </div>
 

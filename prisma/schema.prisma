@@ -127,10 +127,13 @@ model campaigns {
   platform            String[]
   content_type        String[]
   game_category       String[]
-  min_avg_viewers     Int?
-  min_subs_followers  Int?
-  min_engagement_rate Decimal?                @db.Decimal(5, 2)
-  creative_package    String[]
+  min_avg_viewers              Int?
+  min_subs_followers           Int?
+  min_engagement_rate          Decimal?                @db.Decimal(5, 2)
+  min_audience_age             Int?
+  max_audience_age             Int?
+  required_audience_locations  String[]
+  creative_package             String[]
   deadline            DateTime?               @db.Timestamptz(6)
   created_at          DateTime?               @default(now()) @db.Timestamptz(6)
   updated_at          DateTime?               @default(now()) @db.Timestamptz(6)

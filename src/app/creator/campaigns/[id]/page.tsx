@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server'
 import { getCampaignById, getMyApplication } from '../_actions'
 import ApplyButton from './ApplyButton'
 import { prisma } from '@/lib/prisma'
+import { matchCreatorToCampaign } from '@/lib/matching'
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -20,16 +21,31 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             audience_age_min: true,
             audience_age_max: true,
             audience_locations: true,
+            platform: true,
+            subs_followers: true,
+            youtube_subscribers: true,
+            average_vod_views: true,
+            youtube_avg_views: true,
+            engagement_rate: true,
           },
         })
       : null,
   ])
 
+  const { eligible, reasons } = creatorProfile && campaign
+    ? matchCreatorToCampaign(creatorProfile, campaign)
+    : { eligible: true, reasons: [] as string[] }
+
   if (!campaign) notFound()
 
   const alreadyApplied = myApplication != null
   const hasRequirements =
-    campaign.min_avg_viewers || campaign.min_subs_followers || campaign.min_engagement_rate
+    campaign.min_avg_viewers ||
+    campaign.min_subs_followers ||
+    campaign.min_engagement_rate ||
+    campaign.min_audience_age ||
+    campaign.max_audience_age ||
+    campaign.required_audience_locations.length > 0
 
   return (
     <main className="max-w-4xl mx-auto p-6 sm:p-8">
@@ -88,27 +104,64 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
           {/* Requirements */}
           {hasRequirements && (
             <div className="cr-panel p-5">
-              <h2 className="cr-panel-title mb-4">Requirements</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="cr-panel-title mb-0">Requirements</h2>
+                {creatorProfile && (
+                  <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium border ${
+                    eligible
+                      ? 'bg-[#22c55e]/10 text-[#22c55e] border-[#22c55e]/20'
+                      : 'bg-red-500/10 text-red-400 border-red-500/20'
+                  }`}>
+                    {eligible ? '✓ Eligible' : '✗ Requirements not met'}
+                  </span>
+                )}
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {campaign.min_avg_viewers && (
+                {campaign.min_avg_viewers != null && (
                   <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
                     <p className="text-lg font-bold cr-text-bright">{campaign.min_avg_viewers.toLocaleString()}</p>
                     <p className="text-[11px] cr-text-muted mt-0.5">Min. avg viewers</p>
                   </div>
                 )}
-                {campaign.min_subs_followers && (
+                {campaign.min_subs_followers != null && (
                   <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
                     <p className="text-lg font-bold cr-text-bright">{campaign.min_subs_followers.toLocaleString()}</p>
                     <p className="text-[11px] cr-text-muted mt-0.5">Min. followers / subs</p>
                   </div>
                 )}
-                {campaign.min_engagement_rate && (
+                {campaign.min_engagement_rate != null && (
                   <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
                     <p className="text-lg font-bold cr-text-bright">{Number(campaign.min_engagement_rate).toFixed(1)}%</p>
                     <p className="text-[11px] cr-text-muted mt-0.5">Min. engagement rate</p>
                   </div>
                 )}
+                {(campaign.min_audience_age != null || campaign.max_audience_age != null) && (
+                  <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
+                    <p className="text-lg font-bold cr-text-bright">
+                      {campaign.min_audience_age ?? '?'}–{campaign.max_audience_age ?? '?'}
+                    </p>
+                    <p className="text-[11px] cr-text-muted mt-0.5">Target audience age</p>
+                  </div>
+                )}
+                {campaign.required_audience_locations.length > 0 && (
+                  <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center sm:col-span-2">
+                    <p className="text-sm font-semibold cr-text-bright leading-snug">
+                      {campaign.required_audience_locations.join(', ')}
+                    </p>
+                    <p className="text-[11px] cr-text-muted mt-0.5">Required audience locations</p>
+                  </div>
+                )}
               </div>
+              {!eligible && reasons.length > 0 && (
+                <div className="mt-3 pt-3 border-t cr-border">
+                  <p className="text-xs text-red-400/80 font-medium mb-1">Why you don't qualify:</p>
+                  <ul className="space-y-0.5">
+                    {reasons.map((r) => (
+                      <li key={r} className="text-xs text-red-400/70">· {r}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -160,6 +213,8 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 profileAudienceAgeMin={creatorProfile?.audience_age_min ?? null}
                 profileAudienceAgeMax={creatorProfile?.audience_age_max ?? null}
                 profileAudienceLocations={creatorProfile?.audience_locations ?? []}
+                eligible={eligible}
+                ineligibleReasons={reasons}
               />
             )}
           </div>

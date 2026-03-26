@@ -1,9 +1,10 @@
 import Link from 'next/link'
-import { getOpenCampaigns } from './_actions'
+import { getOpenCampaignsWithEligibility } from './_actions'
 import Panel from '@/components/shared/Panel'
 
 export default async function CreatorCampaignsPage() {
-  const campaigns = await getOpenCampaigns(10)
+  const allEntries = await getOpenCampaignsWithEligibility(50)
+  const entries = allEntries.filter((e) => e.eligible)
 
   return (
     <main className="max-w-4xl mx-auto p-6 sm:p-8">
@@ -13,13 +14,13 @@ export default async function CreatorCampaignsPage() {
         <p className="text-sm cr-text-muted mt-1">Browse and apply to sponsor campaigns.</p>
       </div>
 
-      {campaigns.length === 0 ? (
+      {entries.length === 0 ? (
         <Panel variant="creator">
           <p className="text-sm cr-text-muted text-center py-8">No open campaigns right now. Check back soon!</p>
         </Panel>
       ) : (
         <ul className="space-y-3">
-          {campaigns.map((c: (typeof campaigns)[number]) => (
+          {entries.map(({ campaign: c }) => (
             <li key={c.id}>
               <Link
                 href={`/creator/campaigns/${c.id}`}
