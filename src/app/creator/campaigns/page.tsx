@@ -32,7 +32,7 @@ export default async function CreatorCampaignsPage() {
                     <p className="text-xs cr-text-muted mt-0.5">
                       {c.sponsor.company_name ?? 'Sponsor'} ·{' '}
                       {c.platform.join(', ')}
-                      {c.deadline ? ` · Deadline: ${new Date(c.deadline).toLocaleDateString()}` : ''}
+                      {c.end_date ? ` · Ends: ${new Date(c.end_date).toLocaleDateString()}` : ''}
                     </p>
                     {c.description && (
                       <p className="text-xs cr-text mt-1 line-clamp-2">{c.description}</p>

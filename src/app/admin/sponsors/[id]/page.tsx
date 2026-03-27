@@ -110,18 +110,20 @@ export default async function AdminSponsorDetailPage({ params }: Props) {
                   <p className="dash-text-bright font-medium truncate">{c.title}</p>
                   <p className="text-xs dash-text-muted mt-0.5">
                     {c._count.applications} applicant{c._count.applications !== 1 ? 's' : ''} ·{' '}
-                    {c.deadline
-                      ? `Deadline ${new Date(c.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-                      : 'No deadline'}
+                    {c.end_date
+                      ? `Ends ${new Date(c.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                      : 'No end date'}
                   </p>
                 </div>
                 <span
                   className={`text-xs px-2 py-0.5 rounded font-medium shrink-0 ${
-                    c.status === 'active'
-                      ? 'bg-[#00c8ff]/10 text-[#00c8ff]'
-                      : c.status === 'closed'
-                      ? 'bg-white/5 dash-text-muted'
-                      : 'bg-[#7b4fff]/10 text-[#7b4fff]'
+                    c.status === 'live'
+                      ? 'bg-[#22c55e]/20 text-[#22c55e]'
+                      : c.status === 'draft'
+                      ? 'bg-[#94a3b8]/20 text-[#94a3b8]'
+                      : c.status === 'cancelled'
+                      ? 'bg-[#f87171]/20 text-[#f87171]'
+                      : 'bg-[#eab308]/20 text-[#eab308]'
                   }`}
                 >
                   {c.status}

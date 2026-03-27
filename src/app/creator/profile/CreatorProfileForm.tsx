@@ -279,7 +279,7 @@ export default function CreatorProfileForm({
           <button
             type="button"
             onClick={addGameTag}
-            className="px-4 py-2.5 rounded-lg bg-[#00c8ff]/20 text-[#00c8ff] text-sm font-medium hover:bg-[#00c8ff]/30 transition-colors shrink-0"
+            className="px-4 py-2.5 rounded-lg bg-[#00c8ff]/20 text-[#00c8ff] text-sm font-medium hover:opacity-90 transition-opacity shrink-0"
           >
             Add
           </button>

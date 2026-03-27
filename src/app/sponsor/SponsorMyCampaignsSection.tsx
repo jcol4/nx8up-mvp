@@ -48,10 +48,18 @@ export default async function SponsorMyCampaignsSection() {
                 <span className="text-sm font-medium dash-text-bright">{c.title}</span>
                 <span
                   className={`text-xs px-2 py-0.5 rounded ${
-                    c.status === 'active' ? 'bg-[#22c55e]/20 text-[#22c55e]' : 'bg-[#eab308]/20 text-[#eab308]'
+                    c.status === 'live'
+                      ? 'bg-[#22c55e]/20 text-[#22c55e]'
+                      : c.status === 'pending_approval'
+                        ? 'bg-[#eab308]/20 text-[#eab308]'
+                        : c.status === 'completed'
+                          ? 'bg-[#00c8ff]/20 text-[#00c8ff]'
+                          : c.status === 'cancelled'
+                            ? 'bg-[#f87171]/20 text-[#f87171]'
+                            : 'bg-[#94a3b8]/20 text-[#94a3b8]'
                   }`}
                 >
-                  {c.status === 'active' ? 'Active' : c.status.charAt(0).toUpperCase() + c.status.slice(1)}
+                  {c.status === 'pending_approval' ? 'Pending Approval' : c.status.charAt(0).toUpperCase() + c.status.slice(1)}
                 </span>
               </div>
               <p className="text-xs dash-text-muted mt-0.5">

@@ -89,7 +89,7 @@ export default function ApplyButton({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full py-2.5 rounded-lg font-semibold text-sm bg-[#00c8ff] text-[#0a1223] hover:bg-[#00b0e0] transition-colors"
+        className="w-full py-2.5 rounded-lg font-semibold text-sm bg-[#00c8ff] text-[#0a1223] hover:opacity-90 transition-opacity"
       >
         Apply to This Campaign
       </button>
@@ -214,14 +214,14 @@ export default function ApplyButton({
       <div className="flex gap-2 pt-1">
         <button
           onClick={() => setOpen(false)}
-          className="flex-1 py-2.5 rounded-lg text-sm cr-text-muted border cr-border hover:border-[rgba(0,200,255,0.3)] transition-colors"
+          className="flex-1 py-2.5 rounded-lg text-sm cr-text-muted border cr-border hover:text-[#c8dff0] transition-colors"
         >
           Cancel
         </button>
         <button
           onClick={handleApply}
           disabled={loading}
-          className="flex-1 py-2.5 rounded-lg font-semibold text-sm bg-[#00c8ff] text-[#0a1223] hover:bg-[#00b0e0] disabled:opacity-50 transition-colors"
+          className="flex-1 py-2.5 rounded-lg font-semibold text-sm bg-[#00c8ff] text-[#0a1223] hover:opacity-90 disabled:opacity-50 transition-opacity"
         >
           {loading ? 'Submitting…' : 'Submit Application'}
         </button>

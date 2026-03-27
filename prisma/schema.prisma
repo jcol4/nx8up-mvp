@@ -9,61 +9,48 @@ datasource db {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model content_creators {
-  id                      String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  clerk_user_id           String                  @unique
-  email                   String                  @unique
-  age                     Int?
-  location                String?
-  language                String[]
-  platform                String[]
-  subs_followers          Int?
-  engagement_rate         Decimal?                @db.Decimal(5, 2)
-  content_type            String[]
-  game_category           String[]
-  created_at              DateTime?               @default(now()) @db.Timestamptz(6)
-  updated_at              DateTime?               @default(now()) @db.Timestamptz(6)
+  id                       String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerk_user_id            String                  @unique
+  email                    String                  @unique
+  age                      Int?
+  location                 String?
+  language                 String[]
+  platform                 String[]
+  subs_followers           Int?
+  engagement_rate          Decimal?                @db.Decimal(5, 2)
+  content_type             String[]
+  game_category            String[]
+  created_at               DateTime?               @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime?               @default(now()) @db.Timestamptz(6)
+  twitch_broadcaster_type  String?
+  twitch_created_at        DateTime?               @db.Timestamptz(6)
+  twitch_description       String?
+  twitch_id                String?                 @unique
+  twitch_profile_image     String?
+  twitch_synced_at         DateTime?               @db.Timestamptz(6)
+  twitch_username          String?
+  youtube_avg_views        Int?
+  youtube_channel_id       String?                 @unique
+  youtube_channel_name     String?
+  youtube_handle           String?
+  youtube_subscribers      Int?
+  youtube_synced_at        DateTime?               @db.Timestamptz(6)
+  youtube_top_categories   String[]
+  average_vod_views        Int?
+  twitch_access_token      String?
+  twitch_refresh_token     String?
+  twitch_subscriber_count  Int?
+  twitch_token_expires_at  DateTime?               @db.Timestamptz(6)
+  youtube_access_token     String?
+  youtube_refresh_token    String?
+  youtube_token_expires_at DateTime?               @db.Timestamptz(6)
+  youtube_watch_time_hours Int?
+  youtube_member_count     Int?
+  audience_age_min         Int?
+  audience_age_max         Int?
+  audience_locations       String[]
+  applications             campaign_applications[]
 
-  // ── Twitch ──────────────────────────────────────────────────────────────────
-  twitch_id               String?                 @unique
-  twitch_username         String?
-  twitch_broadcaster_type String?
-  twitch_description      String?
-  twitch_profile_image    String?
-  twitch_created_at       DateTime?               @db.Timestamptz(6)
-  twitch_synced_at        DateTime?               @db.Timestamptz(6)
-  average_vod_views       Int?
-  twitch_subscriber_count Int?                    // Paid subs — only available via OAuth
-
-  // Twitch OAuth tokens (encrypted at rest)
-  twitch_access_token     String?
-  twitch_refresh_token    String?
-  twitch_token_expires_at DateTime?               @db.Timestamptz(6)
-
-  // ── YouTube ─────────────────────────────────────────────────────────────────
-  youtube_channel_id      String?                 @unique
-  youtube_channel_name    String?
-  youtube_handle          String?
-  youtube_subscribers     Int?
-  youtube_avg_views       Int?
-  youtube_top_categories  String[]
-  youtube_synced_at       DateTime?               @db.Timestamptz(6)
-  youtube_watch_time_hours Int?                   // Only available via OAuth + Analytics API
-  youtube_member_count    Int?                    // Paying channel members — requires channel-memberships.creator scope
-
-  // YouTube OAuth tokens (encrypted at rest)
-  youtube_access_token    String?
-  youtube_refresh_token   String?
-  youtube_token_expires_at DateTime?              @db.Timestamptz(6)
-
-  // ── Audience Demographics (creator-entered) ──────────────────────────────
-  audience_age_min        Int?                    // Minimum age of primary audience (e.g. 18)
-  audience_age_max        Int?                    // Maximum age of primary audience (e.g. 34)
-  audience_locations      String[]                // Primary audience countries/regions
-
-  // ── Relations ───────────────────────────────────────────────────────────────
-  applications            campaign_applications[]
-
-  // ── Indexes ─────────────────────────────────────────────────────────────────
   @@index([average_vod_views])
   @@index([content_type], type: Gin)
   @@index([engagement_rate])
@@ -118,50 +105,57 @@ model admins {
 }
 
 model campaigns {
-  id                  String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sponsor_id          String                  @db.Uuid
-  title               String
-  description         String?
-  status              String                  @default("draft")
-  budget              Int?
-  platform            String[]
-  content_type        String[]
-  game_category       String[]
-  min_avg_viewers              Int?
-  min_subs_followers           Int?
-  min_engagement_rate          Decimal?                @db.Decimal(5, 2)
-  min_audience_age             Int?
-  max_audience_age             Int?
-  required_audience_locations  String[]
-  creative_package             String[]
-  deadline            DateTime?               @db.Timestamptz(6)
-  created_at          DateTime?               @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime?               @default(now()) @db.Timestamptz(6)
-  applications        campaign_applications[]
-  sponsor             sponsors                @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
+  id                          String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaign_code               String?                 @unique
+  sponsor_id                  String                  @db.Uuid
+  title                       String
+  brand_name                  String?
+  description                 String?
+  objective                   String?
+  campaign_type               String?
+  status                      String                  @default("draft")
+  budget                      Int?
+  payment_model               String?
+  platform                    String[]
+  content_type                String[]
+  game_category               String[]
+  min_avg_viewers             Int?
+  min_subs_followers          Int?
+  min_engagement_rate         Decimal?                @db.Decimal(5, 2)
+  min_audience_age            Int?
+  max_audience_age            Int?
+  required_audience_locations String[]
+  creative_package            String[]
+  start_date                  DateTime?               @db.Timestamptz(6)
+  end_date                    DateTime?               @db.Timestamptz(6)
+  created_at                  DateTime?               @default(now()) @db.Timestamptz(6)
+  updated_at                  DateTime?               @default(now()) @db.Timestamptz(6)
+  applications                campaign_applications[]
+  sponsor                     sponsors                @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
 
   @@index([status])
   @@index([sponsor_id])
+  @@index([campaign_code])
   @@index([platform], type: Gin)
   @@index([content_type], type: Gin)
   @@index([game_category], type: Gin)
-  @@index([deadline])
+  @@index([end_date])
 }
 
 model campaign_applications {
-  id           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  campaign_id  String           @db.Uuid
-  creator_id   String           @db.Uuid
-  status       String           @default("pending")
-  message      String?          // Application pitch / why they're a good fit
+  id                     String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaign_id            String           @db.Uuid
+  creator_id             String           @db.Uuid
+  status                 String           @default("pending")
+  message                String?          // Application pitch / why they're a good fit
   // Application-specific audience overrides (auto-filled from profile, editable per application)
-  app_audience_age_min  Int?
-  app_audience_age_max  Int?
+  app_audience_age_min   Int?
+  app_audience_age_max   Int?
   app_audience_locations String[]
-  app_location          String?  // Creator location override for this application
-  submitted_at DateTime?        @default(now()) @db.Timestamptz(6)
-  campaign     campaigns        @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
-  creator      content_creators @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+  app_location           String?          // Creator location override for this application
+  submitted_at           DateTime?        @default(now()) @db.Timestamptz(6)
+  campaign               campaigns        @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+  creator                content_creators @relation(fields: [creator_id], references: [id], onDelete: Cascade)
 
   @@unique([campaign_id, creator_id])
   @@index([campaign_id])

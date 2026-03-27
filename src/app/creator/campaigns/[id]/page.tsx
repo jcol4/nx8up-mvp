@@ -184,11 +184,11 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                   {campaign.status}
                 </span>
               </li>
-              {campaign.deadline && (
+              {campaign.end_date && (
                 <li className="flex justify-between items-center">
-                  <span className="cr-text-muted">Deadline</span>
+                  <span className="cr-text-muted">Ends</span>
                   <span className="cr-text-bright font-medium text-xs">
-                    {new Date(campaign.deadline).toLocaleDateString(undefined, {
+                    {new Date(campaign.end_date).toLocaleDateString(undefined, {
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric',

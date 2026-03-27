@@ -19,7 +19,7 @@ const CREATOR_MATCHING_SELECT = {
 
 export async function getOpenCampaigns(limit = 10) {
   return prisma.campaigns.findMany({
-    where: { status: 'active' },
+    where: { status: 'live' },
     orderBy: { created_at: 'desc' },
     take: limit,
     include: {
