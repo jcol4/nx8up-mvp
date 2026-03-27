@@ -49,6 +49,14 @@ model content_creators {
   audience_age_min         Int?
   audience_age_max         Int?
   audience_locations       String[]
+  creator_types            String[]
+  content_style            String[]
+  audience_interests       String[]
+  preferred_campaign_types String[]
+  preferred_product_types  String[]
+  primary_platform         String?
+  is_available             Boolean  @default(true)
+  max_campaigns_per_month  Int?
   applications             campaign_applications[]
 
   @@index([average_vod_views])
@@ -130,6 +138,33 @@ model campaigns {
   end_date                    DateTime?               @db.Timestamptz(6)
   created_at                  DateTime?               @default(now()) @db.Timestamptz(6)
   updated_at                  DateTime?               @default(now()) @db.Timestamptz(6)
+  // Wizard fields — Screen 1
+  product_name                String?
+  product_type                String?
+  // Wizard fields — Screen 2 (audience)
+  target_age_ranges           String[]
+  target_genders              String[]
+  target_cities               String?
+  target_interests            String[]
+  // Wizard fields — Screen 3 (creator mix)
+  creator_types               String[]
+  creator_sizes               String[]
+  creator_count               Int?
+  // Wizard fields — Screen 5 (deliverables)
+  num_videos                  Int?
+  video_includes              String[]
+  num_streams                 Int?
+  min_stream_duration         Int?
+  num_posts                   Int?
+  num_short_videos            Int?
+  content_guidelines          String?
+  must_include_link           Boolean                 @default(false)
+  must_include_promo_code     Boolean                 @default(false)
+  must_tag_brand              Boolean                 @default(false)
+  // Wizard fields — Screen 6 (tracking)
+  landing_page_url            String?
+  tracking_type               String?
+  conversion_goal             String?
   applications                campaign_applications[]
   sponsor                     sponsors                @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
 

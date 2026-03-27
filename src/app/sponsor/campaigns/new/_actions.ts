@@ -8,12 +8,19 @@ import { prisma } from '@/lib/prisma'
 export type CreateCampaignResult = { error?: string; success?: boolean; id?: string }
 
 const VALID_OBJECTIVES = ['awareness', 'engagement', 'traffic', 'conversions'] as const
-const VALID_CAMPAIGN_TYPES = ['one_time', 'ongoing', 'milestone_based'] as const
 const VALID_PAYMENT_MODELS = ['fixed_per_creator', 'performance_based', 'hybrid'] as const
+const VALID_PRODUCT_TYPES = ['consumable', 'gaming_hardware', 'digital_product', 'fashion_lifestyle', 'event_experience'] as const
+const VALID_CAMPAIGN_TYPES = ['use_and_show', 'explain_and_demo', 'mention_and_repeat', 'compete_and_feature'] as const
 
 function parseOptionalInt(value: string | null): number | null {
   if (value == null || value.trim() === '') return null
   const n = parseInt(value, 10)
+  return Number.isNaN(n) ? null : n
+}
+
+function parseOptionalFloat(value: string | null): number | null {
+  if (value == null || value.trim() === '') return null
+  const n = parseFloat(value)
   return Number.isNaN(n) ? null : n
 }
 
@@ -33,8 +40,98 @@ function parseStringArray(value: string | null): string[] {
   }
 }
 
+function parseBool(value: string | null): boolean {
+  return value === 'true'
+}
+
 function generateCampaignCode(): string {
   return 'NX-' + randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase()
+}
+
+export async function saveCampaignDraft(formData: FormData): Promise<CreateCampaignResult> {
+  const { userId } = await auth()
+  if (!userId) return { error: 'Not authenticated' }
+
+  const sponsor = await prisma.sponsors.findUnique({ where: { clerk_user_id: userId } })
+  if (!sponsor) return { error: 'Sponsor profile not found.' }
+
+  const existingId = (formData.get('draft_id') as string | null)?.trim() || null
+
+  const title = (formData.get('title') as string)?.trim() || 'Untitled Campaign'
+  const budgetRaw = (formData.get('budget') as string | null)?.trim() ?? ''
+  const budgetNumber = budgetRaw ? Number(budgetRaw) : null
+  const budget = budgetNumber && Number.isFinite(budgetNumber) && budgetNumber > 0 ? budgetNumber : null
+  const start_date = parseOptionalDate(formData.get('start_date') as string | null)
+  const end_date = parseOptionalDate(formData.get('end_date') as string | null)
+
+  const draftData = {
+    title,
+    brand_name: (formData.get('brand_name') as string | null)?.trim() || null,
+    product_name: (formData.get('product_name') as string | null)?.trim() || null,
+    product_type: (formData.get('product_type') as string | null)?.trim() || null,
+    objective: (formData.get('objective') as string | null)?.trim() || null,
+    campaign_type: (formData.get('campaign_type') as string | null)?.trim() || null,
+    payment_model: (formData.get('payment_model') as string | null)?.trim() || 'fixed_per_creator',
+    budget,
+    start_date: start_date && end_date && start_date < end_date ? start_date : null,
+    end_date: start_date && end_date && start_date < end_date ? end_date : null,
+    platform: parseStringArray(formData.get('platform') as string | null),
+    game_category: parseStringArray(formData.get('target_interests') as string | null),
+    target_age_ranges: parseStringArray(formData.get('target_age_ranges') as string | null),
+    target_genders: parseStringArray(formData.get('target_genders') as string | null),
+    required_audience_locations: parseStringArray(formData.get('required_audience_locations') as string | null),
+    target_cities: (formData.get('target_cities') as string | null)?.trim() || null,
+    target_interests: parseStringArray(formData.get('target_interests') as string | null),
+    creator_types: parseStringArray(formData.get('creator_types') as string | null),
+    creator_sizes: parseStringArray(formData.get('creator_sizes') as string | null),
+    creator_count: parseOptionalInt(formData.get('creator_count') as string | null),
+    min_subs_followers: parseOptionalInt(formData.get('min_subs_followers') as string | null),
+    min_engagement_rate: parseOptionalFloat(formData.get('min_engagement_rate') as string | null),
+    num_videos: parseOptionalInt(formData.get('num_videos') as string | null),
+    video_includes: parseStringArray(formData.get('video_includes') as string | null),
+    num_streams: parseOptionalInt(formData.get('num_streams') as string | null),
+    min_stream_duration: parseOptionalInt(formData.get('min_stream_duration') as string | null),
+    num_posts: parseOptionalInt(formData.get('num_posts') as string | null),
+    num_short_videos: parseOptionalInt(formData.get('num_short_videos') as string | null),
+    content_guidelines: (formData.get('content_guidelines') as string | null)?.trim() || null,
+    must_include_link: parseBool(formData.get('must_include_link') as string | null),
+    must_include_promo_code: parseBool(formData.get('must_include_promo_code') as string | null),
+    must_tag_brand: parseBool(formData.get('must_tag_brand') as string | null),
+    landing_page_url: (formData.get('landing_page_url') as string | null)?.trim() || null,
+    tracking_type: (formData.get('tracking_type') as string | null)?.trim() || null,
+    conversion_goal: (formData.get('conversion_goal') as string | null)?.trim() || null,
+    updated_at: new Date(),
+  }
+
+  let campaignId: string
+
+  if (existingId) {
+    // Verify the draft belongs to this sponsor before updating
+    const existing = await prisma.campaigns.findFirst({
+      where: { id: existingId, sponsor_id: sponsor.id, status: 'draft' },
+      select: { id: true },
+    })
+    if (!existing) return { error: 'Draft not found.' }
+
+    await prisma.campaigns.update({ where: { id: existingId }, data: draftData })
+    campaignId = existingId
+  } else {
+    const campaign = await prisma.campaigns.create({
+      data: {
+        ...draftData,
+        campaign_code: generateCampaignCode(),
+        sponsor_id: sponsor.id,
+        status: 'draft',
+        content_type: [],
+        creative_package: [],
+      },
+    })
+    campaignId = campaign.id
+  }
+
+  revalidatePath('/sponsor/campaigns')
+  revalidatePath('/sponsor')
+  return { success: true, id: campaignId }
 }
 
 export async function createCampaign(formData: FormData): Promise<CreateCampaignResult> {
@@ -44,27 +141,24 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
   const sponsor = await prisma.sponsors.findUnique({ where: { clerk_user_id: userId } })
   if (!sponsor) return { error: 'Sponsor profile not found.' }
 
+  // Step 1
   const title = (formData.get('title') as string)?.trim()
   if (!title) return { error: 'Campaign name is required.' }
 
-  const brand_name = (formData.get('brand_name') as string)?.trim()
-  if (!brand_name) return { error: 'Brand / Company name is required.' }
+  const product_type = (formData.get('product_type') as string)?.trim()
+  if (!product_type || !VALID_PRODUCT_TYPES.includes(product_type as typeof VALID_PRODUCT_TYPES[number])) {
+    return { error: 'A valid product type is required.' }
+  }
 
   const objective = (formData.get('objective') as string)?.trim()
   if (!objective || !VALID_OBJECTIVES.includes(objective as typeof VALID_OBJECTIVES[number])) {
-    return { error: 'A valid campaign objective is required.' }
+    return { error: 'A valid campaign goal is required.' }
   }
 
-  const campaign_type = (formData.get('campaign_type') as string)?.trim()
-  if (!campaign_type || !VALID_CAMPAIGN_TYPES.includes(campaign_type as typeof VALID_CAMPAIGN_TYPES[number])) {
-    return { error: 'A valid campaign type is required.' }
-  }
+  const platform = parseStringArray(formData.get('platform') as string | null)
+  if (!platform.length) return { error: 'At least one platform is required.' }
 
-  const payment_model = (formData.get('payment_model') as string)?.trim()
-  if (!payment_model || !VALID_PAYMENT_MODELS.includes(payment_model as typeof VALID_PAYMENT_MODELS[number])) {
-    return { error: 'A valid payment model is required.' }
-  }
-
+  // Step 4
   const budgetRaw = (formData.get('budget') as string | null)?.trim() ?? ''
   if (!budgetRaw) return { error: 'Total budget is required.' }
   const budgetNumber = Number(budgetRaw)
@@ -79,46 +173,114 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
   const endDateRaw = formData.get('end_date') as string | null
   const end_date = parseOptionalDate(endDateRaw)
   if (!end_date) return { error: 'End date is required.' }
-
   if (end_date <= start_date) return { error: 'End date must be after start date.' }
 
-  const description = (formData.get('description') as string | null)?.trim() ?? null
-  const platform = parseStringArray(formData.get('platform') as string | null)
-  const content_type = parseStringArray(formData.get('content_type') as string | null)
-  const game_category = parseStringArray(formData.get('game_category') as string | null)
-  const min_avg_viewers = parseOptionalInt(formData.get('min_avg_viewers') as string | null)
-  const min_subs_followers = parseOptionalInt(formData.get('min_subs_followers') as string | null)
-  const min_audience_age = parseOptionalInt(formData.get('min_audience_age') as string | null)
-  const max_audience_age = parseOptionalInt(formData.get('max_audience_age') as string | null)
-  const required_audience_locations = parseStringArray(formData.get('required_audience_locations') as string | null)
+  // Step 5
+  const campaign_type = (formData.get('campaign_type') as string)?.trim()
+  if (!campaign_type || !VALID_CAMPAIGN_TYPES.includes(campaign_type as typeof VALID_CAMPAIGN_TYPES[number])) {
+    return { error: 'A valid campaign type / mission is required.' }
+  }
 
-  const campaign = await prisma.campaigns.create({
-    data: {
-      campaign_code: generateCampaignCode(),
-      sponsor_id: sponsor.id,
-      status: 'draft',
-      title,
-      brand_name,
-      description: description || null,
-      objective,
-      campaign_type,
-      payment_model,
-      budget: budgetNumber,
-      start_date,
-      end_date,
-      platform,
-      content_type,
-      game_category,
-      min_avg_viewers,
-      min_subs_followers,
-      min_audience_age,
-      max_audience_age,
-      required_audience_locations,
-      creative_package: [],
-    },
-  })
+  const payment_model = (formData.get('payment_model') as string)?.trim() || 'fixed_per_creator'
+  if (!VALID_PAYMENT_MODELS.includes(payment_model as typeof VALID_PAYMENT_MODELS[number])) {
+    return { error: 'Invalid payment model.' }
+  }
+
+  // Optional fields
+  const brand_name = (formData.get('brand_name') as string | null)?.trim() ?? null
+  const product_name = (formData.get('product_name') as string | null)?.trim() ?? null
+  const content_guidelines = (formData.get('content_guidelines') as string | null)?.trim() ?? null
+  const target_cities = (formData.get('target_cities') as string | null)?.trim() ?? null
+  const landing_page_url = (formData.get('landing_page_url') as string | null)?.trim() ?? null
+  const tracking_type = (formData.get('tracking_type') as string | null)?.trim() ?? null
+  const conversion_goal = (formData.get('conversion_goal') as string | null)?.trim() ?? null
+
+  const creator_count = parseOptionalInt(formData.get('creator_count') as string | null)
+  const min_subs_followers = parseOptionalInt(formData.get('min_subs_followers') as string | null)
+  const min_engagement_rate = parseOptionalFloat(formData.get('min_engagement_rate') as string | null)
+  const num_videos = parseOptionalInt(formData.get('num_videos') as string | null)
+  const num_streams = parseOptionalInt(formData.get('num_streams') as string | null)
+  const min_stream_duration = parseOptionalInt(formData.get('min_stream_duration') as string | null)
+  const num_posts = parseOptionalInt(formData.get('num_posts') as string | null)
+  const num_short_videos = parseOptionalInt(formData.get('num_short_videos') as string | null)
+
+  const target_age_ranges = parseStringArray(formData.get('target_age_ranges') as string | null)
+  const target_genders = parseStringArray(formData.get('target_genders') as string | null)
+  const required_audience_locations = parseStringArray(formData.get('required_audience_locations') as string | null)
+  const target_interests = parseStringArray(formData.get('target_interests') as string | null)
+  const creator_types = parseStringArray(formData.get('creator_types') as string | null)
+  const creator_sizes = parseStringArray(formData.get('creator_sizes') as string | null)
+  const video_includes = parseStringArray(formData.get('video_includes') as string | null)
+
+  const must_include_link = parseBool(formData.get('must_include_link') as string | null)
+  const must_include_promo_code = parseBool(formData.get('must_include_promo_code') as string | null)
+  const must_tag_brand = parseBool(formData.get('must_tag_brand') as string | null)
+
+  const campaignData = {
+    title,
+    brand_name,
+    product_name,
+    product_type,
+    objective,
+    campaign_type,
+    payment_model,
+    budget: budgetNumber,
+    start_date,
+    end_date,
+    platform,
+    game_category: target_interests,
+    target_age_ranges,
+    target_genders,
+    required_audience_locations,
+    target_cities,
+    target_interests,
+    creator_types,
+    creator_sizes,
+    creator_count,
+    min_subs_followers,
+    min_engagement_rate,
+    num_videos,
+    video_includes,
+    num_streams,
+    min_stream_duration,
+    num_posts,
+    num_short_videos,
+    content_guidelines,
+    must_include_link,
+    must_include_promo_code,
+    must_tag_brand,
+    landing_page_url,
+    tracking_type,
+    conversion_goal,
+    updated_at: new Date(),
+  }
+
+  const existingDraftId = (formData.get('draft_id') as string | null)?.trim() || null
+  let campaignId: string
+
+  if (existingDraftId) {
+    const existing = await prisma.campaigns.findFirst({
+      where: { id: existingDraftId, sponsor_id: sponsor.id, status: 'draft' },
+      select: { id: true },
+    })
+    if (!existing) return { error: 'Draft not found.' }
+    await prisma.campaigns.update({ where: { id: existingDraftId }, data: campaignData })
+    campaignId = existingDraftId
+  } else {
+    const campaign = await prisma.campaigns.create({
+      data: {
+        ...campaignData,
+        campaign_code: generateCampaignCode(),
+        sponsor_id: sponsor.id,
+        status: 'draft',
+        content_type: [],
+        creative_package: [],
+      },
+    })
+    campaignId = campaign.id
+  }
 
   revalidatePath('/sponsor/campaigns')
   revalidatePath('/sponsor')
-  return { success: true, id: campaign.id }
+  return { success: true, id: campaignId }
 }

@@ -111,6 +111,14 @@ export default async function SponsorCampaignsPage() {
                     </div>
 
                     <div className="flex items-center gap-3 shrink-0">
+                      {c.status === 'draft' && (
+                        <Link
+                          href={`/sponsor/campaigns/${c.id}/edit`}
+                          className="text-xs dash-text-muted hover:text-[#c8dff0] transition-colors"
+                        >
+                          Edit
+                        </Link>
+                      )}
                       {c.status === 'draft' && <PublishCampaignButton id={c.id} />}
                       {c._count.applications > 0 ? (
                         <Link

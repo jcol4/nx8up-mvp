@@ -78,6 +78,18 @@ export async function getCreatorProfile(): Promise<CreatorProfile | null> {
     audience_age_min: fromDb?.audience_age_min ?? undefined,
     audience_age_max: fromDb?.audience_age_max ?? undefined,
     audience_locations: fromDb?.audience_locations?.length ? fromDb.audience_locations : undefined,
+    // Creator identity
+    creator_types: fromDb?.creator_types?.length ? fromDb.creator_types : undefined,
+    primary_platform: fromDb?.primary_platform ?? undefined,
+    // Content & audience tags
+    content_style: fromDb?.content_style?.length ? fromDb.content_style : undefined,
+    audience_interests: fromDb?.audience_interests?.length ? fromDb.audience_interests : undefined,
+    // Brand & campaign preferences
+    preferred_campaign_types: fromDb?.preferred_campaign_types?.length ? fromDb.preferred_campaign_types : undefined,
+    preferred_product_types: fromDb?.preferred_product_types?.length ? fromDb.preferred_product_types : undefined,
+    // Eligibility
+    is_available: fromDb?.is_available ?? undefined,
+    max_campaigns_per_month: fromDb?.max_campaigns_per_month ?? undefined,
   }
 }
 
@@ -160,6 +172,78 @@ export async function updateCreatorProfile(data: CreatorProfile): Promise<{ erro
     return {}
   } catch {
     return { error: 'Failed to update profile' }
+  }
+}
+
+export async function updateCreatorProfileWizard(data: import('./_shared').CreatorProfileDraft): Promise<{ error?: string }> {
+  const { userId } = await auth()
+  if (!userId) return { error: 'Not authenticated' }
+
+  try {
+    const client = await clerkClient()
+    const user = await client.users.getUser(userId)
+    const email = user.emailAddresses[0]?.emailAddress ?? ''
+    const existing = (user.publicMetadata || {}) as Record<string, unknown>
+
+    const locationStr = [data.city.trim(), data.state.trim(), data.country.trim()].filter(Boolean).join(', ')
+
+    await prisma.content_creators.upsert({
+      where: { clerk_user_id: userId },
+      create: {
+        clerk_user_id: userId,
+        email,
+        location: locationStr || undefined,
+        language: data.language,
+        platform: data.platform,
+        game_category: data.game_category,
+        content_type: data.content_type,
+        audience_age_min: data.audience_age_min ? parseInt(data.audience_age_min, 10) : undefined,
+        audience_age_max: data.audience_age_max ? parseInt(data.audience_age_max, 10) : undefined,
+        audience_locations: data.audience_locations,
+        creator_types: data.creator_types,
+        primary_platform: data.primary_platform || null,
+        content_style: data.content_style,
+        audience_interests: data.audience_interests,
+        preferred_campaign_types: data.preferred_campaign_types,
+        preferred_product_types: data.preferred_product_types,
+        is_available: data.is_available,
+        max_campaigns_per_month: data.max_campaigns_per_month ? parseInt(data.max_campaigns_per_month, 10) : undefined,
+      },
+      update: {
+        location: locationStr || null,
+        language: data.language,
+        platform: data.platform,
+        game_category: data.game_category,
+        content_type: data.content_type,
+        audience_age_min: data.audience_age_min ? parseInt(data.audience_age_min, 10) : null,
+        audience_age_max: data.audience_age_max ? parseInt(data.audience_age_max, 10) : null,
+        audience_locations: data.audience_locations,
+        creator_types: data.creator_types,
+        primary_platform: data.primary_platform || null,
+        content_style: data.content_style,
+        audience_interests: data.audience_interests,
+        preferred_campaign_types: data.preferred_campaign_types,
+        preferred_product_types: data.preferred_product_types,
+        is_available: data.is_available,
+        max_campaigns_per_month: data.max_campaigns_per_month ? parseInt(data.max_campaigns_per_month, 10) : null,
+        updated_at: new Date(),
+      },
+    })
+
+    await client.users.updateUser(userId, {
+      publicMetadata: {
+        ...existing,
+        displayName: data.displayName.trim() || undefined,
+        bio: data.bio.trim() || undefined,
+      },
+    })
+
+    revalidatePath('/creator')
+    revalidatePath('/creator/profile')
+    revalidatePath('/admin')
+    return {}
+  } catch {
+    return { error: 'Failed to save profile' }
   }
 }
 

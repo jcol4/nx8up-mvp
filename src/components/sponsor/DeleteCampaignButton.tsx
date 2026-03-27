@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import SecondaryButton from '@/components/ui/SecondaryButton'
 import { deleteCampaign } from '@/app/sponsor/campaigns/_actions'
 
 type Props = {
@@ -41,28 +40,25 @@ export default function DeleteCampaignButton({ id }: Props) {
   }
 
   return (
-    <div className="flex flex-col items-end gap-2 text-xs">
-      <p className="dash-text-muted max-w-xs text-right">
-        This will permanently delete this campaign and all of its applications. This action cannot be undone.
-      </p>
-      <div className="flex gap-2">
-        <SecondaryButton
-          variant="danger"
-          className="w-auto px-3 py-1.5"
-          onClick={handleDelete}
-          disabled={isPending}
-        >
-          {isPending ? 'Deleting…' : 'Confirm delete'}
-        </SecondaryButton>
-        <SecondaryButton
-          className="w-auto px-3 py-1.5"
-          onClick={() => setIsConfirming(false)}
-          disabled={isPending}
-        >
-          Cancel
-        </SecondaryButton>
-      </div>
-      {error && <p className="text-red-400 mt-1">{error}</p>}
+    <div className="flex items-center gap-2 text-xs">
+      <span className="dash-text-muted">Delete?</span>
+      <button
+        type="button"
+        onClick={handleDelete}
+        disabled={isPending}
+        className="text-red-400 hover:text-red-300 font-medium disabled:opacity-50"
+      >
+        {isPending ? 'Deleting…' : 'Yes'}
+      </button>
+      <button
+        type="button"
+        onClick={() => { setIsConfirming(false); setError('') }}
+        disabled={isPending}
+        className="dash-text-muted hover:text-[#c8dff0] transition-colors"
+      >
+        No
+      </button>
+      {error && <span className="text-red-400">{error}</span>}
     </div>
   )
 }

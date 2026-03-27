@@ -16,7 +16,7 @@ type Application = {
     id: string
     title: string
     budget: number | null
-    deadline: Date | null
+    end_date: Date | null
     sponsor: { company_name: string | null }
   }
 }
@@ -91,9 +91,9 @@ export default function DealsAndCampaignsSection({ applications }: Props) {
                   >
                     {app.status === 'accepted' ? 'Accepted' : 'Pending review'}
                   </span>
-                  {app.campaign.deadline && (
+                  {app.campaign.end_date && (
                     <span className="text-[10px] cr-text-muted">
-                      Due {new Date(app.campaign.deadline).toLocaleDateString(undefined, {
+                      Due {new Date(app.campaign.end_date!).toLocaleDateString(undefined, {
                         month: 'short',
                         day: 'numeric',
                       })}

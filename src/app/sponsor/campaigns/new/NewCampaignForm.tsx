@@ -2,475 +2,226 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { createCampaign } from './_actions'
-import { DEFAULT_CONTENT_CATEGORIES } from '@/lib/creator-profile'
-import Alert from '@/components/ui/Alert'
-import FormInput from '@/components/ui/FormInput'
-import FormTextarea from '@/components/ui/FormTextarea'
+import { createCampaign, saveCampaignDraft } from './_actions'
+import { EMPTY_DRAFT, STEP_LABELS, type CampaignDraft } from './_shared'
+import Step1Basics from './steps/Step1Basics'
+import Step2Audience from './steps/Step2Audience'
+import Step3Creators from './steps/Step3Creators'
+import Step4Budget from './steps/Step4Budget'
+import Step5Content from './steps/Step5Content'
+import Step6Tracking from './steps/Step6Tracking'
+import Step7Review from './steps/Step7Review'
 
-const labelClass = 'block text-sm font-medium dash-text-muted mb-1.5'
-const sectionClass = 'space-y-4 pb-5 border-b dash-border'
-const sectionTitle = 'text-xs font-semibold uppercase tracking-widest dash-text-muted mb-3'
+const TOTAL_STEPS = 7
 
-const PLATFORMS = ['Twitch', 'YouTube', 'TikTok', 'Instagram', 'Other'] as const
+type Props = {
+  initialDraft?: CampaignDraft
+  editingId?: string
+}
 
-const OBJECTIVES = [
-  { value: 'awareness', label: 'Awareness' },
-  { value: 'engagement', label: 'Engagement' },
-  { value: 'traffic', label: 'Traffic' },
-  { value: 'conversions', label: 'Conversions' },
-] as const
+function validateStep(step: number, draft: CampaignDraft): string {
+  switch (step) {
+    case 1:
+      if (!draft.title.trim()) return 'Campaign name is required.'
+      if (!draft.product_type) return 'Product type is required.'
+      if (!draft.objective) return 'Campaign goal is required.'
+      if (!draft.platform.length) return 'Select at least one platform.'
+      return ''
+    case 4:
+      if (!draft.budget || parseInt(draft.budget, 10) <= 0) return 'A budget greater than $0 is required.'
+      if (!draft.creator_count || parseInt(draft.creator_count, 10) <= 0) return 'Number of creators is required.'
+      if (!draft.start_date) return 'Start date is required.'
+      if (!draft.end_date) return 'End date is required.'
+      if (draft.start_date >= draft.end_date) return 'End date must be after start date.'
+      return ''
+    case 5:
+      if (!draft.campaign_type) return 'Campaign type / mission is required.'
+      return ''
+    default:
+      return ''
+  }
+}
 
-const CAMPAIGN_TYPES = [
-  { value: 'one_time', label: 'One-time' },
-  { value: 'ongoing', label: 'Ongoing' },
-  { value: 'milestone_based', label: 'Milestone-based' },
-] as const
-
-const PAYMENT_MODELS = [
-  { value: 'fixed_per_creator', label: 'Fixed per creator' },
-  { value: 'performance_based', label: 'Performance-based' },
-  { value: 'hybrid', label: 'Hybrid' },
-] as const
-
-const AUDIENCE_LOCATION_OPTIONS = [
-  'United States', 'Canada', 'United Kingdom', 'Australia', 'Germany',
-  'France', 'Spain', 'Mexico', 'Brazil', 'Japan', 'South Korea', 'India',
-  'Philippines', 'Indonesia', 'Netherlands', 'Sweden', 'Other',
-] as const
-
-export default function NewCampaignForm() {
+export default function NewCampaignForm({ initialDraft, editingId }: Props) {
   const router = useRouter()
-  const [title, setTitle] = useState('')
-  const [brandName, setBrandName] = useState('')
-  const [objective, setObjective] = useState('')
-  const [campaignType, setCampaignType] = useState('')
-  const [paymentModel, setPaymentModel] = useState('')
-  const [budget, setBudget] = useState('')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const [description, setDescription] = useState('')
-  const [platform, setPlatform] = useState<string[]>([])
-  const [contentType, setContentType] = useState<string[]>([])
-  const [gameTagInput, setGameTagInput] = useState('')
-  const [gameCategory, setGameCategory] = useState<string[]>([])
-  const [minFollowers, setMinFollowers] = useState('')
-  const [minAvgViewers, setMinAvgViewers] = useState('')
-  const [minAudienceAge, setMinAudienceAge] = useState('')
-  const [maxAudienceAge, setMaxAudienceAge] = useState('')
-  const [requiredLocations, setRequiredLocations] = useState<string[]>([])
+  const [step, setStep] = useState(1)
+  const [draft, setDraft] = useState<CampaignDraft>(initialDraft ?? EMPTY_DRAFT)
+  const [stepError, setStepError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState('')
+  const [isSavingDraft, setIsSavingDraft] = useState(false)
+  const [draftSaved, setDraftSaved] = useState(false)
+  const [draftId, setDraftId] = useState<string | null>(editingId ?? null)
 
-  const togglePlatform = (p: string) =>
-    setPlatform((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]))
-
-  const toggleContentType = (cat: string) =>
-    setContentType((prev) => (prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]))
-
-  const addGameTag = () => {
-    const t = gameTagInput.trim()
-    if (t && !gameCategory.includes(t)) {
-      setGameCategory((prev) => [...prev, t])
-      setGameTagInput('')
-    }
+  const goNext = () => {
+    const err = validateStep(step, draft)
+    if (err) { setStepError(err); return }
+    setStepError('')
+    setStep(s => Math.min(s + 1, TOTAL_STEPS))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const removeGameTag = (t: string) =>
-    setGameCategory((prev) => prev.filter((x) => x !== t))
+  const goBack = () => {
+    setStepError('')
+    setStep(s => Math.max(s - 1, 1))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
+  const buildFormData = () => {
+    const fd = new FormData()
+    if (draftId) fd.set('draft_id', draftId)
+    fd.set('title', draft.title)
+    fd.set('brand_name', draft.brand_name)
+    fd.set('product_name', draft.product_name)
+    fd.set('product_type', draft.product_type)
+    fd.set('objective', draft.objective)
+    fd.set('platform', JSON.stringify(draft.platform))
+    fd.set('target_age_ranges', JSON.stringify(draft.target_age_ranges))
+    fd.set('target_genders', JSON.stringify(draft.target_genders))
+    fd.set('required_audience_locations', JSON.stringify(draft.required_audience_locations))
+    fd.set('target_cities', draft.target_cities)
+    fd.set('target_interests', JSON.stringify(draft.target_interests))
+    fd.set('creator_types', JSON.stringify(draft.creator_types))
+    fd.set('creator_sizes', JSON.stringify(draft.creator_sizes))
+    fd.set('min_subs_followers', draft.min_subs_followers)
+    fd.set('min_engagement_rate', draft.min_engagement_rate)
+    fd.set('budget', draft.budget)
+    fd.set('creator_count', draft.creator_count)
+    fd.set('payment_model', draft.payment_model)
+    fd.set('start_date', draft.start_date)
+    fd.set('end_date', draft.end_date)
+    fd.set('campaign_type', draft.campaign_type)
+    fd.set('num_videos', draft.num_videos)
+    fd.set('video_includes', JSON.stringify(draft.video_includes))
+    fd.set('num_streams', draft.num_streams)
+    fd.set('min_stream_duration', draft.min_stream_duration)
+    fd.set('num_posts', draft.num_posts)
+    fd.set('num_short_videos', draft.num_short_videos)
+    fd.set('content_guidelines', draft.content_guidelines)
+    fd.set('must_include_link', String(draft.must_include_link))
+    fd.set('must_include_promo_code', String(draft.must_include_promo_code))
+    fd.set('must_tag_brand', String(draft.must_tag_brand))
+    fd.set('landing_page_url', draft.landing_page_url)
+    fd.set('tracking_type', draft.tracking_type)
+    fd.set('conversion_goal', draft.conversion_goal)
+    return fd
+  }
+
+  const handleSaveDraft = async () => {
+    setIsSavingDraft(true)
+    setDraftSaved(false)
+    const res = await saveCampaignDraft(buildFormData())
+    setIsSavingDraft(false)
+    if (res.error) { setStepError(res.error); return }
+    if (res.id) setDraftId(res.id)
+    setDraftSaved(true)
+    setTimeout(() => router.push('/sponsor/campaigns'), 800)
+  }
+
+  const handleSubmit = async () => {
+    setStepError('')
     setIsSubmitting(true)
-    const formData = new FormData()
-    formData.set('title', title.trim())
-    formData.set('brand_name', brandName.trim())
-    formData.set('objective', objective)
-    formData.set('campaign_type', campaignType)
-    formData.set('payment_model', paymentModel)
-    formData.set('budget', budget.trim())
-    formData.set('start_date', startDate)
-    formData.set('end_date', endDate)
-    formData.set('description', description.trim())
-    formData.set('platform', JSON.stringify(platform))
-    formData.set('content_type', JSON.stringify(contentType))
-    formData.set('game_category', JSON.stringify(gameCategory))
-    formData.set('min_subs_followers', minFollowers.trim())
-    formData.set('min_avg_viewers', minAvgViewers.trim())
-    formData.set('min_audience_age', minAudienceAge.trim())
-    formData.set('max_audience_age', maxAudienceAge.trim())
-    formData.set('required_audience_locations', JSON.stringify(requiredLocations))
-
-    const res = await createCampaign(formData)
+    const res = await createCampaign(buildFormData())
     setIsSubmitting(false)
-    if (res.error) {
-      setError(res.error)
-      return
-    }
+    if (res.error) { setStepError(res.error); return }
     router.push('/sponsor/campaigns')
   }
 
-  const selectClass = 'w-full px-3 py-2 rounded-lg text-sm dash-border border dash-text-muted dash-bg-inner bg-transparent focus:outline-none focus:border-[#00c8ff]/50 transition-colors'
+  const stepProps = { draft, setDraft }
 
   return (
-    <div className="dash-panel p-6">
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {error && <Alert variant="error">{error}</Alert>}
-
-        {/* Campaign Identity */}
-        <div className={sectionClass}>
-          <p className={sectionTitle}>Campaign Identity</p>
-
-          <div>
-            <label htmlFor="campaign-title" className={labelClass}>
-              Campaign name <span className="text-[#00c8ff]">*</span>
-            </label>
-            <FormInput
-              id="campaign-title"
-              type="text"
-              variant="dashboard"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Summer Launch, Product Review"
-              maxLength={80}
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="brand-name" className={labelClass}>
-              Brand / Company name <span className="text-[#00c8ff]">*</span>
-            </label>
-            <FormInput
-              id="brand-name"
-              type="text"
-              variant="dashboard"
-              value={brandName}
-              onChange={(e) => setBrandName(e.target.value)}
-              placeholder="e.g. Acme Corp"
-              maxLength={100}
-              required
-            />
-          </div>
-        </div>
-
-        {/* Campaign Configuration */}
-        <div className={sectionClass}>
-          <p className={sectionTitle}>Campaign Configuration</p>
-
-          <div>
-            <label htmlFor="objective" className={labelClass}>
-              Campaign objective <span className="text-[#00c8ff]">*</span>
-            </label>
-            <select
-              id="objective"
-              value={objective}
-              onChange={(e) => setObjective(e.target.value)}
-              required
-              className={selectClass}
-            >
-              <option value="">Select objective</option>
-              {OBJECTIVES.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="campaign-type" className={labelClass}>
-                Campaign type <span className="text-[#00c8ff]">*</span>
-              </label>
-              <select
-                id="campaign-type"
-                value={campaignType}
-                onChange={(e) => setCampaignType(e.target.value)}
-                required
-                className={selectClass}
-              >
-                <option value="">Select type</option>
-                {CAMPAIGN_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="payment-model" className={labelClass}>
-                Payment model <span className="text-[#00c8ff]">*</span>
-              </label>
-              <select
-                id="payment-model"
-                value={paymentModel}
-                onChange={(e) => setPaymentModel(e.target.value)}
-                required
-                className={selectClass}
-              >
-                <option value="">Select model</option>
-                {PAYMENT_MODELS.map((m) => (
-                  <option key={m.value} value={m.value}>{m.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Budget & Timeline */}
-        <div className={sectionClass}>
-          <p className={sectionTitle}>Budget &amp; Timeline</p>
-
-          <div>
-            <label htmlFor="campaign-budget" className={labelClass}>
-              Total budget (USD) <span className="text-[#00c8ff]">*</span>
-            </label>
-            <FormInput
-              id="campaign-budget"
-              type="number"
-              inputMode="numeric"
-              variant="dashboard"
-              value={budget}
-              onChange={(e) => setBudget(e.target.value.replace(/[^\d]/g, ''))}
-              placeholder="e.g. 5000"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="start-date" className={labelClass}>
-                Start date <span className="text-[#00c8ff]">*</span>
-              </label>
-              <FormInput
-                id="start-date"
-                type="date"
-                variant="dashboard"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="end-date" className={labelClass}>
-                End date <span className="text-[#00c8ff]">*</span>
-              </label>
-              <FormInput
-                id="end-date"
-                type="date"
-                variant="dashboard"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Additional Details */}
-        <div className={sectionClass}>
-          <p className={sectionTitle}>Additional details <span className="normal-case font-normal">(optional)</span></p>
-
-          <div>
-            <label htmlFor="campaign-desc" className={labelClass}>Description</label>
-            <FormTextarea
-              id="campaign-desc"
-              variant="dashboard"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="What should creators do? Include deliverables, timeline..."
-              maxLength={500}
-              rows={3}
-            />
-          </div>
-
-          <div>
-            <label className={labelClass}>Platform</label>
-            <div className="flex flex-wrap gap-2">
-              {PLATFORMS.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => togglePlatform(p)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    platform.includes(p)
-                      ? 'bg-[#00c8ff] text-black'
-                      : 'dash-border border dash-text-muted hover:text-[#c8dff0]'
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className={labelClass}>Content type</label>
-            <div className="flex flex-wrap gap-2">
-              {DEFAULT_CONTENT_CATEGORIES.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => toggleContentType(cat)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    contentType.includes(cat)
-                      ? 'bg-[#00c8ff] text-black'
-                      : 'dash-border border dash-text-muted hover:text-[#c8dff0]'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className={labelClass}>Game / genre tags</label>
-            <div className="flex gap-2 flex-wrap items-center">
-              <FormInput
-                type="text"
-                variant="dashboard"
-                value={gameTagInput}
-                onChange={(e) => setGameTagInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addGameTag())}
-                placeholder="e.g. Valorant, FPS"
-                className="flex-1 min-w-[120px]"
-              />
-              <button
-                type="button"
-                onClick={addGameTag}
-                className="px-3 py-1.5 rounded-lg text-sm font-medium dash-border border dash-text-muted hover:text-[#c8dff0] transition-colors"
-              >
-                Add
-              </button>
-            </div>
-            {gameCategory.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {gameCategory.map((t) => (
-                  <span
-                    key={t}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#00c8ff]/20 text-[#00c8ff] text-sm"
-                  >
-                    {t}
-                    <button
-                      type="button"
-                      onClick={() => removeGameTag(t)}
-                      className="hover:opacity-80"
-                      aria-label={`Remove ${t}`}
-                    >
-                      ×
-                    </button>
+    <div className="space-y-6">
+      {/* Step progress bar */}
+      <div className="dash-panel p-4">
+        <div className="flex items-center justify-between">
+          {STEP_LABELS.map((label, i) => {
+            const n = i + 1
+            const isActive = n === step
+            const isDone = n < step
+            return (
+              <div key={n} className="flex items-center flex-1 last:flex-none">
+                <div className="flex flex-col items-center gap-1">
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                    isActive
+                      ? 'bg-[#00c8ff] text-black shadow-[0_0_12px_rgba(0,200,255,0.5)]'
+                      : isDone
+                        ? 'bg-[rgba(0,200,255,0.2)] text-[#00c8ff] border border-[rgba(0,200,255,0.4)]'
+                        : 'bg-white/5 text-[#2a3f55] border border-white/10'
+                  }`}>
+                    {isDone ? (
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path d="M2 6l3 3 5-5" stroke="#00c8ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    ) : n}
+                  </div>
+                  <span className={`text-[10px] font-medium hidden sm:block ${
+                    isActive ? 'text-[#00c8ff]' : isDone ? 'text-[#3a5570]' : 'text-[#2a3f55]'
+                  }`}>
+                    {label}
                   </span>
-                ))}
+                </div>
+                {n < TOTAL_STEPS && (
+                  <div className={`flex-1 h-px mx-1.5 mb-4 transition-all ${
+                    isDone ? 'bg-[rgba(0,200,255,0.35)]' : 'bg-white/5'
+                  }`} />
+                )}
               </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="campaign-followers" className={labelClass}>Min. followers</label>
-              <FormInput
-                id="campaign-followers"
-                type="text"
-                inputMode="numeric"
-                variant="dashboard"
-                value={minFollowers}
-                onChange={(e) => setMinFollowers(e.target.value)}
-                placeholder="e.g. 1000"
-              />
-            </div>
-            <div>
-              <label htmlFor="campaign-avg-viewers" className={labelClass}>Min. avg VOD views</label>
-              <FormInput
-                id="campaign-avg-viewers"
-                type="text"
-                inputMode="numeric"
-                variant="dashboard"
-                value={minAvgViewers}
-                onChange={(e) => setMinAvgViewers(e.target.value)}
-                placeholder="e.g. 500"
-              />
-            </div>
-          </div>
+            )
+          })}
         </div>
+      </div>
 
-        {/* Audience Targeting */}
-        <div className="space-y-4">
-          <p className={sectionTitle}>Audience targeting <span className="normal-case font-normal">(optional)</span></p>
-
-          <div>
-            <label className={labelClass}>Target audience age range</label>
-            <p className="text-xs dash-text-muted mb-2">
-              Only creators whose audience age overlaps this range will be eligible.
-            </p>
-            <div className="flex items-center gap-3">
-              <FormInput
-                type="text"
-                inputMode="numeric"
-                variant="dashboard"
-                value={minAudienceAge}
-                onChange={(e) => setMinAudienceAge(e.target.value.replace(/[^\d]/g, ''))}
-                placeholder="Min age"
-                className="w-28"
-              />
-              <span className="dash-text-muted text-sm shrink-0">to</span>
-              <FormInput
-                type="text"
-                inputMode="numeric"
-                variant="dashboard"
-                value={maxAudienceAge}
-                onChange={(e) => setMaxAudienceAge(e.target.value.replace(/[^\d]/g, ''))}
-                placeholder="Max age"
-                className="w-28"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className={labelClass}>Required audience locations</label>
-            <p className="text-xs dash-text-muted mb-2">
-              Creators must have audiences in at least one of the selected regions.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {AUDIENCE_LOCATION_OPTIONS.map((loc) => (
-                <button
-                  key={loc}
-                  type="button"
-                  onClick={() =>
-                    setRequiredLocations((prev) =>
-                      prev.includes(loc) ? prev.filter((x) => x !== loc) : [...prev, loc]
-                    )
-                  }
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    requiredLocations.includes(loc)
-                      ? 'bg-[#00c8ff] text-black'
-                      : 'dash-border border dash-text-muted hover:text-[#c8dff0]'
-                  }`}
-                >
-                  {loc}
-                </button>
-              ))}
-            </div>
-          </div>
+      {/* Step title + save draft */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-base font-semibold dash-text-bright">
+            Step {step} — {STEP_LABELS[step - 1]}
+          </h2>
+          <p className="text-xs dash-text-muted mt-0.5">{step} of {TOTAL_STEPS}</p>
         </div>
+        <button
+          type="button"
+          onClick={handleSaveDraft}
+          disabled={isSavingDraft || isSubmitting}
+          className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg border dash-border dash-text-muted text-xs font-medium hover:text-[#c8dff0] hover:border-[rgba(0,200,255,0.3)] transition-colors disabled:opacity-40"
+        >
+          {draftSaved ? (
+            <>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span className="text-[#22c55e]">Saved</span>
+            </>
+          ) : (
+            <>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2 2h6.5L10 3.5V10H2V2z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+                <path d="M4 2v3h4V2M4 7h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+              </svg>
+              {isSavingDraft ? 'Saving...' : 'Save Draft'}
+            </>
+          )}
+        </button>
+      </div>
 
-        <div className="flex gap-3 pt-2 border-t dash-border">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="py-2.5 px-5 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
-          >
-            {isSubmitting ? 'Saving...' : 'Save as Draft'}
-          </button>
-          <Link
-            href="/sponsor/campaigns"
-            className="py-2.5 px-5 rounded-lg dash-border border dash-text-muted text-sm font-medium hover:text-[#c8dff0] transition-colors"
-          >
-            Cancel
-          </Link>
-        </div>
-      </form>
+      {/* Step content */}
+      {/* Steps 1 & 4 need overflow:visible so dropdowns/calendars can escape the panel */}
+      <div className="dash-panel p-6" style={step === 1 || step === 4 ? { overflow: 'visible' } : undefined}>
+        {step === 1 && <Step1Basics {...stepProps} error={stepError} onNext={goNext} />}
+        {step === 2 && <Step2Audience {...stepProps} onNext={goNext} onBack={goBack} />}
+        {step === 3 && <Step3Creators {...stepProps} onNext={goNext} onBack={goBack} />}
+        {step === 4 && <Step4Budget {...stepProps} error={stepError} onNext={goNext} onBack={goBack} />}
+        {step === 5 && <Step5Content {...stepProps} error={stepError} onNext={goNext} onBack={goBack} />}
+        {step === 6 && <Step6Tracking {...stepProps} onNext={goNext} onBack={goBack} />}
+        {step === 7 && (
+          <Step7Review
+            draft={draft}
+            error={stepError}
+            isSubmitting={isSubmitting}
+            onSubmit={handleSubmit}
+            onBack={goBack}
+          />
+        )}
+      </div>
     </div>
   )
 }

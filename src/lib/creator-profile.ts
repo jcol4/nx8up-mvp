@@ -16,6 +16,18 @@ export type CreatorProfile = {
   audience_age_min?: number
   audience_age_max?: number
   audience_locations?: string[]
+  /** Creator identity */
+  creator_types?: string[]
+  primary_platform?: string
+  /** Content & audience tags */
+  content_style?: string[]
+  audience_interests?: string[]
+  /** Brand & campaign preferences */
+  preferred_campaign_types?: string[]
+  preferred_product_types?: string[]
+  /** Eligibility */
+  is_available?: boolean
+  max_campaigns_per_month?: number
 }
 
 export const DEFAULT_CONTENT_CATEGORIES = [
