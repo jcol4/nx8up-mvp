@@ -140,7 +140,7 @@ export default function YouTubeConnect({ initial }: YouTubeConnectProps) {
               </div>
             )}
 
-            <p className="yt-approx-note">⚠ Subscriber count may be rounded by YouTube for large channels</p>
+            <p className="yt-approx-note">Subscriber count may be approximate for large channels.</p>
 
             <div className="yt-actions">
               <button type="button" className="yt-btn yt-btn--unlink" onClick={handleUnlink} disabled={isUnlinking}>

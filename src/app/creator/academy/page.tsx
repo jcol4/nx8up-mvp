@@ -24,7 +24,7 @@ export default function AcademyPage() {
       <main className="max-w-3xl mx-auto p-6 sm:p-8">
         <Panel variant="creator" as="div" title="Academy" titleLevel={1}>
           <p className="text-sm cr-text-muted mb-6">
-            Step-by-step lessons to grow your creator business.
+            Structured modules to develop your creator business.
           </p>
           <div className="space-y-4">
             {LESSONS.map((lesson, i) => (
@@ -43,9 +43,9 @@ export default function AcademyPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium cr-text-bright">{lesson.title}</p>
-                    <p className="text-xs cr-text-muted mt-0.5">+ {lesson.category} · {lesson.duration}</p>
+                    <p className="text-xs cr-text-muted mt-0.5">{lesson.category} · {lesson.duration}</p>
                   </div>
-                  <span className="text-xs cr-accent self-center">Start →</span>
+                  <span className="text-xs cr-text-muted self-center">View</span>
                 </div>
               </Link>
             ))}

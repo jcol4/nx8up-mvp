@@ -21,7 +21,7 @@ export default function CreatorMissionsSection() {
   }
 
   return (
-    <Panel variant="creator" title="Today's Missions">
+    <Panel variant="creator" title="Active Objectives">
       <ul className="space-y-3 flex-1">
         {MISSIONS.map((m, i) => (
           <li
@@ -37,7 +37,7 @@ export default function CreatorMissionsSection() {
                   onClick={() => handleClaim(m.xp)}
                   className="text-xs px-2 py-0.5 rounded bg-[#00c8ff]/20 text-[#00c8ff] hover:bg-[#00c8ff]/30 font-medium"
                 >
-                  Claim
+                  Complete
                 </button>
               </div>
             </div>

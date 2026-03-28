@@ -125,6 +125,14 @@ export default function CreatorProfileWizard({
     scrollTop()
   }
 
+  // Jump directly to any already-completed step from the progress bar.
+  // Preserves returnToSummary if it was already set (e.g. navigating from summary).
+  const jumpToStep = (targetStep: number) => {
+    setStepError('')
+    setStep(targetStep)
+    scrollTop()
+  }
+
   const finish = () => router.push('/creator')
 
   const stepProps = { draft, setDraft }
@@ -138,23 +146,38 @@ export default function CreatorProfileWizard({
           {STEP_LABELS.map((label, i) => {
             const n = i + 1
             const isActive = n === step
-            const isDone = n < step || (isSummary && n < SUMMARY_STEP)
+            const isDone = n < step || (returnToSummary && n < SUMMARY_STEP)
+            const isClickable = !isActive && (isDone || returnToSummary)
+
+            const circle = (
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                isActive
+                  ? 'bg-[#00c8ff] text-black shadow-[0_0_12px_rgba(0,200,255,0.5)]'
+                  : isDone
+                    ? 'bg-[rgba(0,200,255,0.2)] text-[#00c8ff] border border-[rgba(0,200,255,0.4)]'
+                    : 'bg-white/5 text-[#2a3f55] border border-white/10'
+              }`}>
+                {isDone ? (
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M2 6l3 3 5-5" stroke="#00c8ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ) : n}
+              </div>
+            )
+
             return (
               <div key={n} className="flex items-center flex-1 last:flex-none">
                 <div className="flex flex-col items-center gap-1">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                    isActive
-                      ? 'bg-[#00c8ff] text-black shadow-[0_0_12px_rgba(0,200,255,0.5)]'
-                      : isDone
-                        ? 'bg-[rgba(0,200,255,0.2)] text-[#00c8ff] border border-[rgba(0,200,255,0.4)]'
-                        : 'bg-white/5 text-[#2a3f55] border border-white/10'
-                  }`}>
-                    {isDone ? (
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 6l3 3 5-5" stroke="#00c8ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    ) : n}
-                  </div>
+                  {isClickable ? (
+                    <button
+                      type="button"
+                      onClick={() => jumpToStep(n)}
+                      className="rounded-full hover:opacity-80 transition-opacity focus:outline-none"
+                      title={`Go to ${label}`}
+                    >
+                      {circle}
+                    </button>
+                  ) : circle}
                   <span className={`text-[10px] font-medium hidden sm:block ${
                     isActive ? 'text-[#00c8ff]' : isDone ? 'text-[#3a5570]' : 'text-[#2a3f55]'
                   }`}>
@@ -235,6 +258,9 @@ export default function CreatorProfileWizard({
         {step === 7 && (
           <Step7Summary
             draft={draft}
+            twitchInitial={twitchInitial}
+            youtubeInitial={youtubeInitial}
+            creatorStats={creatorStats}
             onEditStep={editStep}
             onFinish={finish}
           />

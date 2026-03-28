@@ -44,26 +44,38 @@ function validateStep(step: number, draft: CampaignDraft): string {
 
 export default function NewCampaignForm({ initialDraft, editingId }: Props) {
   const router = useRouter()
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(editingId ? TOTAL_STEPS : 1)
   const [draft, setDraft] = useState<CampaignDraft>(initialDraft ?? EMPTY_DRAFT)
   const [stepError, setStepError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSavingDraft, setIsSavingDraft] = useState(false)
   const [draftSaved, setDraftSaved] = useState(false)
   const [draftId, setDraftId] = useState<string | null>(editingId ?? null)
+  // Free navigation: true when editing a saved draft or after reaching the review step
+  const [freeNav, setFreeNav] = useState(!!editingId)
+
+  const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
   const goNext = () => {
     const err = validateStep(step, draft)
     if (err) { setStepError(err); return }
     setStepError('')
-    setStep(s => Math.min(s + 1, TOTAL_STEPS))
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    const next = Math.min(step + 1, TOTAL_STEPS)
+    if (next === TOTAL_STEPS) setFreeNav(true)
+    setStep(next)
+    scrollTop()
   }
 
   const goBack = () => {
     setStepError('')
     setStep(s => Math.max(s - 1, 1))
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    scrollTop()
+  }
+
+  const jumpToStep = (target: number) => {
+    setStepError('')
+    setStep(target)
+    scrollTop()
   }
 
   const buildFormData = () => {
@@ -75,7 +87,8 @@ export default function NewCampaignForm({ initialDraft, editingId }: Props) {
     fd.set('product_type', draft.product_type)
     fd.set('objective', draft.objective)
     fd.set('platform', JSON.stringify(draft.platform))
-    fd.set('target_age_ranges', JSON.stringify(draft.target_age_ranges))
+    fd.set('audience_age_min', draft.audience_age_min)
+    fd.set('audience_age_max', draft.audience_age_max)
     fd.set('target_genders', JSON.stringify(draft.target_genders))
     fd.set('required_audience_locations', JSON.stringify(draft.required_audience_locations))
     fd.set('target_cities', draft.target_cities)
@@ -136,23 +149,38 @@ export default function NewCampaignForm({ initialDraft, editingId }: Props) {
           {STEP_LABELS.map((label, i) => {
             const n = i + 1
             const isActive = n === step
-            const isDone = n < step
+            const isDone = n < step || (freeNav && n < TOTAL_STEPS)
+            const isClickable = !isActive && (isDone || freeNav)
+
+            const circle = (
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                isActive
+                  ? 'bg-[#00c8ff] text-black shadow-[0_0_12px_rgba(0,200,255,0.5)]'
+                  : isDone
+                    ? 'bg-[rgba(0,200,255,0.2)] text-[#00c8ff] border border-[rgba(0,200,255,0.4)]'
+                    : 'bg-white/5 text-[#2a3f55] border border-white/10'
+              }`}>
+                {isDone ? (
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M2 6l3 3 5-5" stroke="#00c8ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ) : n}
+              </div>
+            )
+
             return (
               <div key={n} className="flex items-center flex-1 last:flex-none">
                 <div className="flex flex-col items-center gap-1">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                    isActive
-                      ? 'bg-[#00c8ff] text-black shadow-[0_0_12px_rgba(0,200,255,0.5)]'
-                      : isDone
-                        ? 'bg-[rgba(0,200,255,0.2)] text-[#00c8ff] border border-[rgba(0,200,255,0.4)]'
-                        : 'bg-white/5 text-[#2a3f55] border border-white/10'
-                  }`}>
-                    {isDone ? (
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 6l3 3 5-5" stroke="#00c8ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    ) : n}
-                  </div>
+                  {isClickable ? (
+                    <button
+                      type="button"
+                      onClick={() => jumpToStep(n)}
+                      className="rounded-full hover:opacity-80 transition-opacity focus:outline-none"
+                      title={`Go to ${label}`}
+                    >
+                      {circle}
+                    </button>
+                  ) : circle}
                   <span className={`text-[10px] font-medium hidden sm:block ${
                     isActive ? 'text-[#00c8ff]' : isDone ? 'text-[#3a5570]' : 'text-[#2a3f55]'
                   }`}>

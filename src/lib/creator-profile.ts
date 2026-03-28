@@ -16,6 +16,7 @@ export type CreatorProfile = {
   audience_age_min?: number
   audience_age_max?: number
   audience_locations?: string[]
+  audience_gender?: string[]
   /** Creator identity */
   creator_types?: string[]
   primary_platform?: string

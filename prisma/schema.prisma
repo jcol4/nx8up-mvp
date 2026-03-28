@@ -45,18 +45,20 @@ model content_creators {
   youtube_refresh_token    String?
   youtube_token_expires_at DateTime?               @db.Timestamptz(6)
   youtube_watch_time_hours Int?
-  youtube_member_count     Int?
   audience_age_min         Int?
   audience_age_max         Int?
   audience_locations       String[]
+  youtube_member_count     Int?
   creator_types            String[]
   content_style            String[]
   audience_interests       String[]
   preferred_campaign_types String[]
   preferred_product_types  String[]
   primary_platform         String?
-  is_available             Boolean  @default(true)
+  is_available             Boolean                 @default(true)
   max_campaigns_per_month  Int?
+  audience_gender          String[]
+  creator_size             String?
   applications             campaign_applications[]
 
   @@index([average_vod_views])
@@ -114,43 +116,38 @@ model admins {
 
 model campaigns {
   id                          String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  campaign_code               String?                 @unique
   sponsor_id                  String                  @db.Uuid
   title                       String
-  brand_name                  String?
   description                 String?
-  objective                   String?
-  campaign_type               String?
   status                      String                  @default("draft")
   budget                      Int?
-  payment_model               String?
   platform                    String[]
   content_type                String[]
   game_category               String[]
   min_avg_viewers             Int?
   min_subs_followers          Int?
   min_engagement_rate         Decimal?                @db.Decimal(5, 2)
+  creative_package            String[]
+  created_at                  DateTime?               @default(now()) @db.Timestamptz(6)
+  updated_at                  DateTime?               @default(now()) @db.Timestamptz(6)
   min_audience_age            Int?
   max_audience_age            Int?
   required_audience_locations String[]
-  creative_package            String[]
+  campaign_code               String?                 @unique
+  brand_name                  String?
+  objective                   String?
+  campaign_type               String?
+  payment_model               String?
   start_date                  DateTime?               @db.Timestamptz(6)
   end_date                    DateTime?               @db.Timestamptz(6)
-  created_at                  DateTime?               @default(now()) @db.Timestamptz(6)
-  updated_at                  DateTime?               @default(now()) @db.Timestamptz(6)
-  // Wizard fields — Screen 1
   product_name                String?
   product_type                String?
-  // Wizard fields — Screen 2 (audience)
-  target_age_ranges           String[]
   target_genders              String[]
   target_cities               String?
   target_interests            String[]
-  // Wizard fields — Screen 3 (creator mix)
   creator_types               String[]
   creator_sizes               String[]
   creator_count               Int?
-  // Wizard fields — Screen 5 (deliverables)
   num_videos                  Int?
   video_includes              String[]
   num_streams                 Int?
@@ -161,7 +158,6 @@ model campaigns {
   must_include_link           Boolean                 @default(false)
   must_include_promo_code     Boolean                 @default(false)
   must_tag_brand              Boolean                 @default(false)
-  // Wizard fields — Screen 6 (tracking)
   landing_page_url            String?
   tracking_type               String?
   conversion_goal             String?
@@ -182,13 +178,12 @@ model campaign_applications {
   campaign_id            String           @db.Uuid
   creator_id             String           @db.Uuid
   status                 String           @default("pending")
-  message                String?          // Application pitch / why they're a good fit
-  // Application-specific audience overrides (auto-filled from profile, editable per application)
+  message                String?
+  submitted_at           DateTime?        @default(now()) @db.Timestamptz(6)
   app_audience_age_min   Int?
   app_audience_age_max   Int?
   app_audience_locations String[]
-  app_location           String?          // Creator location override for this application
-  submitted_at           DateTime?        @default(now()) @db.Timestamptz(6)
+  app_location           String?
   campaign               campaigns        @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
   creator                content_creators @relation(fields: [creator_id], references: [id], onDelete: Cascade)
 

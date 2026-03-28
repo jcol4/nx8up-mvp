@@ -15,6 +15,15 @@ const CREATOR_MATCHING_SELECT = {
   audience_age_min: true,
   audience_age_max: true,
   audience_locations: true,
+  audience_gender: true,
+  audience_interests: true,
+  creator_types: true,
+  creator_size: true,
+  game_category: true,
+  content_type: true,
+  preferred_campaign_types: true,
+  preferred_product_types: true,
+  is_available: true,
 } as const
 
 export async function getOpenCampaigns(limit = 10) {
@@ -51,9 +60,9 @@ export async function getOpenCampaignsWithEligibility(limit = 50) {
   ])
 
   return campaigns.map((campaign) => {
-    if (!creator) return { campaign, eligible: true, reasons: [] as string[] }
-    const { eligible, reasons } = matchCreatorToCampaign(creator, campaign)
-    return { campaign, eligible, reasons }
+    if (!creator) return { campaign, eligible: true, score: 100, reasons: [] as string[], notes: [] as string[] }
+    const { eligible, score, reasons, notes } = matchCreatorToCampaign(creator, campaign)
+    return { campaign, eligible, score, reasons, notes }
   })
 }
 
@@ -113,13 +122,21 @@ export async function applyToCampaign(
       min_audience_age: true,
       max_audience_age: true,
       required_audience_locations: true,
+      target_genders: true,
+      target_interests: true,
+      creator_types: true,
+      creator_sizes: true,
+      game_category: true,
+      content_type: true,
+      campaign_type: true,
+      product_type: true,
     },
   })
   if (!campaign) return { error: 'Campaign not found.' }
 
   const { eligible, reasons } = matchCreatorToCampaign(creator, campaign)
   if (!eligible) {
-    return { error: `You do not meet this campaign's requirements: ${reasons.join('; ')}` }
+    return { error: `Requirements not met: ${reasons.join('; ')}` }
   }
 
   const existing = await prisma.campaign_applications.findUnique({

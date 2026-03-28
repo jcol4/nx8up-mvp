@@ -77,7 +77,8 @@ export async function saveCampaignDraft(formData: FormData): Promise<CreateCampa
     end_date: start_date && end_date && start_date < end_date ? end_date : null,
     platform: parseStringArray(formData.get('platform') as string | null),
     game_category: parseStringArray(formData.get('target_interests') as string | null),
-    target_age_ranges: parseStringArray(formData.get('target_age_ranges') as string | null),
+    min_audience_age: parseOptionalInt(formData.get('audience_age_min') as string | null),
+    max_audience_age: parseOptionalInt(formData.get('audience_age_max') as string | null),
     target_genders: parseStringArray(formData.get('target_genders') as string | null),
     required_audience_locations: parseStringArray(formData.get('required_audience_locations') as string | null),
     target_cities: (formData.get('target_cities') as string | null)?.trim() || null,
@@ -204,7 +205,8 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
   const num_posts = parseOptionalInt(formData.get('num_posts') as string | null)
   const num_short_videos = parseOptionalInt(formData.get('num_short_videos') as string | null)
 
-  const target_age_ranges = parseStringArray(formData.get('target_age_ranges') as string | null)
+  const min_audience_age = parseOptionalInt(formData.get('audience_age_min') as string | null)
+  const max_audience_age = parseOptionalInt(formData.get('audience_age_max') as string | null)
   const target_genders = parseStringArray(formData.get('target_genders') as string | null)
   const required_audience_locations = parseStringArray(formData.get('required_audience_locations') as string | null)
   const target_interests = parseStringArray(formData.get('target_interests') as string | null)
@@ -229,7 +231,8 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
     end_date,
     platform,
     game_category: target_interests,
-    target_age_ranges,
+    min_audience_age,
+    max_audience_age,
     target_genders,
     required_audience_locations,
     target_cities,

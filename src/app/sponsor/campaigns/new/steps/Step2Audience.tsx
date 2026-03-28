@@ -5,8 +5,63 @@ import FormInput from '@/components/ui/FormInput'
 import type { CampaignDraft } from '../_shared'
 import {
   labelClass, sectionClass, sectionTitle, toggleBtn,
-  AGE_RANGES, GENDERS, AUDIENCE_LOCATIONS,
+  GENDERS, AUDIENCE_LOCATIONS,
 } from '../_shared'
+
+function AgeStepper({
+  value,
+  onChange,
+  min = 13,
+  max = 100,
+  placeholder,
+}: {
+  value: string
+  onChange: (val: string) => void
+  min?: number
+  max?: number
+  placeholder: string
+}) {
+  const num = parseInt(value, 10)
+  const decrement = () => {
+    if (!value) { onChange(String(max)); return }
+    if (num > min) onChange(String(num - 1))
+  }
+  const increment = () => {
+    if (!value) { onChange(String(min)); return }
+    if (num < max) onChange(String(num + 1))
+  }
+  const btnClass =
+    'w-8 h-8 flex items-center justify-center rounded-lg border dash-border dash-text-muted hover:text-[#c8dff0] hover:border-[rgba(0,200,255,0.35)] hover:bg-[rgba(0,200,255,0.05)] transition-all select-none shrink-0'
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <button type="button" onClick={decrement} className={btnClass} aria-label="Decrease">
+        <svg width="10" height="2" viewBox="0 0 10 2" fill="none">
+          <path d="M1 1h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      </button>
+      <input
+        type="number"
+        value={value}
+        onChange={e => {
+          const v = e.target.value
+          if (v === '') { onChange(''); return }
+          const n = parseInt(v, 10)
+          if (!isNaN(n) && n >= min && n <= max) onChange(String(n))
+        }}
+        placeholder={placeholder}
+        min={min}
+        max={max}
+        className="w-14 text-center px-2 py-1.5 rounded-lg border dash-border dash-bg-inner dash-text text-sm focus:outline-none focus:ring-1 focus:ring-[#00c8ff]/50 hover:border-[rgba(0,200,255,0.3)] transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+      />
+      <button type="button" onClick={increment} className={btnClass} aria-label="Increase">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <path d="M5 1v8M1 5h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      </button>
+    </div>
+  )
+}
 
 type Props = {
   draft: CampaignDraft
@@ -18,7 +73,7 @@ type Props = {
 export default function Step2Audience({ draft, setDraft, onNext, onBack }: Props) {
   const [interestInput, setInterestInput] = useState('')
 
-  const toggle = <K extends 'target_age_ranges' | 'target_genders' | 'required_audience_locations' | 'target_interests'>(
+  const toggle = <K extends 'target_genders' | 'required_audience_locations' | 'target_interests'>(
     key: K,
     val: string
   ) => setDraft(prev => ({
@@ -43,14 +98,21 @@ export default function Step2Audience({ draft, setDraft, onNext, onBack }: Props
         <p className={sectionTitle}>Who are you trying to reach?</p>
 
         <div>
-          <label className={labelClass}>Age range</label>
-          <div className="flex flex-wrap gap-2">
-            {AGE_RANGES.map(r => (
-              <button key={r} type="button" onClick={() => toggle('target_age_ranges', r)} className={toggleBtn(draft.target_age_ranges.includes(r))}>
-                {r}
-              </button>
-            ))}
+          <label className={labelClass}>Audience age range</label>
+          <div className="flex items-center gap-3">
+            <AgeStepper
+              value={draft.audience_age_min}
+              onChange={val => setDraft(prev => ({ ...prev, audience_age_min: val }))}
+              placeholder="Min"
+            />
+            <span className="dash-text-muted text-sm">to</span>
+            <AgeStepper
+              value={draft.audience_age_max}
+              onChange={val => setDraft(prev => ({ ...prev, audience_age_max: val }))}
+              placeholder="Max"
+            />
           </div>
+          <p className="text-xs dash-text-muted mt-1.5">Ages 13 – 100</p>
         </div>
 
         <div>
@@ -133,18 +195,14 @@ export default function Step2Audience({ draft, setDraft, onNext, onBack }: Props
             Add
           </button>
         </div>
-
-        <p className="text-xs dash-text-muted">
-          Examples: FPS gaming · esports · casual gaming · fitness · streetwear
-        </p>
       </div>
 
       <div className="flex justify-between pt-2 border-t dash-border">
         <button type="button" onClick={onBack} className="py-2.5 px-5 rounded-lg border dash-border dash-text-muted text-sm font-medium hover:text-[#c8dff0] transition-colors">
-          ← Back
+          Back
         </button>
         <button type="button" onClick={onNext} className="py-2.5 px-6 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 transition-opacity">
-          Next →
+          Next
         </button>
       </div>
     </div>

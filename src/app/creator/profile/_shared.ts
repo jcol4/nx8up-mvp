@@ -14,6 +14,7 @@ export type CreatorProfileDraft = {
   content_style: string[]
   content_type: string[]
   audience_interests: string[]
+  audience_gender: string[]
   audience_age_min: string
   audience_age_max: string
   audience_locations: string[]
@@ -39,6 +40,7 @@ export const EMPTY_DRAFT: CreatorProfileDraft = {
   content_style: [],
   content_type: [],
   audience_interests: [],
+  audience_gender: [],
   audience_age_min: '',
   audience_age_max: '',
   audience_locations: [],
@@ -89,6 +91,8 @@ export const CONTENT_CATEGORY_OPTIONS = [
   'Sports',
   'Other',
 ]
+
+export const AUDIENCE_GENDER_OPTIONS = ['Male', 'Female', 'Mixed'] as const
 
 export const AUDIENCE_LOCATION_OPTIONS = [
   'United States',

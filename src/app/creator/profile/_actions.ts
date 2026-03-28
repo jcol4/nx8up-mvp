@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import type { CreatorProfile } from '@/lib/creator-profile'
 import { prisma } from '@/lib/prisma'
 import { parseLocation } from '@/lib/location-options'
+import { computeCreatorSize } from '@/lib/matching'
 import { 
   getTwitchUserByLogin, 
   getTwitchUserById, 
@@ -78,6 +79,7 @@ export async function getCreatorProfile(): Promise<CreatorProfile | null> {
     audience_age_min: fromDb?.audience_age_min ?? undefined,
     audience_age_max: fromDb?.audience_age_max ?? undefined,
     audience_locations: fromDb?.audience_locations?.length ? fromDb.audience_locations : undefined,
+    audience_gender: fromDb?.audience_gender?.length ? fromDb.audience_gender : undefined,
     // Creator identity
     creator_types: fromDb?.creator_types?.length ? fromDb.creator_types : undefined,
     primary_platform: fromDb?.primary_platform ?? undefined,
@@ -187,6 +189,16 @@ export async function updateCreatorProfileWizard(data: import('./_shared').Creat
 
     const locationStr = [data.city.trim(), data.state.trim(), data.country.trim()].filter(Boolean).join(', ')
 
+    // Fetch current follower counts to compute creator_size
+    const existing_cc = await prisma.content_creators.findUnique({
+      where: { clerk_user_id: userId },
+      select: { subs_followers: true, youtube_subscribers: true },
+    })
+    const creator_size = computeCreatorSize(
+      existing_cc?.subs_followers ?? null,
+      existing_cc?.youtube_subscribers ?? null,
+    )
+
     await prisma.content_creators.upsert({
       where: { clerk_user_id: userId },
       create: {
@@ -200,6 +212,7 @@ export async function updateCreatorProfileWizard(data: import('./_shared').Creat
         audience_age_min: data.audience_age_min ? parseInt(data.audience_age_min, 10) : undefined,
         audience_age_max: data.audience_age_max ? parseInt(data.audience_age_max, 10) : undefined,
         audience_locations: data.audience_locations,
+        audience_gender: data.audience_gender,
         creator_types: data.creator_types,
         primary_platform: data.primary_platform || null,
         content_style: data.content_style,
@@ -208,6 +221,7 @@ export async function updateCreatorProfileWizard(data: import('./_shared').Creat
         preferred_product_types: data.preferred_product_types,
         is_available: data.is_available,
         max_campaigns_per_month: data.max_campaigns_per_month ? parseInt(data.max_campaigns_per_month, 10) : undefined,
+        ...(creator_size ? { creator_size } : {}),
       },
       update: {
         location: locationStr || null,
@@ -218,6 +232,7 @@ export async function updateCreatorProfileWizard(data: import('./_shared').Creat
         audience_age_min: data.audience_age_min ? parseInt(data.audience_age_min, 10) : null,
         audience_age_max: data.audience_age_max ? parseInt(data.audience_age_max, 10) : null,
         audience_locations: data.audience_locations,
+        audience_gender: data.audience_gender,
         creator_types: data.creator_types,
         primary_platform: data.primary_platform || null,
         content_style: data.content_style,
@@ -226,6 +241,7 @@ export async function updateCreatorProfileWizard(data: import('./_shared').Creat
         preferred_product_types: data.preferred_product_types,
         is_available: data.is_available,
         max_campaigns_per_month: data.max_campaigns_per_month ? parseInt(data.max_campaigns_per_month, 10) : null,
+        ...(creator_size ? { creator_size } : {}),
         updated_at: new Date(),
       },
     })
@@ -399,6 +415,10 @@ export async function refreshTwitchDataIfStale(userId: string) {
 
     if (!twitchUser) return
 
+    const twitchCreator = await prisma.content_creators.findUnique({
+      where: { clerk_user_id: userId },
+      select: { youtube_subscribers: true },
+    })
     await prisma.content_creators.update({
       where: { clerk_user_id: userId },
       data: {
@@ -409,6 +429,7 @@ export async function refreshTwitchDataIfStale(userId: string) {
         twitch_synced_at: new Date(),
         subs_followers: followerCount,
         average_vod_views: streamStats.average_vod_views,
+        creator_size: computeCreatorSize(followerCount, twitchCreator?.youtube_subscribers ?? null) ?? undefined,
       },
     })
   } catch (err) {
@@ -633,6 +654,10 @@ export async function refreshYouTubeDataIfStale(userId: string) {
         youtube_synced_at: new Date(),
         ...(watchTimeHours !== null ? { youtube_watch_time_hours: watchTimeHours } : {}),
         ...(memberCount !== null ? { youtube_member_count: memberCount } : {}),
+        creator_size: computeCreatorSize(
+          (await prisma.content_creators.findUnique({ where: { clerk_user_id: userId }, select: { subs_followers: true } }))?.subs_followers ?? null,
+          channel.subscriber_count,
+        ) ?? undefined,
       },
     })
   } catch (err) {

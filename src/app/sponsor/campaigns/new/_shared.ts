@@ -10,7 +10,8 @@ export type CampaignDraft = {
   platform: string[]
 
   // Step 2 — Audience
-  target_age_ranges: string[]
+  audience_age_min: string
+  audience_age_max: string
   target_genders: string[]
   required_audience_locations: string[]
   target_cities: string
@@ -55,7 +56,8 @@ export const EMPTY_DRAFT: CampaignDraft = {
   product_type: '',
   objective: '',
   platform: [],
-  target_age_ranges: [],
+  audience_age_min: '',
+  audience_age_max: '',
   target_genders: [],
   required_audience_locations: [],
   target_cities: '',
@@ -123,7 +125,6 @@ export const OBJECTIVES = [
 
 export const PLATFORMS = ['YouTube', 'Twitch', 'TikTok', 'Instagram'] as const
 
-export const AGE_RANGES = ['13–17', '18–24', '25–34', '35–44', '45+'] as const
 export const GENDERS = ['Male', 'Female', 'All'] as const
 
 export const AUDIENCE_LOCATIONS = [

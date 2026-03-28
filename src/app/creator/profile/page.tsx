@@ -70,6 +70,7 @@ export default async function CreatorProfilePage() {
     content_style: profile?.content_style ?? [],
     content_type: profile?.categories ?? [],
     audience_interests: profile?.audience_interests ?? [],
+    audience_gender: profile?.audience_gender ?? [],
     audience_age_min: profile?.audience_age_min?.toString() ?? '',
     audience_age_max: profile?.audience_age_max?.toString() ?? '',
     audience_locations: profile?.audience_locations ?? [],
@@ -92,7 +93,7 @@ export default async function CreatorProfilePage() {
         }
       />
 
-      <main className="max-w-3xl mx-auto p-6 sm:p-8">
+      <main className="w-full max-w-3xl mx-auto p-6 sm:p-8">
         <div className="mb-6">
           <h1 className="text-xl font-semibold cr-text-bright">Creator Profile</h1>
           <p className="text-sm cr-text-muted mt-1">

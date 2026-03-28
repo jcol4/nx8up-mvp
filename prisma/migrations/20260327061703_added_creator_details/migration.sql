@@ -1,5 +1,12 @@
 -- AlterTable
-ALTER TABLE "campaigns" ALTER COLUMN "target_age_ranges" DROP DEFAULT,
+-- Note: target_age_ranges is added in a later migration; the DO block guards against ordering issues
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'campaigns' AND column_name = 'target_age_ranges') THEN
+    ALTER TABLE "campaigns" ALTER COLUMN "target_age_ranges" DROP DEFAULT;
+  END IF;
+END $$;
+ALTER TABLE "campaigns"
 ALTER COLUMN "target_genders" DROP DEFAULT,
 ALTER COLUMN "target_interests" DROP DEFAULT,
 ALTER COLUMN "creator_types" DROP DEFAULT,

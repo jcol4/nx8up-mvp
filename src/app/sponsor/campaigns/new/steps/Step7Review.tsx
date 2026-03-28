@@ -73,7 +73,12 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-widest dash-text-muted mb-2">Audience</p>
           <div className="dash-panel p-3">
-            <Pills label="Age" values={draft.target_age_ranges} />
+            {(draft.audience_age_min || draft.audience_age_max) && (
+              <Row
+                label="Audience age"
+                value={[draft.audience_age_min, draft.audience_age_max].filter(Boolean).join(' – ')}
+              />
+            )}
             <Pills label="Gender" values={draft.target_genders} />
             <Pills label="Countries" values={draft.required_audience_locations} />
             <Row label="Cities" value={draft.target_cities || undefined} />

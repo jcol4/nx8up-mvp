@@ -68,8 +68,8 @@ export async function addCreatorXp(amount: number): Promise<{ error?: string }> 
       const newNotif: CreatorNotification = {
         id: crypto.randomUUID(),
         type: 'level',
-        title: `Level ${next.level} reached!`,
-        message: `You've ranked up to ${next.rankName}. Keep up the great work!`,
+        title: `Level ${next.level}`,
+        message: `Rank updated to ${next.rankName}.`,
         read: false,
         createdAt: new Date().toISOString(),
         link: '/creator',

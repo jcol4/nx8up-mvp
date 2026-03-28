@@ -40,7 +40,7 @@ export default async function CreatorTopBar({ rightContent }: Props) {
     <header className="cr-topbar flex-shrink-0">
       <div className="flex items-center gap-6">
         <span className="text-sm cr-text-muted">
-          Welcome, <span className="cr-text-bright font-semibold">{userName}!</span>
+          <span className="cr-text-bright font-semibold">{userName}</span>
         </span>
         <div className="hidden md:flex items-center gap-4 text-xs cr-text-muted">
           <span>

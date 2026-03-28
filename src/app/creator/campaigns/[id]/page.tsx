@@ -18,23 +18,32 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
           where: { clerk_user_id: userId },
           select: {
             location: true,
-            audience_age_min: true,
-            audience_age_max: true,
-            audience_locations: true,
             platform: true,
             subs_followers: true,
             youtube_subscribers: true,
             average_vod_views: true,
             youtube_avg_views: true,
             engagement_rate: true,
+            audience_age_min: true,
+            audience_age_max: true,
+            audience_locations: true,
+            audience_gender: true,
+            audience_interests: true,
+            creator_types: true,
+            creator_size: true,
+            game_category: true,
+            content_type: true,
+            preferred_campaign_types: true,
+            preferred_product_types: true,
+            is_available: true,
           },
         })
       : null,
   ])
 
-  const { eligible, reasons } = creatorProfile && campaign
+  const { eligible, score, reasons, notes } = creatorProfile && campaign
     ? matchCreatorToCampaign(creatorProfile, campaign)
-    : { eligible: true, reasons: [] as string[] }
+    : { eligible: true, score: 100, reasons: [] as string[], notes: [] as string[] }
 
   if (!campaign) notFound()
 
@@ -107,13 +116,23 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
               <div className="flex items-center justify-between mb-4">
                 <h2 className="cr-panel-title mb-0">Requirements</h2>
                 {creatorProfile && (
-                  <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium border ${
-                    eligible
-                      ? 'bg-[#22c55e]/10 text-[#22c55e] border-[#22c55e]/20'
-                      : 'bg-red-500/10 text-red-400 border-red-500/20'
-                  }`}>
-                    {eligible ? '✓ Eligible' : '✗ Requirements not met'}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-[#3a5570]">Match</span>
+                    <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium border ${
+                      score >= 75
+                        ? 'bg-[#22c55e]/10 text-[#22c55e] border-[#22c55e]/20'
+                        : score >= 45
+                          ? 'bg-[#eab308]/10 text-[#eab308] border-[#eab308]/20'
+                          : 'bg-red-500/10 text-red-400 border-red-500/20'
+                    }`}>
+                      {score}%
+                    </span>
+                    {!eligible && (
+                      <span className="text-[11px] px-2 py-0.5 rounded-full font-medium border bg-red-500/10 text-red-400 border-red-500/20">
+                        Ineligible
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -154,10 +173,20 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
               </div>
               {!eligible && reasons.length > 0 && (
                 <div className="mt-3 pt-3 border-t cr-border">
-                  <p className="text-xs text-red-400/80 font-medium mb-1">Why you don't qualify:</p>
+                  <p className="text-xs text-red-400/80 font-medium mb-1">Requirements not met:</p>
                   <ul className="space-y-0.5">
                     {reasons.map((r) => (
                       <li key={r} className="text-xs text-red-400/70">· {r}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {notes.length > 0 && (
+                <div className="mt-3 pt-3 border-t cr-border">
+                  <p className="text-xs cr-text-muted font-medium mb-1">Soft mismatches:</p>
+                  <ul className="space-y-0.5">
+                    {notes.map((n) => (
+                      <li key={n} className="text-xs cr-text-muted opacity-70">· {n}</li>
                     ))}
                   </ul>
                 </div>

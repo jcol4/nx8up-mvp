@@ -16,7 +16,11 @@ export default function CreatorProgressPanel({ xpState, calendarTasks }: Props) 
   return (
     <Panel variant="creator">
       <div className="flex items-center gap-3 mb-4">
-        <span className="text-2xl">🏆</span>
+        <div className="w-8 h-8 rounded flex items-center justify-center bg-white/5 border border-white/10 shrink-0">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1l1.5 3.5H12L9.5 7l1 3.5L7 8.5 3.5 10.5l1-3.5L2 4.5h3.5z" stroke="#00c8ff" strokeWidth="1.2" strokeLinejoin="round"/>
+          </svg>
+        </div>
         <div>
           <p className="text-sm font-medium cr-text-bright">
             {xp} / {xpForNext}

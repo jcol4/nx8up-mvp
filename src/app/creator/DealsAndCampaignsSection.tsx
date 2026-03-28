@@ -53,7 +53,7 @@ export default function DealsAndCampaignsSection({ applications }: Props) {
                 href="/creator/campaigns"
                 className="mt-2 text-xs text-[#00c8ff] hover:underline"
               >
-                Browse campaigns →
+                View available campaigns
               </Link>
             )}
           </li>

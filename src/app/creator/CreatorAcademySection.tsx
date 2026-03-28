@@ -24,7 +24,7 @@ export default function CreatorAcademySection() {
         </div>
       }
     >
-      <p className="text-xs cr-accent uppercase tracking-wider mb-3">Next lesson</p>
+      <p className="text-xs cr-text-muted uppercase tracking-wider mb-3">Next module</p>
       <Link
         href={`/creator/academy/${NEXT_LESSON.id}`}
         className="block rounded-lg cr-border border cr-bg-inner overflow-hidden mb-3 aspect-video relative group"
@@ -35,19 +35,21 @@ export default function CreatorAcademySection() {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/30 transition-colors">
-          <span className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center text-2xl text-black ml-1 group-hover:scale-110 transition-transform">
-            ▶
+          <span className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-105 transition-transform">
+            <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+              <path d="M2 1.5l12 7.5-12 7.5V1.5z" fill="#000"/>
+            </svg>
           </span>
         </div>
       </Link>
       <p className="text-sm font-medium cr-text-bright">{NEXT_LESSON.title}</p>
-      <p className="text-xs cr-text-muted mt-0.5">+ {NEXT_LESSON.category}</p>
+      <p className="text-xs cr-text-muted mt-0.5">{NEXT_LESSON.category}</p>
       <p className="text-xs cr-text-muted mt-1">0/{NEXT_LESSON.duration.replace(' min', '')} min</p>
       <Link
         href={`/creator/academy/${NEXT_LESSON.id}`}
         className="mt-4 inline-block py-2 px-5 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 transition-opacity"
       >
-        Start
+        Begin Module
       </Link>
     </Panel>
   )

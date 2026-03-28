@@ -7,6 +7,7 @@ import {
   CONTENT_STYLE_OPTIONS,
   CONTENT_CATEGORY_OPTIONS,
   AUDIENCE_LOCATION_OPTIONS,
+  AUDIENCE_GENDER_OPTIONS,
   labelClass,
   sectionTitle,
   toggleBtn,
@@ -183,6 +184,24 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
           >
             Add
           </button>
+        </div>
+      </div>
+
+      {/* Audience gender */}
+      <div>
+        <p className={sectionTitle}>Audience Gender</p>
+        <p className="text-xs cr-text-muted mb-3">Primary gender makeup of your audience.</p>
+        <div className="flex flex-wrap gap-2">
+          {AUDIENCE_GENDER_OPTIONS.map(g => (
+            <button
+              key={g}
+              type="button"
+              onClick={() => toggle('audience_gender', g)}
+              className={toggleBtn(draft.audience_gender.includes(g))}
+            >
+              {g}
+            </button>
+          ))}
         </div>
       </div>
 
