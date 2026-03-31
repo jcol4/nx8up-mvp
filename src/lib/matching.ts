@@ -10,9 +10,14 @@
  * Soft criteria (contribute to score, never block):
  *   - Creator types, sizes, game categories, content types
  *   - Audience locations, age range, gender
- *   - Interest overlap (fuzzy)
+ *   - Interest overlap (fuzzy + synonym-aware)
  *   - Campaign type / product type preference alignment
+ *
+ * Tag matching uses normalization (case/punctuation-insensitive) and a synonym
+ * dictionary so that related tags like "FPS", "Shooter", and "Valorant" connect.
  */
+
+import { SYNONYMS } from './tag-synonyms'
 
 export type CampaignCriteria = {
   platform: string[]
@@ -69,24 +74,55 @@ function toNum(v: { toNumber(): number } | number | null): number | null {
 
 const TOLERANCE = 0.67 // creator must be >= 67% of requirement
 
-/** Proportion of `required` values that appear in `available` (case-insensitive). */
+/**
+ * Normalize a tag: lowercase, strip apostrophes/backticks, collapse all
+ * remaining non-alphanumeric characters into single spaces.
+ * "CS:GO" → "cs go"  |  "Baldur's Gate 3" → "baldurs gate 3"
+ */
+function normTag(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[''`]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+}
+
+/**
+ * Returns true if two tags are semantically equivalent via:
+ *   1. Exact match after normalization
+ *   2. b's normalized form appears in a's synonym list
+ *   3. a's normalized form appears in b's synonym list
+ */
+function tagsMatch(a: string, b: string): boolean {
+  const na = normTag(a)
+  const nb = normTag(b)
+  if (na === nb) return true
+  return (SYNONYMS[na] ?? []).includes(nb) || (SYNONYMS[nb] ?? []).includes(na)
+}
+
+/**
+ * Proportion of `required` tags that semantically match at least one
+ * tag in `available`, using normalization + synonym expansion.
+ */
 function overlapRatio(required: string[], available: string[]): number {
   if (required.length === 0 || available.length === 0) return 0
-  const norm = available.map(s => s.toLowerCase())
-  const matched = required.filter(r => norm.includes(r.toLowerCase()))
+  const matched = required.filter(r => available.some(a => tagsMatch(r, a)))
   return matched.length / required.length
 }
 
 /**
- * Fuzzy interest overlap: a campaign interest "matches" if any creator interest
- * contains it as a substring (or vice-versa), case-insensitive.
+ * Interest overlap: a campaign interest matches if any creator interest
+ * is an exact/synonym match OR contains it as a substring (case-insensitive).
  */
 function interestOverlapRatio(campaignInterests: string[], creatorInterests: string[]): number {
   if (campaignInterests.length === 0 || creatorInterests.length === 0) return 0
-  const normCreator = creatorInterests.map(s => s.toLowerCase())
   const matched = campaignInterests.filter(ci => {
-    const cn = ci.toLowerCase()
-    return normCreator.some(c => c.includes(cn) || cn.includes(c))
+    const cn = normTag(ci)
+    return creatorInterests.some(c => {
+      const cc = normTag(c)
+      if (cc.includes(cn) || cn.includes(cc)) return true
+      return (SYNONYMS[cn] ?? []).includes(cc) || (SYNONYMS[cc] ?? []).includes(cn)
+    })
   })
   return matched.length / campaignInterests.length
 }

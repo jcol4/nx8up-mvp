@@ -1,8 +1,35 @@
 import Link from 'next/link'
-import { getOpenCampaignsWithEligibility } from './_actions'
+import { getOpenCampaignsWithEligibility, getCreatorOAuthStatus } from './_actions'
 import Panel from '@/components/shared/Panel'
 
 export default async function CreatorCampaignsPage() {
+  const { verified } = await getCreatorOAuthStatus()
+
+  if (!verified) {
+    return (
+      <main className="max-w-4xl mx-auto p-6 sm:p-8">
+        <div className="mb-6">
+          <Link href="/creator" className="text-xs cr-accent hover:underline">← Back to Dashboard</Link>
+          <h1 className="text-xl font-semibold cr-text-bright mt-2">Open Campaigns</h1>
+        </div>
+        <Panel variant="creator">
+          <div className="text-center py-10 px-4">
+            <p className="text-base font-semibold cr-text-bright mb-2">Connect a platform to view campaigns</p>
+            <p className="text-sm cr-text-muted mb-6">
+              You need to connect at least one verified platform — Twitch or YouTube — before you can browse sponsor campaigns.
+            </p>
+            <Link
+              href="/creator/profile"
+              className="inline-block text-sm font-medium px-4 py-2 rounded-md bg-[#00c8ff]/10 text-[#00c8ff] border border-[#00c8ff]/30 hover:bg-[#00c8ff]/20 transition-colors"
+            >
+              Go to Profile Settings
+            </Link>
+          </div>
+        </Panel>
+      </main>
+    )
+  }
+
   const allEntries = await getOpenCampaignsWithEligibility(50)
   const entries = allEntries.filter((e) => e.eligible).sort((a, b) => b.score - a.score)
 

@@ -5,6 +5,18 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { matchCreatorToCampaign } from '@/lib/matching'
 
+export async function getCreatorOAuthStatus(): Promise<{ verified: boolean }> {
+  const { userId } = await auth()
+  if (!userId) return { verified: false }
+  const creator = await prisma.content_creators.findUnique({
+    where: { clerk_user_id: userId },
+    select: { twitch_id: true, youtube_channel_id: true },
+  })
+  if (!creator) return { verified: false }
+  const verified = creator.twitch_id != null || creator.youtube_channel_id != null
+  return { verified }
+}
+
 const CREATOR_MATCHING_SELECT = {
   platform: true,
   subs_followers: true,
@@ -59,11 +71,13 @@ export async function getOpenCampaignsWithEligibility(limit = 50) {
       : null,
   ])
 
-  return campaigns.map((campaign) => {
-    if (!creator) return { campaign, eligible: true, score: 100, reasons: [] as string[], notes: [] as string[] }
-    const { eligible, score, reasons, notes } = matchCreatorToCampaign(creator, campaign)
-    return { campaign, eligible, score, reasons, notes }
-  })
+  return campaigns
+    .map((campaign) => {
+      if (!creator) return { campaign, eligible: true, score: 100, reasons: [] as string[], notes: [] as string[] }
+      const { eligible, score, reasons, notes } = matchCreatorToCampaign(creator, campaign)
+      return { campaign, eligible, score, reasons, notes }
+    })
+    .filter(({ score }) => score >= 75)
 }
 
 export async function getCampaignById(id: string) {
