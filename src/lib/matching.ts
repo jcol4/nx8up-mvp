@@ -67,7 +67,7 @@ function toNum(v: { toNumber(): number } | number | null): number | null {
   return typeof v === 'object' ? v.toNumber() : v
 }
 
-const TOLERANCE = 0.75 // creator must be >= 75% of requirement
+const TOLERANCE = 0.67 // creator must be >= 67% of requirement
 
 /** Proportion of `required` values that appear in `available` (case-insensitive). */
 function overlapRatio(required: string[], available: string[]): number {
@@ -126,12 +126,12 @@ export function matchCreatorToCampaign(
     reasons.push('Your profile is currently set to unavailable.')
   }
 
-  // ── Platform (hard if both sides have data) ───────────────────────────────
+  // ── Platform (soft) ───────────────────────────────────────────────────────
   if (campaign.platform.length > 0 && creator.platform.length > 0) {
     const ratio = overlapRatio(campaign.platform, creator.platform)
     addScore(20, ratio)
     if (ratio === 0) {
-      reasons.push(
+      notes.push(
         `Platform: campaign targets ${campaign.platform.join(' / ')} — your profile shows ${creator.platform.join(', ')}`,
       )
     }

@@ -5,15 +5,15 @@
  * Run with:  npm run seed
  */
 
-import { loadEnvConfig } from '@next/env'
+import dotenv from 'dotenv'
 import { PrismaClient } from '@prisma/client'
 import { PrismaNeon } from '@prisma/adapter-neon'
 
-loadEnvConfig(process.cwd())
+dotenv.config({ path: '.env.local' })
+dotenv.config()
 
-const prisma = new PrismaClient({
-  adapter: new PrismaNeon({ connectionString: process.env.DATABASE_URL! }),
-})
+const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! })
+const prisma = new PrismaClient({ adapter })
 
 // ─── Edit these to whatever values you want to test with ────────────────────
 

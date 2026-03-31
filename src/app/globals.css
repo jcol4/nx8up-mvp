@@ -25,7 +25,40 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Clerk UserButton popover & UserProfile modal – match nx8up theme */
+/* ── Custom scrollbar ────────────────────────────────────────────────────── */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 200, 255, 0.25) rgba(10, 18, 35, 0.6);
+}
+
+/* WebKit (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(10, 18, 35, 0.6);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 200, 255, 0.25);
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 200, 255, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ── Clerk UserButton popover & UserProfile modal – match nx8up theme ─── */
 .cl-userButtonPopoverCard,
 .cl-userButtonPopoverCard .cl-card {
   background: #0a1223 !important;

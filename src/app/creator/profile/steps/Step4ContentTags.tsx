@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import NXStepper from '@/components/ui/NXStepper'
 import FormInput from '@/components/ui/FormInput'
 import {
   PLATFORM_OPTIONS,
@@ -209,26 +210,18 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
       <div>
         <p className={sectionTitle}>Audience Age Range</p>
         <div className="flex items-center gap-3">
-          <FormInput
-            type="number"
-            variant="creator"
+          <NXStepper
             value={draft.audience_age_min}
-            onChange={e => setDraft(d => ({ ...d, audience_age_min: e.target.value }))}
-            placeholder="Min"
-            min={13}
-            max={65}
-            className="w-24"
+            onChange={v => setDraft(d => ({ ...d, audience_age_min: v }))}
+            step={1} min={13} max={65} placeholder="13"
+            className="w-36"
           />
           <span className="cr-text-muted text-sm">to</span>
-          <FormInput
-            type="number"
-            variant="creator"
+          <NXStepper
             value={draft.audience_age_max}
-            onChange={e => setDraft(d => ({ ...d, audience_age_max: e.target.value }))}
-            placeholder="Max"
-            min={13}
-            max={65}
-            className="w-24"
+            onChange={v => setDraft(d => ({ ...d, audience_age_max: v }))}
+            step={1} min={13} max={65} placeholder="65"
+            className="w-36"
           />
         </div>
         <p className="text-xs cr-text-muted mt-1.5">e.g. 18 to 34</p>

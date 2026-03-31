@@ -73,17 +73,17 @@ export default function SponsorSidebar({ navItems, stats }: Props) {
             Campaign Stats
           </p>
           <div className="space-y-2 text-sm">
-            <div className="flex items-center gap-2 dash-text-muted">
-              <span>🎯</span>
-              <span>{s.activeCampaigns} Active Campaigns</span>
+            <div className="flex items-center justify-between dash-text-muted">
+              <span>Active Campaigns</span>
+              <span className="dash-text-bright font-semibold">{s.activeCampaigns}</span>
             </div>
-            <div className="flex items-center gap-2 dash-text-muted">
-              <span>💰</span>
-              <span>Budget: <span className="dash-text-bright font-semibold">{s.totalBudget}</span></span>
+            <div className="flex items-center justify-between dash-text-muted">
+              <span>Budget</span>
+              <span className="dash-text-bright font-semibold">{s.totalBudget}</span>
             </div>
-            <div className="flex items-center gap-2 dash-text-muted">
-              <span>👥</span>
-              <span>{s.creatorsReached} Creators Reached</span>
+            <div className="flex items-center justify-between dash-text-muted">
+              <span>Creators Reached</span>
+              <span className="dash-text-bright font-semibold">{s.creatorsReached}</span>
             </div>
           </div>
         </div>
@@ -102,9 +102,9 @@ export default function SponsorSidebar({ navItems, stats }: Props) {
 
       {collapsed && (
         <div className="p-2 border-t border-white/10 flex flex-col items-center gap-2 text-xs dash-text-muted shrink-0">
-          <span title={`${s.activeCampaigns} Active Campaigns`}>🎯</span>
+          <span title={`${s.activeCampaigns} Active Campaigns`} className="dash-text-bright font-semibold">{s.activeCampaigns}</span>
           <span title={`Budget: ${s.totalBudget}`} className="dash-text-bright font-semibold">{s.totalBudget}</span>
-          <span title={`${s.creatorsReached} Creators Reached`}>👥</span>
+          <span title={`${s.creatorsReached} Creators Reached`} className="dash-text-bright font-semibold">{s.creatorsReached}</span>
         </div>
       )}
     </aside>

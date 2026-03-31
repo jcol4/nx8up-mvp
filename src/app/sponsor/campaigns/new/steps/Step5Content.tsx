@@ -1,6 +1,6 @@
 'use client'
 
-import FormInput from '@/components/ui/FormInput'
+import NXStepper from '@/components/ui/NXStepper'
 import FormTextarea from '@/components/ui/FormTextarea'
 import type { CampaignDraft } from '../_shared'
 import {
@@ -94,11 +94,10 @@ export default function Step5Content({ draft, setDraft, error, onNext, onBack }:
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={labelClass}>Number of videos</label>
-                <FormInput
-                  type="text" inputMode="numeric" variant="dashboard"
+                <NXStepper
                   value={draft.num_videos}
-                  onChange={e => set('num_videos', e.target.value.replace(/[^\d]/g, ''))}
-                  placeholder="e.g. 2"
+                  onChange={v => set('num_videos', v)}
+                  step={1} min={0} placeholder="0"
                 />
               </div>
             </div>
@@ -126,20 +125,18 @@ export default function Step5Content({ draft, setDraft, error, onNext, onBack }:
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={labelClass}>Number of streams</label>
-                <FormInput
-                  type="text" inputMode="numeric" variant="dashboard"
+                <NXStepper
                   value={draft.num_streams}
-                  onChange={e => set('num_streams', e.target.value.replace(/[^\d]/g, ''))}
-                  placeholder="e.g. 4"
+                  onChange={v => set('num_streams', v)}
+                  step={1} min={0} placeholder="0"
                 />
               </div>
               <div>
                 <label className={labelClass}>Min. stream duration (min)</label>
-                <FormInput
-                  type="text" inputMode="numeric" variant="dashboard"
+                <NXStepper
                   value={draft.min_stream_duration}
-                  onChange={e => set('min_stream_duration', e.target.value.replace(/[^\d]/g, ''))}
-                  placeholder="e.g. 60"
+                  onChange={v => set('min_stream_duration', v)}
+                  step={30} min={0} suffix="min" placeholder="0"
                 />
               </div>
             </div>
@@ -154,20 +151,18 @@ export default function Step5Content({ draft, setDraft, error, onNext, onBack }:
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={labelClass}>Number of posts</label>
-                <FormInput
-                  type="text" inputMode="numeric" variant="dashboard"
+                <NXStepper
                   value={draft.num_posts}
-                  onChange={e => set('num_posts', e.target.value.replace(/[^\d]/g, ''))}
-                  placeholder="e.g. 3"
+                  onChange={v => set('num_posts', v)}
+                  step={1} min={0} placeholder="0"
                 />
               </div>
               <div>
                 <label className={labelClass}>Number of short videos</label>
-                <FormInput
-                  type="text" inputMode="numeric" variant="dashboard"
+                <NXStepper
                   value={draft.num_short_videos}
-                  onChange={e => set('num_short_videos', e.target.value.replace(/[^\d]/g, ''))}
-                  placeholder="e.g. 2"
+                  onChange={v => set('num_short_videos', v)}
+                  step={1} min={0} placeholder="0"
                 />
               </div>
             </div>

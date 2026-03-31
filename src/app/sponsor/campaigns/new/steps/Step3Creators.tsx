@@ -1,6 +1,6 @@
 'use client'
 
-import FormInput from '@/components/ui/FormInput'
+import NXStepper from '@/components/ui/NXStepper'
 import type { CampaignDraft } from '../_shared'
 import { labelClass, sectionClass, sectionTitle, CREATOR_TYPES, CREATOR_SIZES } from '../_shared'
 
@@ -83,24 +83,25 @@ export default function Step3Creators({ draft, setDraft, onNext, onBack }: Props
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>Minimum followers / subscribers</label>
-            <FormInput
-              type="text"
-              inputMode="numeric"
-              variant="dashboard"
+            <NXStepper
               value={draft.min_subs_followers}
-              onChange={e => setDraft(prev => ({ ...prev, min_subs_followers: e.target.value.replace(/[^\d]/g, '') }))}
-              placeholder="e.g. 1000"
+              onChange={v => setDraft(prev => ({ ...prev, min_subs_followers: v }))}
+              step={1000}
+              min={0}
+              placeholder="0"
             />
           </div>
           <div>
             <label className={labelClass}>Minimum engagement rate (%)</label>
-            <FormInput
-              type="text"
-              inputMode="decimal"
-              variant="dashboard"
+            <NXStepper
               value={draft.min_engagement_rate}
-              onChange={e => setDraft(prev => ({ ...prev, min_engagement_rate: e.target.value.replace(/[^\d.]/g, '') }))}
-              placeholder="e.g. 3.5"
+              onChange={v => setDraft(prev => ({ ...prev, min_engagement_rate: v }))}
+              step={0.5}
+              min={0}
+              max={100}
+              suffix="%"
+              placeholder="0"
+              allowDecimal
             />
           </div>
         </div>

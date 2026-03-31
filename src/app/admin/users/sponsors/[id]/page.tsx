@@ -8,7 +8,7 @@ export const metadata = { title: 'Sponsor Detail — nx8up Admin' }
 type Props = { params: Promise<{ id: string }> }
 
 export default async function AdminSponsorDetailPage({ params }: Props) {
-  const { id } = await params 
+  const { id } = await params
   const { sessionClaims } = await auth()
   const role = (sessionClaims?.metadata as { role?: string })?.role
   if (role !== 'admin') redirect('/')
@@ -27,9 +27,9 @@ export default async function AdminSponsorDetailPage({ params }: Props) {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center gap-3">
-        <Link href="/admin/sponsors" className="text-sm dash-text-muted hover:dash-text-bright transition-colors">
-          ← Sponsors
+      <div>
+        <Link href="/admin/users" className="text-sm dash-text-muted hover:dash-text-bright transition-colors">
+          ← Users
         </Link>
       </div>
 
@@ -102,10 +102,7 @@ export default async function AdminSponsorDetailPage({ params }: Props) {
         ) : (
           <div className="space-y-2">
             {sponsor.campaigns.map((c) => (
-              <div
-                key={c.id}
-                className="dash-panel p-4 flex items-center justify-between gap-4"
-              >
+              <div key={c.id} className="dash-panel p-4 flex items-center justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <p className="dash-text-bright font-medium truncate">{c.title}</p>
                   <p className="text-xs dash-text-muted mt-0.5">
@@ -115,19 +112,19 @@ export default async function AdminSponsorDetailPage({ params }: Props) {
                       : 'No end date'}
                   </p>
                 </div>
-                <span
-                  className={`text-xs px-2 py-0.5 rounded font-medium shrink-0 ${
-                    c.status === 'live'
-                      ? 'bg-[#22c55e]/20 text-[#22c55e]'
-                      : c.status === 'draft'
-                      ? 'bg-[#94a3b8]/20 text-[#94a3b8]'
-                      : c.status === 'cancelled'
-                      ? 'bg-[#f87171]/20 text-[#f87171]'
-                      : 'bg-[#eab308]/20 text-[#eab308]'
-                  }`}
-                >
-                  {c.status}
-                </span>
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className={`text-xs px-2 py-0.5 rounded font-medium ${
+                    c.status === 'live'      ? 'bg-[#22c55e]/20 text-[#22c55e]' :
+                    c.status === 'draft'     ? 'bg-[#94a3b8]/20 text-[#94a3b8]' :
+                    c.status === 'cancelled' ? 'bg-[#f87171]/20 text-[#f87171]' :
+                                              'bg-[#eab308]/20 text-[#eab308]'
+                  }`}>
+                    {c.status}
+                  </span>
+                  <Link href={`/admin/campaigns/${c.id}`} className="text-xs text-[#00c8ff] hover:underline">
+                    View
+                  </Link>
+                </div>
               </div>
             ))}
           </div>

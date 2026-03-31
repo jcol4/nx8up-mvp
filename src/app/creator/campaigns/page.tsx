@@ -4,7 +4,7 @@ import Panel from '@/components/shared/Panel'
 
 export default async function CreatorCampaignsPage() {
   const allEntries = await getOpenCampaignsWithEligibility(50)
-  const entries = allEntries.filter((e) => e.eligible)
+  const entries = allEntries.filter((e) => e.eligible).sort((a, b) => b.score - a.score)
 
   return (
     <main className="max-w-4xl mx-auto p-6 sm:p-8">
@@ -20,7 +20,7 @@ export default async function CreatorCampaignsPage() {
         </Panel>
       ) : (
         <ul className="space-y-3">
-          {entries.map(({ campaign: c }) => (
+          {entries.map(({ campaign: c, score }) => (
             <li key={c.id}>
               <Link
                 href={`/creator/campaigns/${c.id}`}
@@ -51,6 +51,11 @@ export default async function CreatorCampaignsPage() {
                       <span className="text-sm font-bold cr-success">${c.budget.toLocaleString()}</span>
                     )}
                     <p className="text-xs cr-text-muted mt-0.5">{c._count.applications} applied</p>
+                    <p className={`text-xs font-medium mt-1 ${
+                      score >= 75 ? 'text-green-400' : score >= 45 ? 'text-yellow-400' : 'text-red-400'
+                    }`}>
+                      {score}% match
+                    </p>
                   </div>
                 </div>
               </Link>

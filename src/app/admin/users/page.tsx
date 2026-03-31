@@ -1,5 +1,6 @@
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import AdminUserRoleButton from './AdminUserRoleButton'
 
@@ -14,14 +15,13 @@ type Props = {
 export default async function AdminUsersPage({ searchParams }: Props) {
   const { page: pageParam, role: roleParam } = await searchParams
   const page = Math.max(1, parseInt(pageParam ?? '1'))
-  const roleFilter = roleParam ?? ''    
+  const roleFilter = roleParam ?? ''
   const { sessionClaims } = await auth()
   const role = (sessionClaims?.metadata as { role?: string })?.role
   if (role !== 'admin') redirect('/')
 
   const client = await clerkClient()
 
-  // Fetch users from Clerk — supports offset pagination
   const { data: clerkUsers, totalCount } = await client.users.getUserList({
     limit: PAGE_SIZE,
     offset: (page - 1) * PAGE_SIZE,
@@ -29,23 +29,42 @@ export default async function AdminUsersPage({ searchParams }: Props) {
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
-  // Filter by role client-side (Clerk doesn't support filtering by metadata server-side)
   const filtered = roleFilter
     ? clerkUsers.filter(
         (u) => (u.publicMetadata as { role?: string })?.role === roleFilter
       )
     : clerkUsers
 
-  // Build lookup maps for DB records
   const clerkIds = filtered.map((u) => u.id)
+
   const [creators, sponsors] = await Promise.all([
     prisma.content_creators.findMany({
       where: { clerk_user_id: { in: clerkIds } },
-      select: { clerk_user_id: true, twitch_username: true, subs_followers: true },
+      select: {
+        id: true,
+        clerk_user_id: true,
+        twitch_username: true,
+        youtube_handle: true,
+        subs_followers: true,
+        youtube_subscribers: true,
+        average_vod_views: true,
+        platform: true,
+        location: true,
+        _count: { select: { applications: true } },
+      },
     }),
     prisma.sponsors.findMany({
       where: { clerk_user_id: { in: clerkIds } },
-      select: { clerk_user_id: true, company_name: true },
+      select: {
+        id: true,
+        clerk_user_id: true,
+        company_name: true,
+        location: true,
+        budget_min: true,
+        budget_max: true,
+        platform: true,
+        _count: { select: { campaigns: true } },
+      },
     }),
   ])
 
@@ -73,13 +92,13 @@ export default async function AdminUsersPage({ searchParams }: Props) {
       </div>
 
       {/* Role filter */}
-      <div className="flex flex-wrap gap-2 text-sm">
+      <div className="flex flex-wrap gap-2">
         {[
-          { label: 'All', value: '' },
+          { label: 'All',      value: '' },
           { label: 'Creators', value: 'creator' },
           { label: 'Sponsors', value: 'sponsor' },
-          { label: 'Admins', value: 'admin' },
-          { label: 'No role', value: 'none' },
+          { label: 'Admins',   value: 'admin' },
+          { label: 'No role',  value: 'none' },
         ].map(({ label, value }) => (
           <a
             key={value}
@@ -106,6 +125,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
               <tr className="border-b border-white/10">
                 <th className="text-left px-4 py-3 dash-text-muted font-medium">User</th>
                 <th className="text-left px-4 py-3 dash-text-muted font-medium">Role</th>
+                <th className="text-left px-4 py-3 dash-text-muted font-medium">Details</th>
                 <th className="text-left px-4 py-3 dash-text-muted font-medium">DB record</th>
                 <th className="text-left px-4 py-3 dash-text-muted font-medium">Onboarding</th>
                 <th className="text-left px-4 py-3 dash-text-muted font-medium">Joined</th>
@@ -114,10 +134,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
             </thead>
             <tbody>
               {filtered.map((u, i) => {
-                const meta = u.publicMetadata as {
-                  role?: string
-                  onboardingComplete?: boolean
-                }
+                const meta = u.publicMetadata as { role?: string; onboardingComplete?: boolean }
                 const userRole = meta?.role ?? null
                 const onboarded = meta?.onboardingComplete ?? false
                 const creator = creatorMap[u.id]
@@ -126,6 +143,10 @@ export default async function AdminUsersPage({ searchParams }: Props) {
                   (e) => e.id === u.primaryEmailAddressId
                 )?.emailAddress
 
+                const followers = creator
+                  ? Math.max(creator.subs_followers ?? 0, creator.youtube_subscribers ?? 0) || null
+                  : null
+
                 return (
                   <tr
                     key={u.id}
@@ -133,6 +154,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
                       i === filtered.length - 1 ? 'border-b-0' : ''
                     }`}
                   >
+                    {/* User */}
                     <td className="px-4 py-3">
                       <p className="dash-text-bright font-medium">
                         {u.firstName || u.lastName
@@ -143,47 +165,91 @@ export default async function AdminUsersPage({ searchParams }: Props) {
                       {creator?.twitch_username && (
                         <p className="text-xs text-[#7b4fff]">@{creator.twitch_username}</p>
                       )}
+                      {creator?.youtube_handle && !creator.twitch_username && (
+                        <p className="text-xs text-red-400">@{creator.youtube_handle}</p>
+                      )}
                       {sponsor?.company_name && (
                         <p className="text-xs text-[#00c8ff]">{sponsor.company_name}</p>
                       )}
                     </td>
 
+                    {/* Role */}
                     <td className="px-4 py-3">
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded font-medium ${
-                          userRole === 'admin'
-                            ? 'bg-yellow-500/10 text-yellow-400'
-                            : userRole === 'sponsor'
-                            ? 'bg-[#00c8ff]/10 text-[#00c8ff]'
-                            : userRole === 'creator'
-                            ? 'bg-[#7b4fff]/10 text-[#7b4fff]'
-                            : 'bg-white/5 dash-text-muted'
-                        }`}
-                      >
+                      <span className={`text-xs px-2 py-0.5 rounded font-medium ${
+                        userRole === 'admin'   ? 'bg-yellow-500/10 text-yellow-400' :
+                        userRole === 'sponsor' ? 'bg-[#00c8ff]/10 text-[#00c8ff]' :
+                        userRole === 'creator' ? 'bg-[#7b4fff]/10 text-[#7b4fff]' :
+                                                 'bg-white/5 dash-text-muted'
+                      }`}>
                         {userRole ?? 'none'}
                       </span>
                     </td>
 
+                    {/* Details — creator or sponsor specifics */}
+                    <td className="px-4 py-3">
+                      {creator && (
+                        <div className="space-y-1">
+                          {followers != null && (
+                            <p className="text-xs dash-text-bright font-medium">
+                              {followers.toLocaleString()} followers
+                            </p>
+                          )}
+                          {creator.average_vod_views != null && (
+                            <p className="text-xs dash-text-muted">
+                              {creator.average_vod_views.toLocaleString()} avg views
+                            </p>
+                          )}
+                          <div className="flex flex-wrap gap-1 pt-0.5">
+                            {creator.platform.map(p => (
+                              <span key={p} className="text-[11px] px-1.5 py-0.5 rounded bg-[#7b4fff]/10 text-[#7b4fff]">{p}</span>
+                            ))}
+                          </div>
+                          {creator.location && (
+                            <p className="text-xs dash-text-muted">{creator.location}</p>
+                          )}
+                          <p className="text-xs dash-text-muted">
+                            {creator._count.applications} application{creator._count.applications !== 1 ? 's' : ''}
+                          </p>
+                        </div>
+                      )}
+                      {sponsor && (
+                        <div className="space-y-1">
+                          {sponsor.budget_min != null && sponsor.budget_max != null && (
+                            <p className="text-xs dash-text-bright font-medium">
+                              ${sponsor.budget_min.toLocaleString()} – ${sponsor.budget_max.toLocaleString()}
+                            </p>
+                          )}
+                          <div className="flex flex-wrap gap-1 pt-0.5">
+                            {sponsor.platform.map(p => (
+                              <span key={p} className="text-[11px] px-1.5 py-0.5 rounded bg-[#00c8ff]/10 text-[#00c8ff]">{p}</span>
+                            ))}
+                          </div>
+                          {sponsor.location && (
+                            <p className="text-xs dash-text-muted">{sponsor.location}</p>
+                          )}
+                          <p className="text-xs dash-text-muted">
+                            {sponsor._count.campaigns} campaign{sponsor._count.campaigns !== 1 ? 's' : ''}
+                          </p>
+                        </div>
+                      )}
+                      {!creator && !sponsor && (
+                        <span className="text-xs dash-text-muted italic">—</span>
+                      )}
+                    </td>
+
+                    {/* DB record */}
                     <td className="px-4 py-3">
                       {userRole === 'creator' && (
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded ${
-                            creator
-                              ? 'bg-green-500/10 text-green-400'
-                              : 'bg-red-500/10 text-red-400'
-                          }`}
-                        >
+                        <span className={`text-xs px-2 py-0.5 rounded ${
+                          creator ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
+                        }`}>
                           {creator ? '✓ creator row' : '✗ missing'}
                         </span>
                       )}
                       {userRole === 'sponsor' && (
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded ${
-                            sponsor
-                              ? 'bg-green-500/10 text-green-400'
-                              : 'bg-red-500/10 text-red-400'
-                          }`}
-                        >
+                        <span className={`text-xs px-2 py-0.5 rounded ${
+                          sponsor ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
+                        }`}>
                           {sponsor ? '✓ sponsor row' : '✗ missing'}
                         </span>
                       )}
@@ -192,29 +258,37 @@ export default async function AdminUsersPage({ searchParams }: Props) {
                       )}
                     </td>
 
+                    {/* Onboarding */}
                     <td className="px-4 py-3">
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded ${
-                          onboarded
-                            ? 'bg-green-500/10 text-green-400'
-                            : 'bg-yellow-500/10 text-yellow-400'
-                        }`}
-                      >
+                      <span className={`text-xs px-2 py-0.5 rounded ${
+                        onboarded ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'
+                      }`}>
                         {onboarded ? '✓ complete' : '⏳ pending'}
                       </span>
                     </td>
 
+                    {/* Joined */}
                     <td className="px-4 py-3 dash-text-muted text-xs">
                       {new Date(u.createdAt).toLocaleDateString('en-US', {
                         month: 'short', day: 'numeric', year: 'numeric',
                       })}
                     </td>
 
+                    {/* Actions */}
                     <td className="px-4 py-3">
-                      <AdminUserRoleButton
-                        userId={u.id}
-                        currentRole={userRole}
-                      />
+                      <div className="flex items-center gap-3">
+                        <AdminUserRoleButton userId={u.id} currentRole={userRole} />
+                        {creator && (
+                          <Link href={`/admin/users/creators/${creator.id}`} className="text-xs text-[#00c8ff] hover:underline whitespace-nowrap">
+                            View
+                          </Link>
+                        )}
+                        {sponsor && (
+                          <Link href={`/admin/users/sponsors/${sponsor.id}`} className="text-xs text-[#00c8ff] hover:underline whitespace-nowrap">
+                            View
+                          </Link>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 )
@@ -232,9 +306,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
               ← Previous
             </a>
           )}
-          <span className="dash-text-muted">
-            Page {page} of {totalPages}
-          </span>
+          <span className="dash-text-muted">Page {page} of {totalPages}</span>
           {page < totalPages && (
             <a href={buildUrl({ page: String(page + 1) })} className="px-3 py-1.5 rounded-lg dash-panel dash-text-muted hover:dash-text-bright transition-colors">
               Next →

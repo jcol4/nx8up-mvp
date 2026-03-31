@@ -20,8 +20,6 @@ type Props = {
 const SECTION_NAV_ITEMS: NavItemType[] = [
   { href: '/admin', label: 'Dashboard' },
   { href: '/admin/users', label: 'Users' },
-  { href: '/admin/creators', label: 'Creators' },
-  { href: '/admin/sponsors', label: 'Sponsors' },
   { href: '/admin/campaigns', label: 'Campaigns' },
   { href: '/admin/applications', label: 'Applications' },
   { href: '/admin/reports', label: 'Reports' },

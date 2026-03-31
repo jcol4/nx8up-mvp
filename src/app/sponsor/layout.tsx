@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import DashboardStyles from '@/components/dashboard/DashboardStyles'
 import { DashboardSidebar } from '@/components/dashboard'
+import { prisma } from '@/lib/prisma'
 
 export const metadata: Metadata = {
   title: 'Sponsor Hub | Nx8up',
@@ -26,13 +27,32 @@ const NAV_ITEMS = [
   { href: '/sponsor/creators', label: 'Creators' },
 ]
 
-async function getSponsorStats() {
-  const { userId } = await auth()
-  if (!userId) return null
+async function getSponsorStats(userId: string) {
+  const sponsor = await prisma.sponsors.findUnique({
+    where: { clerk_user_id: userId },
+    select: { id: true },
+  })
+  if (!sponsor) return null
+
+  const [campaigns, acceptedApps] = await Promise.all([
+    prisma.campaigns.findMany({
+      where: { sponsor_id: sponsor.id, status: 'live' },
+      select: { budget: true },
+    }),
+    prisma.campaign_applications.count({
+      where: {
+        status: 'accepted',
+        campaign: { sponsor_id: sponsor.id },
+      },
+    }),
+  ])
+
+  const totalBudget = campaigns.reduce((sum, c) => sum + (c.budget ?? 0), 0)
+
   return {
-    activeCampaigns: 3,
-    totalBudget: '$12,500',
-    creatorsReached: 24,
+    activeCampaigns: campaigns.length,
+    totalBudget: totalBudget > 0 ? `$${totalBudget.toLocaleString()}` : '$0',
+    creatorsReached: acceptedApps,
   }
 }
 
@@ -44,8 +64,8 @@ export default async function SponsorLayout({
   if (!userId) redirect('/sign-in')
   if (role !== 'sponsor' && role !== 'admin') redirect('/')
 
-  const stats = await getSponsorStats()
-  const s = stats ?? { activeCampaigns: 3, totalBudget: '$12,500', creatorsReached: 24 }
+  const stats = await getSponsorStats(userId)
+  const s = stats ?? { activeCampaigns: 0, totalBudget: '$0', creatorsReached: 0 }
   const sectionNavItems = role === 'admin' ? ALL_SECTION_NAV_ITEMS : SPONSOR_ONLY_SECTION_NAV_ITEMS
 
   const statsNode = (
@@ -54,17 +74,17 @@ export default async function SponsorLayout({
         Campaign Stats
       </p>
       <div className="space-y-2 text-sm">
-        <div className="flex items-center gap-2 dash-text-muted">
-          <span>🎯</span>
-          <span>{s.activeCampaigns} Active Campaigns</span>
+        <div className="flex items-center justify-between">
+          <span className="dash-text-muted">Live campaigns</span>
+          <span className="dash-text-bright font-semibold">{s.activeCampaigns}</span>
         </div>
-        <div className="flex items-center gap-2 dash-text-muted">
-          <span>💰</span>
-          <span>Budget: <span className="dash-text-bright font-semibold">{s.totalBudget}</span></span>
+        <div className="flex items-center justify-between">
+          <span className="dash-text-muted">Live budget</span>
+          <span className="dash-text-bright font-semibold">{s.totalBudget}</span>
         </div>
-        <div className="flex items-center gap-2 dash-text-muted">
-          <span>👥</span>
-          <span>{s.creatorsReached} Creators Reached</span>
+        <div className="flex items-center justify-between">
+          <span className="dash-text-muted">Creators accepted</span>
+          <span className="dash-text-bright font-semibold">{s.creatorsReached}</span>
         </div>
       </div>
     </div>

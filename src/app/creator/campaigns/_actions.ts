@@ -43,7 +43,7 @@ export async function getOpenCampaignsWithEligibility(limit = 50) {
 
   const [campaigns, creator] = await Promise.all([
     prisma.campaigns.findMany({
-      where: { status: 'active' },
+      where: { status: 'live' },
       orderBy: { created_at: 'desc' },
       take: limit,
       include: {

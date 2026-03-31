@@ -167,7 +167,7 @@ export default function Step7Summary({ draft, twitchInitial, youtubeInitial, cre
                 <Row label="Subscribers" value={fmt(creatorStats.twitch_subscriber_count)} />
                 <Row label="Avg VOD views" value={fmt(creatorStats.average_vod_views)} />
                 {creatorStats.engagement_rate != null && (
-                  <Row label="Engagement" value={`${(creatorStats.engagement_rate.toNumber() * 100).toFixed(1)}%`} />
+                  <Row label="Engagement" value={`${(Number(creatorStats.engagement_rate) * 100).toFixed(1)}%`} />
                 )}
               </>
             )}

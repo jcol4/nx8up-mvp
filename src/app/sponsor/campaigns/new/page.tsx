@@ -1,7 +1,44 @@
+import { auth } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/prisma'
 import SponsorHeader from '../../SponsorHeader'
 import NewCampaignForm from './NewCampaignForm'
+import { EMPTY_DRAFT, type CampaignDraft } from './_shared'
 
-export default function NewCampaignPage() {
+export default async function NewCampaignPage() {
+  const { userId } = await auth()
+  if (!userId) redirect('/sign-in')
+
+  const sponsor = await prisma.sponsors.findUnique({
+    where: { clerk_user_id: userId },
+    select: {
+      company_name: true,
+      platform: true,
+      budget_min: true,
+      budget_max: true,
+      min_subs_followers: true,
+      min_engagement_rate: true,
+    },
+  })
+
+  const profileDraft: CampaignDraft = {
+    ...EMPTY_DRAFT,
+    brand_name:          sponsor?.company_name ?? '',
+    platform:            sponsor?.platform ?? [],
+    min_subs_followers:  sponsor?.min_subs_followers?.toString() ?? '',
+    min_engagement_rate: sponsor?.min_engagement_rate != null
+                           ? Number(sponsor.min_engagement_rate).toFixed(2)
+                           : '',
+    budget: (() => {
+      const lo = sponsor?.budget_min
+      const hi = sponsor?.budget_max
+      if (lo != null && hi != null) return String(Math.round((lo + hi) / 2))
+      if (lo != null) return String(lo)
+      if (hi != null) return String(hi)
+      return ''
+    })(),
+  }
+
   return (
     <>
       <SponsorHeader />
@@ -13,7 +50,7 @@ export default function NewCampaignPage() {
               Walk through the setup steps to create a campaign creators can apply to.
             </p>
           </div>
-          <NewCampaignForm />
+          <NewCampaignForm initialDraft={profileDraft} />
         </div>
       </div>
     </>

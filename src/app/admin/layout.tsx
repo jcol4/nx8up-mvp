@@ -20,10 +20,8 @@ const SECTION_NAV_ITEMS = [
 const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard' },
   { href: '/admin/campaigns', label: 'Campaigns' },
-  { href: '/admin/creators', label: 'Creators' },
   { href: '/admin/reports', label: 'Reports' },
   { href: '/admin/academy', label: 'Academy' },
-  { href: '/admin/sponsors', label: 'Sponsors' },
   { href: '/admin/applications', label: 'Applications' },
   { href: '/admin/users', label: 'Users' },
   { href: '/admin/profile', label: 'Profile' },

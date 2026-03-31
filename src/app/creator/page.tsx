@@ -8,19 +8,16 @@ import CreatorMissionsSection from "./CreatorMissionsSection";
 import CreatorAcademySection from "./CreatorAcademySection";
 import CreatorNotifications from "./CreatorNotifications";
 import DealsAndCampaignsSection from "./DealsAndCampaignsSection";
-import ContentPlannerSection from "./ContentPlannerSection";
-import { getContentPlannerNotes } from "./_actions";
 import { prisma } from "@/lib/prisma";
 
 export default async function CreatorDashboardPage() {
-  const [authResult, displayInfo, xpState, calendarTasks, notifications, contentPlannerNotes] =
+  const [authResult, displayInfo, xpState, calendarTasks, notifications] =
     await Promise.all([
       auth(),
       getUserDisplayInfo(),
       getCreatorXp(),
       getCreatorCalendarTasks(),
       getCreatorNotifications(),
-      getContentPlannerNotes(),
     ]);
   const role = (authResult.sessionClaims?.metadata as { role?: string } | undefined)?.role;
 
@@ -29,9 +26,18 @@ export default async function CreatorDashboardPage() {
   const campaignApplications = userId
     ? await prisma.campaign_applications.findMany({
         where: { creator: { clerk_user_id: userId } },
-        include: {
+        select: {
+          id: true,
+          status: true,
+          submitted_at: true,
           campaign: {
-            include: { sponsor: { select: { company_name: true } } },
+            select: {
+              id: true,
+              title: true,
+              budget: true,
+              end_date: true,
+              sponsor: { select: { company_name: true } },
+            },
           },
         },
         orderBy: { submitted_at: 'desc' },
@@ -58,7 +64,7 @@ export default async function CreatorDashboardPage() {
 
       {/* Main content: 2x3 grid (5 panels, Pocketmate removed) */}
       <main className="max-w-7xl mx-auto p-6 sm:p-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* 1. Today's Missions */}
           <CreatorMissionsSection />
 
@@ -71,8 +77,7 @@ export default async function CreatorDashboardPage() {
           {/* 4. Academy */}
           <CreatorAcademySection />
 
-          {/* 5. Content Planner */}
-          <ContentPlannerSection initialNotes={contentPlannerNotes} />
+
         </div>
       </main>
     </>
