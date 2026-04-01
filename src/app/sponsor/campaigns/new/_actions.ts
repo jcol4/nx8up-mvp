@@ -267,7 +267,7 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
       select: { id: true },
     })
     if (!existing) return { error: 'Draft not found.' }
-    await prisma.campaigns.update({ where: { id: existingDraftId }, data: campaignData })
+    await prisma.campaigns.update({ where: { id: existingDraftId }, data: { ...campaignData, status: 'live' } })
     campaignId = existingDraftId
   } else {
     const campaign = await prisma.campaigns.create({
@@ -275,7 +275,7 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
         ...campaignData,
         campaign_code: generateCampaignCode(),
         sponsor_id: sponsor.id,
-        status: 'draft',
+        status: 'live',
         content_type: [],
         creative_package: [],
       },

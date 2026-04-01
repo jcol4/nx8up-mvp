@@ -76,15 +76,15 @@ export default async function SponsorLayout({
       <div className="space-y-2 text-sm">
         <div className="flex items-center justify-between">
           <span className="dash-text-muted">Live campaigns</span>
-          <span className="dash-text-bright font-semibold">{s.activeCampaigns}</span>
+          <span className="font-bold" style={{ color: '#00c8ff', textShadow: '0 0 8px rgba(0,200,255,0.4)' }}>{s.activeCampaigns}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="dash-text-muted">Live budget</span>
-          <span className="dash-text-bright font-semibold">{s.totalBudget}</span>
+          <span className="font-bold" style={{ color: '#00e5a0', textShadow: '0 0 8px rgba(0,229,160,0.4)' }}>{s.totalBudget}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="dash-text-muted">Creators accepted</span>
-          <span className="dash-text-bright font-semibold">{s.creatorsReached}</span>
+          <span className="font-bold" style={{ color: '#c084fc', textShadow: '0 0 8px rgba(192,132,252,0.4)' }}>{s.creatorsReached}</span>
         </div>
       </div>
     </div>

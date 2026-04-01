@@ -91,13 +91,15 @@ export default function NXStepper({
         {prefix && <span className="nxs-affix nxs-prefix">{prefix}</span>}
         <input
           className="nxs-input"
-          type="number"
+          type="text"
           inputMode={allowDecimal ? 'decimal' : 'numeric'}
-          min={min}
-          max={max}
-          step={step}
           value={value}
           onChange={handleChange}
+          onBlur={() => {
+            const n = (allowDecimal ? parseFloat(value) : parseInt(value, 10)) || min
+            const clamped = max != null ? Math.min(max, Math.max(min, n)) : Math.max(min, n)
+            onChange(allowDecimal ? String(parseFloat(clamped.toFixed(2))) : String(clamped))
+          }}
           placeholder={placeholder}
         />
         {suffix && <span className="nxs-affix">{suffix}</span>}
