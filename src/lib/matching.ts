@@ -175,17 +175,17 @@ export function matchCreatorToCampaign(
 
   // ── Min followers (25% tolerance) ────────────────────────────────────────
   if (campaign.min_subs_followers != null) {
-    const best = Math.max(creator.subs_followers ?? 0, creator.youtube_subscribers ?? 0)
+    const total = (creator.subs_followers ?? 0) + (creator.youtube_subscribers ?? 0)
     const hasData = creator.subs_followers != null || creator.youtube_subscribers != null
     if (hasData) {
-      addScore(15, Math.min(1, best / campaign.min_subs_followers))
-      if (best < campaign.min_subs_followers * TOLERANCE) {
+      addScore(15, Math.min(1, total / campaign.min_subs_followers))
+      if (total < campaign.min_subs_followers * TOLERANCE) {
         reasons.push(
-          `Min ${campaign.min_subs_followers.toLocaleString()} followers required — you have ${best.toLocaleString()}`,
+          `Min ${campaign.min_subs_followers.toLocaleString()} followers required — you have ${total.toLocaleString()} across all platforms`,
         )
-      } else if (best < campaign.min_subs_followers) {
+      } else if (total < campaign.min_subs_followers) {
         notes.push(
-          `Followers slightly below requirement (${best.toLocaleString()} / ${campaign.min_subs_followers.toLocaleString()}) — within tolerance`,
+          `Followers slightly below requirement (${total.toLocaleString()} / ${campaign.min_subs_followers.toLocaleString()}) — within tolerance`,
         )
       }
     }
@@ -193,17 +193,17 @@ export function matchCreatorToCampaign(
 
   // ── Min avg viewers (25% tolerance) ──────────────────────────────────────
   if (campaign.min_avg_viewers != null) {
-    const best = Math.max(creator.average_vod_views ?? 0, creator.youtube_avg_views ?? 0)
+    const total = (creator.average_vod_views ?? 0) + (creator.youtube_avg_views ?? 0)
     const hasData = creator.average_vod_views != null || creator.youtube_avg_views != null
     if (hasData) {
-      addScore(15, Math.min(1, best / campaign.min_avg_viewers))
-      if (best < campaign.min_avg_viewers * TOLERANCE) {
+      addScore(15, Math.min(1, total / campaign.min_avg_viewers))
+      if (total < campaign.min_avg_viewers * TOLERANCE) {
         reasons.push(
-          `Min ${campaign.min_avg_viewers.toLocaleString()} avg viewers required — you have ${best.toLocaleString()}`,
+          `Min ${campaign.min_avg_viewers.toLocaleString()} avg viewers required — you have ${total.toLocaleString()} across all platforms`,
         )
-      } else if (best < campaign.min_avg_viewers) {
+      } else if (total < campaign.min_avg_viewers) {
         notes.push(
-          `Avg viewers slightly below requirement (${best.toLocaleString()} / ${campaign.min_avg_viewers.toLocaleString()}) — within tolerance`,
+          `Avg viewers slightly below requirement (${total.toLocaleString()} / ${campaign.min_avg_viewers.toLocaleString()}) — within tolerance`,
         )
       }
     }
