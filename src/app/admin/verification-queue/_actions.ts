@@ -83,11 +83,11 @@ export async function adminReviewSubmission(
     data: { status: decision, admin_notes: notes ?? null },
   })
 
-  revalidatePath('/admin/deal-room')
-  revalidatePath(`/admin/deal-room/${applicationId}`)
-  revalidatePath(`/sponsor/deal-room/${applicationId}`)
-  revalidatePath('/sponsor/deal-room')
-  revalidatePath(`/creator/deal-room/${applicationId}`)
+  revalidatePath('/admin/verification-queue')
+  revalidatePath(`/admin/verification-queue/${applicationId}`)
+  revalidatePath(`/sponsor/verification-queue/${applicationId}`)
+  revalidatePath('/sponsor/verification-queue')
+  revalidatePath(`/creator/verification-queue/${applicationId}`)
 
   return { success: true }
 }

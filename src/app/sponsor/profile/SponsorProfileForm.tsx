@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { updateSponsorProfile, type SponsorProfile } from './_actions'
+import { updateSponsorProfile, requestAgeRestrictionChange, type SponsorProfile } from './_actions'
 import {
   COUNTRIES,
   US_STATES,
@@ -52,6 +52,18 @@ export default function SponsorProfileForm({ profile }: Props) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
+  // Age restriction state (separate submission flow)
+  const [ageRestricted, setAgeRestricted] = useState(profile?.age_restricted ?? false)
+  const [ageRestrictionType, setAgeRestrictionType] = useState<string>(profile?.age_restriction_type ?? '')
+  const [ageChangeMessage, setAgeChangeMessage] = useState('')
+  const [isSubmittingAgeChange, setIsSubmittingAgeChange] = useState(false)
+  const [ageChangeError, setAgeChangeError] = useState('')
+  const [ageChangeSuccess, setAgeChangeSuccess] = useState(false)
+
+  const ageRestrictionChanged =
+    ageRestricted !== (profile?.age_restricted ?? false) ||
+    (ageRestricted && ageRestrictionType !== (profile?.age_restriction_type ?? ''))
+
   const toggleArr = <T extends string>(arr: T[], setArr: (v: T[]) => void, val: T) =>
     setArr(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val])
 
@@ -72,6 +84,10 @@ export default function SponsorProfileForm({ profile }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (ageRestrictionChanged) {
+      setError('Submit or revert your age restriction change before saving the profile.')
+      return
+    }
     setError('')
     setSuccess(false)
     setIsSaving(true)
@@ -97,6 +113,27 @@ export default function SponsorProfileForm({ profile }: Props) {
       setError(res.error)
     } else {
       setSuccess(true)
+      router.refresh()
+    }
+  }
+
+  const handleAgeRestrictionChangeRequest = async () => {
+    setAgeChangeError('')
+    setAgeChangeSuccess(false)
+    setIsSubmittingAgeChange(true)
+
+    const res = await requestAgeRestrictionChange({
+      requested_age_restricted: ageRestricted,
+      requested_age_restriction_type: ageRestricted ? ageRestrictionType || null : null,
+      sponsor_message: ageChangeMessage,
+    })
+
+    setIsSubmittingAgeChange(false)
+    if (res.error) {
+      setAgeChangeError(res.error)
+    } else {
+      setAgeChangeSuccess(true)
+      setAgeChangeMessage('')
       router.refresh()
     }
   }
@@ -297,7 +334,7 @@ export default function SponsorProfileForm({ profile }: Props) {
       </div>
 
       {/* ── Creator Requirements ──────────────────────────────────────── */}
-      <div className="space-y-4">
+      <div className={sectionClass}>
         <p className={sectionTitle}>
           Default creator requirements{' '}
           <span className="normal-case font-normal">(optional)</span>
@@ -346,22 +383,136 @@ export default function SponsorProfileForm({ profile }: Props) {
         </div>
       </div>
 
+      {/* ── Age Restrictions ─────────────────────────────────────────── */}
+      <div className="space-y-4 pb-5 border-b dash-border">
+        <div>
+          <p className={sectionTitle}>Age Restrictions</p>
+          <p className="text-xs dash-text-muted -mt-2 mb-3">
+            If your products have legal age-marketing restrictions, enable this setting. Changes to age
+            restrictions require admin approval.
+          </p>
+
+          {profile?.has_pending_age_restriction_request && (
+            <div className="mb-3 flex items-start gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-xs text-yellow-400">
+              <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+              <span>A change request for age restrictions is pending admin review.</span>
+            </div>
+          )}
+
+          <label className="flex items-center gap-3 cursor-pointer w-fit">
+            <input
+              type="checkbox"
+              checked={ageRestricted}
+              onChange={e => {
+                setAgeRestricted(e.target.checked)
+                if (!e.target.checked) setAgeRestrictionType('')
+              }}
+              className="w-4 h-4 rounded border border-white/20 bg-white/5 accent-[#00c8ff]"
+            />
+            <span className="text-sm dash-text-muted">
+              My company has products that legally cannot be marketed to certain age groups
+            </span>
+          </label>
+
+          {ageRestricted && (
+            <div className="mt-3 ml-7 space-y-2">
+              <p className="text-xs dash-text-muted mb-2">Minimum legal marketing age:</p>
+              <div className="flex gap-3">
+                {['18+', '21+'].map(opt => (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => setAgeRestrictionType(opt)}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 border ${
+                      ageRestrictionType === opt
+                        ? 'bg-orange-500/20 text-orange-400 border-orange-500/40'
+                        : 'dash-border dash-text-muted hover:text-[#c8dff0] hover:border-orange-500/30 hover:bg-orange-500/5'
+                    }`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {ageRestrictionChanged && (
+          <div className="ml-0 p-3 rounded-lg bg-[#00c8ff]/5 border border-[#00c8ff]/20 space-y-3">
+            <p className="text-xs text-[#00c8ff] font-medium">
+              Age restriction changes require admin approval before taking effect.
+            </p>
+            <div>
+              <label className={labelClass}>
+                Reason for change <span className="text-red-400">*</span>
+              </label>
+              <textarea
+                value={ageChangeMessage}
+                onChange={e => setAgeChangeMessage(e.target.value)}
+                placeholder="Explain why you are changing your age restriction setting (e.g. product line update, regulatory compliance, etc.)"
+                rows={3}
+                maxLength={500}
+                className="w-full rounded-lg p-3 text-sm border dash-border dash-bg-inner dash-text focus:outline-none focus:border-[#00c8ff]/50 resize-none"
+              />
+              <p className="text-xs dash-text-muted text-right mt-0.5">{ageChangeMessage.length}/500</p>
+            </div>
+            {ageChangeError && <p className="text-xs text-red-400">{ageChangeError}</p>}
+            {ageChangeSuccess && <p className="text-xs text-[#22c55e]">Change request submitted. Awaiting admin approval.</p>}
+            <button
+              type="button"
+              onClick={handleAgeRestrictionChangeRequest}
+              disabled={isSubmittingAgeChange}
+              className="py-2 px-4 rounded-lg bg-[#00c8ff]/20 text-[#00c8ff] text-sm font-semibold hover:bg-[#00c8ff]/30 disabled:opacity-50 transition-colors"
+            >
+              {isSubmittingAgeChange ? 'Submitting...' : 'Submit Change Request'}
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* ── Actions ──────────────────────────────────────────────────── */}
-      <div className="flex gap-3 pt-4 border-t dash-border">
-        <button
-          type="submit"
-          disabled={isSaving}
-          className="py-2.5 px-5 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
-        >
-          {isSaving ? 'Saving...' : 'Save profile'}
-        </button>
-        <button
-          type="button"
-          onClick={() => router.push('/sponsor')}
-          className="py-2.5 px-5 rounded-lg border dash-border dash-text-muted text-sm font-medium hover:text-[#c8dff0] transition-colors"
-        >
-          Cancel
-        </button>
+      <div className="pt-4 border-t dash-border space-y-3">
+        {ageRestrictionChanged && (
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-400">
+            <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+            <span>
+              You have unsaved age restriction changes. Submit a change request above or revert to your saved
+              settings before saving the profile.
+            </span>
+          </div>
+        )}
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            disabled={isSaving || ageRestrictionChanged}
+            className="py-2.5 px-5 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+          >
+            {isSaving ? 'Saving...' : 'Save profile'}
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/sponsor')}
+            className="py-2.5 px-5 rounded-lg border dash-border dash-text-muted text-sm font-medium hover:text-[#c8dff0] transition-colors"
+          >
+            Cancel
+          </button>
+          {ageRestrictionChanged && (
+            <button
+              type="button"
+              onClick={() => {
+                setAgeRestricted(profile?.age_restricted ?? false)
+                setAgeRestrictionType(profile?.age_restriction_type ?? '')
+              }}
+              className="py-2.5 px-5 rounded-lg border border-red-500/30 text-red-400 text-sm font-medium hover:bg-red-500/10 transition-colors"
+            >
+              Revert age restriction
+            </button>
+          )}
+        </div>
       </div>
     </form>
   )

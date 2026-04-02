@@ -20,10 +20,10 @@ const SECTION_NAV_ITEMS = [
 const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard' },
   { href: '/admin/campaigns', label: 'Campaigns' },
-  { href: '/admin/deal-room', label: 'Deal Room Queue' },
+  { href: '/admin/verification-queue', label: 'Verification Queue' },
+  { href: '/admin/applications', label: 'Applications' },
   { href: '/admin/reports', label: 'Reports' },
   { href: '/admin/academy', label: 'Academy' },
-  { href: '/admin/applications', label: 'Applications' },
   { href: '/admin/users', label: 'Users' },
   { href: '/admin/profile', label: 'Profile' },
 ]

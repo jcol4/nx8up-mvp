@@ -68,10 +68,12 @@ type Props = {
   setDraft: React.Dispatch<React.SetStateAction<CampaignDraft>>
   onNext: () => void
   onBack: () => void
+  sponsorAgeRestriction?: string | null
 }
 
-export default function Step2Audience({ draft, setDraft, onNext, onBack }: Props) {
+export default function Step2Audience({ draft, setDraft, onNext, onBack, sponsorAgeRestriction }: Props) {
   const [interestInput, setInterestInput] = useState('')
+  const restrictionMinAge = sponsorAgeRestriction === '21+' ? 21 : sponsorAgeRestriction === '18+' ? 18 : 13
 
   const toggle = <K extends 'target_genders' | 'required_audience_locations' | 'target_interests'>(
     key: K,
@@ -97,22 +99,44 @@ export default function Step2Audience({ draft, setDraft, onNext, onBack }: Props
       <div className={sectionClass}>
         <p className={sectionTitle}>Who are you trying to reach?</p>
 
+        {sponsorAgeRestriction && (
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20 text-xs text-orange-400">
+            <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+            <span>
+              Your profile has a <strong>{sponsorAgeRestriction}</strong> age restriction. The minimum audience age for all campaigns must be at least{' '}
+              <strong>{restrictionMinAge}</strong>. You cannot market this product to audiences below this age.
+            </span>
+          </div>
+        )}
+
         <div>
           <label className={labelClass}>Audience age range</label>
           <div className="flex items-center gap-3">
             <AgeStepper
               value={draft.audience_age_min}
-              onChange={val => setDraft(prev => ({ ...prev, audience_age_min: val }))}
+              onChange={val => {
+                const num = parseInt(val, 10)
+                if (!isNaN(num) && num < restrictionMinAge) return
+                setDraft(prev => ({ ...prev, audience_age_min: val }))
+              }}
               placeholder="Min"
+              min={restrictionMinAge}
             />
             <span className="dash-text-muted text-sm">to</span>
             <AgeStepper
               value={draft.audience_age_max}
               onChange={val => setDraft(prev => ({ ...prev, audience_age_max: val }))}
               placeholder="Max"
+              min={restrictionMinAge}
             />
           </div>
-          <p className="text-xs dash-text-muted mt-1.5">Ages 13 – 100</p>
+          <p className="text-xs dash-text-muted mt-1.5">
+            {sponsorAgeRestriction
+              ? `Ages ${restrictionMinAge} – 100 (minimum enforced by your age restriction policy)`
+              : 'Ages 13 – 100'}
+          </p>
         </div>
 
         <div>

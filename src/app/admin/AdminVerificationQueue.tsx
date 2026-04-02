@@ -20,7 +20,7 @@ export default async function AdminVerificationQueue() {
   return (
     <DashboardPanel
       title="Verification Queue"
-      href="/admin/deal-room"
+      href="/admin/verification-queue"
       linkLabel={pending.length > 0 ? `View all (${pending.length})` : 'View'}
     >
       <div className="rounded-lg overflow-hidden dash-border border dash-bg-inner">

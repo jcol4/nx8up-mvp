@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { parseLocation, formatLocation } from '@/lib/location-options'
 
+
 export type SponsorProfile = {
   company_name: string
   country: string
@@ -19,6 +20,9 @@ export type SponsorProfile = {
   min_avg_viewers: number | null
   min_subs_followers: number | null
   min_engagement_rate: number | null
+  age_restricted: boolean
+  age_restriction_type: string | null
+  has_pending_age_restriction_request: boolean
 }
 
 export async function getSponsorProfile(): Promise<SponsorProfile | null> {
@@ -27,6 +31,12 @@ export async function getSponsorProfile(): Promise<SponsorProfile | null> {
 
   const sponsor = await prisma.sponsors.findUnique({
     where: { clerk_user_id: userId },
+    include: {
+      age_restriction_requests: {
+        where: { status: 'pending' },
+        take: 1,
+      },
+    },
   })
 
   if (!sponsor) return null
@@ -47,11 +57,14 @@ export async function getSponsorProfile(): Promise<SponsorProfile | null> {
     min_avg_viewers: sponsor.min_avg_viewers ?? null,
     min_subs_followers: sponsor.min_subs_followers ?? null,
     min_engagement_rate: sponsor.min_engagement_rate ? Number(sponsor.min_engagement_rate) : null,
+    age_restricted: sponsor.age_restricted,
+    age_restriction_type: sponsor.age_restriction_type ?? null,
+    has_pending_age_restriction_request: sponsor.age_restriction_requests.length > 0,
   }
 }
 
 export async function updateSponsorProfile(
-  data: SponsorProfile
+  data: Omit<SponsorProfile, 'age_restricted' | 'age_restriction_type' | 'has_pending_age_restriction_request'>
 ): Promise<{ error?: string }> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
@@ -102,5 +115,61 @@ export async function updateSponsorProfile(
     return {}
   } catch {
     return { error: 'Failed to update profile' }
+  }
+}
+
+export async function requestAgeRestrictionChange(data: {
+  requested_age_restricted: boolean
+  requested_age_restriction_type: string | null
+  sponsor_message: string
+}): Promise<{ error?: string }> {
+  const { userId } = await auth()
+  if (!userId) return { error: 'Not authenticated' }
+
+  if (!data.sponsor_message.trim()) {
+    return { error: 'Please provide a message explaining the reason for this change.' }
+  }
+
+  if (data.requested_age_restricted && !data.requested_age_restriction_type) {
+    return { error: 'Please select an age restriction type (18+ or 21+).' }
+  }
+
+  try {
+    const sponsor = await prisma.sponsors.findUnique({
+      where: { clerk_user_id: userId },
+      select: { id: true },
+    })
+    if (!sponsor) return { error: 'Sponsor profile not found.' }
+
+    // Upsert: update existing pending request or create a new one
+    const existing = await prisma.sponsor_age_restriction_requests.findFirst({
+      where: { sponsor_id: sponsor.id, status: 'pending' },
+    })
+
+    if (existing) {
+      await prisma.sponsor_age_restriction_requests.update({
+        where: { id: existing.id },
+        data: {
+          requested_age_restricted: data.requested_age_restricted,
+          requested_age_restriction_type: data.requested_age_restriction_type,
+          sponsor_message: data.sponsor_message.trim(),
+        },
+      })
+    } else {
+      await prisma.sponsor_age_restriction_requests.create({
+        data: {
+          sponsor_id: sponsor.id,
+          requested_age_restricted: data.requested_age_restricted,
+          requested_age_restriction_type: data.requested_age_restriction_type,
+          sponsor_message: data.sponsor_message.trim(),
+          status: 'pending',
+        },
+      })
+    }
+
+    revalidatePath('/sponsor/profile')
+    return {}
+  } catch {
+    return { error: 'Failed to submit change request.' }
   }
 }

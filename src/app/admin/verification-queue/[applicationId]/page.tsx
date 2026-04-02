@@ -44,7 +44,7 @@ export default async function AdminDealRoomDetailPage({
     <div className="flex-1 p-6 overflow-auto">
       <div className="max-w-4xl mx-auto space-y-6">
         <Link
-          href="/admin/deal-room"
+          href="/admin/verification-queue"
           className="inline-flex items-center gap-1.5 text-xs dash-text-muted hover:text-[#c8dff0] transition-colors"
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

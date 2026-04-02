@@ -43,6 +43,11 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
 
   if (!campaign) notFound()
 
+  if (campaign.legal_age_restriction && creatorProfile?.audience_age_min != null) {
+    const restrictionAge = campaign.legal_age_restriction === '21+' ? 21 : 18
+    if (creatorProfile.audience_age_min < restrictionAge) notFound()
+  }
+
   const { eligible, score, reasons, notes } = creatorProfile
     ? matchCreatorToCampaign(creatorProfile, campaign)
     : { eligible: true, score: 100, reasons: [] as string[], notes: [] as string[] }
@@ -454,6 +459,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             acceptedMediaTypes={campaign.content_type}
             eligible={eligible}
             ineligibleReasons={reasons}
+            legalAgeRestriction={campaign.legal_age_restriction ?? null}
           />
         )}
       </div>

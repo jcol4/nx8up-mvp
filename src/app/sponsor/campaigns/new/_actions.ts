@@ -52,7 +52,10 @@ export async function saveCampaignDraft(formData: FormData): Promise<CreateCampa
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
 
-  const sponsor = await prisma.sponsors.findUnique({ where: { clerk_user_id: userId } })
+  const sponsor = await prisma.sponsors.findUnique({
+    where: { clerk_user_id: userId },
+    select: { id: true, age_restriction_type: true },
+  })
   if (!sponsor) return { error: 'Sponsor profile not found.' }
 
   const existingId = (formData.get('draft_id') as string | null)?.trim() || null
@@ -64,8 +67,11 @@ export async function saveCampaignDraft(formData: FormData): Promise<CreateCampa
   const start_date = parseOptionalDate(formData.get('start_date') as string | null)
   const end_date = parseOptionalDate(formData.get('end_date') as string | null)
 
+  const legalAgeRestriction = sponsor.age_restriction_type ?? null
+
   const draftData = {
     title,
+    legal_age_restriction: legalAgeRestriction,
     brand_name: (formData.get('brand_name') as string | null)?.trim() || null,
     product_name: (formData.get('product_name') as string | null)?.trim() || null,
     product_type: (formData.get('product_type') as string | null)?.trim() || null,
@@ -139,7 +145,10 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
 
-  const sponsor = await prisma.sponsors.findUnique({ where: { clerk_user_id: userId } })
+  const sponsor = await prisma.sponsors.findUnique({
+    where: { clerk_user_id: userId },
+    select: { id: true, age_restriction_type: true },
+  })
   if (!sponsor) return { error: 'Sponsor profile not found.' }
 
   // Step 1
@@ -205,8 +214,21 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
   const num_posts = parseOptionalInt(formData.get('num_posts') as string | null)
   const num_short_videos = parseOptionalInt(formData.get('num_short_videos') as string | null)
 
+  const legalAgeRestriction = sponsor.age_restriction_type ?? null
+  const restrictionMinAge =
+    legalAgeRestriction === '21+' ? 21 : legalAgeRestriction === '18+' ? 18 : null
+
   const min_audience_age = parseOptionalInt(formData.get('audience_age_min') as string | null)
   const max_audience_age = parseOptionalInt(formData.get('audience_age_max') as string | null)
+
+  if (restrictionMinAge !== null) {
+    if (min_audience_age === null || min_audience_age < restrictionMinAge) {
+      return {
+        error: `Your account has a ${legalAgeRestriction} age restriction. The minimum audience age must be at least ${restrictionMinAge}.`,
+      }
+    }
+  }
+
   const target_genders = parseStringArray(formData.get('target_genders') as string | null)
   const required_audience_locations = parseStringArray(formData.get('required_audience_locations') as string | null)
   const target_interests = parseStringArray(formData.get('target_interests') as string | null)
@@ -220,6 +242,7 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
 
   const campaignData = {
     title,
+    legal_age_restriction: legalAgeRestriction,
     brand_name,
     product_name,
     product_type,

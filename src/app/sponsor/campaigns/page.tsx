@@ -7,6 +7,7 @@ import SponsorHeader from '../SponsorHeader'
 import DeleteCampaignButton from '@/components/sponsor/DeleteCampaignButton'
 import PublishCampaignButton from '@/components/sponsor/PublishCampaignButton'
 import LaunchCampaignButton from '@/components/sponsor/LaunchCampaignButton'
+import { getMissingSponsorProfileFields } from '@/lib/sponsor-profile'
 
 const STATUS_STYLES: Record<string, string> = {
   draft: 'bg-[#94a3b8]/20 text-[#94a3b8]',
@@ -56,6 +57,9 @@ export default async function SponsorCampaignsPage({
   const sponsor = await prisma.sponsors.findUnique({ where: { clerk_user_id: userId } })
   if (!sponsor) redirect('/')
 
+  const missingFields = getMissingSponsorProfileFields(sponsor)
+  const profileComplete = missingFields.length === 0
+
   const { tab } = await searchParams
   const activeTab = tab === 'launched' ? 'launched' : 'active'
 
@@ -93,13 +97,52 @@ export default async function SponsorCampaignsPage({
                 Manage your posted campaigns and view applicants.
               </p>
             </div>
-            <Link
-              href="/sponsor/campaigns/new"
-              className="py-2.5 px-5 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 transition-opacity"
-            >
-              New campaign
-            </Link>
+            {profileComplete ? (
+              <Link
+                href="/sponsor/campaigns/new"
+                className="py-2.5 px-5 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 transition-opacity"
+              >
+                New campaign
+              </Link>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <p className="text-xs text-yellow-400 font-medium">Profile incomplete</p>
+                  <p className="text-xs dash-text-muted">
+                    Complete your{' '}
+                    <Link href="/sponsor/profile" className="text-[#00c8ff] hover:underline">
+                      profile
+                    </Link>{' '}
+                    before posting
+                  </p>
+                </div>
+                <span className="py-2.5 px-5 rounded-lg bg-white/5 text-[#3a5570] text-sm font-semibold cursor-not-allowed border border-white/10">
+                  New campaign
+                </span>
+              </div>
+            )}
           </div>
+
+          {!profileComplete && (
+            <div className="mb-4 flex items-start gap-2.5 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+              <svg className="w-4 h-4 shrink-0 mt-0.5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+              <div>
+                <p className="text-xs text-yellow-400 font-medium mb-1">
+                  Your profile is incomplete — campaigns are locked until all required fields are filled.
+                </p>
+                <ul className="text-xs dash-text-muted space-y-0.5">
+                  {missingFields.map(f => (
+                    <li key={f.label}>· <span className="text-yellow-400/80">{f.label}</span> — {f.description}</li>
+                  ))}
+                </ul>
+                <Link href="/sponsor/profile" className="inline-block mt-2 text-xs text-[#00c8ff] hover:underline">
+                  Go to profile →
+                </Link>
+              </div>
+            </div>
+          )}
           <BackLink href="/sponsor" className="mb-6 inline-block" />
 
           {/* Tabs */}

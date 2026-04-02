@@ -26,6 +26,7 @@ type Props = {
   acceptedMediaTypes: string[]
   eligible: boolean
   ineligibleReasons: string[]
+  legalAgeRestriction: string | null
 }
 
 export default function ApplyButton({
@@ -37,6 +38,7 @@ export default function ApplyButton({
   acceptedMediaTypes,
   eligible,
   ineligibleReasons,
+  legalAgeRestriction,
 }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -115,17 +117,30 @@ export default function ApplyButton({
 
   if (!open) {
     return (
-      <div className="flex items-center justify-between gap-6">
-        <div>
-          <h2 className="text-base font-semibold cr-text-bright">Apply to This Campaign</h2>
-          <p className="text-xs cr-text-muted mt-0.5">Tell the sponsor why you're the right fit.</p>
+      <div className="space-y-3">
+        {legalAgeRestriction && (
+          <div className="flex items-start gap-2.5 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
+            <svg className="w-4 h-4 shrink-0 mt-0.5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+            <p className="text-xs text-orange-400 leading-relaxed">
+              <span className="font-semibold">Legal notice — {legalAgeRestriction} restriction:</span> It is not
+              legal to market this product to audiences below {legalAgeRestriction === '21+' ? '21' : '18'} years of age.
+            </p>
+          </div>
+        )}
+        <div className="flex items-center justify-between gap-6">
+          <div>
+            <h2 className="text-base font-semibold cr-text-bright">Apply to This Campaign</h2>
+            <p className="text-xs cr-text-muted mt-0.5">Tell the sponsor why you're the right fit.</p>
+          </div>
+          <button
+            onClick={() => setOpen(true)}
+            className="shrink-0 py-2.5 px-6 rounded-lg font-semibold text-sm bg-[#00c8ff] text-[#0a1223] hover:opacity-90 transition-opacity whitespace-nowrap"
+          >
+            Apply to This Campaign
+          </button>
         </div>
-        <button
-          onClick={() => setOpen(true)}
-          className="shrink-0 py-2.5 px-6 rounded-lg font-semibold text-sm bg-[#00c8ff] text-[#0a1223] hover:opacity-90 transition-opacity whitespace-nowrap"
-        >
-          Apply to This Campaign
-        </button>
       </div>
     )
   }
@@ -136,6 +151,21 @@ export default function ApplyButton({
 
   return (
     <div className="space-y-4">
+      {/* Legal age restriction notice */}
+      {legalAgeRestriction && (
+        <div className="flex items-start gap-2.5 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
+          <svg className="w-4 h-4 shrink-0 mt-0.5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          </svg>
+          <p className="text-xs text-orange-400 leading-relaxed">
+            <span className="font-semibold">Legal notice — {legalAgeRestriction} restriction:</span> It is not
+            legal to market this product to audiences below {legalAgeRestriction === '21+' ? '21' : '18'} years of
+            age. By applying, you confirm that your content will not be directed toward viewers under{' '}
+            {legalAgeRestriction === '21+' ? '21' : '18'}.
+          </p>
+        </div>
+      )}
+
       {/* Pitch */}
       <div>
         <label className={labelClass}>Why are you a great fit? *</label>

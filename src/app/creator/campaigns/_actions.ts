@@ -77,7 +77,14 @@ export async function getOpenCampaignsWithEligibility(limit = 50) {
       const { eligible, score, reasons, notes } = matchCreatorToCampaign(creator, campaign)
       return { campaign, eligible, score, reasons, notes }
     })
-    .filter(({ score }) => score >= 75)
+    .filter(({ campaign, score }) => {
+      if (score < 75) return false
+      if (campaign.legal_age_restriction && creator?.audience_age_min != null) {
+        const restrictionAge = campaign.legal_age_restriction === '21+' ? 21 : 18
+        if (creator.audience_age_min < restrictionAge) return false
+      }
+      return true
+    })
 }
 
 export async function getLaunchedCampaigns(limit = 50) {
@@ -181,10 +188,18 @@ export async function applyToCampaign(
       content_type: true,
       campaign_type: true,
       product_type: true,
+      legal_age_restriction: true,
     },
   })
   if (!campaign) return { error: 'Campaign not found.' }
   if (campaign.status === 'launched') return { error: 'This campaign is no longer accepting applications.' }
+
+  if (campaign.legal_age_restriction && creator.audience_age_min != null) {
+    const restrictionAge = campaign.legal_age_restriction === '21+' ? 21 : 18
+    if (creator.audience_age_min < restrictionAge) {
+      return { error: `This campaign requires an audience aged ${campaign.legal_age_restriction} or older. Your audience age minimum does not meet this requirement.` }
+    }
+  }
 
   const { eligible, reasons } = matchCreatorToCampaign(creator, campaign)
   if (!eligible) {

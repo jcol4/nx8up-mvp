@@ -78,23 +78,26 @@ model content_creators {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model sponsors {
-  id                  String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  clerk_user_id       String      @unique
-  email               String      @unique
-  company_name        String?
-  location            String?
-  language            String[]
-  budget_min          Int?
-  budget_max          Int?
-  min_avg_viewers     Int?
-  min_subs_followers  Int?
-  min_engagement_rate Decimal?    @db.Decimal(5, 2)
-  platform            String[]
-  content_type        String[]
-  game_category       String[]
-  created_at          DateTime?   @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime?   @default(now()) @db.Timestamptz(6)
-  campaigns           campaigns[]
+  id                           String                               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerk_user_id                String                               @unique
+  email                        String                               @unique
+  company_name                 String?
+  location                     String?
+  language                     String[]
+  budget_min                   Int?
+  budget_max                   Int?
+  min_avg_viewers              Int?
+  min_subs_followers           Int?
+  min_engagement_rate          Decimal?                             @db.Decimal(5, 2)
+  platform                     String[]
+  content_type                 String[]
+  game_category                String[]
+  created_at                   DateTime?                            @default(now()) @db.Timestamptz(6)
+  updated_at                   DateTime?                            @default(now()) @db.Timestamptz(6)
+  age_restricted               Boolean                              @default(false)
+  age_restriction_type         String?
+  campaigns                    campaigns[]
+  age_restriction_requests     sponsor_age_restriction_requests[]
 
   @@index([budget_max])
   @@index([budget_min])
@@ -162,6 +165,7 @@ model campaigns {
   landing_page_url            String?
   tracking_type               String?
   conversion_goal             String?
+  legal_age_restriction       String?
   applications                campaign_applications[]
   sponsor                     sponsors                @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
 
@@ -175,19 +179,19 @@ model campaigns {
 }
 
 model campaign_applications {
-  id                     String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  campaign_id            String           @db.Uuid
-  creator_id             String           @db.Uuid
-  status                 String           @default("pending")
+  id                     String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaign_id            String            @db.Uuid
+  creator_id             String            @db.Uuid
+  status                 String            @default("pending")
   message                String?
-  submitted_at           DateTime?        @default(now()) @db.Timestamptz(6)
+  submitted_at           DateTime?         @default(now()) @db.Timestamptz(6)
   app_audience_age_min   Int?
   app_audience_age_max   Int?
   app_audience_locations String[]
   app_location           String?
   app_media_types        String[]
-  campaign               campaigns        @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
-  creator                content_creators @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+  campaign               campaigns         @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+  creator                content_creators  @relation(fields: [creator_id], references: [id], onDelete: Cascade)
   deal_submission        deal_submissions?
 
   @@unique([campaign_id, creator_id])
@@ -199,15 +203,31 @@ model campaign_applications {
 model deal_submissions {
   id                   String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   application_id       String                @unique @db.Uuid
-  application          campaign_applications @relation(fields: [application_id], references: [id], onDelete: Cascade)
-  proof_urls           String[]
   screenshot_url       String?
   posted_at            DateTime?             @db.Timestamptz(6)
   disclosure_confirmed Boolean               @default(false)
   submitted_at         DateTime?             @db.Timestamptz(6)
   status               String                @default("pending")
   sponsor_notes        String?
-  admin_notes          String?
   created_at           DateTime              @default(now()) @db.Timestamptz(6)
   updated_at           DateTime              @updatedAt @db.Timestamptz(6)
+  proof_urls           String[]
+  admin_notes          String?
+  application          campaign_applications @relation(fields: [application_id], references: [id], onDelete: Cascade)
+}
+
+model sponsor_age_restriction_requests {
+  id                             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sponsor_id                     String   @db.Uuid
+  requested_age_restricted       Boolean
+  requested_age_restriction_type String?
+  sponsor_message                String
+  status                         String   @default("pending")
+  admin_notes                    String?
+  created_at                     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                     DateTime @updatedAt @db.Timestamptz(6)
+  sponsor                        sponsors @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
+
+  @@index([sponsor_id])
+  @@index([status])
 }
