@@ -102,6 +102,7 @@ export default function NewCampaignForm({ initialDraft, editingId }: Props) {
     fd.set('payment_model', draft.payment_model)
     fd.set('start_date', draft.start_date)
     fd.set('end_date', draft.end_date)
+    fd.set('accepted_media_types', JSON.stringify(draft.accepted_media_types))
     fd.set('campaign_type', draft.campaign_type)
     fd.set('num_videos', draft.num_videos)
     fd.set('video_includes', JSON.stringify(draft.video_includes))

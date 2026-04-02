@@ -5,7 +5,7 @@ import FormTextarea from '@/components/ui/FormTextarea'
 import type { CampaignDraft } from '../_shared'
 import {
   labelClass, sectionClass, sectionTitle, toggleBtn,
-  MISSION_TYPES, VIDEO_INCLUDES,
+  MISSION_TYPES, VIDEO_INCLUDES, MEDIA_TYPES,
 } from '../_shared'
 
 type Props = {
@@ -50,6 +50,13 @@ export default function Step5Content({ draft, setDraft, error, onNext, onBack }:
       ? draft.video_includes.filter(x => x !== val)
       : [...draft.video_includes, val])
 
+  const toggleMediaType = (val: string) =>
+    set('accepted_media_types', draft.accepted_media_types.includes(val)
+      ? draft.accepted_media_types.filter(x => x !== val)
+      : [...draft.accepted_media_types, val])
+
+  const availableMediaTypes = MEDIA_TYPES.filter(m => draft.platform.includes(m.platform))
+
   const hasYouTube = draft.platform.includes('YouTube')
   const hasTwitch = draft.platform.includes('Twitch')
   const hasSocialShort = draft.platform.includes('TikTok') || draft.platform.includes('Instagram')
@@ -83,6 +90,47 @@ export default function Step5Content({ draft, setDraft, error, onNext, onBack }:
           ))}
         </div>
       </div>
+
+      {/* Accepted media types */}
+      {availableMediaTypes.length > 0 && (
+        <div className={sectionClass}>
+          <p className={sectionTitle}>
+            Accepted Media Types <span className="text-[#00c8ff]">*</span>
+          </p>
+          <p className="text-xs dash-text-muted -mt-2 mb-3">Select which content formats you will accept as proof of delivery.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {availableMediaTypes.map(m => {
+              const active = draft.accepted_media_types.includes(m.value)
+              return (
+                <button
+                  key={m.value}
+                  type="button"
+                  onClick={() => toggleMediaType(m.value)}
+                  className={`flex items-start gap-3 p-3 rounded-lg border text-left transition-all duration-150 ${
+                    active
+                      ? 'border-[#00c8ff] bg-[rgba(0,200,255,0.06)]'
+                      : 'dash-border hover:border-[rgba(0,200,255,0.25)]'
+                  }`}
+                >
+                  <span className={`w-4 h-4 rounded border flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
+                    active ? 'bg-[#00c8ff] border-[#00c8ff]' : 'border-[rgba(0,200,255,0.25)]'
+                  }`}>
+                    {active && (
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M1.5 5l2.5 2.5 4.5-5" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </span>
+                  <div>
+                    <p className={`text-sm font-medium ${active ? 'dash-text-bright' : 'dash-text-muted'}`}>{m.label}</p>
+                    <p className="text-xs dash-text-muted">{m.description}</p>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Deliverables */}
       <div className={sectionClass}>

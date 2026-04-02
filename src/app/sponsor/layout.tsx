@@ -24,6 +24,7 @@ const NAV_ITEMS = [
   { href: '/sponsor', label: 'Dashboard' },
   { href: '/sponsor/profile', label: 'Profile' },
   { href: '/sponsor/campaigns', label: 'My Campaigns' },
+  { href: '/sponsor/deal-room', label: 'Deal Room' },
   { href: '/sponsor/creators', label: 'Creators' },
 ]
 

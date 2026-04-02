@@ -10,12 +10,20 @@ const AUDIENCE_LOCATION_OPTIONS = [
   'Philippines', 'Indonesia', 'Netherlands', 'Sweden', 'Other',
 ] as const
 
+const MEDIA_TYPE_LABELS: Record<string, string> = {
+  youtube_video: 'YouTube Video',
+  youtube_short: 'YouTube Short',
+  twitch_stream: 'Twitch Stream',
+  twitch_clip:   'Twitch Clip',
+}
+
 type Props = {
   campaignId: string
   profileLocation: string | null
   profileAudienceAgeMin: number | null
   profileAudienceAgeMax: number | null
   profileAudienceLocations: string[]
+  acceptedMediaTypes: string[]
   eligible: boolean
   ineligibleReasons: string[]
 }
@@ -26,6 +34,7 @@ export default function ApplyButton({
   profileAudienceAgeMin,
   profileAudienceAgeMax,
   profileAudienceLocations,
+  acceptedMediaTypes,
   eligible,
   ineligibleReasons,
 }: Props) {
@@ -39,6 +48,14 @@ export default function ApplyButton({
   const [ageMin, setAgeMin] = useState(profileAudienceAgeMin?.toString() ?? '')
   const [ageMax, setAgeMax] = useState(profileAudienceAgeMax?.toString() ?? '')
   const [audienceLocations, setAudienceLocations] = useState<string[]>(profileAudienceLocations)
+  const [selectedMediaTypes, setSelectedMediaTypes] = useState<string[]>(
+    acceptedMediaTypes.length === 1 ? [acceptedMediaTypes[0]] : []
+  )
+
+  const toggleMediaType = (val: string) =>
+    setSelectedMediaTypes(prev =>
+      prev.includes(val) ? prev.filter(x => x !== val) : [...prev, val]
+    )
 
   const toggleAudienceLocation = (loc: string) =>
     setAudienceLocations((prev) =>
@@ -52,12 +69,17 @@ export default function ApplyButton({
     }
     setLoading(true)
     setError(null)
+    if (acceptedMediaTypes.length > 0 && selectedMediaTypes.length === 0) {
+      setError('Please select at least one media type you will deliver.')
+      return
+    }
     const res = await applyToCampaign(campaignId, {
       message,
       audienceAgeMin: ageMin ? parseInt(ageMin, 10) : null,
       audienceAgeMax: ageMax ? parseInt(ageMax, 10) : null,
       audienceLocations,
       location,
+      mediaTypes: selectedMediaTypes,
     })
     setLoading(false)
     if (res.error) {
@@ -220,6 +242,29 @@ export default function ApplyButton({
             </button>
           )}
       </div>
+
+      {/* Media types */}
+      {acceptedMediaTypes.length > 0 && (
+        <div>
+          <label className={labelClass}>Content type you will deliver *</label>
+          <div className="flex flex-wrap gap-2">
+            {acceptedMediaTypes.map((mt) => (
+              <button
+                key={mt}
+                type="button"
+                onClick={() => toggleMediaType(mt)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  selectedMediaTypes.includes(mt)
+                    ? 'bg-[#00c8ff]/20 text-[#00c8ff] border border-[#00c8ff]/40'
+                    : 'cr-border border cr-text-muted hover:text-[#c8dff0]'
+                }`}
+              >
+                {MEDIA_TYPE_LABELS[mt] ?? mt}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {error && <p className="text-xs text-red-400">{error}</p>}
 

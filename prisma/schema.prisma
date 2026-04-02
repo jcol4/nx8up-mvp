@@ -185,11 +185,29 @@ model campaign_applications {
   app_audience_age_max   Int?
   app_audience_locations String[]
   app_location           String?
+  app_media_types        String[]
   campaign               campaigns        @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
   creator                content_creators @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+  deal_submission        deal_submissions?
 
   @@unique([campaign_id, creator_id])
   @@index([campaign_id])
   @@index([creator_id])
   @@index([status])
+}
+
+model deal_submissions {
+  id                   String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  application_id       String                @unique @db.Uuid
+  application          campaign_applications @relation(fields: [application_id], references: [id], onDelete: Cascade)
+  proof_urls           String[]
+  screenshot_url       String?
+  posted_at            DateTime?             @db.Timestamptz(6)
+  disclosure_confirmed Boolean               @default(false)
+  submitted_at         DateTime?             @db.Timestamptz(6)
+  status               String                @default("pending")
+  sponsor_notes        String?
+  admin_notes          String?
+  created_at           DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime              @updatedAt @db.Timestamptz(6)
 }

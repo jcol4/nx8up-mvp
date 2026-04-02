@@ -80,6 +80,41 @@ export async function getOpenCampaignsWithEligibility(limit = 50) {
     .filter(({ score }) => score >= 75)
 }
 
+export async function getLaunchedCampaigns(limit = 50) {
+  const { userId } = await auth()
+
+  const creator = userId
+    ? await prisma.content_creators.findUnique({
+        where: { clerk_user_id: userId },
+        select: { id: true },
+      })
+    : null
+
+  const campaigns = await prisma.campaigns.findMany({
+    where: { status: 'launched' },
+    orderBy: { created_at: 'desc' },
+    take: limit,
+    include: {
+      sponsor: { select: { company_name: true } },
+      _count: { select: { applications: true } },
+      ...(creator
+        ? {
+            applications: {
+              where: { creator_id: creator.id },
+              select: { status: true },
+              take: 1,
+            },
+          }
+        : {}),
+    },
+  })
+
+  return campaigns.map((c) => ({
+    campaign: c,
+    myApplication: (c as typeof c & { applications?: { status: string }[] }).applications?.[0] ?? null,
+  }))
+}
+
 export async function getCampaignById(id: string) {
   return prisma.campaigns.findUnique({
     where: { id },
@@ -111,6 +146,7 @@ export type ApplicationData = {
   audienceAgeMax?: number | null
   audienceLocations?: string[]
   location?: string
+  mediaTypes?: string[]
 }
 
 export async function applyToCampaign(
@@ -129,6 +165,7 @@ export async function applyToCampaign(
   const campaign = await prisma.campaigns.findUnique({
     where: { id: campaignId },
     select: {
+      status: true,
       platform: true,
       min_subs_followers: true,
       min_avg_viewers: true,
@@ -147,6 +184,7 @@ export async function applyToCampaign(
     },
   })
   if (!campaign) return { error: 'Campaign not found.' }
+  if (campaign.status === 'launched') return { error: 'This campaign is no longer accepting applications.' }
 
   const { eligible, reasons } = matchCreatorToCampaign(creator, campaign)
   if (!eligible) {
@@ -168,6 +206,7 @@ export async function applyToCampaign(
       app_audience_age_max: data.audienceAgeMax ?? null,
       app_audience_locations: data.audienceLocations ?? [],
       app_location: data.location?.trim() || null,
+      app_media_types: data.mediaTypes ?? [],
     },
   })
 

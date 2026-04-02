@@ -94,6 +94,7 @@ export async function saveCampaignDraft(formData: FormData): Promise<CreateCampa
     min_stream_duration: parseOptionalInt(formData.get('min_stream_duration') as string | null),
     num_posts: parseOptionalInt(formData.get('num_posts') as string | null),
     num_short_videos: parseOptionalInt(formData.get('num_short_videos') as string | null),
+    content_type: parseStringArray(formData.get('accepted_media_types') as string | null),
     content_guidelines: (formData.get('content_guidelines') as string | null)?.trim() || null,
     must_include_link: parseBool(formData.get('must_include_link') as string | null),
     must_include_promo_code: parseBool(formData.get('must_include_promo_code') as string | null),
@@ -123,7 +124,6 @@ export async function saveCampaignDraft(formData: FormData): Promise<CreateCampa
         campaign_code: generateCampaignCode(),
         sponsor_id: sponsor.id,
         status: 'draft',
-        content_type: [],
         creative_package: [],
       },
     })
@@ -276,7 +276,6 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
         campaign_code: generateCampaignCode(),
         sponsor_id: sponsor.id,
         status: 'live',
-        content_type: [],
         creative_package: [],
       },
     })

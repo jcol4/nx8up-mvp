@@ -31,6 +31,7 @@ export type CampaignDraft = {
   end_date: string
 
   // Step 5 — Content
+  accepted_media_types: string[]
   campaign_type: string
   num_videos: string
   video_includes: string[]
@@ -71,6 +72,7 @@ export const EMPTY_DRAFT: CampaignDraft = {
   payment_model: 'fixed_per_creator',
   start_date: '',
   end_date: '',
+  accepted_media_types: [],
   campaign_type: '',
   num_videos: '',
   video_includes: [],
@@ -124,6 +126,13 @@ export const OBJECTIVES = [
 ]
 
 export const PLATFORMS = ['YouTube', 'Twitch', 'TikTok', 'Instagram'] as const
+
+export const MEDIA_TYPES = [
+  { value: 'youtube_video', label: 'YouTube Video',  platform: 'YouTube', description: 'Standard long-form YouTube upload' },
+  { value: 'youtube_short', label: 'YouTube Short',  platform: 'YouTube', description: 'Vertical short-form (≤ 60 sec)' },
+  { value: 'twitch_stream', label: 'Twitch Stream',  platform: 'Twitch',  description: 'Live stream VOD' },
+  { value: 'twitch_clip',   label: 'Twitch Clip',    platform: 'Twitch',  description: 'Short highlight clip from a stream' },
+] as const
 
 export const GENDERS = ['Male', 'Female', 'All'] as const
 

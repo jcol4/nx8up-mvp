@@ -24,6 +24,35 @@ export async function publishCampaign(id: string): Promise<{ error?: string; suc
   return { success: true }
 }
 
+export async function launchCampaign(id: string): Promise<{ error?: string; success?: boolean }> {
+  const { userId } = await auth()
+  if (!userId) return { error: 'Not authenticated' }
+
+  const sponsor = await prisma.sponsors.findUnique({ where: { clerk_user_id: userId } })
+  if (!sponsor) return { error: 'Sponsor account not found.' }
+
+  const campaign = await prisma.campaigns.findUnique({
+    where: { id },
+    include: { applications: { where: { status: 'accepted' }, select: { id: true }, take: 1 } },
+  })
+  if (!campaign || campaign.sponsor_id !== sponsor.id) {
+    return { error: 'You are not allowed to launch this campaign.' }
+  }
+  if (campaign.status !== 'live') {
+    return { error: 'Only active campaigns can be launched.' }
+  }
+  if (campaign.applications.length === 0) {
+    return { error: 'You must accept at least one creator before launching.' }
+  }
+
+  await prisma.campaigns.update({ where: { id }, data: { status: 'launched' } })
+
+  revalidatePath('/sponsor/campaigns')
+  revalidatePath('/sponsor')
+
+  return { success: true }
+}
+
 export async function deleteCampaign(id: string): Promise<{ error?: string; success?: boolean }> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }

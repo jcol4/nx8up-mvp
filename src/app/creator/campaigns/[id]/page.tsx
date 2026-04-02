@@ -422,7 +422,21 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
 
       {/* ── Full-width Apply panel ── */}
       <div className="cr-panel px-6 py-4">
-        {alreadyApplied ? (
+        {campaign.status === 'launched' ? (
+          <div className="flex items-center gap-3">
+            <span className="w-2 h-2 rounded-full bg-[#a855f7] shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-[#a855f7]">Campaign Launched</p>
+              {alreadyApplied ? (
+                <p className="text-xs cr-text-muted">
+                  Your application status: <span className="capitalize cr-text">{myApplication!.status}</span>
+                </p>
+              ) : (
+                <p className="text-xs cr-text-muted">This campaign is no longer accepting applications.</p>
+              )}
+            </div>
+          </div>
+        ) : alreadyApplied ? (
           <div className="flex items-center gap-3">
             <span className="text-lg">✓</span>
             <div>
@@ -437,6 +451,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             profileAudienceAgeMin={creatorProfile?.audience_age_min ?? null}
             profileAudienceAgeMax={creatorProfile?.audience_age_max ?? null}
             profileAudienceLocations={creatorProfile?.audience_locations ?? []}
+            acceptedMediaTypes={campaign.content_type}
             eligible={eligible}
             ineligibleReasons={reasons}
           />
