@@ -6,7 +6,7 @@ import { createCampaign, saveCampaignDraft } from './_actions'
 import { EMPTY_DRAFT, STEP_LABELS, type CampaignDraft } from './_shared'
 import Step1Basics from './steps/Step1Basics'
 import Step2Audience from './steps/Step2Audience'
-import Step3Creators from './steps/Step3Creators'
+import Step3Creators, { type AvailableCreator } from './steps/Step3Creators'
 import Step4Budget from './steps/Step4Budget'
 import Step5Content from './steps/Step5Content'
 import Step6Tracking from './steps/Step6Tracking'
@@ -18,6 +18,7 @@ type Props = {
   initialDraft?: CampaignDraft
   editingId?: string
   sponsorAgeRestriction?: string | null
+  availableCreators?: AvailableCreator[]
 }
 
 function validateStep(step: number, draft: CampaignDraft): string {
@@ -27,6 +28,9 @@ function validateStep(step: number, draft: CampaignDraft): string {
       if (!draft.product_type) return 'Product type is required.'
       if (!draft.objective) return 'Campaign goal is required.'
       if (!draft.platform.length) return 'Select at least one platform.'
+      return ''
+    case 3:
+      if (draft.is_direct_invite && !draft.invited_creator_id) return 'Please select a creator to invite.'
       return ''
     case 4:
       if (!draft.budget || parseInt(draft.budget, 10) <= 0) return 'A budget greater than $0 is required.'
@@ -43,7 +47,7 @@ function validateStep(step: number, draft: CampaignDraft): string {
   }
 }
 
-export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRestriction }: Props) {
+export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRestriction, availableCreators = [] }: Props) {
   const router = useRouter()
   const [step, setStep] = useState(editingId ? TOTAL_STEPS : 1)
   const [draft, setDraft] = useState<CampaignDraft>(initialDraft ?? EMPTY_DRAFT)
@@ -94,6 +98,8 @@ export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRes
     fd.set('required_audience_locations', JSON.stringify(draft.required_audience_locations))
     fd.set('target_cities', draft.target_cities)
     fd.set('target_interests', JSON.stringify(draft.target_interests))
+    fd.set('is_direct_invite', String(draft.is_direct_invite))
+    fd.set('invited_creator_id', draft.invited_creator_id)
     fd.set('creator_types', JSON.stringify(draft.creator_types))
     fd.set('creator_sizes', JSON.stringify(draft.creator_sizes))
     fd.set('min_subs_followers', draft.min_subs_followers)
@@ -238,7 +244,7 @@ export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRes
       <div className="dash-panel p-6" style={step === 1 || step === 4 ? { overflow: 'visible' } : undefined}>
         {step === 1 && <Step1Basics {...stepProps} error={stepError} onNext={goNext} />}
         {step === 2 && <Step2Audience {...stepProps} onNext={goNext} onBack={goBack} sponsorAgeRestriction={sponsorAgeRestriction} />}
-        {step === 3 && <Step3Creators {...stepProps} onNext={goNext} onBack={goBack} />}
+        {step === 3 && <Step3Creators {...stepProps} onNext={goNext} onBack={goBack} availableCreators={availableCreators} />}
         {step === 4 && <Step4Budget {...stepProps} error={stepError} onNext={goNext} onBack={goBack} />}
         {step === 5 && <Step5Content {...stepProps} error={stepError} onNext={goNext} onBack={goBack} />}
         {step === 6 && <Step6Tracking {...stepProps} onNext={goNext} onBack={goBack} />}

@@ -40,7 +40,7 @@ const CREATOR_MATCHING_SELECT = {
 
 export async function getOpenCampaigns(limit = 10) {
   return prisma.campaigns.findMany({
-    where: { status: 'live' },
+    where: { status: 'live', is_direct_invite: false },
     orderBy: { created_at: 'desc' },
     take: limit,
     include: {
@@ -55,7 +55,7 @@ export async function getOpenCampaignsWithEligibility(limit = 50) {
 
   const [campaigns, creator] = await Promise.all([
     prisma.campaigns.findMany({
-      where: { status: 'live' },
+      where: { status: 'live', is_direct_invite: false },
       orderBy: { created_at: 'desc' },
       take: limit,
       include: {
@@ -227,5 +227,64 @@ export async function applyToCampaign(
 
   revalidatePath('/creator/campaigns')
   revalidatePath(`/creator/campaigns/${campaignId}`)
+  return { success: true }
+}
+
+export async function getMyInvitations() {
+  const { userId } = await auth()
+  if (!userId) return []
+
+  const creator = await prisma.content_creators.findUnique({
+    where: { clerk_user_id: userId },
+    select: { id: true },
+  })
+  if (!creator) return []
+
+  const applications = await prisma.campaign_applications.findMany({
+    where: { creator_id: creator.id, status: 'invited' },
+    include: {
+      campaign: {
+        include: {
+          sponsor: { select: { company_name: true } },
+        },
+      },
+    },
+    orderBy: { submitted_at: 'desc' },
+  })
+
+  return applications
+}
+
+export async function respondToInvitation(
+  applicationId: string,
+  response: 'accept' | 'decline',
+): Promise<{ error?: string; success?: boolean }> {
+  const { userId } = await auth()
+  if (!userId) return { error: 'Not authenticated' }
+
+  const creator = await prisma.content_creators.findUnique({
+    where: { clerk_user_id: userId },
+    select: { id: true },
+  })
+  if (!creator) return { error: 'Creator profile not found.' }
+
+  const application = await prisma.campaign_applications.findUnique({
+    where: { id: applicationId },
+    select: { id: true, creator_id: true, status: true, campaign_id: true },
+  })
+  if (!application || application.creator_id !== creator.id) {
+    return { error: 'Invitation not found.' }
+  }
+  if (application.status !== 'invited') {
+    return { error: 'This invitation has already been responded to.' }
+  }
+
+  await prisma.campaign_applications.update({
+    where: { id: applicationId },
+    data: { status: response === 'accept' ? 'accepted' : 'rejected' },
+  })
+
+  revalidatePath('/creator/campaigns')
+  revalidatePath(`/creator/campaigns/${application.campaign_id}`)
   return { success: true }
 }

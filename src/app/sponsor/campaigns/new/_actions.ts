@@ -69,8 +69,11 @@ export async function saveCampaignDraft(formData: FormData): Promise<CreateCampa
 
   const legalAgeRestriction = sponsor.age_restriction_type ?? null
 
+  const is_direct_invite = parseBool(formData.get('is_direct_invite') as string | null)
+
   const draftData = {
     title,
+    is_direct_invite,
     legal_age_restriction: legalAgeRestriction,
     brand_name: (formData.get('brand_name') as string | null)?.trim() || null,
     product_name: (formData.get('product_name') as string | null)?.trim() || null,
@@ -239,9 +242,21 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
   const must_include_link = parseBool(formData.get('must_include_link') as string | null)
   const must_include_promo_code = parseBool(formData.get('must_include_promo_code') as string | null)
   const must_tag_brand = parseBool(formData.get('must_tag_brand') as string | null)
+  const is_direct_invite = parseBool(formData.get('is_direct_invite') as string | null)
+  const invited_creator_id = (formData.get('invited_creator_id') as string | null)?.trim() || null
+
+  if (is_direct_invite) {
+    if (!invited_creator_id) return { error: 'Please select a creator to invite.' }
+    const invitedCreator = await prisma.content_creators.findUnique({
+      where: { id: invited_creator_id },
+      select: { id: true },
+    })
+    if (!invitedCreator) return { error: 'Selected creator not found.' }
+  }
 
   const campaignData = {
     title,
+    is_direct_invite,
     legal_age_restriction: legalAgeRestriction,
     brand_name,
     product_name,
@@ -303,6 +318,24 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
       },
     })
     campaignId = campaign.id
+  }
+
+  // For direct invite campaigns, create the invited application immediately
+  if (is_direct_invite && invited_creator_id) {
+    const existing = await prisma.campaign_applications.findUnique({
+      where: { campaign_id_creator_id: { campaign_id: campaignId, creator_id: invited_creator_id } },
+    })
+    if (!existing) {
+      await prisma.campaign_applications.create({
+        data: {
+          campaign_id: campaignId,
+          creator_id: invited_creator_id,
+          status: 'invited',
+          app_audience_locations: [],
+          app_media_types: [],
+        },
+      })
+    }
   }
 
   revalidatePath('/sponsor/campaigns')

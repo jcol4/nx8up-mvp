@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import SponsorHeader from '../../../SponsorHeader'
 import NewCampaignForm from '../../new/NewCampaignForm'
 import type { CampaignDraft } from '../../new/_shared'
+import { EMPTY_DRAFT } from '../../new/_shared'
 
 export default async function EditCampaignPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -20,7 +21,9 @@ export default async function EditCampaignPage({ params }: { params: Promise<{ i
   if (!campaign) notFound()
 
   const initialDraft: CampaignDraft = {
+    ...EMPTY_DRAFT,
     title: campaign.title,
+    is_direct_invite: campaign.is_direct_invite,
     brand_name: campaign.brand_name ?? '',
     product_name: campaign.product_name ?? '',
     product_type: campaign.product_type ?? '',

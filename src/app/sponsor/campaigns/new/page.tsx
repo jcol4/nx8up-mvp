@@ -28,6 +28,22 @@ export default async function NewCampaignPage() {
   })
 
   const missingFields = getMissingSponsorProfileFields(sponsor ?? {})
+
+  const availableCreators = await prisma.content_creators.findMany({
+    where: { is_available: true },
+    select: {
+      id: true,
+      twitch_username: true,
+      youtube_handle: true,
+      youtube_channel_name: true,
+      platform: true,
+      subs_followers: true,
+      youtube_subscribers: true,
+      creator_size: true,
+    },
+    orderBy: { subs_followers: 'desc' },
+    take: 200,
+  })
   if (missingFields.length > 0) {
     return (
       <>
@@ -98,6 +114,7 @@ export default async function NewCampaignPage() {
           <NewCampaignForm
             initialDraft={profileDraft}
             sponsorAgeRestriction={sponsor?.age_restriction_type ?? null}
+            availableCreators={availableCreators}
           />
         </div>
       </div>

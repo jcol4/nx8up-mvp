@@ -78,26 +78,26 @@ model content_creators {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model sponsors {
-  id                           String                               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  clerk_user_id                String                               @unique
-  email                        String                               @unique
-  company_name                 String?
-  location                     String?
-  language                     String[]
-  budget_min                   Int?
-  budget_max                   Int?
-  min_avg_viewers              Int?
-  min_subs_followers           Int?
-  min_engagement_rate          Decimal?                             @db.Decimal(5, 2)
-  platform                     String[]
-  content_type                 String[]
-  game_category                String[]
-  created_at                   DateTime?                            @default(now()) @db.Timestamptz(6)
-  updated_at                   DateTime?                            @default(now()) @db.Timestamptz(6)
-  age_restricted               Boolean                              @default(false)
-  age_restriction_type         String?
-  campaigns                    campaigns[]
-  age_restriction_requests     sponsor_age_restriction_requests[]
+  id                       String                             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerk_user_id            String                             @unique
+  email                    String                             @unique
+  company_name             String?
+  location                 String?
+  language                 String[]
+  budget_min               Int?
+  budget_max               Int?
+  min_avg_viewers          Int?
+  min_subs_followers       Int?
+  min_engagement_rate      Decimal?                           @db.Decimal(5, 2)
+  platform                 String[]
+  content_type             String[]
+  game_category            String[]
+  created_at               DateTime?                          @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime?                          @default(now()) @db.Timestamptz(6)
+  age_restricted           Boolean                            @default(false)
+  age_restriction_type     String?
+  campaigns                campaigns[]
+  age_restriction_requests sponsor_age_restriction_requests[]
 
   @@index([budget_max])
   @@index([budget_min])
@@ -166,6 +166,7 @@ model campaigns {
   tracking_type               String?
   conversion_goal             String?
   legal_age_restriction       String?
+  is_direct_invite            Boolean                 @default(false)
   applications                campaign_applications[]
   sponsor                     sponsors                @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
 

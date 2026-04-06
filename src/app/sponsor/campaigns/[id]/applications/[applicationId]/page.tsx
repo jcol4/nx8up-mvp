@@ -120,10 +120,12 @@ export default async function ApplicationReviewPage({ params }: Props) {
                       ? 'bg-[#eab308]/20 text-[#eab308]'
                       : current.status === 'accepted'
                         ? 'bg-[#22c55e]/20 text-[#22c55e]'
-                        : 'bg-[#94a3b8]/20 text-[#94a3b8]'
+                        : current.status === 'invited'
+                          ? 'bg-[#00c8ff]/20 text-[#00c8ff]'
+                          : 'bg-[#94a3b8]/20 text-[#94a3b8]'
                   }`}
                 >
-                  {current.status}
+                  {current.status === 'invited' ? 'Invited (pending)' : current.status}
                 </span>
                 {current.submitted_at && (
                   <span className="text-xs dash-text-muted">

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import { getCampaignById, getMyApplication } from '../_actions'
 import ApplyButton from './ApplyButton'
+import InviteResponseButtons from '@/components/creator/InviteResponseButtons'
 import { prisma } from '@/lib/prisma'
 import { matchCreatorToCampaign } from '@/lib/matching'
 
@@ -427,7 +428,18 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
 
       {/* ── Full-width Apply panel ── */}
       <div className="cr-panel px-6 py-4">
-        {campaign.status === 'launched' ? (
+        {myApplication?.status === 'invited' ? (
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="w-2 h-2 rounded-full bg-[#00c8ff] shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-[#00c8ff]">You&apos;ve been invited</p>
+                <p className="text-xs cr-text-muted">The sponsor selected you directly for this campaign.</p>
+              </div>
+            </div>
+            <InviteResponseButtons applicationId={myApplication.id} />
+          </div>
+        ) : campaign.status === 'launched' ? (
           <div className="flex items-center gap-3">
             <span className="w-2 h-2 rounded-full bg-[#a855f7] shrink-0" />
             <div>

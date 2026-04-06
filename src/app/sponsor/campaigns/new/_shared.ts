@@ -18,6 +18,8 @@ export type CampaignDraft = {
   target_interests: string[]
 
   // Step 3 — Creators
+  is_direct_invite: boolean
+  invited_creator_id: string
   creator_types: string[]
   creator_sizes: string[]
   min_subs_followers: string
@@ -63,6 +65,8 @@ export const EMPTY_DRAFT: CampaignDraft = {
   required_audience_locations: [],
   target_cities: '',
   target_interests: [],
+  is_direct_invite: false,
+  invited_creator_id: '',
   creator_types: [],
   creator_sizes: [],
   min_subs_followers: '',

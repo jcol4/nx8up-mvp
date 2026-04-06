@@ -68,10 +68,12 @@ export default async function CampaignApplicationsPage({ params }: Props) {
                             ? 'bg-[#eab308]/20 text-[#eab308]'
                             : app.status === 'accepted'
                               ? 'bg-[#22c55e]/20 text-[#22c55e]'
-                              : 'bg-[#94a3b8]/20 text-[#94a3b8]'
+                              : app.status === 'invited'
+                                ? 'bg-[#00c8ff]/20 text-[#00c8ff]'
+                                : 'bg-[#94a3b8]/20 text-[#94a3b8]'
                         }`}
                       >
-                        {app.status}
+                        {app.status === 'invited' ? 'Invited (pending)' : app.status}
                       </span>
                       {app.submitted_at && (
                         <span className="text-xs dash-text-muted">

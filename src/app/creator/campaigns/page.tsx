@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { getOpenCampaignsWithEligibility, getLaunchedCampaigns, getCreatorOAuthStatus } from './_actions'
+import { getOpenCampaignsWithEligibility, getLaunchedCampaigns, getCreatorOAuthStatus, getMyInvitations } from './_actions'
 import Panel from '@/components/shared/Panel'
+import InviteResponseButtons from '@/components/creator/InviteResponseButtons'
 
 const APPLICATION_STATUS_STYLES: Record<string, string> = {
   accepted: 'bg-green-500/20 text-green-400',
@@ -47,11 +48,12 @@ export default async function CreatorCampaignsPage({
   }
 
   const { tab } = await searchParams
-  const activeTab = tab === 'launched' ? 'launched' : 'open'
+  const activeTab = tab === 'launched' ? 'launched' : tab === 'invites' ? 'invites' : 'open'
 
-  const [allEntries, launchedEntries] = await Promise.all([
+  const [allEntries, launchedEntries, invitations] = await Promise.all([
     activeTab === 'open' ? getOpenCampaignsWithEligibility(50) : Promise.resolve([]),
     activeTab === 'launched' ? getLaunchedCampaigns(50) : Promise.resolve([]),
+    activeTab === 'invites' ? getMyInvitations() : Promise.resolve([]),
   ])
 
   const openEntries = allEntries.filter((e) => e.eligible).sort((a, b) => b.score - a.score)
@@ -77,6 +79,16 @@ export default async function CreatorCampaignsPage({
           Open
         </Link>
         <Link
+          href="/creator/campaigns?tab=invites"
+          className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+            activeTab === 'invites'
+              ? 'text-[#00c8ff] border-b-2 border-[#00c8ff] -mb-px'
+              : 'cr-text-muted hover:cr-text-bright'
+          }`}
+        >
+          Invites
+        </Link>
+        <Link
           href="/creator/campaigns?tab=launched"
           className={`px-4 py-2 text-sm font-medium transition-colors relative ${
             activeTab === 'launched'
@@ -88,7 +100,61 @@ export default async function CreatorCampaignsPage({
         </Link>
       </div>
 
-      {activeTab === 'open' ? (
+      {activeTab === 'invites' ? (
+        invitations.length === 0 ? (
+          <Panel variant="creator">
+            <p className="text-sm cr-text-muted text-center py-8">No pending invitations.</p>
+          </Panel>
+        ) : (
+          <ul className="space-y-3">
+            {invitations.map((app) => {
+              const c = app.campaign
+              return (
+                <li key={app.id} className="p-4 rounded-lg cr-border border cr-bg-inner">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                        <span className="text-sm font-semibold cr-text-bright">{c.title}</span>
+                        <span className="text-xs px-2 py-0.5 rounded bg-[#00c8ff]/10 text-[#00c8ff] border border-[#00c8ff]/20">
+                          Invited
+                        </span>
+                      </div>
+                      <p className="text-xs cr-text-muted mt-0.5">
+                        {c.sponsor.company_name ?? 'Sponsor'} ·{' '}
+                        {c.platform.join(', ')}
+                        {c.end_date ? ` · Ends: ${new Date(c.end_date).toLocaleDateString()}` : ''}
+                      </p>
+                      {c.description && (
+                        <p className="text-xs cr-text mt-1 line-clamp-2">{c.description}</p>
+                      )}
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {c.game_category.slice(0, 3).map((g: string) => (
+                          <span key={g} className="text-xs px-2 py-0.5 rounded bg-[#00c8ff]/10 text-[#00c8ff]">{g}</span>
+                        ))}
+                        {c.content_type.slice(0, 2).map((t: string) => (
+                          <span key={t} className="text-xs px-2 py-0.5 rounded bg-[#a855f7]/10 text-[#a855f7]">{t}</span>
+                        ))}
+                      </div>
+                      <Link
+                        href={`/creator/campaigns/${c.id}`}
+                        className="text-xs cr-accent hover:underline mt-2 inline-block"
+                      >
+                        View campaign details →
+                      </Link>
+                    </div>
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                      {c.budget != null && (
+                        <span className="text-sm font-bold cr-success">${c.budget.toLocaleString()}</span>
+                      )}
+                      <InviteResponseButtons applicationId={app.id} />
+                    </div>
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        )
+      ) : activeTab === 'open' ? (
         openEntries.length === 0 ? (
           <Panel variant="creator">
             <p className="text-sm cr-text-muted text-center py-8">No open campaigns right now. Check back soon!</p>
