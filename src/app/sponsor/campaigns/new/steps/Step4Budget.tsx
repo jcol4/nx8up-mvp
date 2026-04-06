@@ -45,30 +45,32 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
         </div>
       </div>
 
-      {/* Creator count */}
-      <div className={sectionClass}>
-        <p className={sectionTitle}>Creator Count</p>
-        <div>
-          <label className={labelClass}>
-            Number of creators <span className="text-[#00c8ff]">*</span>
-          </label>
-          <NXStepper
-            value={draft.creator_count}
-            onChange={v => set('creator_count', v)}
-            step={COUNT_STEP}
-            min={1}
-            placeholder="0"
-            className="max-w-[180px]"
-          />
-          {draft.budget && draft.creator_count && Number(draft.creator_count) > 0 && (
-            <p className="text-xs dash-text-muted mt-1.5">
-              ≈ <span className="text-[#c8dff0] font-medium">
-                ${Math.floor(parseInt(draft.budget, 10) / parseInt(draft.creator_count, 10)).toLocaleString()}
-              </span> per creator
-            </p>
-          )}
+      {/* Creator count — hidden for direct invite (always 1) */}
+      {!draft.is_direct_invite && (
+        <div className={sectionClass}>
+          <p className={sectionTitle}>Creator Count</p>
+          <div>
+            <label className={labelClass}>
+              Number of creators <span className="text-[#00c8ff]">*</span>
+            </label>
+            <NXStepper
+              value={draft.creator_count}
+              onChange={v => set('creator_count', v)}
+              step={COUNT_STEP}
+              min={1}
+              placeholder="0"
+              className="max-w-[180px]"
+            />
+            {draft.budget && draft.creator_count && Number(draft.creator_count) > 0 && (
+              <p className="text-xs dash-text-muted mt-1.5">
+                ≈ <span className="text-[#c8dff0] font-medium">
+                  ${Math.floor(parseInt(draft.budget, 10) / parseInt(draft.creator_count, 10)).toLocaleString()}
+                </span> per creator
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Payment model */}
       <div className={sectionClass}>

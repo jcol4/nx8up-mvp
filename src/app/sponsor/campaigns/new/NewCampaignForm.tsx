@@ -34,7 +34,7 @@ function validateStep(step: number, draft: CampaignDraft): string {
       return ''
     case 4:
       if (!draft.budget || parseInt(draft.budget, 10) <= 0) return 'A budget greater than $0 is required.'
-      if (!draft.creator_count || parseInt(draft.creator_count, 10) <= 0) return 'Number of creators is required.'
+      if (!draft.is_direct_invite && (!draft.creator_count || parseInt(draft.creator_count, 10) <= 0)) return 'Number of creators is required.'
       if (!draft.start_date) return 'Start date is required.'
       if (!draft.end_date) return 'End date is required.'
       if (draft.start_date >= draft.end_date) return 'End date must be after start date.'
@@ -100,12 +100,12 @@ export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRes
     fd.set('target_interests', JSON.stringify(draft.target_interests))
     fd.set('is_direct_invite', String(draft.is_direct_invite))
     fd.set('invited_creator_id', draft.invited_creator_id)
+    fd.set('creator_count', draft.is_direct_invite ? '1' : draft.creator_count)
     fd.set('creator_types', JSON.stringify(draft.creator_types))
     fd.set('creator_sizes', JSON.stringify(draft.creator_sizes))
     fd.set('min_subs_followers', draft.min_subs_followers)
     fd.set('min_engagement_rate', draft.min_engagement_rate)
     fd.set('budget', draft.budget)
-    fd.set('creator_count', draft.creator_count)
     fd.set('payment_model', draft.payment_model)
     fd.set('start_date', draft.start_date)
     fd.set('end_date', draft.end_date)
@@ -113,7 +113,9 @@ export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRes
     fd.set('campaign_type', draft.campaign_type)
     fd.set('num_videos', draft.num_videos)
     fd.set('video_includes', JSON.stringify(draft.video_includes))
+    fd.set('num_youtube_shorts', draft.num_youtube_shorts)
     fd.set('num_streams', draft.num_streams)
+    fd.set('num_twitch_clips', draft.num_twitch_clips)
     fd.set('min_stream_duration', draft.min_stream_duration)
     fd.set('num_posts', draft.num_posts)
     fd.set('num_short_videos', draft.num_short_videos)

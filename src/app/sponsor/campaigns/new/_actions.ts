@@ -99,7 +99,9 @@ export async function saveCampaignDraft(formData: FormData): Promise<CreateCampa
     min_engagement_rate: parseOptionalFloat(formData.get('min_engagement_rate') as string | null),
     num_videos: parseOptionalInt(formData.get('num_videos') as string | null),
     video_includes: parseStringArray(formData.get('video_includes') as string | null),
+    num_youtube_shorts: parseOptionalInt(formData.get('num_youtube_shorts') as string | null),
     num_streams: parseOptionalInt(formData.get('num_streams') as string | null),
+    num_twitch_clips: parseOptionalInt(formData.get('num_twitch_clips') as string | null),
     min_stream_duration: parseOptionalInt(formData.get('min_stream_duration') as string | null),
     num_posts: parseOptionalInt(formData.get('num_posts') as string | null),
     num_short_videos: parseOptionalInt(formData.get('num_short_videos') as string | null),
@@ -212,7 +214,9 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
   const min_subs_followers = parseOptionalInt(formData.get('min_subs_followers') as string | null)
   const min_engagement_rate = parseOptionalFloat(formData.get('min_engagement_rate') as string | null)
   const num_videos = parseOptionalInt(formData.get('num_videos') as string | null)
+  const num_youtube_shorts = parseOptionalInt(formData.get('num_youtube_shorts') as string | null)
   const num_streams = parseOptionalInt(formData.get('num_streams') as string | null)
+  const num_twitch_clips = parseOptionalInt(formData.get('num_twitch_clips') as string | null)
   const min_stream_duration = parseOptionalInt(formData.get('min_stream_duration') as string | null)
   const num_posts = parseOptionalInt(formData.get('num_posts') as string | null)
   const num_short_videos = parseOptionalInt(formData.get('num_short_videos') as string | null)
@@ -282,7 +286,9 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
     min_engagement_rate,
     num_videos,
     video_includes,
+    num_youtube_shorts,
     num_streams,
+    num_twitch_clips,
     min_stream_duration,
     num_posts,
     num_short_videos,

@@ -154,7 +154,9 @@ model campaigns {
   creator_count               Int?
   num_videos                  Int?
   video_includes              String[]
+  num_youtube_shorts          Int?
   num_streams                 Int?
+  num_twitch_clips            Int?
   min_stream_duration         Int?
   num_posts                   Int?
   num_short_videos            Int?

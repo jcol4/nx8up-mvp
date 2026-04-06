@@ -37,7 +37,9 @@ export type CampaignDraft = {
   campaign_type: string
   num_videos: string
   video_includes: string[]
+  num_youtube_shorts: string
   num_streams: string
+  num_twitch_clips: string
   min_stream_duration: string
   num_posts: string
   num_short_videos: string
@@ -80,7 +82,9 @@ export const EMPTY_DRAFT: CampaignDraft = {
   campaign_type: '',
   num_videos: '',
   video_includes: [],
+  num_youtube_shorts: '',
   num_streams: '',
+  num_twitch_clips: '',
   min_stream_duration: '',
   num_posts: '',
   num_short_videos: '',

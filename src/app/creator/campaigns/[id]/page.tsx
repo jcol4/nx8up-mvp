@@ -65,7 +65,9 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
 
   const hasDeliverables =
     campaign.num_videos ||
+    campaign.num_youtube_shorts ||
     campaign.num_streams ||
+    campaign.num_twitch_clips ||
     campaign.num_posts ||
     campaign.num_short_videos
 
@@ -193,6 +195,12 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                     <p className="text-[11px] cr-text-muted mt-0.5">Video{campaign.num_videos !== 1 ? 's' : ''}</p>
                   </div>
                 )}
+                {campaign.num_youtube_shorts != null && campaign.num_youtube_shorts > 0 && (
+                  <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
+                    <p className="text-2xl font-bold cr-text-bright">{campaign.num_youtube_shorts}</p>
+                    <p className="text-[11px] cr-text-muted mt-0.5">YT Short{campaign.num_youtube_shorts !== 1 ? 's' : ''}</p>
+                  </div>
+                )}
                 {campaign.num_streams != null && campaign.num_streams > 0 && (
                   <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
                     <p className="text-2xl font-bold cr-text-bright">{campaign.num_streams}</p>
@@ -200,6 +208,12 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                     {campaign.min_stream_duration != null && (
                       <p className="text-[10px] text-[#3a5570] mt-0.5">{campaign.min_stream_duration}h min</p>
                     )}
+                  </div>
+                )}
+                {campaign.num_twitch_clips != null && campaign.num_twitch_clips > 0 && (
+                  <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
+                    <p className="text-2xl font-bold cr-text-bright">{campaign.num_twitch_clips}</p>
+                    <p className="text-[11px] cr-text-muted mt-0.5">Twitch Clip{campaign.num_twitch_clips !== 1 ? 's' : ''}</p>
                   </div>
                 )}
                 {campaign.num_posts != null && campaign.num_posts > 0 && (

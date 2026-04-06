@@ -57,9 +57,13 @@ export default function Step5Content({ draft, setDraft, error, onNext, onBack }:
 
   const availableMediaTypes = MEDIA_TYPES.filter(m => draft.platform.includes(m.platform))
 
-  const hasYouTube = draft.platform.includes('YouTube')
-  const hasTwitch = draft.platform.includes('Twitch')
-  const hasSocialShort = draft.platform.includes('TikTok') || draft.platform.includes('Instagram')
+  const hasYouTubeVideo = draft.accepted_media_types.includes('youtube_video')
+  const hasYouTubeShort = draft.accepted_media_types.includes('youtube_short')
+  const hasTwitchStream = draft.accepted_media_types.includes('twitch_stream')
+  const hasTwitchClip   = draft.accepted_media_types.includes('twitch_clip')
+  const hasAnyYouTube   = hasYouTubeVideo || hasYouTubeShort
+  const hasAnyTwitch    = hasTwitchStream || hasTwitchClip
+  const hasSocialShort  = draft.platform.includes('TikTok') || draft.platform.includes('Instagram')
 
   return (
     <div className="space-y-6">
@@ -136,57 +140,85 @@ export default function Step5Content({ draft, setDraft, error, onNext, onBack }:
       <div className={sectionClass}>
         <p className={sectionTitle}>Deliverables</p>
 
-        {hasYouTube && (
+        {hasAnyYouTube && (
           <div className="space-y-3 p-4 rounded-lg bg-white/[0.02] border border-white/5">
             <p className="text-xs font-semibold text-[#22c55e] uppercase tracking-wider">YouTube</p>
             <div className="grid grid-cols-2 gap-3">
+              {hasYouTubeVideo && (
+                <div>
+                  <label className={labelClass}>Number of videos</label>
+                  <NXStepper
+                    value={draft.num_videos}
+                    onChange={v => set('num_videos', v)}
+                    step={1} min={0} placeholder="0"
+                  />
+                </div>
+              )}
+              {hasYouTubeShort && (
+                <div>
+                  <label className={labelClass}>Number of Shorts</label>
+                  <NXStepper
+                    value={draft.num_youtube_shorts}
+                    onChange={v => set('num_youtube_shorts', v)}
+                    step={1} min={0} placeholder="0"
+                  />
+                </div>
+              )}
+            </div>
+            {hasYouTubeVideo && (
               <div>
-                <label className={labelClass}>Number of videos</label>
-                <NXStepper
-                  value={draft.num_videos}
-                  onChange={v => set('num_videos', v)}
-                  step={1} min={0} placeholder="0"
-                />
+                <label className={labelClass}>Include in</label>
+                <div className="flex flex-wrap gap-2">
+                  {VIDEO_INCLUDES.map(vi => (
+                    <button
+                      key={vi.value}
+                      type="button"
+                      onClick={() => toggleVideoIncludes(vi.value)}
+                      className={toggleBtn(draft.video_includes.includes(vi.value))}
+                    >
+                      {vi.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div>
-              <label className={labelClass}>Include in</label>
-              <div className="flex flex-wrap gap-2">
-                {VIDEO_INCLUDES.map(vi => (
-                  <button
-                    key={vi.value}
-                    type="button"
-                    onClick={() => toggleVideoIncludes(vi.value)}
-                    className={toggleBtn(draft.video_includes.includes(vi.value))}
-                  >
-                    {vi.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
         )}
 
-        {hasTwitch && (
+        {hasAnyTwitch && (
           <div className="space-y-3 p-4 rounded-lg bg-white/[0.02] border border-white/5">
             <p className="text-xs font-semibold text-[#a855f7] uppercase tracking-wider">Twitch</p>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={labelClass}>Number of streams</label>
-                <NXStepper
-                  value={draft.num_streams}
-                  onChange={v => set('num_streams', v)}
-                  step={1} min={0} placeholder="0"
-                />
-              </div>
-              <div>
-                <label className={labelClass}>Min. stream duration (min)</label>
-                <NXStepper
-                  value={draft.min_stream_duration}
-                  onChange={v => set('min_stream_duration', v)}
-                  step={30} min={0} suffix="min" placeholder="0"
-                />
-              </div>
+              {hasTwitchStream && (
+                <div>
+                  <label className={labelClass}>Number of streams</label>
+                  <NXStepper
+                    value={draft.num_streams}
+                    onChange={v => set('num_streams', v)}
+                    step={1} min={0} placeholder="0"
+                  />
+                </div>
+              )}
+              {hasTwitchClip && (
+                <div>
+                  <label className={labelClass}>Number of clips</label>
+                  <NXStepper
+                    value={draft.num_twitch_clips}
+                    onChange={v => set('num_twitch_clips', v)}
+                    step={1} min={0} placeholder="0"
+                  />
+                </div>
+              )}
+              {hasTwitchStream && (
+                <div>
+                  <label className={labelClass}>Min. stream duration (min)</label>
+                  <NXStepper
+                    value={draft.min_stream_duration}
+                    onChange={v => set('min_stream_duration', v)}
+                    step={30} min={0} suffix="min" placeholder="0"
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -217,8 +249,12 @@ export default function Step5Content({ draft, setDraft, error, onNext, onBack }:
           </div>
         )}
 
-        {!hasYouTube && !hasTwitch && !hasSocialShort && (
-          <p className="text-xs dash-text-muted italic">No platforms selected — go back to Step 1 to add platforms.</p>
+        {!hasAnyYouTube && !hasAnyTwitch && !hasSocialShort && (
+          <p className="text-xs dash-text-muted italic">
+            {draft.platform.length === 0
+              ? 'No platforms selected — go back to Step 1 to add platforms.'
+              : 'Select accepted media types above to configure deliverables.'}
+          </p>
         )}
       </div>
 
