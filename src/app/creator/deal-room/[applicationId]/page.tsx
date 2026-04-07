@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getDealRoom } from '../_actions'
 import ProofSubmitForm from './ProofSubmitForm'
+import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
 
 const DELIVERABLE_LABELS: Record<string, string> = {
   gameplay_footage: 'Gameplay footage',
@@ -68,9 +69,15 @@ export default async function CreatorDealRoomDetailPage({
             </p>
           </div>
           <div className="text-right">
-            {c.budget != null && (
-              <p className="text-lg font-bold cr-success">${c.budget.toLocaleString()}</p>
-            )}
+            {c.budget != null && (() => {
+              const { perCreator, creatorPool } = calcFeeBreakdown(c.budget, c.creator_count)
+              return (
+                <>
+                  <p className="text-lg font-bold cr-success">${(perCreator ?? creatorPool).toLocaleString()}</p>
+                  <p className="text-[10px] cr-text-muted">{perCreator ? 'your payout' : 'creator pool'}</p>
+                </>
+              )
+            })()}
             {c.end_date && (
               <p className="text-xs cr-text-muted mt-0.5">
                 Deadline: {new Date(c.end_date).toLocaleDateString()}
@@ -309,12 +316,31 @@ export default async function CreatorDealRoomDetailPage({
                   <dd className="cr-text-bright text-right capitalize">{c.payment_model.replace(/_/g, ' ')}</dd>
                 </div>
               )}
-              {c.budget != null && (
-                <div className="flex justify-between gap-2">
-                  <dt className="cr-text-muted">Budget</dt>
-                  <dd className="cr-success font-bold">${c.budget.toLocaleString()}</dd>
-                </div>
-              )}
+              {c.budget != null && (() => {
+                const { fee, creatorPool, perCreator } = calcFeeBreakdown(c.budget, c.creator_count)
+                return (
+                  <>
+                    {perCreator && (
+                      <div className="flex justify-between gap-2">
+                        <dt className="cr-text-muted">Your Payout</dt>
+                        <dd className="cr-success font-bold">${perCreator.toLocaleString()}</dd>
+                      </div>
+                    )}
+                    <div className="flex justify-between gap-2">
+                      <dt className="cr-text-muted">Creator Pool</dt>
+                      <dd className="cr-success font-semibold">${creatorPool.toLocaleString()}</dd>
+                    </div>
+                    <div className="flex justify-between gap-2 text-[11px]">
+                      <dt className="cr-text-muted">Total Budget</dt>
+                      <dd className="cr-text">${c.budget.toLocaleString()}</dd>
+                    </div>
+                    <div className="flex justify-between gap-2 text-[11px]">
+                      <dt className="cr-text-muted">nx8up Fee ({Math.round(NX_FEE_RATE * 100)}%)</dt>
+                      <dd className="text-red-400/70">−${fee.toLocaleString()}</dd>
+                    </div>
+                  </>
+                )
+              })()}
               {c.start_date && (
                 <div className="flex justify-between gap-2">
                   <dt className="cr-text-muted">Start</dt>

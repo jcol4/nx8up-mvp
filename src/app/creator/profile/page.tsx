@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { getCreatorProfile, refreshTwitchDataIfStale, refreshYouTubeDataIfStale } from './_actions'
 import CreatorTopBar from '@/components/creator/CreatorTopBar'
 import CreatorProfileWizard from './CreatorProfileWizard'
+import PayoutBanner from './PayoutBanner'
 import { prisma } from '@/lib/prisma'
 import { parseLocation } from '@/lib/location-options'
 import type { CreatorProfileDraft } from './_shared'
@@ -33,6 +34,8 @@ export default async function CreatorProfilePage() {
     prisma.content_creators.findUnique({
       where: { clerk_user_id: userId },
       select: {
+        stripe_connect_id: true,
+        stripe_onboarding_complete: true,
         twitch_username: true,
         twitch_broadcaster_type: true,
         twitch_profile_image: true,
@@ -100,6 +103,10 @@ export default async function CreatorProfilePage() {
             Complete your profile to get discovered by sponsors.
           </p>
         </div>
+
+        {!creator?.stripe_onboarding_complete && (
+          <PayoutBanner hasAccount={!!creator?.stripe_connect_id} />
+        )}
 
         <CreatorProfileWizard
           initialDraft={initialDraft}

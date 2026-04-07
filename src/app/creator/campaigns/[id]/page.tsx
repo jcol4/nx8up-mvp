@@ -6,6 +6,7 @@ import ApplyButton from './ApplyButton'
 import InviteResponseButtons from '@/components/creator/InviteResponseButtons'
 import { prisma } from '@/lib/prisma'
 import { matchCreatorToCampaign } from '@/lib/matching'
+import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -377,12 +378,30 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
         {/* ── Sidebar ── */}
         <div className="space-y-4">
           <div className="cr-panel p-5">
-            {campaign.budget != null && (
-              <div className="mb-4 pb-4 border-b cr-border text-center">
-                <p className="text-3xl font-bold cr-success">${campaign.budget.toLocaleString()}</p>
-                <p className="text-xs cr-text-muted mt-1">Campaign Budget</p>
-              </div>
-            )}
+            {campaign.budget != null && (() => {
+              const { fee, creatorPool, perCreator } = calcFeeBreakdown(campaign.budget, campaign.creator_count)
+              return (
+                <div className="mb-4 pb-4 border-b cr-border">
+                  <div className="text-center mb-3">
+                    <p className="text-3xl font-bold cr-success">${creatorPool.toLocaleString()}</p>
+                    <p className="text-xs cr-text-muted mt-1">Creator Payout Pool</p>
+                    {perCreator && (
+                      <p className="text-sm font-semibold text-[#22c55e] mt-1">≈ ${perCreator.toLocaleString()} per creator</p>
+                    )}
+                  </div>
+                  <div className="space-y-1 pt-2 border-t cr-border">
+                    <div className="flex justify-between text-[11px]">
+                      <span className="cr-text-muted">Total Budget</span>
+                      <span className="cr-text">${campaign.budget.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-[11px]">
+                      <span className="cr-text-muted">nx8up Fee ({Math.round(NX_FEE_RATE * 100)}%)</span>
+                      <span className="text-red-400/80">−${fee.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
 
             <ul className="space-y-3 text-sm">
               <li className="flex justify-between items-center">

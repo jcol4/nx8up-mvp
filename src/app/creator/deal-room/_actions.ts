@@ -31,6 +31,7 @@ export async function getMyDealRooms() {
           status: true,
           end_date: true,
           budget: true,
+          creator_count: true,
         },
       },
       deal_submission: {

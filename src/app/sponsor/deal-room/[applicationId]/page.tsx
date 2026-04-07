@@ -3,6 +3,7 @@ import Link from 'next/link'
 import SponsorHeader from '../../SponsorHeader'
 import { getDealRoomForSponsor } from '../_actions'
 import ReviewButtons from './ReviewButtons'
+import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
 
 const DELIVERABLE_LABELS: Record<string, string> = {
   gameplay_footage: 'Gameplay footage',
@@ -80,9 +81,15 @@ export default async function SponsorDealRoomDetailPage({
                 </p>
               </div>
               <div className="text-right">
-                {c.budget != null && (
-                  <p className="text-lg font-bold" style={{ color: '#00e5a0' }}>${c.budget.toLocaleString()}</p>
-                )}
+                {c.budget != null && (() => {
+                  const { fee, creatorPool } = calcFeeBreakdown(c.budget, c.creator_count)
+                  return (
+                    <>
+                      <p className="text-lg font-bold" style={{ color: '#00e5a0' }}>${c.budget.toLocaleString()}</p>
+                      <p className="text-[10px] dash-text-muted">total · ${creatorPool.toLocaleString()} creator pool · −${fee.toLocaleString()} fee</p>
+                    </>
+                  )
+                })()}
                 {c.end_date && (
                   <p className="text-xs dash-text-muted mt-0.5">
                     Deadline: {new Date(c.end_date).toLocaleDateString()}
@@ -320,12 +327,31 @@ export default async function SponsorDealRoomDetailPage({
                       <dd className="dash-text-bright capitalize">{c.payment_model.replace(/_/g, ' ')}</dd>
                     </div>
                   )}
-                  {c.budget != null && (
-                    <div className="flex justify-between gap-2">
-                      <dt className="dash-text-muted">Budget</dt>
-                      <dd className="font-bold" style={{ color: '#00e5a0' }}>${c.budget.toLocaleString()}</dd>
-                    </div>
-                  )}
+                  {c.budget != null && (() => {
+                    const { fee, creatorPool, perCreator } = calcFeeBreakdown(c.budget, c.creator_count)
+                    return (
+                      <>
+                        <div className="flex justify-between gap-2">
+                          <dt className="dash-text-muted">Total Budget</dt>
+                          <dd className="font-bold" style={{ color: '#00e5a0' }}>${c.budget.toLocaleString()}</dd>
+                        </div>
+                        <div className="flex justify-between gap-2 text-[11px]">
+                          <dt className="dash-text-muted">nx8up Fee ({Math.round(NX_FEE_RATE * 100)}%)</dt>
+                          <dd className="text-red-400/70">−${fee.toLocaleString()}</dd>
+                        </div>
+                        <div className="flex justify-between gap-2 text-[11px] pb-1 border-b border-white/5">
+                          <dt className="dash-text-muted">Creator Pool</dt>
+                          <dd className="text-[#22c55e] font-semibold">${creatorPool.toLocaleString()}</dd>
+                        </div>
+                        {perCreator && (
+                          <div className="flex justify-between gap-2 text-[11px]">
+                            <dt className="dash-text-muted">Per Creator</dt>
+                            <dd className="text-[#22c55e]">≈ ${perCreator.toLocaleString()}</dd>
+                          </div>
+                        )}
+                      </>
+                    )
+                  })()}
                   {c.end_date && (
                     <div className="flex justify-between gap-2">
                       <dt className="dash-text-muted">Deadline</dt>

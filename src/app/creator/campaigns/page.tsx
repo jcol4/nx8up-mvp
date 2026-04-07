@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { getOpenCampaignsWithEligibility, getLaunchedCampaigns, getCreatorOAuthStatus, getMyInvitations } from './_actions'
 import Panel from '@/components/shared/Panel'
 import InviteResponseButtons from '@/components/creator/InviteResponseButtons'
+import { calcFeeBreakdown } from '@/lib/constants'
 
 const APPLICATION_STATUS_STYLES: Record<string, string> = {
   accepted: 'bg-green-500/20 text-green-400',
@@ -143,9 +144,15 @@ export default async function CreatorCampaignsPage({
                       </Link>
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
-                      {c.budget != null && (
-                        <span className="text-sm font-bold cr-success">${c.budget.toLocaleString()}</span>
-                      )}
+                      {c.budget != null && (() => {
+                        const { creatorPool } = calcFeeBreakdown(c.budget, c.creator_count)
+                        return (
+                          <div className="text-right">
+                            <span className="text-sm font-bold cr-success">${creatorPool.toLocaleString()}</span>
+                            <p className="text-[10px] cr-text-muted">creator pool</p>
+                          </div>
+                        )
+                      })()}
                       <InviteResponseButtons applicationId={app.id} />
                     </div>
                   </div>
@@ -188,9 +195,15 @@ export default async function CreatorCampaignsPage({
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      {c.budget != null && (
-                        <span className="text-sm font-bold cr-success">${c.budget.toLocaleString()}</span>
-                      )}
+                      {c.budget != null && (() => {
+                        const { creatorPool } = calcFeeBreakdown(c.budget, c.creator_count)
+                        return (
+                          <>
+                            <span className="text-sm font-bold cr-success">${creatorPool.toLocaleString()}</span>
+                            <p className="text-[10px] cr-text-muted">creator pool</p>
+                          </>
+                        )
+                      })()}
                       <p className="text-xs cr-text-muted mt-0.5">{c._count.applications} applied</p>
                       <p className={`text-xs font-medium mt-1 ${
                         score >= 75 ? 'text-green-400' : score >= 45 ? 'text-yellow-400' : 'text-red-400'
@@ -246,9 +259,15 @@ export default async function CreatorCampaignsPage({
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      {c.budget != null && (
-                        <span className="text-sm font-bold cr-success">${c.budget.toLocaleString()}</span>
-                      )}
+                      {c.budget != null && (() => {
+                        const { creatorPool } = calcFeeBreakdown(c.budget, c.creator_count)
+                        return (
+                          <>
+                            <span className="text-sm font-bold cr-success">${creatorPool.toLocaleString()}</span>
+                            <p className="text-[10px] cr-text-muted">creator pool</p>
+                          </>
+                        )
+                      })()}
                       <p className="text-xs cr-text-muted mt-0.5">{c._count.applications} creators</p>
                     </div>
                   </div>

@@ -2,6 +2,7 @@
 
 import type { CampaignDraft } from '../_shared'
 import { PRODUCT_TYPES, OBJECTIVES, MISSION_TYPES, TRACKING_TYPES, CONVERSION_GOALS, CREATOR_TYPES, CREATOR_SIZES } from '../_shared'
+import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
 
 type Props = {
   draft: CampaignDraft
@@ -35,12 +36,10 @@ function Pills({ label, values }: { label: string; values: string[] }) {
   )
 }
 
-const NX_FEE_RATE = 0.1 // 10%
-
 export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBack }: Props) {
   const budgetNum = parseInt(draft.budget, 10) || 0
-  const fee = Math.round(budgetNum * NX_FEE_RATE)
-  const creatorPool = budgetNum - fee
+  const creatorCount = draft.creator_count ? parseInt(draft.creator_count, 10) : null
+  const { fee, creatorPool, perCreator } = calcFeeBreakdown(budgetNum, creatorCount)
 
   const objective = OBJECTIVES.find(o => o.value === draft.objective) as { value: string; label: string; description: string } | undefined
   const productType = PRODUCT_TYPES.find(p => p.value === draft.product_type)
@@ -142,6 +141,12 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
                 <span className="text-sm font-semibold dash-text-bright">Creator Payout Pool</span>
                 <span className="text-sm font-bold text-[#22c55e]">${creatorPool.toLocaleString()}</span>
               </div>
+              {perCreator && (
+                <div className="flex justify-between items-center">
+                  <span className="text-xs dash-text-muted">Per creator ({draft.creator_count} creators)</span>
+                  <span className="text-xs font-semibold text-[#22c55e]">≈ ${perCreator.toLocaleString()}</span>
+                </div>
+              )}
             </>
           )}
         </div>

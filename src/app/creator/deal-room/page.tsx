@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getMyDealRooms } from './_actions'
+import { calcFeeBreakdown } from '@/lib/constants'
 
 const SUBMISSION_STATUS: Record<string, { label: string; className: string }> = {
   pending:            { label: 'Not submitted',          className: 'bg-[#94a3b8]/20 text-[#94a3b8]' },
@@ -62,11 +63,17 @@ export default async function CreatorDealRoomPage() {
                       )}
                     </div>
                     <div className="text-right shrink-0">
-                      {app.campaign.budget != null && (
-                        <span className="text-sm font-bold cr-success">
-                          ${app.campaign.budget.toLocaleString()}
-                        </span>
-                      )}
+                      {app.campaign.budget != null && (() => {
+                        const { perCreator, creatorPool } = calcFeeBreakdown(app.campaign.budget, app.campaign.creator_count)
+                        return (
+                          <div>
+                            <span className="text-sm font-bold cr-success">
+                              ${(perCreator ?? creatorPool).toLocaleString()}
+                            </span>
+                            <p className="text-[10px] cr-text-muted">{perCreator ? 'your payout' : 'creator pool'}</p>
+                          </div>
+                        )
+                      })()}
                       <p className="text-xs cr-text-muted mt-0.5">View deal →</p>
                     </div>
                   </div>

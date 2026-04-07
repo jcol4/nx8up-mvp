@@ -58,9 +58,11 @@ model content_creators {
   primary_platform         String?
   is_available             Boolean                 @default(true)
   max_campaigns_per_month  Int?
-  audience_gender          String[]                @default([])
-  creator_size             String?
-  applications             campaign_applications[]
+  audience_gender              String[]                @default([])
+  creator_size                 String?
+  stripe_connect_id            String?
+  stripe_onboarding_complete   Boolean                 @default(false)
+  applications                 campaign_applications[]
 
   @@index([average_vod_views])
   @@index([content_type], type: Gin)
@@ -169,6 +171,8 @@ model campaigns {
   conversion_goal             String?
   legal_age_restriction       String?
   is_direct_invite            Boolean                 @default(false)
+  stripe_payment_intent_id    String?
+  stripe_authorized_amount    Int?
   applications                campaign_applications[]
   sponsor                     sponsors                @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
 
@@ -216,6 +220,8 @@ model deal_submissions {
   updated_at           DateTime              @updatedAt @db.Timestamptz(6)
   proof_urls           String[]
   admin_notes          String?
+  stripe_transfer_id   String?
+  payout_status        String?
   application          campaign_applications @relation(fields: [application_id], references: [id], onDelete: Cascade)
 }
 

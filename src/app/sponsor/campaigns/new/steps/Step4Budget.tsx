@@ -4,6 +4,7 @@ import NXStepper from '@/components/ui/NXStepper'
 import NXDatePicker from '@/components/ui/NXDatePicker'
 import type { CampaignDraft } from '../_shared'
 import { labelClass, sectionClass, sectionTitle } from '../_shared'
+import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
 
 const BUDGET_STEP = 500
 const COUNT_STEP  = 1
@@ -19,6 +20,10 @@ type Props = {
 export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: Props) {
   const set = <K extends keyof CampaignDraft>(k: K, v: CampaignDraft[K]) =>
     setDraft(prev => ({ ...prev, [k]: v }))
+
+  const budgetNum = parseInt(draft.budget, 10) || 0
+  const creatorCount = draft.creator_count ? parseInt(draft.creator_count, 10) : null
+  const { fee, creatorPool, perCreator } = calcFeeBreakdown(budgetNum, creatorCount)
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -42,6 +47,26 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
           <p className="text-xs dash-text-muted mt-1.5">
             Use +/− to step by ${BUDGET_STEP.toLocaleString()}, or type any amount.
           </p>
+          {budgetNum > 0 && (
+            <div className="mt-3 p-3 rounded-lg border border-[rgba(0,200,255,0.15)] bg-[rgba(0,200,255,0.04)] space-y-1.5">
+              <p className="text-[10px] font-semibold uppercase tracking-widest dash-text-muted">Budget Breakdown</p>
+              <div className="flex justify-between text-xs">
+                <span className="dash-text-muted">Total Budget</span>
+                <span className="dash-text-bright">${budgetNum.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="dash-text-muted">nx8up Fee ({Math.round(NX_FEE_RATE * 100)}%)</span>
+                <span className="text-red-400">−${fee.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-xs font-semibold pt-1.5 border-t border-white/10">
+                <span className="dash-text-bright">Creator Payout Pool</span>
+                <span className="text-[#22c55e]">${creatorPool.toLocaleString()}</span>
+              </div>
+              {perCreator && (
+                <p className="text-[11px] dash-text-muted">≈ <span className="text-[#c8dff0] font-medium">${perCreator.toLocaleString()}</span> per creator</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -61,11 +86,9 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
               placeholder="0"
               className="max-w-[180px]"
             />
-            {draft.budget && draft.creator_count && Number(draft.creator_count) > 0 && (
+            {perCreator && (
               <p className="text-xs dash-text-muted mt-1.5">
-                ≈ <span className="text-[#c8dff0] font-medium">
-                  ${Math.floor(parseInt(draft.budget, 10) / parseInt(draft.creator_count, 10)).toLocaleString()}
-                </span> per creator
+                ≈ <span className="text-[#c8dff0] font-medium">${perCreator.toLocaleString()}</span> per creator (after fee)
               </p>
             )}
           </div>
