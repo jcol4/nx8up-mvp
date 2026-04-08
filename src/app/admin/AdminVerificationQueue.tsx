@@ -39,7 +39,7 @@ export default async function AdminVerificationQueue() {
               return (
                 <Link
                   key={sub.application_id}
-                  href={`/admin/deal-room/${sub.application_id}`}
+                  href={`/admin/verification-queue/${sub.application_id}`}
                   className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors"
                 >
                   <div className="flex-1 min-w-0">

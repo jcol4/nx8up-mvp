@@ -10,59 +10,59 @@ datasource db {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model content_creators {
-  id                       String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  clerk_user_id            String                  @unique
-  email                    String                  @unique
-  age                      Int?
-  location                 String?
-  language                 String[]
-  platform                 String[]
-  subs_followers           Int?
-  engagement_rate          Decimal?                @db.Decimal(5, 2)
-  content_type             String[]
-  game_category            String[]
-  created_at               DateTime?               @default(now()) @db.Timestamptz(6)
-  updated_at               DateTime?               @default(now()) @db.Timestamptz(6)
-  twitch_broadcaster_type  String?
-  twitch_created_at        DateTime?               @db.Timestamptz(6)
-  twitch_description       String?
-  twitch_id                String?                 @unique
-  twitch_profile_image     String?
-  twitch_synced_at         DateTime?               @db.Timestamptz(6)
-  twitch_username          String?
-  youtube_avg_views        Int?
-  youtube_channel_id       String?                 @unique
-  youtube_channel_name     String?
-  youtube_handle           String?
-  youtube_subscribers      Int?
-  youtube_synced_at        DateTime?               @db.Timestamptz(6)
-  youtube_top_categories   String[]
-  average_vod_views        Int?
-  twitch_access_token      String?
-  twitch_refresh_token     String?
-  twitch_subscriber_count  Int?
-  twitch_token_expires_at  DateTime?               @db.Timestamptz(6)
-  youtube_access_token     String?
-  youtube_refresh_token    String?
-  youtube_token_expires_at DateTime?               @db.Timestamptz(6)
-  youtube_watch_time_hours Int?
-  audience_age_min         Int?
-  audience_age_max         Int?
-  audience_locations       String[]
-  youtube_member_count     Int?
-  creator_types            String[]
-  content_style            String[]
-  audience_interests       String[]
-  preferred_campaign_types String[]
-  preferred_product_types  String[]
-  primary_platform         String?
-  is_available             Boolean                 @default(true)
-  max_campaigns_per_month  Int?
-  audience_gender              String[]                @default([])
-  creator_size                 String?
-  stripe_connect_id            String?
-  stripe_onboarding_complete   Boolean                 @default(false)
-  applications                 campaign_applications[]
+  id                         String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerk_user_id              String                  @unique
+  email                      String                  @unique
+  age                        Int?
+  location                   String?
+  language                   String[]
+  platform                   String[]
+  subs_followers             Int?
+  engagement_rate            Decimal?                @db.Decimal(5, 2)
+  content_type               String[]
+  game_category              String[]
+  created_at                 DateTime?               @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime?               @default(now()) @db.Timestamptz(6)
+  twitch_broadcaster_type    String?
+  twitch_created_at          DateTime?               @db.Timestamptz(6)
+  twitch_description         String?
+  twitch_id                  String?                 @unique
+  twitch_profile_image       String?
+  twitch_synced_at           DateTime?               @db.Timestamptz(6)
+  twitch_username            String?
+  youtube_avg_views          Int?
+  youtube_channel_id         String?                 @unique
+  youtube_channel_name       String?
+  youtube_handle             String?
+  youtube_subscribers        Int?
+  youtube_synced_at          DateTime?               @db.Timestamptz(6)
+  youtube_top_categories     String[]
+  average_vod_views          Int?
+  twitch_access_token        String?
+  twitch_refresh_token       String?
+  twitch_subscriber_count    Int?
+  twitch_token_expires_at    DateTime?               @db.Timestamptz(6)
+  youtube_access_token       String?
+  youtube_refresh_token      String?
+  youtube_token_expires_at   DateTime?               @db.Timestamptz(6)
+  youtube_watch_time_hours   Int?
+  audience_age_min           Int?
+  audience_age_max           Int?
+  audience_locations         String[]
+  youtube_member_count       Int?
+  creator_types              String[]
+  content_style              String[]
+  audience_interests         String[]
+  preferred_campaign_types   String[]
+  preferred_product_types    String[]
+  primary_platform           String?
+  is_available               Boolean                 @default(true)
+  max_campaigns_per_month    Int?
+  audience_gender            String[]                @default([])
+  creator_size               String?
+  stripe_connect_id          String?
+  stripe_onboarding_complete Boolean                 @default(false)
+  applications               campaign_applications[]
 
   @@index([average_vod_views])
   @@index([content_type], type: Gin)
@@ -156,9 +156,7 @@ model campaigns {
   creator_count               Int?
   num_videos                  Int?
   video_includes              String[]
-  num_youtube_shorts          Int?
   num_streams                 Int?
-  num_twitch_clips            Int?
   min_stream_duration         Int?
   num_posts                   Int?
   num_short_videos            Int?
@@ -171,8 +169,10 @@ model campaigns {
   conversion_goal             String?
   legal_age_restriction       String?
   is_direct_invite            Boolean                 @default(false)
-  stripe_payment_intent_id    String?
+  num_youtube_shorts          Int?
+  num_twitch_clips            Int?
   stripe_authorized_amount    Int?
+  stripe_payment_intent_id    String?
   applications                campaign_applications[]
   sponsor                     sponsors                @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
 
@@ -220,8 +220,8 @@ model deal_submissions {
   updated_at           DateTime              @updatedAt @db.Timestamptz(6)
   proof_urls           String[]
   admin_notes          String?
-  stripe_transfer_id   String?
   payout_status        String?
+  stripe_transfer_id   String?
   application          campaign_applications @relation(fields: [application_id], references: [id], onDelete: Cascade)
 }
 

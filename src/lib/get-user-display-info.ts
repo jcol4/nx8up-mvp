@@ -10,12 +10,16 @@ export type UserDisplayInfo = {
 export async function getUserDisplayInfo(): Promise<UserDisplayInfo> {
   const { userId } = await auth();
   if (!userId) return { displayName: null, username: null, imageUrl: null };
-  const client = await clerkClient();
-  const user = await client.users.getUser(userId);
-  const meta = user.publicMetadata as Record<string, unknown> | null;
-  return {
-    displayName: (meta?.displayName as string) ?? null,
-    username: user.username ?? user.firstName ?? null,
-    imageUrl: user.imageUrl || null,
-  };
+  try {
+    const client = await clerkClient();
+    const user = await client.users.getUser(userId);
+    const meta = user.publicMetadata as Record<string, unknown> | null;
+    return {
+      displayName: (meta?.displayName as string) ?? null,
+      username: user.username ?? user.firstName ?? null,
+      imageUrl: user.imageUrl || null,
+    };
+  } catch {
+    return { displayName: null, username: null, imageUrl: null };
+  }
 }
