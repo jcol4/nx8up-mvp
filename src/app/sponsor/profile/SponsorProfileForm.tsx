@@ -369,7 +369,7 @@ export default function SponsorProfileForm({ profile }: Props) {
             />
           </div>
           <div>
-            <label htmlFor="min-engagement" className={labelClass}>Min. engagement rate (%)</label>
+            <label htmlFor="min-engagement" className={labelClass}>Min. CTR (%)</label>
             <FormInput
               id="min-engagement"
               type="text"

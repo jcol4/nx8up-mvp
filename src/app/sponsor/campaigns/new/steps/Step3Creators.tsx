@@ -249,7 +249,7 @@ export default function Step3Creators({ draft, setDraft, onNext, onBack, availab
                 />
               </div>
               <div>
-                <label className={labelClass}>Minimum engagement rate (%)</label>
+                <label className={labelClass}>Minimum CTR (%)</label>
                 <NXStepper
                   value={draft.min_engagement_rate}
                   onChange={v => setDraft(prev => ({ ...prev, min_engagement_rate: v }))}

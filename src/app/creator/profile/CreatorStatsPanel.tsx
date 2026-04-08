@@ -109,13 +109,6 @@ export default function CreatorStatsPanel({ creator }: Props) {
               value={fmt(creator.average_vod_views)}
               highlight={creator.average_vod_views != null}
             />
-            {creator.engagement_rate != null && (
-              <StatRow
-                label="Engagement rate"
-                value={`${Number(creator.engagement_rate).toFixed(2)}%`}
-                highlight
-              />
-            )}
             {creator.twitch_created_at && (
               <StatRow
                 label="Channel created"
@@ -195,6 +188,30 @@ export default function CreatorStatsPanel({ creator }: Props) {
                 })}
               />
             )}
+          </div>
+        </div>
+      )}
+
+      {/* CTR — derived from real link-click data, shown separately from platform stats */}
+      {creator.engagement_rate != null && (
+        <div className="rounded-lg border border-[rgba(0,200,255,0.2)] bg-[rgba(0,200,255,0.04)] overflow-hidden">
+          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[rgba(0,200,255,0.1)]">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00c8ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            <span className="text-xs font-bold tracking-widest uppercase text-[#00c8ff]">Performance</span>
+          </div>
+          <div className="px-4 py-1">
+            <StatRow
+              label="Click-Through Rate (CTR)"
+              value={`${Number(creator.engagement_rate).toFixed(2)}%`}
+              highlight
+            />
+            <div className="py-2">
+              <p className="text-[10px] cr-text-muted leading-relaxed">
+                Computed from actual link clicks across your sponsored campaigns — updated after each click.
+              </p>
+            </div>
           </div>
         </div>
       )}

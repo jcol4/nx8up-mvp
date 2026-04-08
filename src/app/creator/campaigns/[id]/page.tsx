@@ -331,7 +331,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 {campaign.min_engagement_rate != null && (
                   <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
                     <p className="text-lg font-bold cr-text-bright">{Number(campaign.min_engagement_rate).toFixed(1)}%</p>
-                    <p className="text-[11px] cr-text-muted mt-0.5">Min. engagement rate</p>
+                    <p className="text-[11px] cr-text-muted mt-0.5">Min. CTR</p>
                   </div>
                 )}
                 {(campaign.min_audience_age != null || campaign.max_audience_age != null) && (

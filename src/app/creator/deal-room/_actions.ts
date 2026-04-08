@@ -2,8 +2,18 @@
 
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
+import { randomBytes } from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { verifyProofUrl, fetchPostTimestamp } from '@/lib/verify-proof-url'
+
+function generateShortCode(): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+  const bytes = randomBytes(8)
+  return Array.from(bytes)
+    .map((b) => chars[b % chars.length])
+    .join('')
+    .slice(0, 8)
+}
 
 async function getCreator(userId: string) {
   return prisma.content_creators.findUnique({
@@ -48,7 +58,7 @@ export async function getDealRoom(applicationId: string) {
   const creator = await getCreator(userId)
   if (!creator) return null
 
-  return prisma.campaign_applications.findUnique({
+  let app = await prisma.campaign_applications.findUnique({
     where: { id: applicationId, creator_id: creator.id, status: 'accepted', campaign: { status: 'launched' } },
     include: {
       campaign: {
@@ -57,6 +67,27 @@ export async function getDealRoom(applicationId: string) {
       deal_submission: true,
     },
   })
+
+  // Lazily generate a short code for applications that were accepted before
+  // the link-tracking feature was added (or any accepted app missing one).
+  if (app && !app.tracking_short_code && app.campaign.landing_page_url) {
+    let code = generateShortCode()
+    while (await prisma.campaign_applications.findUnique({ where: { tracking_short_code: code } })) {
+      code = generateShortCode()
+    }
+    app = await prisma.campaign_applications.update({
+      where: { id: applicationId },
+      data: { tracking_short_code: code },
+      include: {
+        campaign: {
+          include: { sponsor: { select: { company_name: true } } },
+        },
+        deal_submission: true,
+      },
+    })
+  }
+
+  return app
 }
 
 export async function getPostTimestamp(url: string): Promise<{ iso: string } | null> {

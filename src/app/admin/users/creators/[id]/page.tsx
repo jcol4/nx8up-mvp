@@ -70,7 +70,7 @@ export default async function AdminCreatorDetailPage({ params }: Props) {
             </p>
           </div>
           <div>
-            <p className="dash-text-muted mb-0.5">Engagement</p>
+            <p className="dash-text-muted mb-0.5">CTR</p>
             <p className="dash-text-bright font-semibold">
               {creator.engagement_rate != null ? `${Number(creator.engagement_rate).toFixed(1)}%` : '—'}
             </p>

@@ -39,6 +39,7 @@ export async function getSponsorDealRooms() {
       deal_submission: {
         select: { status: true, submitted_at: true },
       },
+      _count: { select: { link_clicks: true } },
     },
   })
 }
@@ -65,9 +66,12 @@ export async function getDealRoomForSponsor(applicationId: string) {
           subs_followers: true,
           youtube_subscribers: true,
           engagement_rate: true,
+          average_vod_views: true,
+          youtube_avg_views: true,
         },
       },
       deal_submission: true,
+      _count: { select: { link_clicks: true } },
     },
   }).then((app) => {
     if (!app || app.campaign.sponsor.id !== sponsor.id) return null

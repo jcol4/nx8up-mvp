@@ -92,7 +92,7 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
             <Pills label="Type" values={creatorTypeLabels} />
             <Pills label="Size" values={creatorSizeLabels} />
             <Row label="Min. followers" value={draft.min_subs_followers || undefined} />
-            <Row label="Min. engagement" value={draft.min_engagement_rate ? `${draft.min_engagement_rate}%` : undefined} />
+            <Row label="Min. CTR" value={draft.min_engagement_rate ? `${draft.min_engagement_rate}%` : undefined} />
           </div>
         </div>
 

@@ -130,7 +130,7 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
                     <th className="text-left px-4 py-3 dash-text-muted font-medium">Platforms</th>
                     <th className="text-right px-4 py-3 dash-text-muted font-medium">Followers</th>
                     <th className="text-right px-4 py-3 dash-text-muted font-medium">Avg views</th>
-                    <th className="text-right px-4 py-3 dash-text-muted font-medium">Engagement</th>
+                    <th className="text-right px-4 py-3 dash-text-muted font-medium">CTR</th>
                     <th className="text-left px-4 py-3 dash-text-muted font-medium">Content</th>
                     <th className="text-left px-4 py-3 dash-text-muted font-medium">Size</th>
                   </tr>
@@ -194,7 +194,7 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
                         {c.avgViews != null ? c.avgViews.toLocaleString() : '—'}
                       </td>
 
-                      {/* Engagement */}
+                      {/* CTR */}
                       <td className="px-4 py-3 text-right">
                         {c.engagement_rate != null ? (
                           <span className={`text-xs font-medium tabular-nums ${

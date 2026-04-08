@@ -27,6 +27,11 @@ export default async function SponsorDealRoomDetailPage({
   const c = app.campaign
   const sub = app.deal_submission
   const creator = app.creator
+  const clickCount = app._count.link_clicks
+
+  // CTR = clicks / avg reach * 100 (use best available reach metric)
+  const reach = creator.average_vod_views ?? creator.youtube_avg_views ?? creator.subs_followers ?? creator.youtube_subscribers ?? null
+  const ctr = reach && reach > 0 ? ((clickCount / reach) * 100).toFixed(2) : null
 
   const handle =
     creator.twitch_username
@@ -317,6 +322,30 @@ export default async function SponsorDealRoomDetailPage({
                   )}
                 </dl>
               </div>
+
+              {app.tracking_short_code && (
+                <div className="dash-panel p-4">
+                  <h3 className="dash-panel-title">Link Performance</h3>
+                  <dl className="space-y-2 text-sm">
+                    <div className="flex justify-between gap-2">
+                      <dt className="dash-text-muted">Total Clicks</dt>
+                      <dd className="dash-text-bright font-bold">{clickCount.toLocaleString()}</dd>
+                    </div>
+                    {ctr !== null && (
+                      <div className="flex justify-between gap-2">
+                        <dt className="dash-text-muted">CTR</dt>
+                        <dd className="text-[#00c8ff] font-semibold">{ctr}%</dd>
+                      </div>
+                    )}
+                    {reach !== null && (
+                      <div className="flex justify-between gap-2 text-[11px]">
+                        <dt className="dash-text-muted">Reach used</dt>
+                        <dd className="dash-text-muted">{reach.toLocaleString()} avg views</dd>
+                      </div>
+                    )}
+                  </dl>
+                </div>
+              )}
 
               <div className="dash-panel p-4">
                 <h3 className="dash-panel-title">Campaign</h3>

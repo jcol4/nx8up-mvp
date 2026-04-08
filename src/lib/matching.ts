@@ -209,18 +209,18 @@ export function matchCreatorToCampaign(
     }
   }
 
-  // ── Min engagement rate (25% tolerance) ──────────────────────────────────
+  // ── Min CTR (25% tolerance) ───────────────────────────────────────────────
   const reqRate = toNum(campaign.min_engagement_rate)
   const creatorRate = toNum(creator.engagement_rate)
   if (reqRate != null && creatorRate != null) {
     addScore(10, Math.min(1, creatorRate / reqRate))
     if (creatorRate < reqRate * TOLERANCE) {
       reasons.push(
-        `Min ${reqRate.toFixed(1)}% engagement required — you have ${creatorRate.toFixed(2)}%`,
+        `Min ${reqRate.toFixed(1)}% CTR required — you have ${creatorRate.toFixed(2)}%`,
       )
     } else if (creatorRate < reqRate) {
       notes.push(
-        `Engagement slightly below requirement (${creatorRate.toFixed(2)}% / ${reqRate.toFixed(1)}%) — within tolerance`,
+        `CTR slightly below requirement (${creatorRate.toFixed(2)}% / ${reqRate.toFixed(1)}%) — within tolerance`,
       )
     }
   }

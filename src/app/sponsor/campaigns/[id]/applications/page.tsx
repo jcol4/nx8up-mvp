@@ -22,7 +22,10 @@ export default async function CampaignApplicationsPage({ params }: Props) {
     where: { id: campaignId },
     include: {
       applications: {
-        include: { creator: true },
+        include: {
+          creator: true,
+          _count: { select: { link_clicks: true } },
+        },
         orderBy: { submitted_at: 'desc' },
       },
     },
@@ -98,6 +101,11 @@ export default async function CampaignApplicationsPage({ params }: Props) {
                       {app.creator.platform?.length ? (
                         <span>{app.creator.platform.join(' · ')}</span>
                       ) : null}
+                      {app.tracking_short_code && (
+                        <span className="text-[#00c8ff]">
+                          {app._count.link_clicks.toLocaleString()} link click{app._count.link_clicks !== 1 ? 's' : ''}
+                        </span>
+                      )}
                     </div>
                     {app.message && (
                       <p className="text-sm dash-text-muted mt-2 border-t dash-border pt-2 line-clamp-2">

@@ -2,7 +2,17 @@
 
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
+import { randomBytes } from 'crypto'
 import { prisma } from '@/lib/prisma'
+
+function generateShortCode(): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+  const bytes = randomBytes(8)
+  return Array.from(bytes)
+    .map((b) => chars[b % chars.length])
+    .join('')
+    .slice(0, 8)
+}
 
 export async function publishCampaign(id: string): Promise<{ error?: string; success?: boolean }> {
   const { userId } = await auth()
@@ -93,9 +103,20 @@ export async function setApplicationStatus(
     return { error: 'You are not allowed to update this application.' }
   }
 
+  // Generate a unique tracking short code when accepting a creator for a campaign with a link
+  let tracking_short_code = application.tracking_short_code
+  if (status === 'accepted' && !tracking_short_code && application.campaign.landing_page_url) {
+    let code = generateShortCode()
+    // Retry on collision (extremely unlikely but safe)
+    while (await prisma.campaign_applications.findUnique({ where: { tracking_short_code: code } })) {
+      code = generateShortCode()
+    }
+    tracking_short_code = code
+  }
+
   await prisma.campaign_applications.update({
     where: { id: applicationId },
-    data: { status },
+    data: { status, ...(tracking_short_code ? { tracking_short_code } : {}) },
   })
 
   revalidatePath(`/sponsor/campaigns/${campaignId}/applications`)

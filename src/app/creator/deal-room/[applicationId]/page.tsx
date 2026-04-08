@@ -1,8 +1,10 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { headers } from 'next/headers'
 import { getDealRoom } from '../_actions'
 import ProofSubmitForm from './ProofSubmitForm'
 import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
+import CopyButton from './CopyButton'
 
 const DELIVERABLE_LABELS: Record<string, string> = {
   gameplay_footage: 'Gameplay footage',
@@ -25,6 +27,14 @@ export default async function CreatorDealRoomDetailPage({
 
   const c = app.campaign
   const sub = app.deal_submission
+
+  // Build the personalised tracking URL for this creator
+  const hdrs = await headers()
+  const host = hdrs.get('host') ?? 'nx8up.com'
+  const proto = host.startsWith('localhost') ? 'http' : 'https'
+  const trackingUrl = app.tracking_short_code
+    ? `${proto}://${host}/r/${app.tracking_short_code}`
+    : null
 
   const hasDeliverables = c.num_videos || c.num_streams || c.num_posts || c.num_short_videos
 
@@ -86,6 +96,31 @@ export default async function CreatorDealRoomDetailPage({
           </div>
         </div>
       </div>
+
+      {/* Tracking link — shown whenever the campaign has a link to include */}
+      {(trackingUrl ?? c.landing_page_url) && (
+        <div className="rounded-xl border border-[#00c8ff]/30 bg-[#00c8ff]/[0.06] p-4 sm:p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <svg className="w-4 h-4 text-[#00c8ff] shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+            <p className="text-sm font-semibold text-[#00c8ff]">
+              {trackingUrl ? 'Your Tracking Link' : 'Link to Include'}
+            </p>
+          </div>
+          <p className="text-xs cr-text-muted mb-3">
+            {trackingUrl
+              ? 'Use this personalised link in your bio and content description. Every click is tracked and counts toward your campaign performance.'
+              : 'Include this link in your bio and content description as specified by the sponsor.'}
+          </p>
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-black/30 border border-[#00c8ff]/20">
+            <code className="text-sm text-[#00c8ff] break-all flex-1 select-all">
+              {trackingUrl ?? c.landing_page_url}
+            </code>
+            <CopyButton text={(trackingUrl ?? c.landing_page_url)!} />
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-5">
@@ -162,13 +197,10 @@ export default async function CreatorDealRoomDetailPage({
                 ) : null}
                 {c.must_include_link && (
                   <li className="flex items-center gap-2 text-sm cr-text">
-                    <span className="w-4 h-4 rounded border border-[#00c8ff]/40 flex-shrink-0" />
-                    Include link in description/bio
-                    {c.landing_page_url ? (
-                      <a href={c.landing_page_url} target="_blank" rel="noopener noreferrer" className="cr-accent hover:underline text-xs">
-                        {c.landing_page_url}
-                      </a>
-                    ) : null}
+                    <span className="w-4 h-4 rounded border border-[#00c8ff]/40 flex-shrink-0 flex items-center justify-center">
+                      {sub?.status === 'approved' ? <span className="text-green-400 text-xs">✓</span> : null}
+                    </span>
+                    Include your tracking link in description/bio
                   </li>
                 )}
                 {c.must_include_promo_code && (
@@ -217,7 +249,7 @@ export default async function CreatorDealRoomDetailPage({
                   <dd className="text-sm cr-text mt-0.5 capitalize">{c.objective}</dd>
                 </div>
               )}
-              {c.landing_page_url && (
+              {c.landing_page_url && !trackingUrl && (
                 <div>
                   <dt className="text-xs cr-text-muted uppercase tracking-wide">Landing Page / Link to Include</dt>
                   <dd className="mt-0.5">

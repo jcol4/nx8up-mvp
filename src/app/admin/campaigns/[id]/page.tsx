@@ -145,7 +145,7 @@ export default async function AdminCampaignDetailPage({ params }: Props) {
                   <Row label="Min avg viewers" value={campaign.min_avg_viewers.toLocaleString()} />
                 )}
                 {campaign.min_engagement_rate != null && (
-                  <Row label="Min engagement" value={`${Number(campaign.min_engagement_rate).toFixed(1)}%`} />
+                  <Row label="Min CTR" value={`${Number(campaign.min_engagement_rate).toFixed(1)}%`} />
                 )}
                 {(campaign.min_audience_age != null || campaign.max_audience_age != null) && (
                   <Row label="Audience age" value={`${campaign.min_audience_age ?? '?'}–${campaign.max_audience_age ?? '?'}`} />
