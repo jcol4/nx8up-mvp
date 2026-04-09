@@ -188,9 +188,25 @@ export default async function SponsorDealRoomDetailPage({
                     </dl>
 
                     {sub.status === 'approved' ? (
-                      <div className="flex items-center gap-2 pt-3 border-t border-white/10">
-                        <span className="w-2 h-2 rounded-full bg-green-400" />
-                        <p className="text-sm text-green-400 font-medium">Submission approved</p>
+                      <div className="pt-3 border-t border-white/10 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-green-400" />
+                          <p className="text-sm text-green-400 font-medium">Submission approved</p>
+                        </div>
+                        {sub.payout_status === 'paid' ? (
+                          <div className="flex items-center gap-2 p-2.5 rounded-lg bg-[#22c55e]/5 border border-[#22c55e]/20">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] shrink-0" />
+                            <p className="text-xs text-[#22c55e]">
+                              Payout sent to creator
+                              {sub.stripe_transfer_id ? ` · ${sub.stripe_transfer_id}` : ''}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 p-2.5 rounded-lg bg-yellow-500/5 border border-yellow-500/20">
+                            <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 shrink-0" />
+                            <p className="text-xs text-yellow-400">Payout pending — contact support if this persists</p>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div className="pt-3 border-t border-white/10">

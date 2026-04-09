@@ -81,6 +81,7 @@ export async function saveCampaignDraft(formData: FormData): Promise<CreateCampa
     objective: (formData.get('objective') as string | null)?.trim() || null,
     campaign_type: (formData.get('campaign_type') as string | null)?.trim() || null,
     payment_model: (formData.get('payment_model') as string | null)?.trim() || 'fixed_per_creator',
+    preferred_payment_method: (['card', 'ach', 'both'].includes((formData.get('preferred_payment_method') as string) ?? '') ? formData.get('preferred_payment_method') as string : 'card'),
     budget,
     start_date: start_date && end_date && start_date < end_date ? start_date : null,
     end_date: start_date && end_date && start_date < end_date ? end_date : null,
@@ -201,6 +202,11 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
     return { error: 'Invalid payment model.' }
   }
 
+  const preferred_payment_method_raw = (formData.get('preferred_payment_method') as string)?.trim()
+  const preferred_payment_method = ['card', 'ach', 'both'].includes(preferred_payment_method_raw)
+    ? preferred_payment_method_raw
+    : 'card'
+
   // Optional fields
   const brand_name = (formData.get('brand_name') as string | null)?.trim() ?? null
   const product_name = (formData.get('product_name') as string | null)?.trim() ?? null
@@ -268,6 +274,7 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
     objective,
     campaign_type,
     payment_model,
+    preferred_payment_method,
     budget: budgetNumber,
     start_date,
     end_date,
@@ -311,7 +318,7 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
       select: { id: true },
     })
     if (!existing) return { error: 'Draft not found.' }
-    await prisma.campaigns.update({ where: { id: existingDraftId }, data: { ...campaignData, status: 'live' } })
+    await prisma.campaigns.update({ where: { id: existingDraftId }, data: { ...campaignData, status: 'pending_payment' } })
     campaignId = existingDraftId
   } else {
     const campaign = await prisma.campaigns.create({
@@ -319,7 +326,7 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
         ...campaignData,
         campaign_code: generateCampaignCode(),
         sponsor_id: sponsor.id,
-        status: 'live',
+        status: 'pending_payment',
         creative_package: [],
       },
     })

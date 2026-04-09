@@ -42,6 +42,7 @@ export default async function EditCampaignPage({ params }: { params: Promise<{ i
     budget: campaign.budget?.toString() ?? '',
     creator_count: campaign.creator_count?.toString() ?? '',
     payment_model: campaign.payment_model ?? 'fixed_per_creator',
+    preferred_payment_method: campaign.preferred_payment_method ?? 'card',
     start_date: campaign.start_date ? campaign.start_date.toISOString().split('T')[0] : '',
     end_date: campaign.end_date ? campaign.end_date.toISOString().split('T')[0] : '',
     campaign_type: campaign.campaign_type ?? '',

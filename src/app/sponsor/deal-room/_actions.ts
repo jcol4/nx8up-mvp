@@ -3,6 +3,8 @@
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+import { stripe } from '@/lib/stripe'
+import { calcFeeBreakdown } from '@/lib/constants'
 
 async function getSponsor(userId: string) {
   return prisma.sponsors.findUnique({
@@ -93,7 +95,23 @@ export async function updateSubmissionStatus(
 
   const app = await prisma.campaign_applications.findUnique({
     where: { id: applicationId },
-    include: { campaign: { select: { sponsor_id: true } } },
+    include: {
+      campaign: {
+        select: {
+          sponsor_id: true,
+          budget: true,
+          creator_count: true,
+          stripe_charge_id: true,
+          title: true,
+        },
+      },
+      creator: {
+        select: { stripe_connect_id: true, stripe_onboarding_complete: true },
+      },
+      deal_submission: {
+        select: { payout_status: true },
+      },
+    },
   })
   if (!app || app.campaign.sponsor_id !== sponsor.id) {
     return { error: 'Not authorized.' }
@@ -103,6 +121,34 @@ export async function updateSubmissionStatus(
     where: { application_id: applicationId },
     data: { status, sponsor_notes: sponsorNotes ?? null },
   })
+
+  // Trigger payout when sponsor approves
+  if (status === 'approved') {
+    const { campaign, creator, deal_submission: sub } = app
+
+    if (sub?.payout_status !== 'paid' && creator.stripe_connect_id && creator.stripe_onboarding_complete && campaign.stripe_charge_id && campaign.budget) {
+      const { perCreator } = calcFeeBreakdown(campaign.budget, campaign.creator_count)
+      if (perCreator && perCreator > 0) {
+        try {
+          const transfer = await stripe.transfers.create({
+            amount: perCreator * 100,
+            currency: 'usd',
+            destination: creator.stripe_connect_id,
+            source_transaction: campaign.stripe_charge_id,
+            metadata: { applicationId, campaignId: app.campaign_id },
+            description: `Payout for campaign: ${campaign.title}`,
+          })
+          await prisma.deal_submissions.update({
+            where: { application_id: applicationId },
+            data: { stripe_transfer_id: transfer.id, payout_status: 'paid' },
+          })
+        } catch (err) {
+          // Payout failed — submission still approved, sponsor can retry via admin
+          console.error('Payout transfer failed:', err)
+        }
+      }
+    }
+  }
 
   revalidatePath(`/sponsor/deal-room/${applicationId}`)
   revalidatePath('/sponsor/deal-room')

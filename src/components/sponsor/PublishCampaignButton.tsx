@@ -12,8 +12,13 @@ export default function PublishCampaignButton({ id }: Props) {
 
   const handlePublish = () => {
     startTransition(async () => {
-      await publishCampaign(id)
-      router.refresh()
+      const result = await publishCampaign(id)
+      if (result.error) {
+        alert(result.error)
+      } else {
+        // Campaign is pending_payment — send sponsor straight to checkout
+        router.push(`/sponsor/campaigns/${id}/pay`)
+      }
     })
   }
 

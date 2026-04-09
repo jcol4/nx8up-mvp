@@ -29,6 +29,7 @@ export type CampaignDraft = {
   budget: string
   creator_count: string
   payment_model: string
+  preferred_payment_method: string
   start_date: string
   end_date: string
 
@@ -76,6 +77,7 @@ export const EMPTY_DRAFT: CampaignDraft = {
   budget: '',
   creator_count: '',
   payment_model: 'fixed_per_creator',
+  preferred_payment_method: 'card',
   start_date: '',
   end_date: '',
   accepted_media_types: [],

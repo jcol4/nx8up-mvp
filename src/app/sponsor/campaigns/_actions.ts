@@ -26,7 +26,7 @@ export async function publishCampaign(id: string): Promise<{ error?: string; suc
     return { error: 'You are not allowed to publish this campaign.' }
   }
 
-  await prisma.campaigns.update({ where: { id }, data: { status: 'live' } })
+  await prisma.campaigns.update({ where: { id }, data: { status: 'pending_payment' } })
 
   revalidatePath('/sponsor/campaigns')
   revalidatePath('/sponsor')
@@ -48,8 +48,14 @@ export async function launchCampaign(id: string): Promise<{ error?: string; succ
   if (!campaign || campaign.sponsor_id !== sponsor.id) {
     return { error: 'You are not allowed to launch this campaign.' }
   }
+  if (campaign.status === 'pending_payment') {
+    return { error: 'Payment is required before launching. Please complete your payment first.' }
+  }
   if (campaign.status !== 'live') {
-    return { error: 'Only active campaigns can be launched.' }
+    return { error: 'Only funded campaigns can be launched.' }
+  }
+  if (!campaign.stripe_charge_id) {
+    return { error: 'Payment has not been confirmed yet. Please wait for your payment to settle.' }
   }
   if (campaign.applications.length === 0) {
     return { error: 'You must accept at least one creator before launching.' }

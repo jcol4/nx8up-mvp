@@ -192,6 +192,7 @@ export async function applyToCampaign(
     },
   })
   if (!campaign) return { error: 'Campaign not found.' }
+  if (campaign.status === 'pending_payment') return { error: 'This campaign is not yet open for applications.' }
   if (campaign.status === 'launched') return { error: 'This campaign is no longer accepting applications.' }
 
   if (campaign.legal_age_restriction && creator.audience_age_min != null) {
@@ -270,13 +271,16 @@ export async function respondToInvitation(
 
   const application = await prisma.campaign_applications.findUnique({
     where: { id: applicationId },
-    select: { id: true, creator_id: true, status: true, campaign_id: true },
+    include: { campaign: { select: { status: true } } },
   })
   if (!application || application.creator_id !== creator.id) {
     return { error: 'Invitation not found.' }
   }
   if (application.status !== 'invited') {
     return { error: 'This invitation has already been responded to.' }
+  }
+  if (application.campaign.status === 'pending_payment') {
+    return { error: 'This campaign is not yet funded. You will be able to respond once the sponsor completes payment.' }
   }
 
   await prisma.campaign_applications.update({

@@ -107,6 +107,54 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
         </div>
       </div>
 
+      {/* Payment method preference */}
+      <div className={sectionClass}>
+        <p className={sectionTitle}>Payment Method</p>
+        <p className="text-xs dash-text-muted mb-3">
+          How would you like to pay when launching this campaign?
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            { value: 'card',  label: 'Credit / Debit Card', desc: 'Instant — charged immediately on launch' },
+            { value: 'ach',   label: 'ACH Bank Transfer',   desc: 'Lower fees — US bank account via Stripe' },
+            { value: 'both',  label: 'Either',              desc: 'Choose at checkout' },
+          ].map(opt => {
+            const active = draft.preferred_payment_method === opt.value
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => set('preferred_payment_method', opt.value)}
+                className={`text-left p-3.5 rounded-lg border transition-all ${
+                  active
+                    ? 'border-[#00c8ff] bg-[rgba(0,200,255,0.08)] shadow-[0_0_12px_rgba(0,200,255,0.15)]'
+                    : 'border-white/10 bg-white/[0.02] hover:border-white/20'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`text-sm font-semibold ${active ? 'text-[#00c8ff]' : 'dash-text-bright'}`}>
+                    {opt.label}
+                  </span>
+                </div>
+                <p className="text-xs dash-text-muted leading-snug">{opt.desc}</p>
+              </button>
+            )
+          })}
+        </div>
+
+        {(draft.preferred_payment_method === 'ach' || draft.preferred_payment_method === 'both') && (
+          <div className="mt-3 flex items-start gap-2 p-3 rounded-lg border border-red-500/30 bg-red-500/5">
+            <svg className="w-3.5 h-3.5 shrink-0 mt-0.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+            <p className="text-xs text-red-400 leading-relaxed">
+              <span className="font-semibold">ACH is not instant.</span> Bank transfers typically take 3–5 business days
+              to verify and clear — though they come with lower processing fees than card. Your campaign will not launch until payment settles.
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* Dates */}
       <div className="space-y-4">
         <p className={sectionTitle}>Campaign Duration</p>

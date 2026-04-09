@@ -107,6 +107,7 @@ export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRes
     fd.set('min_engagement_rate', draft.min_engagement_rate)
     fd.set('budget', draft.budget)
     fd.set('payment_model', draft.payment_model)
+    fd.set('preferred_payment_method', draft.preferred_payment_method)
     fd.set('start_date', draft.start_date)
     fd.set('end_date', draft.end_date)
     fd.set('accepted_media_types', JSON.stringify(draft.accepted_media_types))
@@ -146,7 +147,8 @@ export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRes
     const res = await createCampaign(buildFormData())
     setIsSubmitting(false)
     if (res.error) { setStepError(res.error); return }
-    router.push('/sponsor/campaigns')
+    // Redirect to payment — campaign is not live until funds are held in escrow
+    router.push(`/sponsor/campaigns/${res.id}/pay`)
   }
 
   const stepProps = { draft, setDraft }

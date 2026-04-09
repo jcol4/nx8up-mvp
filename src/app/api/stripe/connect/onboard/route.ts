@@ -11,7 +11,14 @@ export async function POST() {
 
   const creator = await prisma.content_creators.findUnique({
     where: { clerk_user_id: userId },
-    select: { id: true, email: true, stripe_connect_id: true },
+    select: {
+      id: true,
+      email: true,
+      stripe_connect_id: true,
+      twitch_username: true,
+      youtube_handle: true,
+      youtube_channel_id: true,
+    },
   })
 
   if (!creator) {
@@ -22,11 +29,41 @@ export async function POST() {
   let accountId = creator.stripe_connect_id
 
   if (!accountId) {
+    // Build a social profile URL to pre-fill the "website" field so creators
+    // don't need to enter a business website — their Twitch or YouTube page counts.
+    const profileUrl =
+      creator.twitch_username
+        ? `https://www.twitch.tv/${creator.twitch_username}`
+        : creator.youtube_handle
+          ? `https://www.youtube.com/${creator.youtube_handle}`
+          : creator.youtube_channel_id
+            ? `https://www.youtube.com/channel/${creator.youtube_channel_id}`
+            : null
+
+    // Use the creator's handle as their display name instead of a business name
+    const displayName =
+      creator.twitch_username ??
+      creator.youtube_handle?.replace(/^@/, '') ??
+      null
+
     const account = await stripe.accounts.create({
       type: 'express',
       email: creator.email,
+      // Mark as individual so Stripe skips all company/business questions
+      business_type: 'individual',
       capabilities: {
         transfers: { requested: true },
+      },
+      // Pre-fill profile fields so creators don't hit confusing prompts
+      business_profile: {
+        ...(profileUrl ? { url: profileUrl } : {}),
+        ...(displayName ? { name: displayName } : {}),
+      },
+      settings: {
+        payouts: {
+          // Allow creators to set their own payout schedule after onboarding
+          schedule: { interval: 'manual' },
+        },
       },
     })
 

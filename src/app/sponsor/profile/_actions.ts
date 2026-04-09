@@ -20,6 +20,7 @@ export type SponsorProfile = {
   min_avg_viewers: number | null
   min_subs_followers: number | null
   min_engagement_rate: number | null
+  preferred_payment_method: string
   age_restricted: boolean
   age_restriction_type: string | null
   has_pending_age_restriction_request: boolean
@@ -57,6 +58,7 @@ export async function getSponsorProfile(): Promise<SponsorProfile | null> {
     min_avg_viewers: sponsor.min_avg_viewers ?? null,
     min_subs_followers: sponsor.min_subs_followers ?? null,
     min_engagement_rate: sponsor.min_engagement_rate ? Number(sponsor.min_engagement_rate) : null,
+    preferred_payment_method: sponsor.preferred_payment_method ?? 'card',
     age_restricted: sponsor.age_restricted,
     age_restriction_type: sponsor.age_restriction_type ?? null,
     has_pending_age_restriction_request: sponsor.age_restriction_requests.length > 0,
@@ -64,7 +66,7 @@ export async function getSponsorProfile(): Promise<SponsorProfile | null> {
 }
 
 export async function updateSponsorProfile(
-  data: Omit<SponsorProfile, 'age_restricted' | 'age_restriction_type' | 'has_pending_age_restriction_request'>
+  data: Omit<SponsorProfile, 'age_restricted' | 'age_restriction_type' | 'has_pending_age_restriction_request'> & { preferred_payment_method: string }
 ): Promise<{ error?: string }> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
@@ -93,6 +95,7 @@ export async function updateSponsorProfile(
         min_avg_viewers: data.min_avg_viewers,
         min_subs_followers: data.min_subs_followers,
         min_engagement_rate: data.min_engagement_rate,
+        preferred_payment_method: data.preferred_payment_method,
       },
       update: {
         company_name: data.company_name.trim() || null,
@@ -106,6 +109,7 @@ export async function updateSponsorProfile(
         min_avg_viewers: data.min_avg_viewers,
         min_subs_followers: data.min_subs_followers,
         min_engagement_rate: data.min_engagement_rate,
+        preferred_payment_method: data.preferred_payment_method,
         updated_at: new Date(),
       },
     })

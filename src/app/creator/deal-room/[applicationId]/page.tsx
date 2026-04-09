@@ -425,6 +425,14 @@ export default async function CreatorDealRoomDetailPage({
                     <dd className="cr-text text-right">{new Date(sub.submitted_at).toLocaleDateString()}</dd>
                   </div>
                 )}
+                {sub.status === 'approved' && (
+                  <div className="flex justify-between gap-2">
+                    <dt className="cr-text-muted">Payout</dt>
+                    <dd className={sub.payout_status === 'paid' ? 'text-[#22c55e] font-medium' : 'text-yellow-400'}>
+                      {sub.payout_status === 'paid' ? 'Sent' : 'Pending'}
+                    </dd>
+                  </div>
+                )}
                 {sub.admin_notes && (
                   <div className="rounded-lg p-3 bg-red-500/10 border border-red-500/20">
                     <dt className="text-xs font-semibold text-red-400 uppercase tracking-wide mb-1">nx8up Admin</dt>

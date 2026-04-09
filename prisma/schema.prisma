@@ -96,9 +96,11 @@ model sponsors {
   game_category            String[]
   created_at               DateTime?                          @default(now()) @db.Timestamptz(6)
   updated_at               DateTime?                          @default(now()) @db.Timestamptz(6)
-  age_restricted           Boolean                            @default(false)
-  age_restriction_type     String?
-  campaigns                campaigns[]
+  age_restricted              Boolean                            @default(false)
+  age_restriction_type        String?
+  preferred_payment_method    String?                            @default("card")
+  stripe_customer_id          String?
+  campaigns                   campaigns[]
   age_restriction_requests sponsor_age_restriction_requests[]
 
   @@index([budget_max])
@@ -173,6 +175,8 @@ model campaigns {
   num_twitch_clips            Int?
   stripe_authorized_amount    Int?
   stripe_payment_intent_id    String?
+  stripe_charge_id            String?
+  preferred_payment_method    String?  @default("card")
   applications                campaign_applications[]
   sponsor                     sponsors                @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
 

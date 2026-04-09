@@ -11,6 +11,7 @@ import { getMissingSponsorProfileFields } from '@/lib/sponsor-profile'
 
 const STATUS_STYLES: Record<string, string> = {
   draft: 'bg-[#94a3b8]/20 text-[#94a3b8]',
+  pending_payment: 'bg-[#eab308]/20 text-[#eab308]',
   pending_approval: 'bg-[#eab308]/20 text-[#eab308]',
   live: 'bg-[#22c55e]/20 text-[#22c55e]',
   launched: 'bg-[#a855f7]/20 text-[#a855f7]',
@@ -20,6 +21,7 @@ const STATUS_STYLES: Record<string, string> = {
 
 const STATUS_LABELS: Record<string, string> = {
   draft: 'Draft',
+  pending_payment: 'Awaiting Payment',
   pending_approval: 'Pending Approval',
   live: 'Active',
   launched: 'Launched',
@@ -49,7 +51,7 @@ const PAYMENT_MODEL_LABELS: Record<string, string> = {
 export default async function SponsorCampaignsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>
+  searchParams: Promise<{ tab?: string; payment?: string }>
 }) {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
@@ -60,7 +62,7 @@ export default async function SponsorCampaignsPage({
   const missingFields = getMissingSponsorProfileFields(sponsor)
   const profileComplete = missingFields.length === 0
 
-  const { tab } = await searchParams
+  const { tab, payment } = await searchParams
   const activeTab = tab === 'launched' ? 'launched' : 'active'
 
   const campaigns = await prisma.campaigns.findMany({
@@ -68,7 +70,7 @@ export default async function SponsorCampaignsPage({
       sponsor_id: sponsor.id,
       ...(activeTab === 'launched'
         ? { status: 'launched' }
-        : { status: { not: 'launched' } }),
+        : { status: { notIn: ['launched', 'cancelled'] } }),
     },
     orderBy: { created_at: 'desc' },
     include: {
@@ -82,7 +84,7 @@ export default async function SponsorCampaignsPage({
   })
 
   const activeCount = await prisma.campaigns.count({
-    where: { sponsor_id: sponsor.id, status: { not: 'launched' } },
+    where: { sponsor_id: sponsor.id, status: { notIn: ['launched', 'cancelled'] } },
   })
 
   return (
@@ -90,6 +92,17 @@ export default async function SponsorCampaignsPage({
       <SponsorHeader />
       <div className="flex-1 p-6 overflow-auto">
         <div className="max-w-4xl mx-auto">
+          {payment === 'processing' && (
+            <div className="mb-4 flex items-start gap-3 p-4 rounded-lg border border-[#eab308]/30 bg-[#eab308]/5">
+              <svg className="w-4 h-4 shrink-0 mt-0.5 text-[#eab308]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p className="text-sm font-semibold text-[#eab308]">ACH bank transfer initiated</p>
+                <p className="text-xs text-[#eab308]/80 mt-0.5">Your payment is processing and will settle in 3–5 business days. Your campaign will go live automatically once the transfer clears.</p>
+              </div>
+            </div>
+          )}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
             <div>
               <h1 className="text-xl font-semibold dash-text-bright mb-1">My Campaigns</h1>
@@ -244,6 +257,14 @@ export default async function SponsorCampaignsPage({
                           </Link>
                         )}
                         {c.status === 'draft' && <PublishCampaignButton id={c.id} />}
+                        {c.status === 'pending_payment' && (
+                          <Link
+                            href={`/sponsor/campaigns/${c.id}/pay`}
+                            className="text-xs px-2.5 py-1 rounded-lg bg-[#eab308] text-black font-semibold hover:opacity-90 transition-opacity"
+                          >
+                            Pay Now
+                          </Link>
+                        )}
                         {c.status === 'live' && hasAcceptedCreator && (
                           <LaunchCampaignButton id={c.id} />
                         )}

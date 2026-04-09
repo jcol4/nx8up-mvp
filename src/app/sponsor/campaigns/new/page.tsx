@@ -24,6 +24,7 @@ export default async function NewCampaignPage() {
       min_subs_followers: true,
       min_engagement_rate: true,
       age_restriction_type: true,
+      preferred_payment_method: true,
     },
   })
 
@@ -84,12 +85,13 @@ export default async function NewCampaignPage() {
 
   const profileDraft: CampaignDraft = {
     ...EMPTY_DRAFT,
-    brand_name:          sponsor?.company_name ?? '',
-    platform:            sponsor?.platform ?? [],
-    min_subs_followers:  sponsor?.min_subs_followers?.toString() ?? '',
-    min_engagement_rate: sponsor?.min_engagement_rate != null
-                           ? Number(sponsor.min_engagement_rate).toFixed(2)
-                           : '',
+    brand_name:               sponsor?.company_name ?? '',
+    platform:                 sponsor?.platform ?? [],
+    min_subs_followers:       sponsor?.min_subs_followers?.toString() ?? '',
+    min_engagement_rate:      sponsor?.min_engagement_rate != null
+                                ? Number(sponsor.min_engagement_rate).toFixed(2)
+                                : '',
+    preferred_payment_method: sponsor?.preferred_payment_method ?? 'card',
     budget: (() => {
       const lo = sponsor?.budget_min
       const hi = sponsor?.budget_max

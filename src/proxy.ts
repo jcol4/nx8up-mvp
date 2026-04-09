@@ -17,6 +17,7 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
     // These routes handle their own auth
     if (req.nextUrl.pathname.startsWith('/api/auth/')) return NextResponse.next()
+    if (req.nextUrl.pathname.startsWith('/api/stripe/webhook')) return NextResponse.next()
         
     const { userId, sessionClaims, redirectToSignIn } = await auth()
     const role = (sessionClaims?.metadata as any)?.role as string | undefined
