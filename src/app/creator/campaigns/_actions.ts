@@ -5,16 +5,17 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { matchCreatorToCampaign } from '@/lib/matching'
 
-export async function getCreatorOAuthStatus(): Promise<{ verified: boolean }> {
+export async function getCreatorOAuthStatus(): Promise<{ verified: boolean; stripeReady: boolean }> {
   const { userId } = await auth()
-  if (!userId) return { verified: false }
+  if (!userId) return { verified: false, stripeReady: false }
   const creator = await prisma.content_creators.findUnique({
     where: { clerk_user_id: userId },
-    select: { twitch_id: true, youtube_channel_id: true },
+    select: { twitch_id: true, youtube_channel_id: true, stripe_connect_id: true, stripe_onboarding_complete: true },
   })
-  if (!creator) return { verified: false }
+  if (!creator) return { verified: false, stripeReady: false }
   const verified = creator.twitch_id != null || creator.youtube_channel_id != null
-  return { verified }
+  const stripeReady = creator.stripe_connect_id != null && creator.stripe_onboarding_complete === true
+  return { verified, stripeReady }
 }
 
 const CREATOR_MATCHING_SELECT = {

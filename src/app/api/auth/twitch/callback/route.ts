@@ -194,5 +194,15 @@ export async function GET(req: NextRequest) {
     },
   })
 
+  // Refresh aggregate CTR from already-stored per-submission CTRs (DB-only, no extra API calls)
+  const { recomputeCreatorAggregateCtr } = await import('@/lib/ctr')
+  const creator = await prisma.content_creators.findUnique({
+    where: { clerk_user_id: userId },
+    select: { id: true },
+  })
+  if (creator) {
+    recomputeCreatorAggregateCtr(creator.id).catch(console.error)
+  }
+
   return NextResponse.redirect(`${APP_URL}/creator/profile?twitch_linked=1`)
 }

@@ -21,7 +21,32 @@ export default async function CreatorCampaignsPage({
 }: {
   searchParams: Promise<{ tab?: string }>
 }) {
-  const { verified } = await getCreatorOAuthStatus()
+  const { verified, stripeReady } = await getCreatorOAuthStatus()
+
+  if (!stripeReady) {
+    return (
+      <main className="max-w-4xl mx-auto p-6 sm:p-8">
+        <div className="mb-6">
+          <Link href="/creator" className="text-xs cr-accent hover:underline">← Back to Dashboard</Link>
+          <h1 className="text-xl font-semibold cr-text-bright mt-2">Open Campaigns</h1>
+        </div>
+        <Panel variant="creator">
+          <div className="text-center py-10 px-4">
+            <p className="text-base font-semibold cr-text-bright mb-2">Set up your payout account first</p>
+            <p className="text-sm cr-text-muted mb-6">
+              You need to connect a Stripe payout account before you can browse or apply to campaigns. This ensures you can receive payments from sponsors.
+            </p>
+            <Link
+              href="/creator/profile"
+              className="inline-block text-sm font-medium px-4 py-2 rounded-md bg-yellow-500/10 text-yellow-300 border border-yellow-500/30 hover:bg-yellow-500/20 transition-colors"
+            >
+              Set up payout account
+            </Link>
+          </div>
+        </Panel>
+      </main>
+    )
+  }
 
   if (!verified) {
     return (

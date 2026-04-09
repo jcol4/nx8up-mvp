@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHash } from 'crypto'
 import { prisma } from '@/lib/prisma'
-import { recomputeCreatorCtr } from '@/lib/ctr'
 
 export async function GET(
   req: NextRequest,
@@ -31,6 +30,20 @@ export async function GET(
     ? createHash('sha256').update(rawIp).digest('hex')
     : null
 
+  const dest = application.campaign.landing_page_url
+  const url = /^https?:\/\//i.test(dest) ? dest : `https://${dest}`
+
+  // Deduplicate by ip_hash — same IP clicking the same link is one click
+  if (ipHash) {
+    const duplicate = await prisma.link_clicks.findFirst({
+      where: { application_id: application.id, ip_hash: ipHash },
+      select: { id: true },
+    })
+    if (duplicate) {
+      return NextResponse.redirect(url, { status: 302 })
+    }
+  }
+
   // Fire-and-forget — don't block the redirect on the DB write
   prisma.link_clicks
     .create({
@@ -41,11 +54,7 @@ export async function GET(
         referrer: req.headers.get('referer'),
       },
     })
-    .then(() => recomputeCreatorCtr(application.creator_id))
     .catch(() => {})
-
-  const dest = application.campaign.landing_page_url
-  const url = /^https?:\/\//i.test(dest) ? dest : `https://${dest}`
 
   return NextResponse.redirect(url, { status: 302 })
 }

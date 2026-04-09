@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/recalculate-ctr",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

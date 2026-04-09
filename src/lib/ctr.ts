@@ -1,58 +1,159 @@
 import { prisma } from './prisma'
 
-/**
- * Recomputes a creator's click-through rate from real link_clicks data and
- * writes the result to content_creators.engagement_rate (stored as a
- * percentage, e.g. 2.5 = 2.5%).
- *
- * Formula:
- *   CTR = (total clicks across all campaigns) /
- *         (creator avg reach × number of campaigns with tracking) × 100
- *
- * Called fire-and-forget from the /r/[code] redirect route after each click.
- */
-export async function recomputeCreatorCtr(creatorId: string): Promise<void> {
-  const creator = await prisma.content_creators.findUnique({
-    where: { id: creatorId },
-    select: {
-      average_vod_views: true,
-      youtube_avg_views: true,
-      subs_followers: true,
-      youtube_subscribers: true,
-      applications: {
-        where: { tracking_short_code: { not: null } },
-        select: {
-          _count: { select: { link_clicks: true } },
+// ── URL parsers (mirrors verify-proof-url.ts — kept local to avoid coupling) ─
+
+function extractYouTubeVideoId(rawUrl: string): string | null {
+  try {
+    const url = new URL(rawUrl)
+    const { hostname, pathname, searchParams } = url
+    if (hostname === 'youtu.be') return pathname.slice(1).split('/')[0] || null
+    if (hostname === 'youtube.com' || hostname === 'www.youtube.com') {
+      if (pathname.startsWith('/watch')) return searchParams.get('v')
+      const m = pathname.match(/^\/(shorts|live|embed)\/([^/?]+)/)
+      if (m) return m[2]
+    }
+  } catch {}
+  return null
+}
+
+function extractTwitchVideoId(rawUrl: string): { type: 'vod' | 'clip'; id: string } | null {
+  try {
+    const url = new URL(rawUrl)
+    const { hostname, pathname } = url
+    if (hostname === 'twitch.tv' || hostname === 'www.twitch.tv') {
+      const vod = pathname.match(/^\/videos\/(\d+)/)
+      if (vod) return { type: 'vod', id: vod[1] }
+      const clip = pathname.match(/^\/[^/]+\/clip\/([^/?]+)/)
+      if (clip) return { type: 'clip', id: clip[1] }
+    }
+    if (hostname === 'clips.twitch.tv') {
+      const id = pathname.slice(1).split('/')[0]
+      if (id) return { type: 'clip', id }
+    }
+  } catch {}
+  return null
+}
+
+async function getTwitchAppToken(): Promise<string> {
+  const res = await fetch('https://id.twitch.tv/oauth2/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: process.env.TWITCH_CLIENT_ID!,
+      client_secret: process.env.TWITCH_CLIENT_SECRET!,
+      grant_type: 'client_credentials',
+    }),
+  })
+  if (!res.ok) throw new Error(`Twitch token error: ${res.status}`)
+  return (await res.json()).access_token
+}
+
+// ── View count fetcher ───────────────────────────────────────────────────────
+
+async function fetchViewsForUrl(rawUrl: string): Promise<number | null> {
+  try {
+    const url = new URL(rawUrl)
+    const { hostname } = url
+
+    if (hostname === 'youtube.com' || hostname === 'www.youtube.com' || hostname === 'youtu.be') {
+      const apiKey = process.env.YOUTUBE_API_KEY
+      if (!apiKey) return null
+      const videoId = extractYouTubeVideoId(rawUrl)
+      if (!videoId) return null
+      const res = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${encodeURIComponent(videoId)}&key=${apiKey}`,
+        { next: { revalidate: 0 } },
+      )
+      if (!res.ok) return null
+      const data = await res.json()
+      const viewCount = data.items?.[0]?.statistics?.viewCount
+      return viewCount != null ? parseInt(viewCount, 10) : null
+    }
+
+    if (hostname === 'twitch.tv' || hostname === 'www.twitch.tv' || hostname === 'clips.twitch.tv') {
+      const parsed = extractTwitchVideoId(rawUrl)
+      if (!parsed) return null
+      const token = await getTwitchAppToken()
+      const endpoint =
+        parsed.type === 'vod'
+          ? `https://api.twitch.tv/helix/videos?id=${encodeURIComponent(parsed.id)}`
+          : `https://api.twitch.tv/helix/clips?id=${encodeURIComponent(parsed.id)}`
+      const res = await fetch(endpoint, {
+        headers: {
+          'Client-Id': process.env.TWITCH_CLIENT_ID!,
+          Authorization: `Bearer ${token}`,
         },
-      },
+      })
+      if (!res.ok) return null
+      const data = await res.json()
+      return data.data?.[0]?.view_count ?? null
+    }
+  } catch {}
+  return null
+}
+
+// ── Per-submission CTR ───────────────────────────────────────────────────────
+
+/**
+ * Fetches current view counts for all proof URLs in a submission via OAuth
+ * (YouTube API key / Twitch app token — creators cannot self-report).
+ * Computes CTR = (clicks / avg_video_views) * 100 and stores on deal_submissions.
+ */
+export async function computeAndStoreSubmissionCtr(applicationId: string): Promise<void> {
+  const app = await prisma.campaign_applications.findUnique({
+    where: { id: applicationId },
+    select: {
+      _count: { select: { link_clicks: true } },
+      deal_submission: { select: { proof_urls: true } },
     },
   })
 
-  if (!creator) return
+  const sub = app?.deal_submission
+  if (!sub || sub.proof_urls.length === 0) return
 
-  // Use the best available reach metric as the per-campaign impression estimate
-  const reach =
-    creator.average_vod_views ??
-    creator.youtube_avg_views ??
-    creator.subs_followers ??
-    creator.youtube_subscribers
+  const viewCounts = await Promise.all(sub.proof_urls.map(fetchViewsForUrl))
 
-  if (!reach || reach === 0) return
+  const valid = viewCounts.filter((v): v is number => v !== null && v > 0)
+  if (valid.length === 0) return
 
-  const campaignsWithTracking = creator.applications
-  const numCampaigns = campaignsWithTracking.length
-  if (numCampaigns === 0) return
+  const avgViews = valid.reduce((a, b) => a + b, 0) / valid.length
+  const clicks = app!._count.link_clicks
+  const ctr = Math.min((clicks / avgViews) * 100, 999.99)
 
-  const totalClicks = campaignsWithTracking.reduce(
-    (sum, app) => sum + app._count.link_clicks,
-    0,
-  )
+  const videoViews: Record<string, number> = {}
+  sub.proof_urls.forEach((url, i) => {
+    if (viewCounts[i] !== null) videoViews[url] = viewCounts[i]!
+  })
 
-  // Cap at Decimal(5,2) max to avoid DB errors
-  const ctr = Math.min((totalClicks / (reach * numCampaigns)) * 100, 999.99)
+  await prisma.deal_submissions.update({
+    where: { application_id: applicationId },
+    data: { video_views: videoViews, ctr, views_fetched_at: new Date() },
+  })
+}
+
+// ── Aggregate CTR ────────────────────────────────────────────────────────────
+
+/**
+ * Averages stored per-submission CTRs from the DB and writes the result to
+ * content_creators.engagement_rate. Makes no external API calls — safe to
+ * call on every OAuth resync without multiplying API usage with creator count.
+ */
+export async function recomputeCreatorAggregateCtr(creatorId: string): Promise<void> {
+  const submissions = await prisma.deal_submissions.findMany({
+    where: {
+      application: { creator_id: creatorId },
+      ctr: { not: null },
+    },
+    select: { ctr: true },
+  })
+
+  if (submissions.length === 0) return
+
+  const total = submissions.reduce((sum, s) => sum + Number(s.ctr), 0)
+  const aggregate = Math.min(total / submissions.length, 999.99)
 
   await prisma.content_creators.update({
     where: { id: creatorId },
-    data: { engagement_rate: ctr },
+    data: { engagement_rate: aggregate },
   })
 }

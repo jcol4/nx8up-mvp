@@ -28,10 +28,11 @@ export default async function SponsorDealRoomDetailPage({
   const sub = app.deal_submission
   const creator = app.creator
   const clickCount = app._count.link_clicks
-
-  // CTR = clicks / avg reach * 100 (use best available reach metric)
-  const reach = creator.average_vod_views ?? creator.youtube_avg_views ?? creator.subs_followers ?? creator.youtube_subscribers ?? null
-  const ctr = reach && reach > 0 ? ((clickCount / reach) * 100).toFixed(2) : null
+  const ctr = sub?.ctr != null ? Number(sub.ctr).toFixed(2) : null
+  const videoViews = sub?.video_views as Record<string, number> | null | undefined
+  const avgVideoViews = videoViews && Object.keys(videoViews).length > 0
+    ? Math.round(Object.values(videoViews).reduce((a, b) => a + b, 0) / Object.values(videoViews).length)
+    : null
 
   const handle =
     creator.twitch_username
@@ -353,10 +354,10 @@ export default async function SponsorDealRoomDetailPage({
                         <dd className="text-[#00c8ff] font-semibold">{ctr}%</dd>
                       </div>
                     )}
-                    {reach !== null && (
+                    {avgVideoViews !== null && (
                       <div className="flex justify-between gap-2 text-[11px]">
-                        <dt className="dash-text-muted">Reach used</dt>
-                        <dd className="dash-text-muted">{reach.toLocaleString()} avg views</dd>
+                        <dt className="dash-text-muted">Avg video views</dt>
+                        <dd className="dash-text-muted">{avgVideoViews.toLocaleString()}</dd>
                       </div>
                     )}
                   </dl>

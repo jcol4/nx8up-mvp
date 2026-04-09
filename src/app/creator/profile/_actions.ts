@@ -432,6 +432,15 @@ export async function refreshTwitchDataIfStale(userId: string) {
         creator_size: computeCreatorSize(followerCount, twitchCreator?.youtube_subscribers ?? null) ?? undefined,
       },
     })
+
+    const { recomputeCreatorAggregateCtr } = await import('@/lib/ctr')
+    const updated = await prisma.content_creators.findUnique({
+      where: { clerk_user_id: userId },
+      select: { id: true },
+    })
+    if (updated) {
+      recomputeCreatorAggregateCtr(updated.id).catch(console.error)
+    }
   } catch (err) {
     console.error('refreshTwitchDataIfStale error:', err)
   }
@@ -660,6 +669,15 @@ export async function refreshYouTubeDataIfStale(userId: string) {
         ) ?? undefined,
       },
     })
+
+    const { recomputeCreatorAggregateCtr } = await import('@/lib/ctr')
+    const updated = await prisma.content_creators.findUnique({
+      where: { clerk_user_id: userId },
+      select: { id: true },
+    })
+    if (updated) {
+      recomputeCreatorAggregateCtr(updated.id).catch(console.error)
+    }
   } catch (err) {
     console.error('refreshYouTubeDataIfStale error:', err)
   }

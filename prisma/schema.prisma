@@ -96,11 +96,11 @@ model sponsors {
   game_category            String[]
   created_at               DateTime?                          @default(now()) @db.Timestamptz(6)
   updated_at               DateTime?                          @default(now()) @db.Timestamptz(6)
-  age_restricted              Boolean                            @default(false)
-  age_restriction_type        String?
-  preferred_payment_method    String?                            @default("card")
-  stripe_customer_id          String?
-  campaigns                   campaigns[]
+  age_restricted           Boolean                            @default(false)
+  age_restriction_type     String?
+  preferred_payment_method String?                            @default("card")
+  stripe_customer_id       String?
+  campaigns                campaigns[]
   age_restriction_requests sponsor_age_restriction_requests[]
 
   @@index([budget_max])
@@ -176,7 +176,7 @@ model campaigns {
   stripe_authorized_amount    Int?
   stripe_payment_intent_id    String?
   stripe_charge_id            String?
-  preferred_payment_method    String?  @default("card")
+  preferred_payment_method    String?                 @default("card")
   applications                campaign_applications[]
   sponsor                     sponsors                @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
 
@@ -228,6 +228,9 @@ model deal_submissions {
   admin_notes          String?
   payout_status        String?
   stripe_transfer_id   String?
+  video_views          Json?               // { [proofUrl: string]: viewCount }
+  ctr                  Decimal?            @db.Decimal(6, 2)
+  views_fetched_at     DateTime?           @db.Timestamptz(6)
   application          campaign_applications @relation(fields: [application_id], references: [id], onDelete: Cascade)
 }
 
