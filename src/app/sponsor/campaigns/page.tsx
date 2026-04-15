@@ -12,6 +12,7 @@ import { getMissingSponsorProfileFields } from '@/lib/sponsor-profile'
 const STATUS_STYLES: Record<string, string> = {
   draft: 'bg-[#94a3b8]/20 text-[#94a3b8]',
   pending_payment: 'bg-[#eab308]/20 text-[#eab308]',
+  payment_in_progress: 'bg-[#00c8ff]/20 text-[#00c8ff]',
   pending_approval: 'bg-[#eab308]/20 text-[#eab308]',
   live: 'bg-[#22c55e]/20 text-[#22c55e]',
   launched: 'bg-[#a855f7]/20 text-[#a855f7]',
@@ -22,6 +23,7 @@ const STATUS_STYLES: Record<string, string> = {
 const STATUS_LABELS: Record<string, string> = {
   draft: 'Draft',
   pending_payment: 'Awaiting Payment',
+  payment_in_progress: 'Payment Processing',
   pending_approval: 'Pending Approval',
   live: 'Active',
   launched: 'Launched',
@@ -264,6 +266,11 @@ export default async function SponsorCampaignsPage({
                           >
                             Pay Now
                           </Link>
+                        )}
+                        {c.status === 'payment_in_progress' && (
+                          <span className="text-xs px-2.5 py-1 rounded-lg bg-[#00c8ff]/10 text-[#00c8ff] border border-[#00c8ff]/20">
+                            Processing…
+                          </span>
                         )}
                         {c.status === 'live' && hasAcceptedCreator && (
                           <LaunchCampaignButton id={c.id} />

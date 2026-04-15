@@ -3,6 +3,7 @@ import Link from 'next/link'
 import SponsorHeader from '../../SponsorHeader'
 import { getDealRoomForSponsor } from '../_actions'
 import ReviewButtons from './ReviewButtons'
+import RetryPayoutButton from './RetryPayoutButton'
 import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
 
 const DELIVERABLE_LABELS: Record<string, string> = {
@@ -203,10 +204,7 @@ export default async function SponsorDealRoomDetailPage({
                             </p>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2 p-2.5 rounded-lg bg-yellow-500/5 border border-yellow-500/20">
-                            <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 shrink-0" />
-                            <p className="text-xs text-yellow-400">Payout pending — contact support if this persists</p>
-                          </div>
+                          <RetryPayoutButton applicationId={applicationId} />
                         )}
                       </div>
                     ) : (

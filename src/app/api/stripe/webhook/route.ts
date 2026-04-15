@@ -21,6 +21,20 @@ export async function POST(request: Request) {
 
   try {
     switch (event.type) {
+      case 'payment_intent.processing': {
+        const pi = event.data.object as Stripe.PaymentIntent
+        const campaignId = pi.metadata?.campaignId
+        if (!campaignId) break
+
+        // ACH / bank transfer submitted — mark campaign so sponsor sees "Payment Processing"
+        await prisma.campaigns.updateMany({
+          where: { id: campaignId, status: { in: ['pending_payment', 'payment_in_progress'] } },
+          data: { status: 'payment_in_progress', stripe_payment_intent_id: pi.id },
+        })
+        console.log(`[webhook] payment_intent.processing — campaign ${campaignId} marked payment_in_progress`)
+        break
+      }
+
       case 'payment_intent.succeeded': {
         const pi = event.data.object as Stripe.PaymentIntent
         const campaignId = pi.metadata?.campaignId
@@ -31,11 +45,9 @@ export async function POST(request: Request) {
         // Get the charge ID from the PaymentIntent for use as source_transaction in transfers
         const chargeId = typeof pi.latest_charge === 'string' ? pi.latest_charge : (pi.latest_charge as Stripe.Charge | null)?.id ?? null
 
-        // Only advance from pending_payment → live; never downgrade launched/cancelled campaigns
-        // Note: don't filter by stripe_payment_intent_id — in dev the page can render twice,
-        // creating two PIs; the DB may store the second while payment succeeds on the first.
+        // Advance from pending_payment or payment_in_progress → live
         const updated = await prisma.campaigns.updateMany({
-          where: { id: campaignId, status: 'pending_payment' },
+          where: { id: campaignId, status: { in: ['pending_payment', 'payment_in_progress'] } },
           data: {
             status: 'live',
             stripe_payment_intent_id: pi.id,
@@ -85,10 +97,26 @@ export async function POST(request: Request) {
         const campaignId = pi.metadata?.campaignId
         if (!campaignId) break
 
-        // Reset campaign payment intent so sponsor can retry
+        // Reset campaign so sponsor can retry — revert payment_in_progress back to pending_payment
         await prisma.campaigns.updateMany({
           where: { id: campaignId, stripe_payment_intent_id: pi.id },
-          data: { stripe_payment_intent_id: null, stripe_authorized_amount: null },
+          data: { status: 'pending_payment', stripe_payment_intent_id: null, stripe_authorized_amount: null },
+        })
+        break
+      }
+
+      case 'charge.succeeded': {
+        const charge = event.data.object as Stripe.Charge
+        const piId = typeof charge.payment_intent === 'string'
+          ? charge.payment_intent
+          : (charge.payment_intent as Stripe.PaymentIntent | null)?.id ?? null
+        if (!piId) break
+
+        // Ensure stripe_charge_id is always stored — pi.latest_charge can be null
+        // on payment_intent.succeeded for ACH payments, so we capture it here too.
+        await prisma.campaigns.updateMany({
+          where: { stripe_payment_intent_id: piId, stripe_charge_id: null },
+          data: { stripe_charge_id: charge.id },
         })
         break
       }

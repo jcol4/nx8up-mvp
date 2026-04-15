@@ -15,12 +15,12 @@ function CheckoutForm({
   campaignTitle,
   budgetDisplay,
   returnUrl,
-  preferredMethod,
+  largeBudget,
 }: {
   campaignTitle: string
   budgetDisplay: string
   returnUrl: string
-  preferredMethod: string
+  largeBudget: boolean
 }) {
   const stripe = useStripe()
   const elements = useElements()
@@ -83,14 +83,22 @@ function CheckoutForm({
         <h2 className="text-sm font-semibold dash-text-muted uppercase tracking-wide mb-4">
           Payment Details
         </h2>
-        {(preferredMethod === 'ach' || preferredMethod === 'both') && (
+        {largeBudget ? (
+          <div className="flex items-start gap-2 mb-4 p-3 rounded-lg border border-[#00c8ff]/30 bg-[#00c8ff]/5">
+            <svg className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#00c8ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-xs text-[#00c8ff] leading-relaxed">
+              <span className="font-semibold">ACH bank transfer required for budgets over $999,999.</span> Bank transfers take 3–5 business days to settle. Your campaign will go live automatically once payment clears.
+            </p>
+          </div>
+        ) : (
           <div className="flex items-start gap-2 mb-4 p-3 rounded-lg border border-red-500/30 bg-red-500/5">
             <svg className="w-3.5 h-3.5 shrink-0 mt-0.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
             </svg>
             <p className="text-xs text-red-400 leading-relaxed">
-              <span className="font-semibold">ACH is not instant.</span> Bank transfers take 3–5 business days to
-              verify and settle — though they come with lower processing fees than card. Your campaign will not launch until payment clears.
+              <span className="font-semibold">Heads up:</span> If you pay by ACH bank transfer, it takes 3–5 business days to settle. Your campaign will not launch until payment clears.
             </p>
           </div>
         )}
@@ -127,13 +135,13 @@ export default function PaymentForm({
   campaignTitle,
   budgetDisplay,
   returnUrl,
-  preferredMethod,
+  largeBudget,
 }: {
   clientSecret: string
   campaignTitle: string
   budgetDisplay: string
   returnUrl: string
-  preferredMethod: string
+  largeBudget: boolean
 }) {
   return (
     <Elements
@@ -157,7 +165,7 @@ export default function PaymentForm({
         campaignTitle={campaignTitle}
         budgetDisplay={budgetDisplay}
         returnUrl={returnUrl}
-        preferredMethod={preferredMethod}
+        largeBudget={largeBudget}
       />
     </Elements>
   )

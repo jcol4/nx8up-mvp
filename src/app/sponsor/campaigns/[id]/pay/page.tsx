@@ -9,10 +9,12 @@ import { calcFeeBreakdown } from '@/lib/constants'
 import SponsorHeader from '../../../SponsorHeader'
 import PaymentForm from './PaymentForm'
 
-function resolvePaymentMethodTypes(preference: string | null): string[] {
-  if (preference === 'ach') return ['us_bank_account']
-  if (preference === 'both') return ['card', 'us_bank_account']
-  return ['card']
+// Stripe card payments cap at $999,999 — above that, ACH only
+const CARD_MAX_BUDGET = 999_999
+
+function resolvePaymentMethodTypes(budget: number): string[] {
+  if (budget > CARD_MAX_BUDGET) return ['us_bank_account']
+  return ['card', 'us_bank_account']
 }
 
 async function getOrCreatePaymentIntent(opts: {
@@ -22,16 +24,23 @@ async function getOrCreatePaymentIntent(opts: {
   sponsorId: string
   sponsorEmail: string
   existingPiId: string | null
-  preferredMethod: string
 }): Promise<string> {
-  const { campaignId, campaignTitle, budget, sponsorId, sponsorEmail, existingPiId, preferredMethod } = opts
+  const { campaignId, campaignTitle, budget, sponsorId, sponsorEmail, existingPiId } = opts
+  const paymentMethodTypes = resolvePaymentMethodTypes(budget)
 
-  // Re-use an existing open PI if one is already stored on the campaign
+  // Re-use an existing open PI — update its payment_method_types to ensure all options are available
   if (existingPiId) {
     try {
       const existing = await stripe.paymentIntents.retrieve(existingPiId)
       const isOpen = ['requires_payment_method', 'requires_confirmation', 'requires_action'].includes(existing.status)
       if (isOpen && existing.client_secret) {
+        // Ensure the PI has all the right payment method types (sponsor may want to switch)
+        const currentTypes: string[] = (existing.payment_method_types as string[]) ?? []
+        const needsUpdate = paymentMethodTypes.some(t => !currentTypes.includes(t))
+        if (needsUpdate) {
+          const updated = await stripe.paymentIntents.update(existingPiId, { payment_method_types: paymentMethodTypes })
+          return updated.client_secret!
+        }
         return existing.client_secret
       }
     } catch {
@@ -58,8 +67,6 @@ async function getOrCreatePaymentIntent(opts: {
       data: { stripe_customer_id: customerId },
     })
   }
-
-  const paymentMethodTypes = resolvePaymentMethodTypes(preferredMethod)
 
   const pi = await stripe.paymentIntents.create({
     amount: budget * 100,
@@ -122,7 +129,11 @@ export default async function CampaignPayPage({
   // Stripe redirected back after payment attempt
   if (piId && (redirect_status === 'succeeded' || redirect_status === 'processing')) {
     if (redirect_status === 'processing') {
-      // ACH initiated — campaign stays pending_payment until webhook fires payment_intent.succeeded
+      // ACH initiated — mark campaign as payment_in_progress so sponsor sees the right status
+      await prisma.campaigns.updateMany({
+        where: { id: campaignId, status: { in: ['pending_payment', 'payment_in_progress'] } },
+        data: { status: 'payment_in_progress', stripe_payment_intent_id: piId },
+      })
       redirect('/sponsor/campaigns?payment=processing')
     }
 
@@ -146,6 +157,9 @@ export default async function CampaignPayPage({
   if (campaign.status === 'live' || campaign.status === 'launched') {
     redirect('/sponsor/campaigns')
   }
+  if (campaign.status === 'payment_in_progress') {
+    redirect('/sponsor/campaigns?payment=processing')
+  }
   if (campaign.status !== 'pending_payment') {
     redirect('/sponsor/campaigns')
   }
@@ -158,8 +172,8 @@ export default async function CampaignPayPage({
   const proto = host.startsWith('localhost') ? 'http' : 'https'
   const returnUrl = `${proto}://${host}/sponsor/campaigns/${campaignId}/pay`
 
-  const preferredMethod = campaign.preferred_payment_method ?? 'card'
   const { fee, creatorPool, perCreator } = calcFeeBreakdown(campaign.budget, campaign.creator_count)
+  const largeBudget = campaign.budget > 999_999
 
   const clientSecret = await getOrCreatePaymentIntent({
     campaignId,
@@ -168,7 +182,6 @@ export default async function CampaignPayPage({
     sponsorId: sponsor.id,
     sponsorEmail: sponsor.email,
     existingPiId: campaign.stripe_payment_intent_id ?? null,
-    preferredMethod,
   })
 
   return (
@@ -220,7 +233,7 @@ export default async function CampaignPayPage({
             campaignTitle={campaign.title}
             budgetDisplay={`$${campaign.budget.toLocaleString()}`}
             returnUrl={returnUrl}
-            preferredMethod={preferredMethod}
+            largeBudget={largeBudget}
           />
         </div>
       </div>
