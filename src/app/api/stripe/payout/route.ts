@@ -46,6 +46,7 @@ export async function POST(request: Request) {
   if (!sub) return NextResponse.json({ error: 'No submission found' }, { status: 400 })
   if (sub.status !== 'approved') return NextResponse.json({ error: 'Submission not approved' }, { status: 400 })
   if (sub.payout_status === 'paid') return NextResponse.json({ error: 'Already paid' }, { status: 400 })
+  if (sub.payout_status === 'processing') return NextResponse.json({ error: 'Payout already in progress' }, { status: 409 })
 
   if (!creator.stripe_connect_id || !creator.stripe_onboarding_complete) {
     return NextResponse.json({ error: 'Creator has not completed Stripe onboarding' }, { status: 400 })
@@ -61,21 +62,40 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Could not calculate payout amount' }, { status: 400 })
   }
 
-  const amountCents = perCreator * 100
-
-  const transfer = await stripe.transfers.create({
-    amount: amountCents,
-    currency: 'usd',
-    destination: creator.stripe_connect_id,
-    source_transaction: campaign.stripe_charge_id,
-    metadata: { applicationId, campaignId: campaign.id },
-    description: `Payout for campaign: ${campaign.title}`,
+  // Atomic race guard: claim the payout slot before calling Stripe
+  const claimed = await prisma.deal_submissions.updateMany({
+    where: { id: sub.id, payout_status: null },
+    data: { payout_status: 'processing' },
   })
+  if (claimed.count === 0) {
+    return NextResponse.json({ error: 'Payout already in progress or completed' }, { status: 409 })
+  }
 
-  await prisma.deal_submissions.update({
-    where: { application_id: applicationId },
-    data: { stripe_transfer_id: transfer.id, payout_status: 'paid' },
-  })
-
-  return NextResponse.json({ success: true, transferId: transfer.id })
+  try {
+    const transfer = await stripe.transfers.create(
+      {
+        amount: perCreator * 100,
+        currency: 'usd',
+        destination: creator.stripe_connect_id,
+        source_transaction: campaign.stripe_charge_id,
+        metadata: { applicationId, campaignId: campaign.id },
+        description: `Payout for campaign: ${campaign.title}`,
+      },
+      { idempotencyKey: `transfer-${applicationId}` },
+    )
+    await prisma.deal_submissions.update({
+      where: { application_id: applicationId },
+      data: { stripe_transfer_id: transfer.id, payout_status: 'paid' },
+    })
+    return NextResponse.json({ success: true, transferId: transfer.id })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Stripe transfer failed'
+    console.error('[payout] transfer failed for application', applicationId, err)
+    // Reset the guard so the caller can retry
+    await prisma.deal_submissions.update({
+      where: { application_id: applicationId },
+      data: { payout_status: null },
+    }).catch(() => {})
+    return NextResponse.json({ error: msg }, { status: 500 })
+  }
 }

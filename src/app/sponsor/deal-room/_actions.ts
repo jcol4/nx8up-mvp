@@ -83,7 +83,7 @@ export async function updateSubmissionStatus(
   applicationId: string,
   status: 'approved' | 'revision_requested',
   sponsorNotes?: string,
-): Promise<{ error?: string; success?: boolean }> {
+): Promise<{ error?: string; success?: boolean; payoutError?: string }> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
 
@@ -120,11 +120,13 @@ export async function updateSubmissionStatus(
   })
 
   // Trigger payout when sponsor approves
+  let payoutError: string | undefined
+
   if (status === 'approved') {
     const { campaign, creator, deal_submission: sub } = app
 
-    if (sub?.payout_status === 'paid') {
-      // Already paid — nothing to do
+    if (sub?.payout_status === 'paid' || sub?.payout_status === 'processing') {
+      // Already paid or another request is mid-flight — skip
     } else if (!creator.stripe_connect_id || !creator.stripe_onboarding_complete) {
       console.warn(`[payout] skipped for application ${applicationId} — creator has not completed Stripe Connect onboarding`)
     } else if (!campaign.stripe_charge_id) {
@@ -136,22 +138,38 @@ export async function updateSubmissionStatus(
       if (!perCreator || perCreator <= 0) {
         console.warn(`[payout] skipped for application ${applicationId} — perCreator calculated as ${perCreator}`)
       } else {
-        try {
-          const transfer = await stripe.transfers.create({
-            amount: perCreator * 100,
-            currency: 'usd',
-            destination: creator.stripe_connect_id,
-            source_transaction: campaign.stripe_charge_id,
-            metadata: { applicationId, campaignId: app.campaign_id },
-            description: `Payout for campaign: ${campaign.title}`,
-          })
-          await prisma.deal_submissions.update({
-            where: { application_id: applicationId },
-            data: { stripe_transfer_id: transfer.id, payout_status: 'paid' },
-          })
-          console.log(`[payout] transfer ${transfer.id} sent for application ${applicationId}`)
-        } catch (err) {
-          console.error('[payout] transfer failed for application', applicationId, err)
+        // Atomic race guard: claim the payout slot; a concurrent caller will see count=0 and skip.
+        const claimed = await prisma.deal_submissions.updateMany({
+          where: { application_id: applicationId, payout_status: null },
+          data: { payout_status: 'processing' },
+        })
+        if (claimed.count > 0) {
+          try {
+            const transfer = await stripe.transfers.create(
+              {
+                amount: perCreator * 100,
+                currency: 'usd',
+                destination: creator.stripe_connect_id,
+                source_transaction: campaign.stripe_charge_id,
+                metadata: { applicationId, campaignId: app.campaign_id },
+                description: `Payout for campaign: ${campaign.title}`,
+              },
+              { idempotencyKey: `transfer-${applicationId}` },
+            )
+            await prisma.deal_submissions.update({
+              where: { application_id: applicationId },
+              data: { stripe_transfer_id: transfer.id, payout_status: 'paid' },
+            })
+            console.log(`[payout] transfer ${transfer.id} sent for application ${applicationId}`)
+          } catch (err) {
+            payoutError = err instanceof Error ? err.message : 'Stripe transfer failed'
+            console.error('[payout] transfer failed for application', applicationId, err)
+            // Reset guard so retryPayout can attempt again
+            await prisma.deal_submissions.update({
+              where: { application_id: applicationId },
+              data: { payout_status: null },
+            }).catch(() => {})
+          }
         }
       }
     }
@@ -160,7 +178,7 @@ export async function updateSubmissionStatus(
   revalidatePath(`/sponsor/deal-room/${applicationId}`)
   revalidatePath('/sponsor/deal-room')
 
-  return { success: true }
+  return payoutError ? { success: true, payoutError } : { success: true }
 }
 
 export async function retryPayout(
@@ -189,7 +207,7 @@ export async function retryPayout(
         select: { stripe_connect_id: true, stripe_onboarding_complete: true },
       },
       deal_submission: {
-        select: { status: true, payout_status: true },
+        select: { status: true, payout_status: true, stripe_transfer_id: true },
       },
     },
   })
@@ -201,6 +219,7 @@ export async function retryPayout(
   if (!sub) return { error: 'No submission found.' }
   if (sub.status !== 'approved') return { error: 'Submission is not approved.' }
   if (sub.payout_status === 'paid') return { error: 'Already paid.' }
+  if (sub.stripe_transfer_id) return { error: 'Transfer already exists — payout may be pending. Check the Stripe dashboard.' }
 
   if (!creator.stripe_connect_id || !creator.stripe_onboarding_complete) {
     return { error: 'Creator has not completed Stripe payout setup.' }
@@ -263,14 +282,17 @@ export async function retryPayout(
   if (!perCreator || perCreator <= 0) return { error: 'Could not calculate payout amount.' }
 
   try {
-    const transfer = await stripe.transfers.create({
-      amount: perCreator * 100,
-      currency: 'usd',
-      destination: creator.stripe_connect_id,
-      source_transaction: chargeId,
-      metadata: { applicationId, campaignId: campaign.id },
-      description: `Payout for campaign: ${campaign.title}`,
-    })
+    const transfer = await stripe.transfers.create(
+      {
+        amount: perCreator * 100,
+        currency: 'usd',
+        destination: creator.stripe_connect_id,
+        source_transaction: chargeId,
+        metadata: { applicationId, campaignId: campaign.id },
+        description: `Payout for campaign: ${campaign.title}`,
+      },
+      { idempotencyKey: `transfer-${applicationId}` },
+    )
     await prisma.deal_submissions.update({
       where: { application_id: applicationId },
       data: { stripe_transfer_id: transfer.id, payout_status: 'paid' },

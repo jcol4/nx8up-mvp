@@ -118,17 +118,21 @@ export async function POST(request: Request) {
           where: { stripe_payment_intent_id: piId, stripe_charge_id: null },
           data: { stripe_charge_id: charge.id },
         })
+        // Advance campaign to live if payment_intent.succeeded hasn't fired yet or
+        // arrived without a charge (ACH timing edge case).
+        await prisma.campaigns.updateMany({
+          where: { stripe_payment_intent_id: piId, status: 'payment_in_progress' },
+          data: { status: 'live' },
+        })
         break
       }
 
       case 'account.updated': {
         const account = event.data.object as Stripe.Account
-        if (account.charges_enabled) {
-          await prisma.content_creators.updateMany({
-            where: { stripe_connect_id: account.id },
-            data: { stripe_onboarding_complete: true },
-          })
-        }
+        await prisma.content_creators.updateMany({
+          where: { stripe_connect_id: account.id },
+          data: { stripe_onboarding_complete: account.charges_enabled },
+        })
         break
       }
 
@@ -146,12 +150,27 @@ export async function POST(request: Request) {
       }
 
       case 'payout.failed': {
-        // A payout from Stripe to the creator's bank failed
-        // The transfer.destination is the connected account ID
         const payout = event.data.object as Stripe.Payout
-        // We can't easily tie this back to a specific application without more metadata
-        // Log it — in production you'd notify the creator
-        console.error('Payout failed for account, payout id:', payout.id)
+        // event.account is the connected account ID for Connect webhook events
+        const connectedAccountId = (event as unknown as { account?: string }).account
+        console.error('[webhook] payout.failed', {
+          payoutId: payout.id,
+          connectedAccountId,
+          failureCode: payout.failure_code,
+          failureMessage: payout.failure_message,
+        })
+        if (connectedAccountId) {
+          // Mark paid submissions for this creator as payout_failed so admins/creators can act
+          await prisma.deal_submissions.updateMany({
+            where: {
+              payout_status: 'paid',
+              application: {
+                creator: { stripe_connect_id: connectedAccountId },
+              },
+            },
+            data: { payout_status: 'payout_failed' },
+          })
+        }
         break
       }
     }

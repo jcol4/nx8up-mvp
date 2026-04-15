@@ -28,20 +28,25 @@ async function getOrCreatePaymentIntent(opts: {
   const { campaignId, campaignTitle, budget, sponsorId, sponsorEmail, existingPiId } = opts
   const paymentMethodTypes = resolvePaymentMethodTypes(budget)
 
-  // Re-use an existing open PI — update its payment_method_types to ensure all options are available
+  // Re-use an existing open PI — but only if the amount still matches the current budget
   if (existingPiId) {
     try {
       const existing = await stripe.paymentIntents.retrieve(existingPiId)
       const isOpen = ['requires_payment_method', 'requires_confirmation', 'requires_action'].includes(existing.status)
       if (isOpen && existing.client_secret) {
-        // Ensure the PI has all the right payment method types (sponsor may want to switch)
-        const currentTypes: string[] = (existing.payment_method_types as string[]) ?? []
-        const needsUpdate = paymentMethodTypes.some(t => !currentTypes.includes(t))
-        if (needsUpdate) {
-          const updated = await stripe.paymentIntents.update(existingPiId, { payment_method_types: paymentMethodTypes })
-          return updated.client_secret!
+        if (existing.amount !== budget * 100) {
+          // Budget changed after PI was created — cancel the stale PI and fall through to create a fresh one
+          await stripe.paymentIntents.cancel(existingPiId).catch(() => {})
+        } else {
+          // Ensure the PI has all the right payment method types (sponsor may want to switch)
+          const currentTypes: string[] = (existing.payment_method_types as string[]) ?? []
+          const needsUpdate = paymentMethodTypes.some(t => !currentTypes.includes(t))
+          if (needsUpdate) {
+            const updated = await stripe.paymentIntents.update(existingPiId, { payment_method_types: paymentMethodTypes })
+            return updated.client_secret!
+          }
+          return existing.client_secret
         }
-        return existing.client_secret
       }
     } catch {
       // fall through

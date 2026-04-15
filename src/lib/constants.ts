@@ -5,5 +5,7 @@ export function calcFeeBreakdown(budget: number, creatorCount?: number | null) {
   const creatorPool = budget - fee
   const perCreator =
     creatorCount && creatorCount > 0 ? Math.floor(creatorPool / creatorCount) : null
-  return { fee, creatorPool, perCreator }
+  const dust =
+    perCreator !== null && creatorCount ? creatorPool - perCreator * creatorCount : 0
+  return { fee, creatorPool, perCreator, dust }
 }
