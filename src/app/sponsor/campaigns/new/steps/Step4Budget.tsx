@@ -4,10 +4,26 @@ import NXStepper from '@/components/ui/NXStepper'
 import NXDatePicker from '@/components/ui/NXDatePicker'
 import type { CampaignDraft } from '../_shared'
 import { labelClass, sectionClass, sectionTitle } from '../_shared'
-import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
+import { NX_FEE_RATE, calcFeeBreakdown, BUDGET_MAX } from '@/lib/constants'
 
 const BUDGET_STEP = 500
 const COUNT_STEP  = 1
+
+/** Returns the number of business days (Mon–Fri) between today and a date string. */
+function businessDaysUntil(dateStr: string): number {
+  const start = new Date()
+  start.setHours(0, 0, 0, 0)
+  const end = new Date(dateStr + 'T00:00:00')
+  if (end <= start) return 0
+  let count = 0
+  const cur = new Date(start)
+  while (cur < end) {
+    cur.setDate(cur.getDate() + 1)
+    const day = cur.getDay()
+    if (day !== 0 && day !== 6) count++
+  }
+  return count
+}
 
 type Props = {
   draft: CampaignDraft
@@ -27,6 +43,10 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
 
   const today = new Date().toISOString().split('T')[0]
 
+  const achSelected = draft.preferred_payment_method === 'ach' || draft.preferred_payment_method === 'both'
+  const startDateClose = draft.start_date ? businessDaysUntil(draft.start_date) <= 5 : false
+  const showAchStartWarning = achSelected && startDateClose && !!draft.start_date
+
   return (
     <div className="space-y-6">
       {/* Budget */}
@@ -41,12 +61,25 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
             onChange={v => set('budget', v)}
             step={BUDGET_STEP}
             min={0}
+            max={BUDGET_MAX}
             prefix="$"
             placeholder="0"
           />
           <p className="text-xs dash-text-muted mt-1.5">
             Use +/− to step by ${BUDGET_STEP.toLocaleString()}, or type any amount.
           </p>
+          {budgetNum > BUDGET_MAX && (
+            <div className="mt-2 flex items-start gap-2 p-3 rounded-lg border border-amber-500/40 bg-amber-500/8">
+              <svg className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+              <p className="text-xs text-amber-400 leading-relaxed">
+                <span className="font-semibold">Budget limit exceeded.</span> Campaigns cannot exceed{' '}
+                <span className="font-semibold">${BUDGET_MAX.toLocaleString()}</span> — this is Stripe&apos;s ACH debit ceiling.
+                Budgets above this limit cause a hard payment failure. Please lower the budget.
+              </p>
+            </div>
+          )}
           {budgetNum > 0 && (
             <div className="mt-3 p-3 rounded-lg border border-[rgba(0,200,255,0.15)] bg-[rgba(0,200,255,0.04)] space-y-1.5">
               <p className="text-[10px] font-semibold uppercase tracking-widest dash-text-muted">Budget Breakdown</p>
@@ -142,7 +175,7 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
           })}
         </div>
 
-        {(draft.preferred_payment_method === 'ach' || draft.preferred_payment_method === 'both') && (
+        {achSelected && (
           <div className="mt-3 flex items-start gap-2 p-3 rounded-lg border border-red-500/30 bg-red-500/5">
             <svg className="w-3.5 h-3.5 shrink-0 mt-0.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
@@ -150,6 +183,19 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
             <p className="text-xs text-red-400 leading-relaxed">
               <span className="font-semibold">ACH is not instant.</span> Bank transfers typically take 3–5 business days
               to verify and clear — though they come with lower processing fees than card. Your campaign will not launch until payment settles.
+            </p>
+          </div>
+        )}
+        {showAchStartWarning && (
+          <div className="mt-2 flex items-start gap-2 p-3 rounded-lg border border-amber-500/40 bg-amber-500/8">
+            <svg className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+            <p className="text-xs text-amber-400 leading-relaxed">
+              <span className="font-semibold">Start date conflict.</span> Your campaign starts on{' '}
+              <span className="font-semibold">{new Date(draft.start_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>,
+              but ACH transfers take 3–5 business days to clear. Your campaign may launch after its intended start date.
+              Consider using a card payment or moving the start date back by at least 5 business days.
             </p>
           </div>
         )}

@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
 import { randomUUID } from 'crypto'
 import { prisma } from '@/lib/prisma'
+import { BUDGET_MAX } from '@/lib/constants'
 
 export type CreateCampaignResult = { error?: string; success?: boolean; id?: string }
 
@@ -63,7 +64,9 @@ export async function saveCampaignDraft(formData: FormData): Promise<CreateCampa
   const title = (formData.get('title') as string)?.trim() || 'Untitled Campaign'
   const budgetRaw = (formData.get('budget') as string | null)?.trim() ?? ''
   const budgetNumber = budgetRaw ? Number(budgetRaw) : null
-  const budget = budgetNumber && Number.isFinite(budgetNumber) && budgetNumber > 0 ? budgetNumber : null
+  const budget = budgetNumber && Number.isFinite(budgetNumber) && budgetNumber > 0
+    ? Math.min(budgetNumber, BUDGET_MAX)
+    : null
   const start_date = parseOptionalDate(formData.get('start_date') as string | null)
   const end_date = parseOptionalDate(formData.get('end_date') as string | null)
 
@@ -180,6 +183,9 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
   const budgetNumber = Number(budgetRaw)
   if (!Number.isFinite(budgetNumber) || budgetNumber <= 0) {
     return { error: 'Budget must be a positive number.' }
+  }
+  if (budgetNumber > BUDGET_MAX) {
+    return { error: `Budget cannot exceed $${BUDGET_MAX.toLocaleString()} — Stripe's ACH debit limit.` }
   }
 
   const startDateRaw = formData.get('start_date') as string | null

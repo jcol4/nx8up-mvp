@@ -112,18 +112,27 @@ export async function POST(request: Request) {
           : (charge.payment_intent as Stripe.PaymentIntent | null)?.id ?? null
         if (!piId) break
 
+        console.log(`[webhook] charge.succeeded — piId=${piId} chargeId=${charge.id}`)
+
         // Ensure stripe_charge_id is always stored — pi.latest_charge can be null
         // on payment_intent.succeeded for ACH payments, so we capture it here too.
-        await prisma.campaigns.updateMany({
+        const chargeStored = await prisma.campaigns.updateMany({
           where: { stripe_payment_intent_id: piId, stripe_charge_id: null },
           data: { stripe_charge_id: charge.id },
         })
+
         // Advance campaign to live if payment_intent.succeeded hasn't fired yet or
-        // arrived without a charge (ACH timing edge case).
-        await prisma.campaigns.updateMany({
-          where: { stripe_payment_intent_id: piId, status: 'payment_in_progress' },
+        // arrived without a charge (ACH timing edge case). Cover both pending_payment
+        // (charge arrived before PI events) and payment_in_progress states.
+        const chargeAdvanced = await prisma.campaigns.updateMany({
+          where: {
+            stripe_payment_intent_id: piId,
+            status: { in: ['pending_payment', 'payment_in_progress'] },
+          },
           data: { status: 'live' },
         })
+
+        console.log(`[webhook] charge.succeeded — stored=${chargeStored.count} advanced=${chargeAdvanced.count}`)
         break
       }
 

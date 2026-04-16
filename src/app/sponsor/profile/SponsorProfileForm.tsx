@@ -13,6 +13,7 @@ import {
 import { DEFAULT_CONTENT_CATEGORIES } from '@/lib/creator-profile'
 import Alert from '@/components/ui/Alert'
 import FormInput from '@/components/ui/FormInput'
+import { BUDGET_MAX } from '@/lib/constants'
 import FormSelect from '@/components/ui/FormSelect'
 
 const PLATFORMS = ['Twitch', 'YouTube', 'TikTok', 'Instagram', 'Other'] as const
@@ -83,10 +84,19 @@ export default function SponsorProfileForm({ profile }: Props) {
         : 'dash-border dash-text-muted hover:text-[#c8dff0] hover:border-[rgba(0,200,255,0.35)] hover:bg-[rgba(0,200,255,0.05)] hover:shadow-[0_0_14px_rgba(0,200,255,0.12)]'
     }`
 
+  const budgetMinNum = budgetMin ? parseInt(budgetMin, 10) : 0
+  const budgetMaxNum = budgetMax ? parseInt(budgetMax, 10) : 0
+  const budgetMinOver = budgetMinNum > BUDGET_MAX
+  const budgetMaxOver = budgetMaxNum > BUDGET_MAX
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (ageRestrictionChanged) {
       setError('Submit or revert your age restriction change before saving the profile.')
+      return
+    }
+    if (budgetMinOver || budgetMaxOver) {
+      setError(`Budget values cannot exceed $${BUDGET_MAX.toLocaleString()} — Stripe's ACH debit limit.`)
       return
     }
     setError('')
@@ -319,6 +329,14 @@ export default function SponsorProfileForm({ profile }: Props) {
               onChange={e => setBudgetMin(e.target.value.replace(/[^\d]/g, ''))}
               placeholder="e.g. 500"
             />
+            {budgetMinOver && (
+              <div className="mt-1.5 flex items-start gap-1.5 p-2.5 rounded-lg border border-amber-500/40 bg-amber-500/8">
+                <svg className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+                <p className="text-xs text-amber-400">Maximum allowed is ${BUDGET_MAX.toLocaleString()} (Stripe ACH limit).</p>
+              </div>
+            )}
           </div>
           <div>
             <label htmlFor="budget-max" className={labelClass}>Typical budget max (USD)</label>
@@ -331,6 +349,14 @@ export default function SponsorProfileForm({ profile }: Props) {
               onChange={e => setBudgetMax(e.target.value.replace(/[^\d]/g, ''))}
               placeholder="e.g. 10000"
             />
+            {budgetMaxOver && (
+              <div className="mt-1.5 flex items-start gap-1.5 p-2.5 rounded-lg border border-amber-500/40 bg-amber-500/8">
+                <svg className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+                <p className="text-xs text-amber-400">Maximum allowed is ${BUDGET_MAX.toLocaleString()} (Stripe ACH limit).</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

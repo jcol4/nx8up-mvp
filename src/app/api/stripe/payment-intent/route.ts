@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
+import { BUDGET_MAX } from '@/lib/constants'
 
 export async function POST(request: Request) {
   const { userId } = await auth()
@@ -23,6 +24,12 @@ export async function POST(request: Request) {
   if (!campaign.budget || campaign.budget <= 0) {
     return NextResponse.json({ error: 'Campaign budget is missing' }, { status: 400 })
   }
+  if (campaign.budget > BUDGET_MAX) {
+    return NextResponse.json(
+      { error: `Budget of $${campaign.budget.toLocaleString()} exceeds the $${BUDGET_MAX.toLocaleString()} maximum — contact support to process large campaigns.` },
+      { status: 422 },
+    )
+  }
 
   // Re-use an existing pending PaymentIntent if we already created one
   if (campaign.stripe_payment_intent_id) {
@@ -42,16 +49,27 @@ export async function POST(request: Request) {
 
   const amountCents = campaign.budget * 100
 
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: amountCents,
-    currency: 'usd',
-    payment_method_types: ['card', 'us_bank_account'],
-    metadata: {
-      campaignId: campaign.id,
-      sponsorId: sponsor.id,
+  // Idempotency key ensures a network timeout on first creation doesn't produce
+  // a duplicate PI — retrying returns the already-created object instead.
+  // Only set on first creation (no existing PI); if we're replacing a cancelled
+  // PI the key would be stale, so we omit it and let Stripe create fresh.
+  const piIdempotencyKey = !campaign.stripe_payment_intent_id
+    ? { idempotencyKey: `pi-${campaign.id}` }
+    : undefined
+
+  const paymentIntent = await stripe.paymentIntents.create(
+    {
+      amount: amountCents,
+      currency: 'usd',
+      payment_method_types: ['card', 'us_bank_account'],
+      metadata: {
+        campaignId: campaign.id,
+        sponsorId: sponsor.id,
+      },
+      description: `Campaign: ${campaign.title}`,
     },
-    description: `Campaign: ${campaign.title}`,
-  })
+    piIdempotencyKey,
+  )
 
   await prisma.campaigns.update({
     where: { id: campaign.id },

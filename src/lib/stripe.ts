@@ -6,6 +6,11 @@ export const stripe =
   globalForStripe.stripe ??
   new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: '2026-03-25.dahlia',
+    // Retry transient errors (network failures, 429 rate limits, 500s) up to
+    // 2 additional times with exponential backoff. The SDK only retries requests
+    // that are safe to retry — idempotent GETs always, POSTs only when an
+    // Idempotency-Key header is present.
+    maxNetworkRetries: 2,
   })
 
 if (process.env.NODE_ENV !== 'production') globalForStripe.stripe = stripe

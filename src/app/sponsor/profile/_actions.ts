@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { parseLocation, formatLocation } from '@/lib/location-options'
+import { BUDGET_MAX } from '@/lib/constants'
 
 
 export type SponsorProfile = {
@@ -70,6 +71,11 @@ export async function updateSponsorProfile(
 ): Promise<{ error?: string }> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
+
+  if ((data.budget_min != null && data.budget_min > BUDGET_MAX) ||
+      (data.budget_max != null && data.budget_max > BUDGET_MAX)) {
+    return { error: `Budget values cannot exceed $${BUDGET_MAX.toLocaleString()} — Stripe's ACH debit limit.` }
+  }
 
   try {
     const locationStr = formatLocation(data.city, data.state, data.country)

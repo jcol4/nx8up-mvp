@@ -13,6 +13,64 @@ async function getSponsor(userId: string) {
   })
 }
 
+/**
+ * Resolves a Stripe charge ID for a campaign.
+ * Checks DB first, then falls back to Stripe API (PI retrieve → metadata search).
+ * Persists a found charge ID back to the campaign row so future calls are instant.
+ * Returns null if no succeeded charge can be located.
+ */
+async function resolveChargeId(campaign: {
+  id: string
+  stripe_charge_id: string | null
+  stripe_payment_intent_id: string | null
+}): Promise<string | null> {
+  if (campaign.stripe_charge_id) return campaign.stripe_charge_id
+
+  let chargeId: string | null = null
+  let resolvedPiId: string | null = null
+
+  // Try the stored PaymentIntent first
+  if (campaign.stripe_payment_intent_id) {
+    const pi = await stripe.paymentIntents.retrieve(campaign.stripe_payment_intent_id)
+    if (pi.status === 'succeeded') {
+      resolvedPiId = pi.id
+      const lc = typeof pi.latest_charge === 'string'
+        ? pi.latest_charge
+        : (pi.latest_charge as { id: string } | null)?.id ?? null
+      if (lc) chargeId = lc
+    }
+  }
+
+  // Fall back to Stripe metadata search
+  if (!chargeId) {
+    const results = await stripe.paymentIntents.search({
+      query: `metadata['campaignId']:'${campaign.id}' AND status:'succeeded'`,
+      limit: 5,
+    })
+    const pi = results.data[0] ?? null
+    if (pi) {
+      resolvedPiId = pi.id
+      const lc = typeof pi.latest_charge === 'string'
+        ? pi.latest_charge
+        : (pi.latest_charge as { id: string } | null)?.id ?? null
+      if (lc) chargeId = lc
+    }
+  }
+
+  // Persist so future calls hit the DB path
+  if (chargeId) {
+    await prisma.campaigns.update({
+      where: { id: campaign.id },
+      data: {
+        stripe_charge_id: chargeId,
+        ...(resolvedPiId ? { stripe_payment_intent_id: resolvedPiId } : {}),
+      },
+    })
+  }
+
+  return chargeId
+}
+
 export async function getSponsorDealRooms() {
   const { userId } = await auth()
   if (!userId) return []
@@ -95,10 +153,12 @@ export async function updateSubmissionStatus(
     include: {
       campaign: {
         select: {
+          id: true,
           sponsor_id: true,
           budget: true,
           creator_count: true,
           stripe_charge_id: true,
+          stripe_payment_intent_id: true,
           title: true,
         },
       },
@@ -129,46 +189,51 @@ export async function updateSubmissionStatus(
       // Already paid or another request is mid-flight — skip
     } else if (!creator.stripe_connect_id || !creator.stripe_onboarding_complete) {
       console.warn(`[payout] skipped for application ${applicationId} — creator has not completed Stripe Connect onboarding`)
-    } else if (!campaign.stripe_charge_id) {
-      console.warn(`[payout] skipped for application ${applicationId} — campaign stripe_charge_id is null (payment may still be settling)`)
     } else if (!campaign.budget) {
       console.warn(`[payout] skipped for application ${applicationId} — campaign has no budget`)
     } else {
-      const { perCreator } = calcFeeBreakdown(campaign.budget, campaign.creator_count)
-      if (!perCreator || perCreator <= 0) {
-        console.warn(`[payout] skipped for application ${applicationId} — perCreator calculated as ${perCreator}`)
+      // Resolve charge ID — DB hit first, Stripe API fallback if null
+      const chargeId = await resolveChargeId(campaign)
+      if (!chargeId) {
+        payoutError = 'Could not locate a completed payment for this campaign — payout skipped. Use Retry Payout once payment settles.'
+        console.warn(`[payout] skipped for application ${applicationId} — charge ID could not be resolved`)
       } else {
-        // Atomic race guard: claim the payout slot; a concurrent caller will see count=0 and skip.
-        const claimed = await prisma.deal_submissions.updateMany({
-          where: { application_id: applicationId, payout_status: null },
-          data: { payout_status: 'processing' },
-        })
-        if (claimed.count > 0) {
-          try {
-            const transfer = await stripe.transfers.create(
-              {
-                amount: perCreator * 100,
-                currency: 'usd',
-                destination: creator.stripe_connect_id,
-                source_transaction: campaign.stripe_charge_id,
-                metadata: { applicationId, campaignId: app.campaign_id },
-                description: `Payout for campaign: ${campaign.title}`,
-              },
-              { idempotencyKey: `transfer-${applicationId}` },
-            )
-            await prisma.deal_submissions.update({
-              where: { application_id: applicationId },
-              data: { stripe_transfer_id: transfer.id, payout_status: 'paid' },
-            })
-            console.log(`[payout] transfer ${transfer.id} sent for application ${applicationId}`)
-          } catch (err) {
-            payoutError = err instanceof Error ? err.message : 'Stripe transfer failed'
-            console.error('[payout] transfer failed for application', applicationId, err)
-            // Reset guard so retryPayout can attempt again
-            await prisma.deal_submissions.update({
-              where: { application_id: applicationId },
-              data: { payout_status: null },
-            }).catch(() => {})
+        const { perCreator } = calcFeeBreakdown(campaign.budget, campaign.creator_count)
+        if (!perCreator || perCreator <= 0) {
+          console.warn(`[payout] skipped for application ${applicationId} — perCreator calculated as ${perCreator}`)
+        } else {
+          // Atomic race guard: claim the payout slot; a concurrent caller will see count=0 and skip.
+          const claimed = await prisma.deal_submissions.updateMany({
+            where: { application_id: applicationId, payout_status: null },
+            data: { payout_status: 'processing' },
+          })
+          if (claimed.count > 0) {
+            try {
+              const transfer = await stripe.transfers.create(
+                {
+                  amount: perCreator * 100,
+                  currency: 'usd',
+                  destination: creator.stripe_connect_id,
+                  source_transaction: chargeId,
+                  metadata: { applicationId, campaignId: app.campaign_id },
+                  description: `Payout for campaign: ${campaign.title}`,
+                },
+                { idempotencyKey: `transfer-${applicationId}` },
+              )
+              await prisma.deal_submissions.update({
+                where: { application_id: applicationId },
+                data: { stripe_transfer_id: transfer.id, payout_status: 'paid' },
+              })
+              console.log(`[payout] transfer ${transfer.id} sent for application ${applicationId}`)
+            } catch (err) {
+              payoutError = err instanceof Error ? err.message : 'Stripe transfer failed'
+              console.error('[payout] transfer failed for application', applicationId, err)
+              // Reset guard so retryPayout can attempt again
+              await prisma.deal_submissions.update({
+                where: { application_id: applicationId },
+                data: { payout_status: null },
+              }).catch(() => {})
+            }
           }
         }
       }
@@ -200,6 +265,7 @@ export async function retryPayout(
           budget: true,
           creator_count: true,
           stripe_charge_id: true,
+          stripe_payment_intent_id: true,
           title: true,
         },
       },
@@ -226,56 +292,10 @@ export async function retryPayout(
   }
   if (!campaign.budget) return { error: 'Campaign has no budget.' }
 
-  // Resolve charge ID — DB first, then Stripe lookup as fallback
-  let chargeId = campaign.stripe_charge_id
+  // Resolve charge ID — DB first, Stripe API fallback if null
+  const chargeId = await resolveChargeId(campaign)
   if (!chargeId) {
-    // Try the stored PI first
-    const { stripe_payment_intent_id } = await prisma.campaigns.findUniqueOrThrow({
-      where: { id: campaign.id },
-      select: { stripe_payment_intent_id: true },
-    })
-
-    let resolvedPiId: string | null = null
-
-    if (stripe_payment_intent_id) {
-      const pi = await stripe.paymentIntents.retrieve(stripe_payment_intent_id)
-      if (pi.status === 'succeeded') {
-        resolvedPiId = pi.id
-        const latestCharge = typeof pi.latest_charge === 'string'
-          ? pi.latest_charge
-          : (pi.latest_charge as { id: string } | null)?.id ?? null
-        if (latestCharge) chargeId = latestCharge
-      }
-    }
-
-    // If stored PI wasn't the succeeded one, search Stripe by campaign metadata
-    if (!chargeId) {
-      const results = await stripe.paymentIntents.search({
-        query: `metadata['campaignId']:'${campaign.id}' AND status:'succeeded'`,
-        limit: 5,
-      })
-      const succeededPi = results.data[0] ?? null
-      if (succeededPi) {
-        resolvedPiId = succeededPi.id
-        const latestCharge = typeof succeededPi.latest_charge === 'string'
-          ? succeededPi.latest_charge
-          : (succeededPi.latest_charge as { id: string } | null)?.id ?? null
-        if (latestCharge) chargeId = latestCharge
-      }
-    }
-
-    if (!chargeId) {
-      return { error: 'Could not locate a completed payment for this campaign. Check the Stripe dashboard.' }
-    }
-
-    // Persist so future calls don't need to re-fetch
-    await prisma.campaigns.update({
-      where: { id: campaign.id },
-      data: {
-        stripe_charge_id: chargeId,
-        ...(resolvedPiId ? { stripe_payment_intent_id: resolvedPiId } : {}),
-      },
-    })
+    return { error: 'Could not locate a completed payment for this campaign. Check the Stripe dashboard.' }
   }
 
   const { perCreator } = calcFeeBreakdown(campaign.budget, app.campaign.creator_count ?? null)
