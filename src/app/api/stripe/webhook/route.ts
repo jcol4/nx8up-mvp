@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
+import { createNotification } from '@/lib/notifications'
+import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 import type Stripe from 'stripe'
 
 
@@ -56,6 +58,25 @@ export async function POST(request: Request) {
         })
         console.log(`[webhook] payment_intent.succeeded — campaign ${campaignId} status updated: ${updated.count} row(s) affected`)
 
+        // Notify sponsor — use pi.id as dedupeKey so charge.succeeded + payment_intent.succeeded don't both fire
+        if (sponsorId) {
+          const sponsor = await prisma.sponsors.findUnique({
+            where: { id: sponsorId },
+            select: { clerk_user_id: true },
+          })
+          if (sponsor) {
+            await createNotification({
+              userId: sponsor.clerk_user_id,
+              role: 'sponsor',
+              type: NOTIFICATION_TYPES.PAYMENT_SUCCESS,
+              title: 'Payment confirmed',
+              message: `Your campaign "${campaignTitle ?? 'campaign'}" is now live.`,
+              link: `/sponsor/campaigns`,
+              dedupeKey: pi.id,
+            })
+          }
+        }
+
         // Send invoice PDF to sponsor — create a finalized invoice and mark it paid out-of-band
         if (sponsorId && campaignTitle && pi.customer) {
           try {
@@ -95,6 +116,8 @@ export async function POST(request: Request) {
       case 'payment_intent.payment_failed': {
         const pi = event.data.object as Stripe.PaymentIntent
         const campaignId = pi.metadata?.campaignId
+        const sponsorId = pi.metadata?.sponsorId
+        const campaignTitle = pi.metadata?.campaignTitle
         if (!campaignId) break
 
         // Reset campaign so sponsor can retry — revert payment_in_progress back to pending_payment
@@ -102,6 +125,23 @@ export async function POST(request: Request) {
           where: { id: campaignId, stripe_payment_intent_id: pi.id },
           data: { status: 'pending_payment', stripe_payment_intent_id: null, stripe_authorized_amount: null },
         })
+
+        if (sponsorId) {
+          const sponsor = await prisma.sponsors.findUnique({
+            where: { id: sponsorId },
+            select: { clerk_user_id: true },
+          })
+          if (sponsor) {
+            await createNotification({
+              userId: sponsor.clerk_user_id,
+              role: 'sponsor',
+              type: NOTIFICATION_TYPES.PAYMENT_FAILED,
+              title: 'Payment failed',
+              message: `Payment for "${campaignTitle ?? 'your campaign'}" could not be processed. Please retry.`,
+              link: `/sponsor/campaigns`,
+            })
+          }
+        }
         break
       }
 
@@ -147,7 +187,6 @@ export async function POST(request: Request) {
 
       case 'transfer.created': {
         const transfer = event.data.object as Stripe.Transfer
-        // transfer.metadata.applicationId is set when we create the transfer
         const applicationId = transfer.metadata?.applicationId
         if (!applicationId) break
 
@@ -155,12 +194,30 @@ export async function POST(request: Request) {
           where: { application_id: applicationId },
           data: { stripe_transfer_id: transfer.id, payout_status: 'paid' },
         })
+
+        const app = await prisma.campaign_applications.findUnique({
+          where: { id: applicationId },
+          select: {
+            campaign: { select: { title: true } },
+            creator: { select: { clerk_user_id: true } },
+          },
+        })
+        if (app) {
+          await createNotification({
+            userId: app.creator.clerk_user_id,
+            role: 'creator',
+            type: NOTIFICATION_TYPES.PAYOUT_SENT,
+            title: 'Payout sent',
+            message: `Your payout for "${app.campaign.title}" has been sent to your bank account.`,
+            link: '/creator/campaigns',
+            dedupeKey: transfer.id,
+          })
+        }
         break
       }
 
       case 'payout.failed': {
         const payout = event.data.object as Stripe.Payout
-        // event.account is the connected account ID for Connect webhook events
         const connectedAccountId = (event as unknown as { account?: string }).account
         console.error('[webhook] payout.failed', {
           payoutId: payout.id,
@@ -169,7 +226,6 @@ export async function POST(request: Request) {
           failureMessage: payout.failure_message,
         })
         if (connectedAccountId) {
-          // Mark paid submissions for this creator as payout_failed so admins/creators can act
           await prisma.deal_submissions.updateMany({
             where: {
               payout_status: 'paid',
@@ -179,6 +235,21 @@ export async function POST(request: Request) {
             },
             data: { payout_status: 'payout_failed' },
           })
+
+          const creator = await prisma.content_creators.findFirst({
+            where: { stripe_connect_id: connectedAccountId },
+            select: { clerk_user_id: true },
+          })
+          if (creator) {
+            await createNotification({
+              userId: creator.clerk_user_id,
+              role: 'creator',
+              type: NOTIFICATION_TYPES.PAYOUT_FAILED,
+              title: 'Payout failed',
+              message: `A payout to your bank account failed. Please check your Stripe payout settings.`,
+              link: '/creator/profile',
+            })
+          }
         }
         break
       }

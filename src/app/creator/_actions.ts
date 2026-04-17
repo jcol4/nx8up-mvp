@@ -9,6 +9,8 @@ import {
   getRankName,
   type CreatorXpState,
 } from '@/lib/creator-xp'
+import { createNotification } from '@/lib/notifications'
+import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 
 function parseXpState(meta: Record<string, unknown> | null): CreatorXpState {
   const xp = Number(meta?.creatorXp) || 0
@@ -32,17 +34,6 @@ export async function getCreatorXp(): Promise<CreatorXpState> {
   return parseXpState(meta)
 }
 
-// Notifications (type used in addCreatorXp for level-up notifications)
-export type CreatorNotification = {
-  id: string
-  type: 'deal' | 'mission' | 'academy' | 'level' | 'system'
-  title: string
-  message: string
-  read: boolean
-  createdAt: string
-  link?: string
-}
-
 export async function addCreatorXp(amount: number): Promise<{ error?: string }> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
@@ -56,30 +47,25 @@ export async function addCreatorXp(amount: number): Promise<{ error?: string }> 
     const next = addXpToState(current, amount)
     const leveledUp = next.level > current.level
 
-    const metaUpdates: Record<string, unknown> = {
-      ...existing,
-      creatorXp: next.xp,
-      creatorLevel: next.level,
-      creatorXpForNext: next.xpForNext,
-    }
+    await client.users.updateUser(userId, {
+      publicMetadata: {
+        ...existing,
+        creatorXp: next.xp,
+        creatorLevel: next.level,
+        creatorXpForNext: next.xpForNext,
+      },
+    })
 
     if (leveledUp) {
-      const notifications = (existing.creatorNotifications as CreatorNotification[]) ?? []
-      const newNotif: CreatorNotification = {
-        id: crypto.randomUUID(),
-        type: 'level',
+      await createNotification({
+        userId,
+        role: 'creator',
+        type: NOTIFICATION_TYPES.LEVEL_UP,
         title: `Level ${next.level}`,
         message: `Rank updated to ${next.rankName}.`,
-        read: false,
-        createdAt: new Date().toISOString(),
         link: '/creator',
-      }
-      metaUpdates.creatorNotifications = [newNotif, ...notifications]
+      })
     }
-
-    await client.users.updateUser(userId, {
-      publicMetadata: metaUpdates,
-    })
 
     revalidatePath('/creator')
     return {}
@@ -187,89 +173,6 @@ export async function toggleCreatorDayTask(
   })
 }
 
-export async function getCreatorNotifications(): Promise<CreatorNotification[]> {
-  const { userId } = await auth()
-  if (!userId) return []
-
-  const client = await clerkClient()
-  const user = await client.users.getUser(userId)
-  const items = user.publicMetadata?.creatorNotifications as CreatorNotification[] | undefined
-  return Array.isArray(items) ? items : []
-}
-
-async function updateNotifications(
-  updater: (items: CreatorNotification[]) => CreatorNotification[]
-): Promise<{ error?: string }> {
-  const { userId } = await auth()
-  if (!userId) return { error: 'Not authenticated' }
-
-  try {
-    const client = await clerkClient()
-    const user = await client.users.getUser(userId)
-    const existing = (user.publicMetadata || {}) as Record<string, unknown>
-    const items = (existing.creatorNotifications as CreatorNotification[]) ?? []
-    const updated = updater(items)
-
-    await client.users.updateUser(userId, {
-      publicMetadata: { ...existing, creatorNotifications: updated },
-    })
-
-    revalidatePath('/creator')
-    return {}
-  } catch {
-    return { error: 'Failed to update notifications' }
-  }
-}
-
-export async function markNotificationRead(id: string): Promise<{ error?: string }> {
-  return updateNotifications((items) =>
-    items.map((n) => (n.id === id ? { ...n, read: true } : n))
-  )
-}
-
-export async function markAllNotificationsRead(): Promise<{ error?: string }> {
-  return updateNotifications((items) =>
-    items.map((n) => ({ ...n, read: true }))
-  )
-}
-
-export async function deleteCreatorNotification(id: string): Promise<{ error?: string }> {
-  return updateNotifications((items) =>
-    items.filter((n) => n.id !== id)
-  )
-}
-
-export async function addCreatorNotification(
-  notification: Omit<CreatorNotification, 'id' | 'createdAt' | 'read'>
-): Promise<{ error?: string }> {
-  const { userId } = await auth()
-  if (!userId) return { error: 'Not authenticated' }
-
-  try {
-    const client = await clerkClient()
-    const user = await client.users.getUser(userId)
-    const existing = (user.publicMetadata || {}) as Record<string, unknown>
-    const items = (existing.creatorNotifications as CreatorNotification[]) ?? []
-    const newNotif: CreatorNotification = {
-      ...notification,
-      id: crypto.randomUUID(),
-      read: false,
-      createdAt: new Date().toISOString(),
-    }
-
-    await client.users.updateUser(userId, {
-      publicMetadata: {
-        ...existing,
-        creatorNotifications: [newNotif, ...items],
-      },
-    })
-
-    revalidatePath('/creator')
-    return {}
-  } catch {
-    return { error: 'Failed to add notification' }
-  }
-}
 
 export type ContentPlannerNotes = Record<string, string>
 

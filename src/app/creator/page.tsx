@@ -1,23 +1,22 @@
 import { auth } from "@clerk/nextjs/server";
-import { getCreatorXp, getCreatorCalendarTasks, getCreatorNotifications } from "./_actions";
+import { getCreatorXp, getCreatorCalendarTasks } from "./_actions";
 import { getUserDisplayInfo } from "@/lib/get-user-display-info";
 import CreatorTopBar from "@/components/creator/CreatorTopBar";
 import UserProfileBlock from "@/components/shared/UserProfileBlock";
 import CreatorProgressPanel from "./CreatorProgressPanel";
 import CreatorMissionsSection from "./CreatorMissionsSection";
 import CreatorAcademySection from "./CreatorAcademySection";
-import CreatorNotifications from "./CreatorNotifications";
+import NotificationBell from "@/components/shared/NotificationBell";
 import DealsAndCampaignsSection from "./DealsAndCampaignsSection";
 import { prisma } from "@/lib/prisma";
 
 export default async function CreatorDashboardPage() {
-  const [authResult, displayInfo, xpState, calendarTasks, notifications] =
+  const [authResult, displayInfo, xpState, calendarTasks] =
     await Promise.all([
       auth(),
       getUserDisplayInfo(),
       getCreatorXp(),
       getCreatorCalendarTasks(),
-      getCreatorNotifications(),
     ]);
   const role = (authResult.sessionClaims?.metadata as { role?: string } | undefined)?.role;
 
@@ -50,7 +49,7 @@ export default async function CreatorDashboardPage() {
       <CreatorTopBar
         rightContent={
           <div className="flex items-center gap-3 sm:gap-4">
-            <CreatorNotifications notifications={notifications} />
+            <NotificationBell />
             <UserProfileBlock
               displayName={displayName}
               username={username}

@@ -26,6 +26,7 @@ const NAV_ITEMS = [
   { href: '/admin/academy', label: 'Academy' },
   { href: '/admin/users', label: 'Users' },
   { href: '/admin/profile', label: 'Profile' },
+  { href: '/admin/settings/notifications', label: 'Notifications' },
 ]
 
 export default async function AdminLayout({

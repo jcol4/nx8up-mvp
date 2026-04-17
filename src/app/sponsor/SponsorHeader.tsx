@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import UserProfileBlock from '@/components/shared/UserProfileBlock'
+import NotificationBell from '@/components/shared/NotificationBell'
 
 export default async function SponsorHeader() {
   const { sessionClaims } = await auth()
@@ -28,6 +29,7 @@ export default async function SponsorHeader() {
         >
           Sponsor Hub
         </Link>
+        <NotificationBell />
         <UserProfileBlock
           displayName={displayName}
           username={username}

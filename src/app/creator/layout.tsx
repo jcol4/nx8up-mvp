@@ -26,6 +26,7 @@ const NAV_ITEMS = [
   { href: '/creator/campaigns', label: 'Campaigns' },
   { href: '/creator/deal-room', label: 'Deal Room' },
   { href: '/creator/academy', label: 'Academy' },
+  { href: '/creator/settings/notifications', label: 'Notifications' },
 ]
 
 export default async function CreatorLayout({

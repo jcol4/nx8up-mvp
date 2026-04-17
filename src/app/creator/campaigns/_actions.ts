@@ -4,6 +4,8 @@ import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { matchCreatorToCampaign } from '@/lib/matching'
+import { createNotification } from '@/lib/notifications'
+import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 
 export async function getCreatorOAuthStatus(): Promise<{ verified: boolean; stripeReady: boolean }> {
   const { userId } = await auth()
@@ -174,6 +176,8 @@ export async function applyToCampaign(
     where: { id: campaignId },
     select: {
       status: true,
+      title: true,
+      sponsor_id: true,
       platform: true,
       min_subs_followers: true,
       min_avg_viewers: true,
@@ -227,6 +231,22 @@ export async function applyToCampaign(
     },
   })
 
+  // Notify sponsor that a creator applied
+  const sponsor = await prisma.sponsors.findUnique({
+    where: { id: campaign.sponsor_id },
+    select: { clerk_user_id: true },
+  })
+  if (sponsor) {
+    await createNotification({
+      userId: sponsor.clerk_user_id,
+      role: 'sponsor',
+      type: NOTIFICATION_TYPES.CREATOR_APPLIED,
+      title: 'New creator application',
+      message: `A creator has applied to your campaign "${campaign.title}".`,
+      link: `/sponsor/campaigns/${campaignId}/applications`,
+    })
+  }
+
   revalidatePath('/creator/campaigns')
   revalidatePath(`/creator/campaigns/${campaignId}`)
   return { success: true }
@@ -276,7 +296,16 @@ export async function respondToInvitation(
 
   const application = await prisma.campaign_applications.findUnique({
     where: { id: applicationId },
-    include: { campaign: { select: { status: true } } },
+    include: {
+      campaign: {
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          sponsor: { select: { clerk_user_id: true } },
+        },
+      },
+    },
   })
   if (!application || application.creator_id !== creator.id) {
     return { error: 'Invitation not found.' }
@@ -292,6 +321,17 @@ export async function respondToInvitation(
     where: { id: applicationId },
     data: { status: response === 'accept' ? 'accepted' : 'rejected' },
   })
+
+  if (response === 'accept') {
+    await createNotification({
+      userId: application.campaign.sponsor.clerk_user_id,
+      role: 'sponsor',
+      type: NOTIFICATION_TYPES.CREATOR_APPLIED,
+      title: 'Creator accepted your invite',
+      message: `A creator has accepted your direct invite to "${application.campaign.title}".`,
+      link: `/sponsor/campaigns/${application.campaign.id}/applications`,
+    })
+  }
 
   revalidatePath('/creator/campaigns')
   revalidatePath(`/creator/campaigns/${application.campaign_id}`)

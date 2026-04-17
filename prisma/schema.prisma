@@ -262,3 +262,26 @@ model sponsor_age_restriction_requests {
   @@index([sponsor_id])
   @@index([status])
 }
+
+model Notification {
+  id         String   @id @default(cuid())
+  userId     String
+  role       String
+  type       String
+  title      String
+  message    String
+  link       String?
+  read       Boolean  @default(false)
+  dedupeKey  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId, read])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, type, dedupeKey])
+}
+
+model NotificationPreference {
+  id     String @id @default(cuid())
+  userId String @unique
+  prefs  Json
+}

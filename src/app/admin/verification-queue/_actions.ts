@@ -3,6 +3,8 @@
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+import { createNotification } from '@/lib/notifications'
+import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 
 async function assertAdmin() {
   const { sessionClaims } = await auth()
@@ -74,6 +76,14 @@ export async function adminReviewSubmission(
 
   const submission = await prisma.deal_submissions.findUnique({
     where: { application_id: applicationId },
+    include: {
+      application: {
+        select: {
+          campaign: { select: { title: true } },
+          creator: { select: { clerk_user_id: true } },
+        },
+      },
+    },
   })
   if (!submission) return { error: 'Submission not found.' }
   if (submission.status !== 'submitted') return { error: 'Submission is not pending admin review.' }
@@ -81,6 +91,17 @@ export async function adminReviewSubmission(
   await prisma.deal_submissions.update({
     where: { application_id: applicationId },
     data: { status: decision, admin_notes: notes ?? null },
+  })
+
+  await createNotification({
+    userId: submission.application.creator.clerk_user_id,
+    role: 'creator',
+    type: decision === 'admin_verified' ? NOTIFICATION_TYPES.ADMIN_VERIFIED : NOTIFICATION_TYPES.ADMIN_REJECTED,
+    title: decision === 'admin_verified' ? 'Submission verified' : 'Submission rejected',
+    message: decision === 'admin_verified'
+      ? `Your content for "${submission.application.campaign.title}" has been verified by admin.`
+      : `Your submission for "${submission.application.campaign.title}" was rejected by admin.${notes ? ` Reason: ${notes}` : ''}`,
+    link: '/creator/campaigns',
   })
 
   revalidatePath('/admin/verification-queue')

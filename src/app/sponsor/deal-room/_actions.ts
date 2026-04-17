@@ -5,6 +5,8 @@ import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { calcFeeBreakdown } from '@/lib/constants'
+import { createNotification } from '@/lib/notifications'
+import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 
 async function getSponsor(userId: string) {
   return prisma.sponsors.findUnique({
@@ -163,7 +165,11 @@ export async function updateSubmissionStatus(
         },
       },
       creator: {
-        select: { stripe_connect_id: true, stripe_onboarding_complete: true },
+        select: {
+          clerk_user_id: true,
+          stripe_connect_id: true,
+          stripe_onboarding_complete: true,
+        },
       },
       deal_submission: {
         select: { payout_status: true },
@@ -177,6 +183,17 @@ export async function updateSubmissionStatus(
   await prisma.deal_submissions.update({
     where: { application_id: applicationId },
     data: { status, sponsor_notes: sponsorNotes ?? null },
+  })
+
+  await createNotification({
+    userId: app.creator.clerk_user_id,
+    role: 'creator',
+    type: status === 'approved' ? NOTIFICATION_TYPES.SUBMISSION_APPROVED : NOTIFICATION_TYPES.SUBMISSION_REVISION,
+    title: status === 'approved' ? 'Submission approved!' : 'Revision requested',
+    message: status === 'approved'
+      ? `Your content for "${app.campaign.title}" has been approved.`
+      : `The sponsor has requested changes to your "${app.campaign.title}" submission.${sponsorNotes ? ` Note: ${sponsorNotes}` : ''}`,
+    link: '/creator/campaigns',
   })
 
   // Trigger payout when sponsor approves

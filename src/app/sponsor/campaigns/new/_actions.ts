@@ -5,6 +5,8 @@ import { revalidatePath } from 'next/cache'
 import { randomUUID } from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { BUDGET_MAX } from '@/lib/constants'
+import { createNotification } from '@/lib/notifications'
+import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 
 export type CreateCampaignResult = { error?: string; success?: boolean; id?: string }
 
@@ -265,7 +267,7 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
     if (!invited_creator_id) return { error: 'Please select a creator to invite.' }
     const invitedCreator = await prisma.content_creators.findUnique({
       where: { id: invited_creator_id },
-      select: { id: true },
+      select: { id: true, clerk_user_id: true },
     })
     if (!invitedCreator) return { error: 'Selected creator not found.' }
   }
@@ -354,6 +356,21 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
           app_media_types: [],
         },
       })
+
+      const invitedCreator = await prisma.content_creators.findUnique({
+        where: { id: invited_creator_id },
+        select: { clerk_user_id: true },
+      })
+      if (invitedCreator) {
+        await createNotification({
+          userId: invitedCreator.clerk_user_id,
+          role: 'creator',
+          type: NOTIFICATION_TYPES.DIRECT_INVITE,
+          title: 'You have a direct invite',
+          message: `A sponsor has personally invited you to their campaign "${title}". Check your campaigns to respond.`,
+          link: '/creator/campaigns',
+        })
+      }
     }
   }
 

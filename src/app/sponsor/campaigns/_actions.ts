@@ -4,6 +4,8 @@ import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
 import { randomBytes } from 'crypto'
 import { prisma } from '@/lib/prisma'
+import { createNotification } from '@/lib/notifications'
+import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 
 function generateShortCode(): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
@@ -43,7 +45,12 @@ export async function launchCampaign(id: string): Promise<{ error?: string; succ
 
   const campaign = await prisma.campaigns.findUnique({
     where: { id },
-    include: { applications: { where: { status: 'accepted' }, select: { id: true }, take: 1 } },
+    include: {
+      applications: {
+        where: { status: 'accepted' },
+        select: { id: true, creator: { select: { clerk_user_id: true } } },
+      },
+    },
   })
   if (!campaign || campaign.sponsor_id !== sponsor.id) {
     return { error: 'You are not allowed to launch this campaign.' }
@@ -62,6 +69,19 @@ export async function launchCampaign(id: string): Promise<{ error?: string; succ
   }
 
   await prisma.campaigns.update({ where: { id }, data: { status: 'launched' } })
+
+  await Promise.all(
+    campaign.applications.map((app) =>
+      createNotification({
+        userId: app.creator.clerk_user_id,
+        role: 'creator',
+        type: NOTIFICATION_TYPES.CAMPAIGN_LAUNCHED,
+        title: 'Campaign is live!',
+        message: `"${campaign.title}" has launched. Head to your deal room to get started.`,
+        link: '/creator/deal-room',
+      })
+    )
+  )
 
   revalidatePath('/sponsor/campaigns')
   revalidatePath('/sponsor')
@@ -102,7 +122,10 @@ export async function setApplicationStatus(
 
   const application = await prisma.campaign_applications.findUnique({
     where: { id: applicationId },
-    include: { campaign: true },
+    include: {
+      campaign: true,
+      creator: { select: { clerk_user_id: true } },
+    },
   })
 
   if (!application || application.campaign_id !== campaignId || application.campaign.sponsor_id !== sponsor.id) {
@@ -113,7 +136,6 @@ export async function setApplicationStatus(
   let tracking_short_code = application.tracking_short_code
   if (status === 'accepted' && !tracking_short_code && application.campaign.landing_page_url) {
     let code = generateShortCode()
-    // Retry on collision (extremely unlikely but safe)
     while (await prisma.campaign_applications.findUnique({ where: { tracking_short_code: code } })) {
       code = generateShortCode()
     }
@@ -123,6 +145,17 @@ export async function setApplicationStatus(
   await prisma.campaign_applications.update({
     where: { id: applicationId },
     data: { status, ...(tracking_short_code ? { tracking_short_code } : {}) },
+  })
+
+  await createNotification({
+    userId: application.creator.clerk_user_id,
+    role: 'creator',
+    type: status === 'accepted' ? NOTIFICATION_TYPES.APPLICATION_ACCEPTED : NOTIFICATION_TYPES.APPLICATION_REJECTED,
+    title: status === 'accepted' ? 'Application accepted!' : 'Application update',
+    message: status === 'accepted'
+      ? `You've been accepted for "${application.campaign.title}". Check your deal room.`
+      : `Your application for "${application.campaign.title}" was not selected.`,
+    link: '/creator/campaigns',
   })
 
   revalidatePath(`/sponsor/campaigns/${campaignId}/applications`)

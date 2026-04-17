@@ -27,6 +27,7 @@ const NAV_ITEMS = [
   { href: '/sponsor/deal-room', label: 'Deal Room' },
   { href: '/sponsor/creators', label: 'Creators' },
   { href: '/sponsor/payouts', label: 'Payouts' },
+  { href: '/sponsor/settings/notifications', label: 'Notifications' },
 ]
 
 async function getSponsorStats(userId: string) {
