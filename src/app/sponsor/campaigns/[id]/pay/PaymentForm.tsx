@@ -16,11 +16,13 @@ function CheckoutForm({
   budgetDisplay,
   returnUrl,
   largeBudget,
+  preferredPaymentMethod,
 }: {
   campaignTitle: string
   budgetDisplay: string
   returnUrl: string
   largeBudget: boolean
+  preferredPaymentMethod: string | null
 }) {
   const stripe = useStripe()
   const elements = useElements()
@@ -105,6 +107,10 @@ function CheckoutForm({
         <PaymentElement
           options={{
             layout: 'tabs',
+            paymentMethodOrder:
+              preferredPaymentMethod === 'ach'
+                ? ['us_bank_account', 'card']
+                : ['card', 'us_bank_account'],
           }}
         />
       </div>
@@ -136,12 +142,14 @@ export default function PaymentForm({
   budgetDisplay,
   returnUrl,
   largeBudget,
+  preferredPaymentMethod,
 }: {
   clientSecret: string
   campaignTitle: string
   budgetDisplay: string
   returnUrl: string
   largeBudget: boolean
+  preferredPaymentMethod: string | null
 }) {
   return (
     <Elements
@@ -166,6 +174,7 @@ export default function PaymentForm({
         budgetDisplay={budgetDisplay}
         returnUrl={returnUrl}
         largeBudget={largeBudget}
+        preferredPaymentMethod={preferredPaymentMethod}
       />
     </Elements>
   )

@@ -243,7 +243,11 @@ export async function getMyInvitations() {
   if (!creator) return []
 
   const applications = await prisma.campaign_applications.findMany({
-    where: { creator_id: creator.id, status: 'invited' },
+    where: {
+      creator_id: creator.id,
+      status: 'invited',
+      campaign: { status: { in: ['live', 'launched'] } },
+    },
     include: {
       campaign: {
         include: {

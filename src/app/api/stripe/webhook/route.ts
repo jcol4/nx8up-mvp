@@ -81,8 +81,8 @@ export async function POST(request: Request) {
                 footer: `Total campaign budget: $${campaign.budget.toLocaleString()}`,
               })
               await stripe.invoices.finalizeInvoice(invoice.id, { auto_advance: false })
-              await stripe.invoices.pay(invoice.id, { paid_out_of_band: true })
               await stripe.invoices.sendInvoice(invoice.id)
+              await stripe.invoices.pay(invoice.id, { paid_out_of_band: true })
             }
           } catch (invoiceErr) {
             console.error('Failed to send invoice email after payment:', invoiceErr)

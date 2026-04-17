@@ -239,6 +239,7 @@ export default async function CampaignPayPage({
             budgetDisplay={`$${campaign.budget.toLocaleString()}`}
             returnUrl={returnUrl}
             largeBudget={largeBudget}
+            preferredPaymentMethod={campaign.preferred_payment_method ?? null}
           />
         </div>
       </div>
