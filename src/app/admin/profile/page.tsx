@@ -1,3 +1,28 @@
+/**
+ * Admin Profile page (`/admin/profile`).
+ *
+ * Displays the profile of the currently authenticated admin user, combining
+ * Clerk user data with live Prisma platform-wide statistics.
+ *
+ * Data fetched in parallel:
+ *  - Clerk user record (avatar, name, email, metadata, timestamps)
+ *  - `content_creators` count
+ *  - `sponsors` count
+ *  - `campaigns` grouped by status
+ *  - `campaign_applications` grouped by status
+ *
+ * The page renders:
+ *  1. Profile header with avatar, role badge, and primary email
+ *  2. Account details (user ID, onboarding status, join date, last sign-in)
+ *  3. Platform overview stat cards
+ *  4. Campaigns and applications broken down by status
+ *
+ * External services: Clerk (`clerkClient`, `auth`), Prisma.
+ *
+ * Gotcha: `displayName` is derived from Clerk `publicMetadata.displayName`
+ * first, then assembled from `firstName` + `lastName`. If all three are absent,
+ * the heading renders an italic "No name set" placeholder.
+ */
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'

@@ -1,3 +1,14 @@
+/**
+ * CreatorCalendarSection — client component that composes the mini-calendar
+ * and the day-tasks list into a single interactive unit.
+ *
+ * Owns the `selectedDate` state so that both sub-components stay in sync:
+ * clicking a day in `CreatorCalendar` updates the state here, which causes
+ * `CreatorDayTasks` to display the tasks for the newly selected date.
+ *
+ * Receives the full `CalendarTasksMap` (loaded server-side) as a prop so
+ * that the task list renders immediately without a client-side fetch.
+ */
 'use client'
 
 import { useState } from 'react'

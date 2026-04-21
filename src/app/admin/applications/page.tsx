@@ -1,3 +1,30 @@
+/**
+ * Admin Applications page (`/admin/applications`).
+ *
+ * Server-rendered page that lists all `campaign_applications` across the
+ * platform with filtering and pagination.
+ *
+ * Features:
+ *  - **Status filter** – tabs for All / Pending / Accepted / Rejected; counts
+ *    are fetched with a `groupBy` query and displayed in each tab label.
+ *  - **Search** – full-text (case-insensitive) across campaign title, creator
+ *    email, and creator Twitch username via Prisma `contains` / OR.
+ *  - **Pagination** – 25 records per page (`PAGE_SIZE`); page state is kept in
+ *    the URL alongside the active filter so shareable links work.
+ *  - **Auth guard** – redundant check on top of the layout guard; redirects
+ *    non-admins to `/`.
+ *
+ * External services: Clerk (auth), Prisma (campaign_applications, campaigns,
+ * sponsors, content_creators).
+ *
+ * Gotcha: the search form uses a native GET submit, which resets to page 1
+ * only if the hidden `status` input is present. If the user is on page > 1
+ * and submits a new search without a status filter, the page parameter carries
+ * over via `buildUrl` defaults — but the function always accepts `page` as an
+ * override, so the search button correctly resets to page 1 via the form
+ * action's implicit `page` exclusion (there is no hidden `page` input in the
+ * form). This is correct but subtle.
+ */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -61,6 +88,11 @@ export default async function AdminApplicationsPage({ searchParams }: Props) {
     countByStatus[s.status] = s._count.status
   }
 
+  /**
+   * Builds a URL for the applications page preserving the current status filter
+   * and search term while allowing individual values to be overridden.
+   * Used to construct pagination and filter tab links.
+   */
   function buildUrl(overrides: Record<string, string>) {
     const params = new URLSearchParams({
       ...(statusFilter ? { status: statusFilter } : {}),

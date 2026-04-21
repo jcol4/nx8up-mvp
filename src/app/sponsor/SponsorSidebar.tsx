@@ -1,3 +1,20 @@
+/**
+ * SponsorSidebar — collapsible sidebar for the sponsor dashboard.
+ *
+ * NOTE: This component is NOT currently used. The layout.tsx file renders the
+ * shared DashboardSidebar component instead. SponsorSidebar appears to be a
+ * legacy or alternative implementation that was not removed.
+ *
+ * Features:
+ * - Collapsible: toggled via a chevron button; collapses to a 16px icon rail.
+ * - Displays campaign stats (active campaigns, budget, creators reached) in both
+ *   expanded and collapsed modes (collapsed uses tooltips).
+ * - Renders nav items via the shared NavItem component.
+ *
+ * Gotcha: If `stats` is not provided, it falls back to hardcoded placeholder
+ * values (3 campaigns, $12,500, 24 creators) — the same stale values as in
+ * SponsorHeader. These should come from real data.
+ */
 'use client'
 
 import { useState } from 'react'

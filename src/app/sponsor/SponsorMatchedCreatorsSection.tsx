@@ -1,3 +1,14 @@
+/**
+ * SponsorMatchedCreatorsSection — dashboard panel showing creators matched to the
+ * sponsor's targeting criteria.
+ *
+ * NOTE: This component currently renders MOCK_CREATORS (hardcoded static data).
+ * It does not query the database or apply any real matching algorithm. The
+ * displayed match scores are fictitious. This section needs to be wired to live
+ * data before launch.
+ *
+ * Displayed inside the two-column grid on the sponsor dashboard page.
+ */
 import Link from 'next/link'
 import { DashboardPanel } from '@/components/dashboard'
 

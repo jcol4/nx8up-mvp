@@ -1,3 +1,22 @@
+/**
+ * Step 7 — Profile Summary (profile wizard).
+ *
+ * Read-only overview of all wizard data grouped into six panels:
+ * Accounts, Metrics, Identity, Content & Audience, Brand Preferences,
+ * and Eligibility. Each panel has an "Edit" link that calls `onEditStep`
+ * to jump to that step while setting `returnToSummary = true`.
+ *
+ * The summary pulls data from three sources:
+ *  - `draft`          — all user-entered fields from steps 3–6.
+ *  - `twitchInitial`  — Twitch connection state (passed from profile page).
+ *  - `youtubeInitial` — YouTube connection state (passed from profile page).
+ *  - `creatorStats`   — live platform stats (from DB, passed from profile page).
+ *
+ * `fmt()` is a local helper that formats large numbers to K/M notation.
+ * Note: a duplicate `fmt` function also exists in `CreatorStatsPanel.tsx`.
+ *
+ * "Go to Dashboard" calls `onFinish` which pushes `/creator`.
+ */
 'use client'
 
 import {

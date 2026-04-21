@@ -1,3 +1,18 @@
+/**
+ * Step 5 — Brand & Campaign Preferences (profile wizard).
+ *
+ * Lets the creator declare which sponsorship formats and product categories
+ * best fit their content. Both sections use card-style multi-select buttons
+ * with a label + description per option.
+ *
+ * Preferred campaign types (e.g. "Use & Show", "Explain & Demo") inform the
+ * matching algorithm in `@/lib/matching`.
+ * Preferred product types (e.g. "Gaming Hardware", "Consumable") similarly
+ * feed into sponsor-to-creator matching.
+ *
+ * No save action is called here directly — `onNext` delegates to
+ * `saveAndContinue` in the parent wizard.
+ */
 'use client'
 
 import {

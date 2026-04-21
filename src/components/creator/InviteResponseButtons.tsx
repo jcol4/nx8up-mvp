@@ -1,3 +1,7 @@
+/**
+ * InviteResponseButtons — accept/decline buttons for sponsor-invited campaign applications.
+ * Uses useTransition for optimistic pending state; refreshes the route on success.
+ */
 'use client'
 
 import { useTransition } from 'react'

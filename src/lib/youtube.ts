@@ -1,19 +1,38 @@
-// YouTube Data API v3 utility functions
-// Uses API key only — no OAuth required for public channel data
+/**
+ * YouTube Data API v3 utilities.
+ *
+ * All reads use an API key only — no OAuth required for public channel data.
+ * All fetch calls set `revalidate: 0` to bypass Next.js caching and always
+ * return live data (channel stats change frequently).
+ *
+ * Required env var: YOUTUBE_API_KEY
+ */
 
+/** Normalized channel data returned from the YouTube API. */
 interface YouTubeChannel {
+  /** YouTube channel ID (e.g. "UCxxxxxx"). */
   id: string
+  /** Channel display name. */
   title: string
+  /** Channel handle/customUrl (e.g. "@channelname"). */
   handle: string
+  /** Total subscriber count. */
   subscriber_count: number
+  /** Total number of uploaded videos. */
   video_count: number
 }
 
+/** Normalized per-video data used for stats aggregation. */
 interface YouTubeVideo {
+  /** YouTube video ID. */
   id: string
+  /** Video title. */
   title: string
+  /** Total view count at time of fetch. */
   view_count: number
+  /** YouTube category ID (see YOUTUBE_CATEGORIES for name mapping). */
   category_id: string
+  /** ISO 8601 publish timestamp. */
   published_at: string
 }
 
@@ -36,14 +55,19 @@ const YOUTUBE_CATEGORIES: Record<string, string> = {
   '29': 'Nonprofits & Activism',
 }
 
+/** Returns the YouTube API key, throwing immediately if the env var is absent. */
 function getApiKey(): string {
   const key = process.env.YOUTUBE_API_KEY
   if (!key) throw new Error('YOUTUBE_API_KEY is not set')
   return key
 }
 
-// Search for a channel by handle or username
-// Tries handle search first (@handle), falls back to legacy username search
+/**
+ * Looks up a YouTube channel by handle or username.
+ * Tries the modern `forHandle` lookup first (@handle system), then falls back
+ * to the legacy `forUsername` lookup for older channels without a custom handle.
+ * Returns null if no channel is found under either lookup.
+ */
 export async function getYouTubeChannelByHandle(
   handle: string
 ): Promise<YouTubeChannel | null> {
@@ -88,6 +112,7 @@ export async function getYouTubeChannelByHandle(
   return null
 }
 
+/** Fetches a YouTube channel by its permanent channel ID (e.g. "UCxxxxxx"). */
 export async function getYouTubeChannelById(
   channelId: string
 ): Promise<YouTubeChannel | null> {
@@ -108,6 +133,7 @@ export async function getYouTubeChannelById(
   return null
 }
 
+/** Maps a raw YouTube API channel item to the normalized YouTubeChannel shape. */
 function parseChannel(item: any, handle: string): YouTubeChannel {
   return {
     id: item.id,
@@ -118,7 +144,14 @@ function parseChannel(item: any, handle: string): YouTubeChannel {
   }
 }
 
-// Fetches recent uploads and computes average views + top categories
+/**
+ * Fetches up to `maxVideos` recent uploads for a channel and computes:
+ *  - `avg_views`: mean view count across all fetched videos
+ *  - `top_categories`: up to 3 most-frequent YouTube content categories by video count
+ *
+ * Makes 3 sequential API calls: channel details → uploads playlist → video stats.
+ * A private or inaccessible uploads playlist degrades gracefully (returns zeros).
+ */
 export async function getYouTubeChannelStats(
   channelId: string,
   maxVideos = 50
@@ -207,7 +240,7 @@ export async function getYouTubeChannelStats(
   return { avg_views, top_categories }
 }
 
-// Checks if YouTube data is stale (older than threshold in hours)
+/** Returns true if the last YouTube sync is older than `thresholdHours` (default 24h), or has never run. */
 export function isYouTubeDataStale(syncedAt: Date | null, thresholdHours = 24): boolean {
   if (!syncedAt) return true
   const ageMs = Date.now() - new Date(syncedAt).getTime()

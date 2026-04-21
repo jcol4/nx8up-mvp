@@ -1,3 +1,20 @@
+/**
+ * Campaign Applications page — /sponsor/campaigns/[id]/applications
+ *
+ * Lists all applicants for a specific campaign owned by the authenticated sponsor.
+ * Each application card shows:
+ * - Creator handle / email
+ * - Application status (pending / accepted / invited / rejected)
+ * - Submission timestamp
+ * - Quick stats (followers, avg VOD views, YouTube subs, platforms)
+ * - Link click count (if a tracking short code was assigned)
+ * - Excerpt of the creator's pitch message
+ * - A "Review applicant →" link to the individual review page
+ *
+ * Access: returns 404 if the campaign does not belong to the authenticated sponsor.
+ *
+ * External services: Clerk (auth), Prisma.
+ */
 import { auth } from '@clerk/nextjs/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'

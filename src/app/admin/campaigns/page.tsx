@@ -1,3 +1,19 @@
+/**
+ * Admin Campaigns list page (`/admin/campaigns`).
+ *
+ * Fetches all campaigns from Prisma (most recently created first), eager-loads
+ * the sponsor's company name and the application count, then renders them in a
+ * full-width table. A summary line above the table shows counts for live,
+ * draft, and "other" (cancelled / any non-live-non-draft) campaigns.
+ *
+ * Each row links to the campaign detail page at `/admin/campaigns/[id]`.
+ * No pagination is implemented — all campaigns are loaded in a single query.
+ *
+ * External services: Clerk (auth), Prisma (campaigns, sponsors).
+ *
+ * Gotcha: no server-side pagination means this page will degrade in performance
+ * as the campaign count grows. Consider adding pagination or virtual scrolling.
+ */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -5,6 +21,7 @@ import { prisma } from '@/lib/prisma'
 
 export const metadata = { title: 'Campaigns — nx8up Admin' }
 
+/** Tailwind classes keyed by campaign status for the status badge. Falls back to amber for unknown statuses. */
 const STATUS_STYLE: Record<string, string> = {
   live:      'bg-[#22c55e]/20 text-[#22c55e]',
   draft:     'bg-[#94a3b8]/20 text-[#94a3b8]',

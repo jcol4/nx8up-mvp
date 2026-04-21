@@ -1,3 +1,14 @@
+/**
+ * Admin dashboard widget — Active Campaigns.
+ *
+ * Renders a horizontally-scrollable row of campaign cards plus a "+ New"
+ * shortcut card that links to `/admin/campaigns/new`.
+ *
+ * Gotcha: campaign data (`MISSIONS`) is **static mock data** and is not fetched
+ * from the database. Real campaign state is not reflected here. This component
+ * should eventually be replaced with a live Prisma query similar to
+ * `AdminVerificationQueue`.
+ */
 import Link from 'next/link'
 import { DashboardPanel, CardWithImage } from '@/components/dashboard'
 

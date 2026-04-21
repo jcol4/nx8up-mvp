@@ -1,3 +1,30 @@
+/**
+ * CreatorProfileWizard — 7-step profile setup wizard (client component).
+ *
+ * Steps:
+ *  1. Account Connections — link Twitch / YouTube via OAuth.
+ *  2. Platform Metrics    — read-only view of synced stats.
+ *  3. Creator Identity    — display name, bio, location, language, type.
+ *  4. Content & Audience  — platforms, game genres, content style/categories,
+ *                           audience demographics.
+ *  5. Brand Preferences   — preferred campaign and product types.
+ *  6. Eligibility         — availability toggle, max campaigns per month.
+ *  7. Summary             — read-only overview with per-section "Edit" links.
+ *
+ * The full `CreatorProfileDraft` is held in a single `useState` and passed
+ * down to steps 3–6 via `{ draft, setDraft }`. Steps 3–6 call
+ * `updateCreatorProfileWizard` before advancing, so partial saves are
+ * idempotent (each step overwrites the full draft).
+ *
+ * "Return to summary" mode: when the creator clicks "Edit" on the summary
+ * page, `returnToSummary` is set to true. Saving on any step then returns
+ * directly to step 7 instead of advancing linearly.
+ *
+ * Steps 1 and 2 are read-only / OAuth-driven and do not call the save action.
+ *
+ * External services (via server actions): Clerk (auth + publicMetadata),
+ * Prisma/PostgreSQL (creator profile upsert).
+ */
 'use client'
 
 import { useState } from 'react'
@@ -40,6 +67,7 @@ type CreatorStats = {
   subs_followers: number | null
   average_vod_views: number | null
   twitch_subscriber_count: number | null
+  /** Prisma Decimal — call `.toNumber()` before arithmetic. */
   engagement_rate: { toNumber(): number } | null
   youtube_channel_id: string | null
   youtube_channel_name: string | null
@@ -75,6 +103,7 @@ export default function CreatorProfileWizard({
   // When editing a section from the summary, return there after saving
   const [returnToSummary, setReturnToSummary] = useState(initialStep === SUMMARY_STEP)
 
+  /** Smooth-scrolls to the top of the page whenever the active step changes. */
   const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
   const goNext = () => {
@@ -93,6 +122,10 @@ export default function CreatorProfileWizard({
     scrollTop()
   }
 
+  /**
+   * Saves the current draft then advances to the next step (or returns to
+   * summary when `returnToSummary` is true). Used by steps 3–5.
+   */
   const saveAndContinue = async () => {
     setStepError('')
     setIsSaving(true)
@@ -107,6 +140,10 @@ export default function CreatorProfileWizard({
     scrollTop()
   }
 
+  /**
+   * Saves the current draft and always jumps to the summary step (step 7).
+   * Used by step 6 (Eligibility), which is the last data-entry step.
+   */
   const saveProfile = async () => {
     setStepError('')
     setIsSaving(true)
@@ -118,6 +155,10 @@ export default function CreatorProfileWizard({
     scrollTop()
   }
 
+  /**
+   * Navigates to a specific step from the summary page and sets
+   * `returnToSummary = true` so saving returns to step 7.
+   */
   const editStep = (targetStep: number) => {
     setStepError('')
     setReturnToSummary(true)

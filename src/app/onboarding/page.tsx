@@ -1,3 +1,26 @@
+/**
+ * @file onboarding/page.tsx
+ *
+ * Client-side onboarding page. Shown to every newly-registered user before
+ * they access any role-specific dashboard.
+ *
+ * The page collects two pieces of information in a single-step form:
+ *   1. Date of birth – forwarded to the server action for age verification
+ *      (must be 18+).
+ *   2. Role – "creator" or "sponsor", used to create the appropriate DB
+ *      record and set Clerk public metadata.
+ *
+ * Flow:
+ *   Submit → `completeOnboarding` server action → on success, reload the
+ *   Clerk user so updated public metadata is available client-side, then
+ *   redirect to /creator or /sponsor based on the returned role.
+ *
+ * External services: Clerk (useUser / session reload)
+ *
+ * Gotcha: The XP-bar progress indicator is hard-coded to "Step 1 / 1" and
+ * 50 % fill, which is visually misleading — it implies a multi-step flow
+ * but there is only one step.
+ */
 'use client'
 
 import * as React from 'react'
@@ -14,6 +37,17 @@ export default function OnboardingComponent() {
   const { user } = useUser()
   const router = useRouter()
 
+  /**
+   * Form action handler passed directly to `<form action={...}>`.
+   *
+   * On success the Clerk session is reloaded so that updated public metadata
+   * (role, onboardingComplete) is immediately accessible to client-side
+   * hooks, then the user is routed to their role dashboard.
+   *
+   * On failure the returned error string is surfaced in the UI and the
+   * loading spinner is cleared. Note: if the server action succeeds but
+   * returns no role (unexpected), the user falls back to `/`.
+   */
   const handleSubmit = async (formData: FormData) => {
     setIsLoading(true)
     setError('')

@@ -1,10 +1,17 @@
+/**
+ * NXDatePicker — custom branded calendar date picker with three view modes:
+ * calendar (day grid), month picker, and year picker.
+ * Emits YYYY-MM-DD strings and stores the value in a hidden <input> for native form compat.
+ */
 'use client'
 
 import * as React from 'react'
 
 interface DatePickerProps {
+  /** Name of the hidden input submitted with the form. */
   name: string
   required?: boolean
+  /** ISO date string (YYYY-MM-DD) — dates after this are disabled. */
   max?: string
   min?: string         // ISO date string — dates before this are disabled
   placeholder?: string // Custom placeholder text

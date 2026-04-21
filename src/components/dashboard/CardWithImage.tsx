@@ -1,10 +1,19 @@
+/**
+ * CardWithImage — dashboard card with optional background image, gradient overlay, and badge slots.
+ * Renders as a <Link> when href is provided, otherwise as a plain <div>.
+ * NOTE: Uses native <img> instead of Next.js <Image> — bypasses optimization and lazy loading.
+ */
 import Link from 'next/link'
 
 type Props = {
   title: string
+  /** URL for the background image. Rendered at 60% opacity with a bottom-to-top gradient overlay. */
   imageUrl?: string
+  /** When provided, the entire card becomes a Next.js Link. */
   href?: string
+  /** Badge rendered in the top-left of the card content area. */
   badge?: React.ReactNode
+  /** Badge pinned to the top-right corner (absolute position, z-20). */
   cornerBadge?: React.ReactNode
   className?: string
   children?: React.ReactNode

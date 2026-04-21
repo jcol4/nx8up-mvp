@@ -1,3 +1,19 @@
+/**
+ * DealsAndCampaignsSection — tabbed panel on the creator dashboard that
+ * summarises the creator's campaign applications.
+ *
+ * Tabs:
+ *  - Active   → applications with status "accepted"
+ *  - Pending  → applications with status "pending"
+ *  - Payout due → always empty (placeholder; payout detection not implemented)
+ *
+ * Data is passed as a prop from the dashboard page (server-fetched) rather
+ * than fetched client-side. Each campaign card links to the campaign detail
+ * page (not the deal room), which is intentional for the dashboard view.
+ *
+ * Budget amounts are formatted using `toLocaleString()` with no currency
+ * symbol normalization — the raw dollar value from the DB is displayed as-is.
+ */
 'use client'
 
 import { useState } from 'react'

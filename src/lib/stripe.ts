@@ -1,3 +1,13 @@
+/**
+ * Stripe client singleton.
+ *
+ * A single Stripe instance is reused across the entire server process.
+ * In development, the instance is pinned to `globalThis` so that Next.js
+ * hot-module replacement doesn't create a new client on every file change
+ * (which would exhaust connection pools and produce misleading logs).
+ * In production there is only one process start, so the globalThis cache
+ * is unnecessary and skipped.
+ */
 import Stripe from 'stripe'
 
 const globalForStripe = globalThis as unknown as { stripe: Stripe | undefined }

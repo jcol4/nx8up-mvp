@@ -1,3 +1,7 @@
+/**
+ * StatCard — single metric tile using dash-stat CSS classes.
+ * value accepts ReactNode to support formatted numbers, badges, etc.
+ */
 type Props = {
   label: string
   value: React.ReactNode

@@ -1,3 +1,19 @@
+/**
+ * Admin Dashboard page (`/admin`).
+ *
+ * Renders the top-level overview for administrators, composing five dashboard
+ * widget components in a two-column responsive grid:
+ *   - AdminActiveCampaigns  – live campaign cards (static mock data)
+ *   - AdminQuickInsights    – key platform metrics (static mock data)
+ *   - AdminVerificationQueue – live Prisma query for pending deal submissions
+ *   - AdminCreatorAcademy   – featured lesson cards (static mock data)
+ *   - AdminEarningsCard     – monthly earnings summary (static mock data)
+ *
+ * Access is gated at the layout level (`/admin/layout.tsx`); this page itself
+ * performs no additional auth checks.
+ *
+ * @module AdminDashboardPage
+ */
 import Link from 'next/link'
 import AdminHeader from './AdminHeader'
 import AdminActiveCampaigns from './AdminActiveCampaigns'

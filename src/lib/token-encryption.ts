@@ -1,10 +1,20 @@
+/**
+ * AES-256-GCM encryption for OAuth tokens stored at rest (e.g. Twitch/YouTube refresh tokens).
+ *
+ * Encrypted format: base64(iv) + ":" + base64(authTag) + ":" + base64(ciphertext)
+ * The auth tag provides tamper detection — decryption fails if the ciphertext is modified.
+ *
+ * Required env var: TOKEN_ENCRYPTION_KEY — a base64-encoded 32-byte key.
+ * Generate with: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+ */
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto'
 
 const ALGORITHM = 'aes-256-gcm'
-const KEY_LENGTH = 32
-const IV_LENGTH = 12
-const AUTH_TAG_LENGTH = 16
+const KEY_LENGTH = 32   // bytes (256 bits)
+const IV_LENGTH = 12    // bytes (96-bit IV is GCM standard)
+const AUTH_TAG_LENGTH = 16  // bytes (128-bit auth tag)
 
+/** Reads and validates TOKEN_ENCRYPTION_KEY from env, throwing if absent or wrong length. */
 function getKey(): Buffer {
   const raw = process.env.TOKEN_ENCRYPTION_KEY
   if (!raw) throw new Error('TOKEN_ENCRYPTION_KEY is not set in environment variables')

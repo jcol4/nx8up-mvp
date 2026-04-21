@@ -1,3 +1,29 @@
+/**
+ * Sponsor Payouts page — /sponsor/payouts
+ *
+ * Displays the sponsor's full payout ledger: every accepted creator application
+ * with a deal submission, grouped by campaign.
+ *
+ * Summary cards show:
+ * - Total creator count across all campaigns.
+ * - Total campaign count.
+ * - Total amount paid out (sum of `perCreator` for `paid` rows).
+ * - Total amount pending (sum for non-paid rows).
+ *
+ * The ledger table columns: creator handle, platform, submission status, payout
+ * amount, payout status pill, Stripe transfer ID (truncated), link clicks, last
+ * updated date.
+ *
+ * `PayoutStatusPill` renders a colored badge for paid/processing/failed statuses,
+ * or a neutral grey "Pending" pill when `payout_status` is null.
+ *
+ * `summarise` computes the summary card values in a single O(n) pass.
+ *
+ * "Export CSV" links to /api/sponsor/payouts/export which is a separate API route
+ * (not in this file).
+ *
+ * External services: Clerk (auth), Prisma (via _data.ts).
+ */
 import { redirect } from 'next/navigation'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
@@ -19,6 +45,7 @@ const SUBMISSION_STATUS_LABELS: Record<string, string> = {
   revision_requested: 'Revision Req.',
 }
 
+/** Renders a colored status badge for a payout status value. Null status shows a neutral "Pending" pill. */
 function PayoutStatusPill({ status }: { status: string | null }) {
   if (!status) {
     return (
@@ -42,6 +69,10 @@ function PayoutStatusPill({ status }: { status: string | null }) {
   )
 }
 
+/**
+ * Computes summary statistics for the payout ledger in a single O(n) pass.
+ * Returns total paid amount, total pending amount, and the respective creator counts.
+ */
 function summarise(rows: LedgerRow[]) {
   let totalPaid = 0
   let totalPending = 0

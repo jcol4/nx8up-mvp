@@ -1,3 +1,29 @@
+/**
+ * Creator Deal Room detail page (`/creator/deal-room/[applicationId]`).
+ *
+ * Server component for an individual accepted campaign deal. Renders:
+ *  - Header: campaign title, sponsor, submission status badge, payout amount.
+ *  - Tracking link panel: shows either the creator's personalised short URL
+ *    (`/r/[code]`) when a `tracking_short_code` exists, or the raw
+ *    `landing_page_url` as a fallback. Includes a `CopyButton`.
+ *  - Mission requirements: content deliverables + delivery checklist.
+ *  - Creative package: brand/product details, content guidelines, video
+ *    requirements, conversion goal, tracking method.
+ *  - Disclosure reminder: FTC-required disclosure guidance for video/stream,
+ *    social posts, YouTube, and Twitch.
+ *  - Proof submission form (`ProofSubmitForm`).
+ *  - Sidebar: campaign info, fee breakdown, submission status + payout status.
+ *
+ * The tracking URL is constructed server-side from the `host` header to
+ * support both localhost and production environments.
+ *
+ * Calls `notFound()` when the application does not belong to the authenticated
+ * creator or is not in "accepted" + "launched" state.
+ *
+ * External services: Prisma/PostgreSQL (via `getDealRoom`).
+ *
+ * Env vars: none directly; tracking URL uses the `host` request header.
+ */
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { headers } from 'next/headers'

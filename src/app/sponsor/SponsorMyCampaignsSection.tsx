@@ -1,3 +1,17 @@
+/**
+ * SponsorMyCampaignsSection — async server component that fetches and displays the
+ * sponsor's three most recently created campaigns on the dashboard.
+ *
+ * Behavior:
+ * - Returns null silently if the user is unauthenticated or has no sponsor record
+ *   (the parent layout handles the actual redirect guard).
+ * - Shows up to 3 campaigns ordered by creation date descending, with application
+ *   counts and status badges.
+ * - Campaign cards link to /sponsor/campaigns (list view), not the individual
+ *   campaign detail, intentionally.
+ *
+ * External services: Clerk (auth), Prisma (campaigns + application counts).
+ */
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'

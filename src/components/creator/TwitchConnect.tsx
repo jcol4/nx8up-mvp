@@ -1,3 +1,9 @@
+/**
+ * TwitchConnect — Twitch account link/unlink card for the creator profile page.
+ * Reads OAuth result from URL search params (?twitch_linked=1 / ?twitch_error=...) on mount
+ * and clears them with router.replace to prevent param persistence on refresh.
+ * NOTE: Uses native <img> for the profile avatar — no Next.js optimization.
+ */
 'use client'
 
 import * as React from 'react'

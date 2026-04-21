@@ -1,3 +1,18 @@
+/**
+ * GET /api/auth/twitch/callback
+ *
+ * Handles the Twitch OAuth callback after the user grants access.
+ * Steps:
+ *  1. Validates CSRF state against the cookie set by /api/auth/twitch
+ *  2. Exchanges the authorization code for access + refresh tokens
+ *  3. Fetches the Twitch user, follower count, subscriber count, and recent VODs
+ *  4. Encrypts tokens with AES-256-GCM before storing
+ *  5. Upserts the content_creators row for the authenticated Clerk user
+ *  6. Kicks off an async aggregate CTR recompute (no await — non-blocking)
+ *
+ * On success: redirects to /creator/profile?twitch_linked=1
+ * On any error: redirects to /creator/profile?twitch_error=<reason>
+ */
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { cookies } from 'next/headers'
@@ -8,10 +23,12 @@ const TWITCH_TOKEN_URL = 'https://id.twitch.tv/oauth2/token'
 const TWITCH_API_BASE = 'https://api.twitch.tv/helix'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL!
 
+/** Redirects to the creator profile page with a ?twitch_error query param for toast display. */
 function redirectWithError(reason: string) {
   return NextResponse.redirect(`${APP_URL}/creator/profile?twitch_error=${encodeURIComponent(reason)}`)
 }
 
+/** Receives the Twitch OAuth callback, exchanges the code, and persists credentials. */
 export async function GET(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) return NextResponse.redirect(`${APP_URL}/sign-in`)

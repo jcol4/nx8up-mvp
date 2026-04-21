@@ -1,9 +1,24 @@
+/**
+ * POST /api/stripe/payment-intent
+ * Body: { campaignId: string }
+ *
+ * Creates a Stripe PaymentIntent for a campaign awaiting payment, or returns
+ * an existing one if it is still in a payable state.
+ *
+ * Guards:
+ *  - Campaign must be in 'pending_payment' status
+ *  - Budget must be > 0 and <= BUDGET_MAX (Stripe ACH limit)
+ *  - Idempotency key (pi-<campaignId>) prevents duplicate PIs on retries
+ *
+ * Returns: { clientSecret: string } — used by Stripe Elements on the frontend.
+ */
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { BUDGET_MAX } from '@/lib/constants'
 
+/** Creates or retrieves a PaymentIntent for the given campaign. */
 export async function POST(request: Request) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

@@ -1,8 +1,19 @@
+/**
+ * POST /api/stripe/refund
+ * Body: { campaignId: string }
+ *
+ * Issues a full refund on the campaign's PaymentIntent and cancels the campaign.
+ * Blocked if any submissions have already been paid out — partial refunds are
+ * not supported and must be handled manually via the Stripe dashboard.
+ *
+ * Returns: { success: true, refundId: string }
+ */
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 
+/** Refunds the campaign budget in full and sets campaign status to 'cancelled'. */
 export async function POST(request: Request) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

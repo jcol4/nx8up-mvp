@@ -1,9 +1,27 @@
+/**
+ * POST /api/stripe/payout
+ * Body: { applicationId: string }
+ *
+ * Triggers a Stripe Connect transfer from the platform account to the creator's
+ * Express account for an approved deal submission.
+ *
+ * Guards (in order):
+ *  - Submission must be 'approved' and not already paid
+ *  - Creator must have completed Stripe Express onboarding (charges_enabled)
+ *  - Campaign must have a stripe_charge_id (funds collected)
+ *  - payout_status is set to 'processing' atomically via updateMany to prevent
+ *    double-payout races; if another request already claimed the slot, 409 is returned
+ *
+ * On Stripe error: resets payout_status to null so the caller can retry.
+ * Returns: { success: true, transferId: string }
+ */
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { calcFeeBreakdown } from '@/lib/constants'
 
+/** Executes a per-creator payout transfer for an approved campaign submission. */
 export async function POST(request: Request) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

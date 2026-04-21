@@ -1,3 +1,20 @@
+/**
+ * Sponsor Deal Room list page — /sponsor/deal-room
+ *
+ * Shows all accepted creator applications for the sponsor's launched campaigns,
+ * grouped by campaign. Each row displays the creator handle, platform, deadline,
+ * and current submission status.
+ *
+ * Status labels intentionally obscure early review stages from the sponsor:
+ * - `pending` / `submitted` / `admin_rejected` all show "Under review" or
+ *   "Awaiting submission" — the sponsor cannot see the submission until an admin
+ *   has verified it (`admin_verified`).
+ *
+ * Data is fetched via `getSponsorDealRooms` which filters to `accepted` applications
+ * on `launched` campaigns only.
+ *
+ * External services: Clerk (auth, via _actions).
+ */
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { auth } from '@clerk/nextjs/server'

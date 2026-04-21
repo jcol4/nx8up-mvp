@@ -1,3 +1,26 @@
+/**
+ * @file page.tsx
+ * @description Authenticated home / hub page for nx8up.
+ *
+ * Responsibilities:
+ * - Redirects unauthenticated visitors to /sign-in.
+ * - Redirects authenticated users with a known role directly to their role-specific
+ *   dashboard (admin → /admin, creator → /creator, sponsor → /sponsor).
+ * - Redirects authenticated users with no role to /onboarding.
+ * - For users who somehow reach the render path (currently unreachable because the
+ *   role redirect above is unconditional), displays a hub page with a primary
+ *   dashboard CTA and a role-filtered quick-access link grid.
+ *
+ * External services: Clerk (auth + currentUser)
+ *
+ * Gotchas:
+ * - The JSX body (dashboardLink, quick-access grid) is dead code — all authenticated
+ *   users are redirected before reaching the return statement. If role-based
+ *   dashboards are ever removed, the redirect block must also be removed.
+ * - `role` is cast via `as any` from sessionClaims; type safety is weakened here.
+ * - Inline <style> imports Google Fonts via @import — this blocks rendering and should
+ *   ideally be replaced with a next/font import (as is done in layout.tsx).
+ */
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -5,6 +28,13 @@ import HomeQuickAccessCard from '@/components/shared/HomeQuickAccessCard'
 import Image from 'next/image'
 import { SignOutButton } from '@clerk/nextjs'
 
+/**
+ * Server component for the authenticated home page.
+ *
+ * Performs role-based routing: every authenticated user is immediately redirected
+ * to their dashboard. The rendered JSX below the redirect block is a fallback that
+ * is currently unreachable in production.
+ */
 export default async function HomePage() {
   const { userId, sessionClaims } = await auth()
 

@@ -1,3 +1,28 @@
+/**
+ * SponsorProfileForm — client-side form for editing the sponsor's profile.
+ *
+ * Sections:
+ * 1. Company Info — name, location (country/state/city), target languages.
+ * 2. Campaign Preferences — preferred platforms, content types, game/genre tags,
+ *    typical budget range (capped at BUDGET_MAX = Stripe ACH limit).
+ * 3. Payment Preferences — default payment method (card / ACH / either), with
+ *    inline warnings for ACH latency.
+ * 4. Creator Requirements — default minimums that pre-fill new campaign forms.
+ * 5. Age Restrictions — requires a separate admin-approval workflow; changes are
+ *    submitted as `sponsor_age_restriction_requests` records and cannot be saved
+ *    together with the main profile form until the request is submitted or reverted.
+ *
+ * Key behaviors:
+ * - Budget values are validated client-side AND server-side against BUDGET_MAX.
+ * - Age restriction changes are intentionally gated: the main Save button is
+ *   disabled while `ageRestrictionChanged` is true, forcing the sponsor to either
+ *   submit a change request or revert before saving.
+ * - `stateOptionsForCountry` dynamically renders a state/province dropdown for
+ *   US, Canada, and UK only.
+ *
+ * External services: Clerk (via _actions), Prisma (via _actions), Stripe (budget limit).
+ * Env vars: none directly — BUDGET_MAX is imported from @/lib/constants.
+ */
 'use client'
 
 import { useState } from 'react'
@@ -22,6 +47,11 @@ const labelClass = 'block text-sm font-medium dash-text-muted mb-1.5'
 const sectionClass = 'space-y-4 pb-5 border-b dash-border'
 const sectionTitle = 'text-xs font-semibold uppercase tracking-widest dash-text-muted mb-3'
 
+/**
+ * Returns the list of state/province options for the given country.
+ * Only US, Canada, and UK have sub-region options; all others return an empty
+ * array, hiding the state dropdown entirely.
+ */
 function stateOptionsForCountry(country: string): readonly string[] {
   if (country === 'United States') return US_STATES
   if (country === 'Canada') return CA_PROVINCES

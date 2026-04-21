@@ -1,11 +1,22 @@
-// Verifies that a submitted proof URL belongs to the creator's connected account.
-// Returns verified/unverifiable/failed so callers can decide how to handle each case.
+/**
+ * Proof URL verification — confirms that a submitted VOD/clip/video URL belongs
+ * to the creator's connected platform account.
+ *
+ * Three possible outcomes:
+ *  - 'verified':      URL is public and belongs to the creator's connected account.
+ *  - 'unverifiable':  Cannot check ownership (API key missing, platform unsupported,
+ *                     or creator has not connected that platform). Sponsor reviews manually.
+ *  - 'failed':        URL is invalid, video not found, video is private, or belongs
+ *                     to a different channel. Creator must resubmit.
+ */
 
+/** Discriminated union returned by verifyProofUrl and its internal helpers. */
 export type VerifyResult =
   | { status: 'verified'; platform: string }
   | { status: 'unverifiable'; platform: string; reason: string }
   | { status: 'failed'; platform: string; error: string }
 
+/** The connected platform account IDs needed to verify proof URL ownership. */
 type CreatorIds = {
   twitch_id: string | null
   youtube_channel_id: string | null
@@ -13,6 +24,7 @@ type CreatorIds = {
 
 // ── URL parsers ──────────────────────────────────────────────────────────────
 
+/** Extracts a YouTube video ID from a pre-parsed URL object. Supports watch, youtu.be, shorts, live, embed. */
 function extractYouTubeVideoId(url: URL): string | null {
   const { hostname, pathname, searchParams } = url
   if (hostname === 'youtu.be') return pathname.slice(1).split('/')[0] || null
@@ -24,6 +36,7 @@ function extractYouTubeVideoId(url: URL): string | null {
   return null
 }
 
+/** Extracts a Twitch VOD or clip ID from a pre-parsed URL object. Supports /videos/, /clip/, and clips.twitch.tv. */
 function extractTwitchVideoId(url: URL): { type: 'vod'; id: string } | { type: 'clip'; id: string } | null {
   const { hostname, pathname } = url
   if (hostname === 'twitch.tv' || hostname === 'www.twitch.tv') {
@@ -41,6 +54,7 @@ function extractTwitchVideoId(url: URL): { type: 'vod'; id: string } | { type: '
 
 // ── Platform verifiers ───────────────────────────────────────────────────────
 
+/** Verifies a YouTube video ID against the creator's connected channel ID via the YouTube Data API. */
 async function verifyYouTube(videoId: string, channelId: string): Promise<VerifyResult> {
   const apiKey = process.env.YOUTUBE_API_KEY
   if (!apiKey) {
@@ -86,6 +100,7 @@ async function verifyYouTube(videoId: string, channelId: string): Promise<Verify
   return { status: 'verified', platform: 'YouTube' }
 }
 
+/** Fetches a short-lived Twitch app access token for proof verification. Not cached — one call per verification. */
 async function getTwitchAppToken(): Promise<string> {
   const res = await fetch('https://id.twitch.tv/oauth2/token', {
     method: 'POST',
@@ -102,6 +117,7 @@ async function getTwitchAppToken(): Promise<string> {
   return data.access_token
 }
 
+/** Verifies a Twitch VOD ID against the creator's connected Twitch user ID via GET /helix/videos. */
 async function verifyTwitchVod(videoId: string, twitchUserId: string): Promise<VerifyResult> {
   let token: string
   try {
@@ -142,6 +158,7 @@ async function verifyTwitchVod(videoId: string, twitchUserId: string): Promise<V
   return { status: 'verified', platform: 'Twitch' }
 }
 
+/** Verifies a Twitch clip ID against the creator's connected Twitch user ID via GET /helix/clips. */
 async function verifyTwitchClip(clipId: string, twitchUserId: string): Promise<VerifyResult> {
   let token: string
   try {
@@ -184,6 +201,11 @@ async function verifyTwitchClip(clipId: string, twitchUserId: string): Promise<V
 
 // ── Timestamp fetcher ────────────────────────────────────────────────────────
 
+/**
+ * Fetches the publish/broadcast timestamp for a YouTube video or Twitch VOD/clip.
+ * Returns an ISO 8601 string, or null if the URL is unsupported or the API call fails.
+ * Used to record when content was published relative to campaign start dates.
+ */
 export async function fetchPostTimestamp(rawUrl: string): Promise<string | null> {
   let url: URL
   try { url = new URL(rawUrl) } catch { return null }
@@ -237,6 +259,11 @@ export async function fetchPostTimestamp(rawUrl: string): Promise<string | null>
 
 // ── Main export ──────────────────────────────────────────────────────────────
 
+/**
+ * Main entry point — verifies that `rawUrl` is a valid, public proof URL
+ * belonging to the creator's connected YouTube or Twitch account.
+ * Unrecognized platforms return 'unverifiable' for manual sponsor review.
+ */
 export async function verifyProofUrl(rawUrl: string, creator: CreatorIds): Promise<VerifyResult> {
   let url: URL
   try {

@@ -1,3 +1,8 @@
+/**
+ * CreatorTopBar — server component top bar for the creator dashboard.
+ * Fetches the creator's application counts (total + pending) from Prisma
+ * and renders them as inline stats next to the user's display name.
+ */
 import { auth } from '@clerk/nextjs/server'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import UserProfileBlock from '@/components/shared/UserProfileBlock'

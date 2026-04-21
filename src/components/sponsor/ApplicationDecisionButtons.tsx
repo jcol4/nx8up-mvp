@@ -1,3 +1,7 @@
+/**
+ * ApplicationDecisionButtons — accept/reject buttons on a creator's campaign application.
+ * Disables the already-active status button. Uses useTransition for pending state.
+ */
 'use client'
 
 import { useTransition } from 'react'

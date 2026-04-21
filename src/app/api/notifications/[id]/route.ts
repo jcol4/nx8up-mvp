@@ -1,6 +1,15 @@
+/**
+ * /api/notifications/[id]
+ *
+ * PATCH  — Marks a single notification as read. Scoped to the current user
+ *           (updateMany with userId guard prevents reading other users' notifications).
+ *
+ * DELETE — Permanently deletes a single notification. Scoped to the current user.
+ */
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 
+/** Marks the specified notification as read for the current user. */
 export async function PATCH(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -18,6 +27,7 @@ export async function PATCH(
   return Response.json({ success: true })
 }
 
+/** Permanently deletes the specified notification for the current user. */
 export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },

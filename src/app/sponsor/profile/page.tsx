@@ -1,3 +1,15 @@
+/**
+ * Sponsor Profile page — /sponsor/profile
+ *
+ * Server component that guards access (sponsor/admin only), loads the sponsor's
+ * current profile via `getSponsorProfile`, and renders SponsorProfileForm
+ * pre-populated with existing data.
+ *
+ * If no profile exists yet (new sponsor), `profile` is null and the form renders
+ * with empty defaults, allowing the sponsor to create one via upsert.
+ *
+ * External services: Clerk (auth).
+ */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'

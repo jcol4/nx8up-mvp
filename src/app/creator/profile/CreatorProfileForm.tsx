@@ -1,3 +1,21 @@
+/**
+ * CreatorProfileForm — legacy single-page profile editor (client component).
+ *
+ * NOTE: This form is superseded by the multi-step `CreatorProfileWizard` and
+ * is no longer the primary profile-editing surface. It is retained in the
+ * codebase but may not be reachable from the current UI.
+ *
+ * Handles:
+ *  - Display name, bio, country/state/city, platforms, game tags, languages,
+ *    audience age range, audience locations, and content categories.
+ *  - "Clear profile" with a confirmation modal that calls `deleteCreatorProfile`.
+ *  - Twitch broadcaster-type-derived content-category suggestions.
+ *
+ * State/province options are rendered conditionally based on the selected
+ * country (US states, Canadian provinces, UK nations).
+ *
+ * External services: Clerk (via server actions), Prisma (via server actions).
+ */
 'use client'
 
 import { useState } from 'react'
@@ -31,6 +49,11 @@ type Props = {
   twitchBroadcasterType?: string | null
 }
 
+/**
+ * Returns the list of state/province/region options for a given country.
+ * Returns an empty array for countries without subdivisions in the dataset,
+ * which causes the state dropdown to be hidden in the UI.
+ */
 function stateOptionsForCountry(country: string): readonly string[] {
   if (country === 'United States') return US_STATES
   if (country === 'Canada') return CA_PROVINCES

@@ -1,3 +1,13 @@
+/**
+ * Step 2 — Platform Metrics (profile wizard).
+ *
+ * Read-only display step that shows synced Twitch and YouTube stats via
+ * `CreatorStatsPanel`. Stats are fetched server-side before the wizard
+ * renders and passed as the `creator` prop.
+ *
+ * This step has no save action — navigating forward/back simply changes the
+ * active step in the wizard without persisting any data.
+ */
 import CreatorStatsPanel from '../CreatorStatsPanel'
 
 type CreatorStats = {

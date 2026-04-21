@@ -1,3 +1,24 @@
+/**
+ * Creator Notification Preferences page
+ * (`/creator/settings/notifications`).
+ *
+ * Server component that renders a per-notification-type preferences form for
+ * creators. Each notification type is shown with a label and a human-readable
+ * description of when it fires.
+ *
+ * The `ENTRIES` array is built from `CREATOR_NOTIFICATION_TYPES` (the set of
+ * notification type keys relevant to creators) combined with labels from
+ * `NOTIFICATION_LABELS` and descriptions from the local `DESCRIPTIONS` map.
+ *
+ * The actual preference toggles and persistence are handled by
+ * `NotificationPreferencesForm` (a shared component).
+ *
+ * Auth: the role is read from Clerk `sessionClaims` and passed to
+ * `UserProfileBlock` for the role badge, but no role guard is applied here
+ * (the layout already enforces creator/admin access).
+ *
+ * External services: Clerk (auth + `getUserDisplayInfo`).
+ */
 import CreatorTopBar from '@/components/creator/CreatorTopBar'
 import NotificationBell from '@/components/shared/NotificationBell'
 import UserProfileBlock from '@/components/shared/UserProfileBlock'

@@ -1,3 +1,35 @@
+/**
+ * Server actions for the sponsor deal-room feature.
+ *
+ * Exports:
+ * - `getSponsorDealRooms`     — lists all accepted applications on launched campaigns
+ *                               for the current sponsor (used by the list page).
+ * - `getDealRoomForSponsor`   — fetches a single application detail for the current
+ *                               sponsor, including submission data and link click count.
+ *                               Returns null if the application belongs to a different
+ *                               sponsor or the campaign is not `launched`.
+ * - `updateSubmissionStatus`  — approves or requests revision on a creator's submission.
+ *                               On approval, triggers an immediate Stripe payout to the
+ *                               creator's Connect account using an atomic race guard to
+ *                               prevent double-transfers.
+ * - `retryPayout`             — manually retries a failed payout for an approved submission.
+ *                               Validates that no prior transfer exists (checks both DB and
+ *                               `stripe_transfer_id`) before attempting.
+ *
+ * Payout race guard (updateSubmissionStatus):
+ *   Uses `updateMany` with `payout_status: null` condition so only one concurrent
+ *   caller can claim the `processing` slot. If `claimed.count === 0`, a parallel
+ *   request already initiated the transfer and the current call is a no-op.
+ *
+ * Charge ID resolution (`resolveChargeId`):
+ *   1. Returns the DB-cached `stripe_charge_id` if present.
+ *   2. Retrieves the stored PaymentIntent via Stripe API.
+ *   3. Falls back to `paymentIntents.search` by `campaignId` metadata.
+ *   4. Persists the resolved charge ID back to the DB so future calls skip the API.
+ *
+ * External services: Clerk (auth), Prisma, Stripe (transfers, PI retrieve/search).
+ * Env vars: STRIPE_SECRET_KEY (via @/lib/stripe).
+ */
 'use server'
 
 import { auth } from '@clerk/nextjs/server'
@@ -8,6 +40,7 @@ import { calcFeeBreakdown } from '@/lib/constants'
 import { createNotification } from '@/lib/notifications'
 import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 
+/** Fetches only the sponsor `id` for an authenticated Clerk user. Returns null if no sponsor record exists. */
 async function getSponsor(userId: string) {
   return prisma.sponsors.findUnique({
     where: { clerk_user_id: userId },
@@ -73,6 +106,11 @@ async function resolveChargeId(campaign: {
   return chargeId
 }
 
+/**
+ * Returns all accepted creator applications on launched campaigns for the
+ * currently authenticated sponsor. Used to build the deal-room list grouped by
+ * campaign. Returns an empty array if unauthenticated or no sponsor record.
+ */
 export async function getSponsorDealRooms() {
   const { userId } = await auth()
   if (!userId) return []
@@ -106,6 +144,12 @@ export async function getSponsorDealRooms() {
   })
 }
 
+/**
+ * Fetches full detail for a single deal-room application. Returns null if the
+ * application does not belong to the authenticated sponsor, or if the associated
+ * campaign is not in `launched` status (deal rooms are only visible for launched
+ * campaigns).
+ */
 export async function getDealRoomForSponsor(applicationId: string) {
   const { userId } = await auth()
   if (!userId) return null
@@ -139,6 +183,16 @@ export async function getDealRoomForSponsor(applicationId: string) {
   })
 }
 
+/**
+ * Updates the deal submission status to `approved` or `revision_requested` and
+ * notifies the creator. On approval, attempts an immediate Stripe payout using
+ * the atomic race guard pattern. Returns `payoutError` (non-blocking) if the
+ * transfer fails — the submission is still marked approved.
+ *
+ * @param applicationId - The `campaign_applications` record to update.
+ * @param status        - 'approved' or 'revision_requested'.
+ * @param sponsorNotes  - Optional notes sent to the creator on revision requests.
+ */
 export async function updateSubmissionStatus(
   applicationId: string,
   status: 'approved' | 'revision_requested',
@@ -263,6 +317,12 @@ export async function updateSubmissionStatus(
   return payoutError ? { success: true, payoutError } : { success: true }
 }
 
+/**
+ * Retries a failed Stripe payout for an approved submission. Guards against
+ * double-payment by checking `stripe_transfer_id` before attempting. Uses the
+ * same idempotency key as the initial attempt (`transfer-{applicationId}`) so
+ * Stripe will return the existing transfer if it was partially created.
+ */
 export async function retryPayout(
   applicationId: string,
 ): Promise<{ error?: string; success?: boolean }> {

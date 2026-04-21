@@ -1,3 +1,18 @@
+/**
+ * GET /api/auth/youtube/callback
+ *
+ * Handles the Google OAuth callback after the user grants YouTube access.
+ * Steps:
+ *  1. Validates CSRF state against the cookie set by /api/auth/youtube
+ *  2. Exchanges the authorization code for access + refresh tokens
+ *  3. Fetches channel info, recent video stats, member count, and watch time
+ *  4. Encrypts tokens with AES-256-GCM before storing
+ *  5. Upserts the content_creators row for the authenticated Clerk user
+ *  6. Kicks off an async aggregate CTR recompute (no await — non-blocking)
+ *
+ * On success: redirects to /creator/profile?youtube_linked=1
+ * On any error: redirects to /creator/profile?youtube_error=<reason>
+ */
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { cookies } from 'next/headers'
@@ -9,7 +24,7 @@ const YT_API_BASE = 'https://www.googleapis.com/youtube/v3'
 const YT_ANALYTICS_BASE = 'https://youtubeanalytics.googleapis.com/v2'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL!
 
-// YouTube category ID → readable name mapping (most common)
+/** YouTube category ID → readable name mapping (gaming-relevant subset). */
 const CATEGORY_MAP: Record<string, string> = {
   '1': 'Film & Animation', '2': 'Autos & Vehicles', '10': 'Music',
   '15': 'Pets & Animals', '17': 'Sports', '18': 'Short Movies',
@@ -19,10 +34,12 @@ const CATEGORY_MAP: Record<string, string> = {
   '28': 'Science & Technology', '29': 'Nonprofits & Activism',
 }
 
+/** Redirects to the creator profile page with a ?youtube_error query param for toast display. */
 function redirectWithError(reason: string) {
   return NextResponse.redirect(`${APP_URL}/creator/profile?youtube_error=${encodeURIComponent(reason)}`)
 }
 
+/** Receives the Google OAuth callback, exchanges the code, and persists YouTube credentials. */
 export async function GET(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) return NextResponse.redirect(`${APP_URL}/sign-in`)

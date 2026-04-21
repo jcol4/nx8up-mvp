@@ -1,9 +1,35 @@
+/**
+ * Admin Verification Queue detail page
+ * (`/admin/verification-queue/[applicationId]`).
+ *
+ * Full review view for a single `deal_submissions` record. Displays:
+ *  - Submission header: campaign title, creator handle, sponsor, status badge,
+ *    and campaign deadline.
+ *  - Creator submission details: proof URLs, screenshot, posted-at timestamp,
+ *    disclosure confirmation, and submitted-at timestamp.
+ *  - Campaign requirements panel: deliverable counts and content guidelines,
+ *    with `video_includes` items mapped to human-readable labels via
+ *    `DELIVERABLE_LABELS`.
+ *  - **If pending**: `AdminReviewButtons` with notes textarea and
+ *    approve/reject buttons.
+ *  - **If already reviewed**: static outcome banner (approved/rejected) with
+ *    optional sponsor notes.
+ *
+ * Returns a 404 if no submission exists for the given `applicationId`.
+ *
+ * External services: Clerk (auth), Prisma (via `getAdminDealRoomSubmission`).
+ *
+ * Gotcha: the "already reviewed" state displays `sub.sponsor_notes` (the
+ * sponsor's notes) rather than `sub.admin_notes`. If the sponsor has not yet
+ * added notes this will be blank even when the admin left a note.
+ */
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import { getAdminDealRoomSubmission } from '../_actions'
 import AdminReviewButtons from './AdminReviewButtons'
 
+/** Human-readable labels for `video_includes` deliverable keys. */
 const DELIVERABLE_LABELS: Record<string, string> = {
   gameplay_footage: 'Gameplay footage',
   facecam: 'Facecam',

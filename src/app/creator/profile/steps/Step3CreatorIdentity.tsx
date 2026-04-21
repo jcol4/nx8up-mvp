@@ -1,3 +1,20 @@
+/**
+ * Step 3 — Creator Identity (profile wizard).
+ *
+ * Collects the creator's public-facing identity:
+ *  - Display name (max 50 chars) and bio (max 500 chars).
+ *  - Country / state / city — state dropdown appears only for US, Canada, UK.
+ *  - Languages (multi-select toggle buttons).
+ *  - Creator types (competitive gamer, streamer, content creator).
+ *  - Primary platform (single-select; clicking again deselects).
+ *
+ * The "Save & Continue" button label switches to "Save Changes" when
+ * `returnToSummary` is true (user arrived from the summary edit link).
+ *
+ * All field changes go through `setDraft` to keep the parent wizard state
+ * in sync. `onNext` (which calls `saveAndContinue` in the wizard) is
+ * responsible for persisting to the DB.
+ */
 'use client'
 
 import FormInput from '@/components/ui/FormInput'
@@ -36,6 +53,10 @@ type Props = {
 }
 
 export default function Step3CreatorIdentity({ draft, setDraft, error, onNext, onBack, returnToSummary }: Props) {
+  /**
+   * Generic toggle helper for array-type fields in the draft.
+   * Adds `val` if absent, removes it if present.
+   */
   const toggle = (field: keyof CreatorProfileDraft, val: string) => {
     setDraft(d => {
       const arr = d[field] as string[]

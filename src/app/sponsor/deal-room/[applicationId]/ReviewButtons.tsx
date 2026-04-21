@@ -1,3 +1,19 @@
+/**
+ * ReviewButtons — client component for the sponsor to approve or request revision
+ * on a creator's deal submission.
+ *
+ * Renders:
+ * - An optional notes textarea (initially hidden; revealed by clicking "+ Add notes").
+ *   Once visible (or when pre-populated notes exist), it always stays visible.
+ * - "Approve" button — calls `updateSubmissionStatus(applicationId, 'approved', notes)`.
+ * - "Request Revision" button — calls `updateSubmissionStatus(applicationId, 'revision_requested', notes)`.
+ *
+ * Uses React's `useTransition` for optimistic pending state. On success, triggers
+ * `router.refresh()` to re-render the parent page with the updated status.
+ *
+ * Note: Both buttons share the same `isPending` state, so clicking either one
+ * disables both during the transition.
+ */
 'use client'
 
 import { useState, useTransition } from 'react'

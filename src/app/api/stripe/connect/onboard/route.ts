@@ -1,8 +1,23 @@
+/**
+ * POST /api/stripe/connect/onboard
+ *
+ * Creates (or retrieves) a Stripe Express Connect account for the creator and
+ * returns a one-time account link URL to redirect the creator into Stripe's
+ * hosted onboarding flow.
+ *
+ * - If the creator already has a stripe_connect_id, re-uses that account.
+ * - Pre-fills the Stripe profile with the creator's Twitch/YouTube URL and handle
+ *   so they don't see confusing "business website" prompts.
+ * - Payout schedule is set to manual so creators control their own timing.
+ *
+ * Returns: { url: string } — the Stripe-hosted onboarding URL to redirect to.
+ */
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 
+/** Creates or resumes a Stripe Express onboarding session for the authenticated creator. */
 export async function POST() {
   const { userId } = await auth()
   if (!userId) {

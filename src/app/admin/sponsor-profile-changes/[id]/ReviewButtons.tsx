@@ -1,3 +1,23 @@
+/**
+ * Admin review controls for sponsor age-restriction change requests.
+ *
+ * Client component that renders a notes textarea and Approve/Deny buttons for
+ * the `sponsor_age_restriction_requests` detail page.
+ *
+ * On submission, calls the `reviewAgeRestrictionRequest` server action with the
+ * selected decision and any optional admin notes (max 500 chars enforced by the
+ * textarea `maxLength`).
+ *
+ * On success: navigates back to `/admin/sponsor-profile-changes` and calls
+ * `router.refresh()` to invalidate the cache. On error: displays the error
+ * message inline.
+ *
+ * Gotcha: `isSubmitting` is managed manually via `useState` (set before the
+ * async call, cleared after). If the component unmounts during the in-flight
+ * request (e.g., due to navigation), this will cause a React "setState on
+ * unmounted component" warning. Using `useTransition` (as in
+ * `AdminReviewButtons`) would be safer.
+ */
 'use client'
 
 import { useState } from 'react'
@@ -14,6 +34,7 @@ export default function ReviewButtons({ requestId }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
+  /** Calls the server action and handles navigation/error on completion. */
   async function handle(decision: 'approved' | 'denied') {
     setError('')
     setIsSubmitting(true)

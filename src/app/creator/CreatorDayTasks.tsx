@@ -1,3 +1,19 @@
+/**
+ * CreatorDayTasks — interactive task list for a specific calendar day.
+ *
+ * Displays tasks for `dateKey` (a YYYY-MM-DD string) and provides:
+ *  - Toggle: marks a task done/undone (checkbox button).
+ *  - Inline edit: click the task text to enter edit mode; Save with Enter or
+ *    the Save button; cancel with Escape or the Cancel button.
+ *  - Delete: trash icon visible on row hover.
+ *  - Add: input + "Add" button at the bottom.
+ *
+ * Each mutation calls the corresponding server action then calls
+ * `router.refresh()` to re-sync the server-rendered task list.
+ *
+ * Props are received from `CreatorCalendarSection`, which filters the full
+ * `CalendarTasksMap` down to just the tasks for the selected day.
+ */
 'use client'
 
 import { useRouter } from 'next/navigation'

@@ -55,6 +55,10 @@ export const COMMON_LANGUAGES = [
   'Other',
 ] as const
 
+/**
+ * Parses a stored location string ("City, State, Country") back into its components.
+ * Handles 1-part (country only), 2-part (state, country), and 3-part (city, state, country) formats.
+ */
 export function parseLocation(location: string | null | undefined): { country: string; state: string; city: string } {
   if (!location?.trim()) return { country: '', state: '', city: '' }
   const parts = location.split(',').map((p) => p.trim())
@@ -63,6 +67,7 @@ export function parseLocation(location: string | null | undefined): { country: s
   return { city: '', state: '', country: parts[0] ?? '' }
 }
 
+/** Joins non-empty location parts into a single comma-separated string for DB storage. */
 export function formatLocation(city: string, state: string, country: string): string {
   const parts = [city.trim(), state.trim(), country.trim()].filter(Boolean)
   return parts.join(', ')

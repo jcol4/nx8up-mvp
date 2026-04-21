@@ -1,6 +1,18 @@
 /**
- * Read-only panel showing all viewership stats pulled from the database via OAuth.
- * Creators cannot edit any of these values — they are set exclusively by OAuth syncs.
+ * CreatorStatsPanel — read-only panel showing all viewership stats pulled from
+ * the database via OAuth. Creators cannot edit any of these values — they are
+ * set exclusively by background OAuth syncs (`refreshTwitchDataIfStale` /
+ * `refreshYouTubeDataIfStale`).
+ *
+ * Sections rendered (each conditionally, based on whether the account is linked):
+ *  - Twitch: username, followers, paid subscribers, avg VOD views, channel age,
+ *    last sync timestamp.
+ *  - YouTube: channel name, handle, subscribers, avg views, watch time (30-day),
+ *    member count, top categories, last sync timestamp.
+ *  - Performance: CTR (click-through rate) derived from deal link clicks.
+ *
+ * Shown in Step 2 of the profile wizard. When no accounts are connected, renders
+ * a placeholder message instead of empty sections.
  */
 
 type StatRowProps = {
@@ -20,6 +32,10 @@ function StatRow({ label, value, highlight }: StatRowProps) {
   )
 }
 
+/**
+ * Formats a number to a compact K/M string for stat display.
+ * Returns `null` for null/undefined inputs so callers can conditionally render.
+ */
 function fmt(n: number | null | undefined): string | null {
   if (n == null) return null
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`

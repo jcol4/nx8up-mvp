@@ -1,5 +1,10 @@
+/**
+ * UserAvatar — circular avatar image with initial-letter fallback.
+ * NOTE: Uses native <img> instead of Next.js <Image> — no optimization or lazy loading.
+ */
 type Props = {
   src?: string | null
+  /** Used to derive the fallback initial when src is absent. */
   name?: string
   size?: 'sm' | 'md' | 'lg'
   className?: string

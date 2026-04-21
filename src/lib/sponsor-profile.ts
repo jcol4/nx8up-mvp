@@ -1,9 +1,20 @@
+/**
+ * Sponsor profile validation helpers.
+ * Used to gate campaign creation and show completion prompts in the sponsor dashboard.
+ */
+
+/** Describes a single incomplete required field on a sponsor profile. */
 export type ProfileIncompleteField = {
+  /** Short field name shown in the UI completion checklist. */
   label: string
+  /** Human-readable instruction for where/how to fill in the field. */
   description: string
 }
 
-/** Returns a list of missing required fields. Empty array means the profile is complete. */
+/**
+ * Returns a list of incomplete required fields for the given sponsor profile.
+ * An empty array means the profile is complete and the sponsor may create campaigns.
+ */
 export function getMissingSponsorProfileFields(
   sponsor: {
     company_name?: string | null

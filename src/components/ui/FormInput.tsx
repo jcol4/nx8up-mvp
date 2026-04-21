@@ -1,3 +1,7 @@
+/**
+ * FormInput — themed text input with two visual variants.
+ * Accepts all native <input> attributes via spread.
+ */
 import type { InputHTMLAttributes } from "react";
 
 const BASE_CLASS =

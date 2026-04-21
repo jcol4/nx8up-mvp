@@ -1,9 +1,33 @@
+/**
+ * CreatorCalendar — a self-contained mini-calendar widget for the creator
+ * dashboard. Renders one month at a time with prev/next navigation.
+ *
+ * The calendar maintains its own `viewDate` state (which month is visible)
+ * independently from the `selectedDate` prop (controlled by the parent).
+ * This lets the user browse months without changing the selected day.
+ *
+ * Days are rendered as `<button>` elements so keyboard navigation works
+ * out of the box. Empty cells (before the 1st) are disabled `<button>`s
+ * with `pointer-events: none`.
+ *
+ * Visual highlights:
+ *  - Today → cyan dot below the day number
+ *  - Selected → gradient background + cyan border
+ *
+ * All styles are inline CSS injected via a `<style>` tag under the `.cr-cal-`
+ * namespace to stay consistent with the creator dashboard design system.
+ */
 'use client'
 
 import { useState, useMemo } from 'react'
 
 const DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] as const
 
+/**
+ * Builds the grid cells for a given month.
+ * Leading `null` values represent the empty cells before the 1st of the month
+ * (offset determined by `Date.getDay()` of the 1st).
+ */
 function getMonthDays(year: number, month: number) {
   const first = new Date(year, month, 1)
   const last = new Date(year, month + 1, 0)

@@ -1,3 +1,14 @@
+/**
+ * GET /api/auth/twitch
+ *
+ * Initiates the Twitch OAuth 2.0 authorization code flow.
+ * Generates a CSRF state token, stores it in a 10-minute HttpOnly cookie,
+ * then redirects the user to Twitch's consent screen.
+ *
+ * Required env vars: TWITCH_CLIENT_ID, TWITCH_REDIRECT_URI
+ * On success: redirects to Twitch authorization URL.
+ * On failure: redirects to /sign-in or returns 500.
+ */
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { randomBytes } from 'crypto'
@@ -6,10 +17,11 @@ import { cookies } from 'next/headers'
 const TWITCH_AUTH_URL = 'https://id.twitch.tv/oauth2/authorize'
 
 // Scopes needed:
-// user:read:email        — confirm account identity
+// user:read:email            — confirm account identity
 // channel:read:subscriptions — paid subscriber count (requires user token)
 const SCOPES = ['user:read:email', 'channel:read:subscriptions'].join(' ')
 
+/** Redirects authenticated users to Twitch's OAuth consent screen. */
 export async function GET() {
   const { userId } = await auth()
   if (!userId) {

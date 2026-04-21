@@ -1,8 +1,20 @@
+/**
+ * /api/notifications
+ *
+ * GET  — Returns a paginated list of notifications for the authenticated user.
+ *         Query params: cursor (last seen notification ID), limit (max 50, default 20).
+ *         Response: { notifications, nextCursor }
+ *
+ * PATCH — Marks all unread notifications as read for the authenticated user.
+ *
+ * DELETE — Deletes all read notifications for the authenticated user.
+ */
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 
 const PAGE_SIZE = 20
 
+/** Returns cursor-paginated notifications for the current user, newest first. */
 export async function GET(request: Request) {
   const { userId } = await auth()
   if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 })
@@ -27,6 +39,7 @@ export async function GET(request: Request) {
   })
 }
 
+/** Marks all unread notifications as read for the current user. */
 export async function PATCH() {
   const { userId } = await auth()
   if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 })
@@ -39,6 +52,7 @@ export async function PATCH() {
   return Response.json({ success: true })
 }
 
+/** Deletes all already-read notifications for the current user. */
 export async function DELETE() {
   const { userId } = await auth()
   if (!userId) return Response.json({ error: 'Unauthorized' }, { status: 401 })

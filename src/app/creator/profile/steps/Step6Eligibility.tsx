@@ -1,3 +1,18 @@
+/**
+ * Step 6 — Eligibility (profile wizard).
+ *
+ * The final data-entry step before the summary. Collects:
+ *  - Availability toggle (Available / Not Available) — surfaces to sponsors
+ *    on the campaign matching and admin creator views.
+ *  - Max campaigns per month — optional cap; leave blank for no limit.
+ *
+ * The "Save & Continue" button here calls `onSave` (mapped to `saveProfile`
+ * in the wizard), which always jumps to the summary step (step 7) rather than
+ * advancing linearly. This differs from steps 3–5 which use `saveAndContinue`.
+ *
+ * `isSaving` is passed from the wizard to disable the button during the async
+ * save and provide user feedback.
+ */
 'use client'
 
 import FormInput from '@/components/ui/FormInput'

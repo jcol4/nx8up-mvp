@@ -1,11 +1,28 @@
+/**
+ * Transactional email delivery via Resend.
+ *
+ * Only used for notification emails triggered by createNotification.
+ * Resend is dynamically imported so it is excluded from the client bundle —
+ * this module must only ever be called from server-side code.
+ *
+ * Required env vars: RESEND_API_KEY, RESEND_FROM_EMAIL (optional, defaults to notifications@nx8up.com)
+ */
+
+/** Input for a single notification email. */
 type SendEmailInput = {
+  /** Recipient email address. */
   to: string
+  /** Email subject line (usually the notification title). */
   subject: string
+  /** Large heading rendered inside the email body. */
   title: string
+  /** Body copy rendered below the heading. */
   message: string
+  /** Optional URL for the "View Details" CTA button. Omit to suppress the button. */
   link?: string
 }
 
+/** Renders a styled HTML email body for a notification. */
 function buildEmailHtml({ title, message, link }: Pick<SendEmailInput, 'title' | 'message' | 'link'>): string {
   const ctaButton = link
     ? `<a href="${link}" style="display:inline-block;margin-top:20px;padding:10px 20px;background:#00c8ff;color:#000;font-weight:bold;border-radius:6px;text-decoration:none;">View Details</a>`
@@ -30,6 +47,11 @@ function buildEmailHtml({ title, message, link }: Pick<SendEmailInput, 'title' |
 </html>`
 }
 
+/**
+ * Sends a notification email via Resend.
+ * Silently no-ops (with a warning) if RESEND_API_KEY is not configured.
+ * All Resend errors are caught and logged without re-throwing.
+ */
 export async function sendNotificationEmail(input: SendEmailInput): Promise<void> {
   if (!process.env.RESEND_API_KEY) {
     console.warn('[email] RESEND_API_KEY not set — skipping email notification')

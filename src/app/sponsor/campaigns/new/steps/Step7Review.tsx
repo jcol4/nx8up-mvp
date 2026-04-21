@@ -1,3 +1,20 @@
+/**
+ * Step 7 — Review
+ *
+ * Final review step of the campaign creation wizard. Displays a read-only summary
+ * of all campaign settings across four grid columns (Campaign, Audience, Creators,
+ * Deliverables) plus a Duration row and a Budget Breakdown panel.
+ *
+ * Renders `Row` and `Pills` helper components that conditionally hide themselves
+ * when the value is empty/null, keeping the review UI clean for optional fields.
+ *
+ * The "Launch Campaign" button triggers the `createCampaign` server action and
+ * redirects to the payment page on success. Funds are NOT charged here — the
+ * campaign goes into `pending_payment` status until the payment step completes.
+ *
+ * Note: The "10%" fee label in the budget breakdown is hardcoded. It should use
+ * `NX_FEE_RATE * 100` (already imported) to stay in sync if the rate ever changes.
+ */
 'use client'
 
 import type { CampaignDraft } from '../_shared'
@@ -12,6 +29,7 @@ type Props = {
   onBack: () => void
 }
 
+/** Renders a label/value row inside a review panel; hidden when value is falsy. */
 function Row({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null
   return (
@@ -22,6 +40,7 @@ function Row({ label, value }: { label: string; value?: string | null }) {
   )
 }
 
+/** Renders a label with a row of pill badges; hidden when `values` is empty. */
 function Pills({ label, values }: { label: string; values: string[] }) {
   if (!values.length) return null
   return (

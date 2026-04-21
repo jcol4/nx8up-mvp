@@ -1,3 +1,7 @@
+/**
+ * DeleteCampaignButton — inline two-step confirmation delete button for campaigns.
+ * First click shows "Delete?" prompt; second click fires the server action.
+ */
 'use client'
 
 import { useState, useTransition } from 'react'

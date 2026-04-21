@@ -1,3 +1,17 @@
+/**
+ * CreatorAcademySection — server component panel that previews the first
+ * academy lesson on the creator dashboard.
+ *
+ * Always shows `LESSONS[0]` as the "Next module" regardless of which lessons
+ * the creator has already completed (lesson progress tracking is not yet
+ * implemented).
+ *
+ * The thumbnail falls back to the YouTube `mqdefault.jpg` image extracted
+ * from the lesson's `videoUrl` when a dedicated `thumbnailUrl` is not set.
+ *
+ * The dot-row progress indicator in the panel header is decorative — only the
+ * first dot is highlighted (index 0 = current lesson is always lesson 1).
+ */
 import Link from 'next/link'
 import { LESSONS } from '@/lib/academy-lessons'
 import Panel from '@/components/shared/Panel'

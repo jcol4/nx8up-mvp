@@ -1,3 +1,38 @@
+/**
+ * @file sign-up/[[...sign-up]]/page.tsx
+ *
+ * Custom Clerk sign-up page for the nx8up platform. Uses the low-level
+ * Clerk `useSignUp` hook to provide a fully custom UI consistent with the
+ * platform's design system.
+ *
+ * Two-stage flow controlled by the `stage` state:
+ *   1. `"register"` – collects email, username, and password, then calls
+ *      `signUp.create` followed by `prepareEmailAddressVerification` to
+ *      dispatch a 6-digit one-time code to the user's email.
+ *   2. `"verify"` – accepts the code via `attemptEmailAddressVerification`.
+ *      On success the Clerk session is activated and the user is redirected
+ *      to `/onboarding` to complete age verification and role selection.
+ *
+ * Additional behaviors:
+ *   - "Resend code" triggers a fresh `prepareEmailAddressVerification` call
+ *     without resetting any other state.
+ *   - Clerk error codes are mapped to specific, actionable user messages.
+ *   - Two reusable inner components (`ErrorBox`, `SubmitButton`) are defined
+ *     inside the component to share the loading/loaded state via closure.
+ *
+ * External services:
+ *   - Clerk (`useSignUp`, `useSignUp.setActive`) – user creation and email
+ *     verification.
+ *
+ * Gotchas:
+ *   - `ErrorBox` and `SubmitButton` are defined inside the parent component,
+ *     which means they are re-created on every render. They should be moved
+ *     outside (or memoised) to avoid unnecessary React reconciliation.
+ *   - There is no rate-limiting or cooldown on "Resend code"; a user could
+ *     spam the Clerk API by clicking the button repeatedly.
+ *   - `form_identifier_exists` only catches duplicate emails; a duplicate
+ *     username would fall through to the generic error message.
+ */
 'use client'
 
 import * as React from 'react'
@@ -18,6 +53,14 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = React.useState(false)
   const router = useRouter()
 
+  /**
+   * Handles the registration form submission (stage: "register").
+   *
+   * Creates a new Clerk user with email, username, and password, then
+   * immediately sends an email verification code. On success, advances
+   * the UI to the `"verify"` stage. Clerk error codes are translated to
+   * descriptive messages before being surfaced to the user.
+   */
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isLoaded) return
@@ -47,6 +90,13 @@ export default function SignUpPage() {
     }
   }
 
+  /**
+   * Handles the email verification form submission (stage: "verify").
+   *
+   * Attempts to verify the one-time code. On success, activates the Clerk
+   * session and redirects to `/onboarding`. Maps `form_code_incorrect` and
+   * `verification_expired` Clerk errors to actionable messages.
+   */
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isLoaded) return
@@ -76,6 +126,12 @@ export default function SignUpPage() {
     }
   }
 
+  /**
+   * Re-sends the email verification code by calling
+   * `prepareEmailAddressVerification` again. The existing `code` input state
+   * is not cleared, so the user sees the field pre-populated with any
+   * previously typed value.
+   */
   const handleResendCode = async () => {
     if (!isLoaded) return
     setError('')
@@ -86,6 +142,7 @@ export default function SignUpPage() {
     }
   }
 
+  /** Renders a styled inline error banner with an SVG warning icon. */
   const ErrorBox = ({ message }: { message: string }) => (
     <div className="nx-error">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -96,6 +153,11 @@ export default function SignUpPage() {
     </div>
   )
 
+  /**
+   * Reusable submit button that shows a spinner + `loadingLabel` while a
+   * request is in flight and the normal `label` otherwise. Disabled while
+   * `isLoading` is true or the Clerk SDK has not finished loading.
+   */
   const SubmitButton = ({ label, loadingLabel }: { label: string; loadingLabel: string }) => (
     <button className="nx-submit" type="submit" disabled={isLoading || !isLoaded}>
       <span className="nx-submit-inner">

@@ -1,3 +1,18 @@
+/**
+ * ContentPlannerSection — tabbed content planner panel on the creator
+ * dashboard.
+ *
+ * IMPORTANT: The deals list rendered in each tab (`PLANNER_BY_TAB`) is
+ * **hardcoded mock data** and does not reflect real campaign applications.
+ * This is a known placeholder pending full integration with the deal system.
+ *
+ * The Notes textarea is real: notes are persisted per-tab in Clerk
+ * `publicMetadata` via `updateContentPlannerNotes`, auto-saved with a 500ms
+ * debounce. The `initialNotes` prop is hydrated server-side.
+ *
+ * Gotcha: `router.refresh()` is called after each save to re-sync server
+ * state, but the optimistic `localNotes` state means the UI never flickers.
+ */
 'use client'
 
 import { useState, useEffect, useRef } from 'react'

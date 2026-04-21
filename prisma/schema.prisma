@@ -1,5 +1,29 @@
+// ============================================================
+// schema.prisma — nx8up database schema
+//
+// Database: PostgreSQL (hosted on Neon; accessed via the Neon
+//           serverless driver adapter, hence driverAdapters preview flag).
+//
+// Auth:  Row Level Security (RLS) is enabled on several tables — any
+//        direct psql access bypasses Clerk auth, so always use the app
+//        layer for mutations.
+//
+// Models overview:
+//   content_creators            — Creator profiles + Twitch/YouTube OAuth data
+//   sponsors                    — Sponsor company profiles + Stripe billing
+//   admins                      — Admin user registry (role checked in Clerk metadata)
+//   campaigns                   — Sponsor-created campaign definitions
+//   campaign_applications       — A creator's application to a specific campaign
+//   deal_submissions            — Proof-of-delivery submitted by a creator post-campaign
+//   link_clicks                 — Privacy-safe click tracking for campaign short links
+//   sponsor_age_restriction_requests — Admin-approval workflow for age-restricted campaigns
+//   Notification                — In-app notification records (camelCase model, mixed naming convention)
+//   NotificationPreference      — Per-user notification opt-in/out preferences (JSON blob)
+// ============================================================
+
 generator client {
   provider        = "prisma-client-js"
+  // driverAdapters enables the Neon serverless HTTP/WebSocket driver
   previewFeatures = ["driverAdapters"]
 }
 
@@ -9,6 +33,9 @@ datasource db {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+// Stores the profile and platform analytics for every content creator on the platform.
+// OAuth tokens for Twitch and YouTube are stored here in plaintext — ensure the
+// database is not exposed directly and tokens are rotated via the respective refresh flows.
 model content_creators {
   id                         String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   clerk_user_id              String                  @unique
@@ -16,14 +43,14 @@ model content_creators {
   age                        Int?
   location                   String?
   language                   String[]
-  platform                   String[]
-  subs_followers             Int?
+  platform                   String[]                // e.g. ["twitch", "youtube"]
+  subs_followers             Int?                    // combined/primary follower count used for matching
   engagement_rate            Decimal?                @db.Decimal(5, 2)
   content_type               String[]
   game_category              String[]
   created_at                 DateTime?               @default(now()) @db.Timestamptz(6)
   updated_at                 DateTime?               @default(now()) @db.Timestamptz(6)
-  twitch_broadcaster_type    String?
+  twitch_broadcaster_type    String?                 // "affiliate", "partner", or "" for regular users
   twitch_created_at          DateTime?               @db.Timestamptz(6)
   twitch_description         String?
   twitch_id                  String?                 @unique
@@ -33,34 +60,34 @@ model content_creators {
   youtube_avg_views          Int?
   youtube_channel_id         String?                 @unique
   youtube_channel_name       String?
-  youtube_handle             String?
+  youtube_handle             String?                 // @handle format, distinct from channel name
   youtube_subscribers        Int?
   youtube_synced_at          DateTime?               @db.Timestamptz(6)
   youtube_top_categories     String[]
   average_vod_views          Int?
-  twitch_access_token        String?
-  twitch_refresh_token       String?
+  twitch_access_token        String?                 // SENSITIVE — encrypted at rest recommended
+  twitch_refresh_token       String?                 // SENSITIVE — used to obtain new access tokens
   twitch_subscriber_count    Int?
   twitch_token_expires_at    DateTime?               @db.Timestamptz(6)
-  youtube_access_token       String?
-  youtube_refresh_token      String?
+  youtube_access_token       String?                 // SENSITIVE — encrypted at rest recommended
+  youtube_refresh_token      String?                 // SENSITIVE — used to obtain new access tokens
   youtube_token_expires_at   DateTime?               @db.Timestamptz(6)
   youtube_watch_time_hours   Int?
   audience_age_min           Int?
   audience_age_max           Int?
   audience_locations         String[]
-  youtube_member_count       Int?
-  creator_types              String[]
+  youtube_member_count       Int?                    // YouTube channel memberships (paid subscribers)
+  creator_types              String[]                // e.g. ["gamer", "lifestyle"]
   content_style              String[]
   audience_interests         String[]
   preferred_campaign_types   String[]
   preferred_product_types    String[]
-  primary_platform           String?
+  primary_platform           String?                 // which platform the creator identifies as their main channel
   is_available               Boolean                 @default(true)
   max_campaigns_per_month    Int?
   audience_gender            String[]                @default([])
-  creator_size               String?
-  stripe_connect_id          String?
+  creator_size               String?                 // e.g. "nano", "micro", "mid", "macro", "mega"
+  stripe_connect_id          String?                 // Stripe Connect account ID for creator payouts
   stripe_onboarding_complete Boolean                 @default(false)
   applications               campaign_applications[]
 
@@ -79,6 +106,8 @@ model content_creators {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+// Stores sponsor company profiles, campaign targeting preferences, and Stripe billing info.
+// budget_min/max define the sponsor's per-campaign spend range in USD cents (or dollars — verify unit with payment code).
 model sponsors {
   id                       String                             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   clerk_user_id            String                             @unique
@@ -86,8 +115,8 @@ model sponsors {
   company_name             String?
   location                 String?
   language                 String[]
-  budget_min               Int?
-  budget_max               Int?
+  budget_min               Int?                               // minimum campaign budget the sponsor is willing to spend
+  budget_max               Int?                               // maximum campaign budget; enforced in UI — ACH path must also validate server-side
   min_avg_viewers          Int?
   min_subs_followers       Int?
   min_engagement_rate      Decimal?                           @db.Decimal(5, 2)
@@ -96,10 +125,10 @@ model sponsors {
   game_category            String[]
   created_at               DateTime?                          @default(now()) @db.Timestamptz(6)
   updated_at               DateTime?                          @default(now()) @db.Timestamptz(6)
-  age_restricted           Boolean                            @default(false)
-  age_restriction_type     String?
-  preferred_payment_method String?                            @default("card")
-  stripe_customer_id       String?
+  age_restricted           Boolean                            @default(false)   // whether the sponsor's products are age-restricted (e.g. alcohol, gambling)
+  age_restriction_type     String?                            // specific restriction type, e.g. "alcohol", "gambling" — requires admin approval to set
+  preferred_payment_method String?                            @default("card")  // "card" or "ach"
+  stripe_customer_id       String?                            // Stripe Customer ID for charge/payment-intent creation
   campaigns                campaigns[]
   age_restriction_requests sponsor_age_restriction_requests[]
 
@@ -114,6 +143,8 @@ model sponsors {
   @@index([platform], type: Gin)
 }
 
+// Registry of admin users. Role enforcement happens primarily in Clerk session claims;
+// this table is used for auditing and admin-specific queries.
 model admins {
   id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   clerk_user_id String    @unique
@@ -122,30 +153,33 @@ model admins {
   updated_at    DateTime? @default(now()) @db.Timestamptz(6)
 }
 
+// A sponsor-created campaign that creators can apply to.
+// Status lifecycle: "draft" → "active" → "completed" / "cancelled"
+// Stripe fields record the payment intent lifecycle for budget authorization and capture.
 model campaigns {
   id                          String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   sponsor_id                  String                  @db.Uuid
   title                       String
   description                 String?
-  status                      String                  @default("draft")
-  budget                      Int?
+  status                      String                  @default("draft")      // "draft" | "active" | "completed" | "cancelled"
+  budget                      Int?                                            // total campaign budget in USD cents (verify unit)
   platform                    String[]
   content_type                String[]
   game_category               String[]
   min_avg_viewers             Int?
   min_subs_followers          Int?
   min_engagement_rate         Decimal?                @db.Decimal(5, 2)
-  creative_package            String[]
+  creative_package            String[]                                        // list of deliverables included (e.g. "logo", "brief")
   created_at                  DateTime?               @default(now()) @db.Timestamptz(6)
   updated_at                  DateTime?               @default(now()) @db.Timestamptz(6)
   min_audience_age            Int?
   max_audience_age            Int?
   required_audience_locations String[]
-  campaign_code               String?                 @unique
+  campaign_code               String?                 @unique                 // human-readable short code used in admin/sponsor views
   brand_name                  String?
-  objective                   String?
-  campaign_type               String?
-  payment_model               String?
+  objective                   String?                                         // e.g. "awareness", "conversion", "engagement"
+  campaign_type               String?                                         // e.g. "integration", "dedicated", "livestream"
+  payment_model               String?                                         // e.g. "flat_fee", "cpm", "cpa"
   start_date                  DateTime?               @db.Timestamptz(6)
   end_date                    DateTime?               @db.Timestamptz(6)
   product_name                String?
@@ -155,28 +189,28 @@ model campaigns {
   target_interests            String[]
   creator_types               String[]
   creator_sizes               String[]
-  creator_count               Int?
+  creator_count               Int?                                            // how many creators the sponsor wants for this campaign
   num_videos                  Int?
-  video_includes              String[]
+  video_includes              String[]                                        // required video elements, e.g. ["dedicated_segment", "end_card"]
   num_streams                 Int?
-  min_stream_duration         Int?
+  min_stream_duration         Int?                                            // minimum stream duration in minutes
   num_posts                   Int?
   num_short_videos            Int?
   content_guidelines          String?
   must_include_link           Boolean                 @default(false)
   must_include_promo_code     Boolean                 @default(false)
   must_tag_brand              Boolean                 @default(false)
-  landing_page_url            String?
-  tracking_type               String?
+  landing_page_url            String?                                         // destination URL for tracking short links (/r/:code)
+  tracking_type               String?                                         // e.g. "link", "promo_code", "none"
   conversion_goal             String?
-  legal_age_restriction       String?
-  is_direct_invite            Boolean                 @default(false)
+  legal_age_restriction       String?                                         // mirrors sponsor age_restriction_type; may be null for unrestricted campaigns
+  is_direct_invite            Boolean                 @default(false)         // true when a sponsor invites a specific creator vs open application
   num_youtube_shorts          Int?
   num_twitch_clips            Int?
-  stripe_authorized_amount    Int?
-  stripe_payment_intent_id    String?
-  stripe_charge_id            String?
-  preferred_payment_method    String?                 @default("card")
+  stripe_authorized_amount    Int?                                            // amount authorized on the payment intent, in USD cents
+  stripe_payment_intent_id    String?                                         // Stripe PaymentIntent ID for budget hold
+  stripe_charge_id            String?                                         // Stripe Charge ID once payment is captured
+  preferred_payment_method    String?                 @default("card")        // inherited from sponsor at campaign creation time
   applications                campaign_applications[]
   sponsor                     sponsors                @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
 
@@ -189,19 +223,23 @@ model campaigns {
   @@index([end_date])
 }
 
+// Records a creator's application to a campaign.
+// Status lifecycle: "pending" → "approved" / "rejected" (→ "completed" after deal submission review).
+// The composite unique constraint (campaign_id, creator_id) prevents duplicate applications.
+// tracking_short_code is generated when the application is approved and used by /r/:code.
 model campaign_applications {
   id                     String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   campaign_id            String            @db.Uuid
   creator_id             String            @db.Uuid
-  status                 String            @default("pending")
-  message                String?
+  status                 String            @default("pending")  // "pending" | "approved" | "rejected" | "completed"
+  message                String?                                // optional cover message from the creator
   submitted_at           DateTime?         @default(now()) @db.Timestamptz(6)
-  app_audience_age_min   Int?
+  app_audience_age_min   Int?                                   // creator's actual audience age range at time of application
   app_audience_age_max   Int?
-  app_audience_locations String[]
-  app_location           String?
-  app_media_types        String[]
-  tracking_short_code    String?           @unique
+  app_audience_locations String[]                               // creator's actual audience locations at time of application
+  app_location           String?                                // creator's physical location at time of application
+  app_media_types        String[]                               // media types the creator is offering for this campaign
+  tracking_short_code    String?           @unique              // short identifier used in /r/:code redirect URLs
   campaign               campaigns         @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
   creator                content_creators  @relation(fields: [creator_id], references: [id], onDelete: Cascade)
   deal_submission        deal_submissions?
@@ -213,47 +251,59 @@ model campaign_applications {
   @@index([status])
 }
 
+// Proof-of-delivery record submitted by a creator after completing a campaign.
+// Admins review submissions, set payout_status, and trigger Stripe transfers.
+// Status lifecycle: "pending" → "approved" / "rejected"
+// payout_status: null → "pending" → "paid" (maps to Stripe transfer creation)
 model deal_submissions {
   id                   String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   application_id       String                @unique @db.Uuid
-  screenshot_url       String?
-  posted_at            DateTime?             @db.Timestamptz(6)
-  disclosure_confirmed Boolean               @default(false)
+  screenshot_url       String?                                   // legacy single screenshot; superseded by proof_urls
+  posted_at            DateTime?             @db.Timestamptz(6) // when the creator's content went live
+  disclosure_confirmed Boolean               @default(false)    // creator confirmed FTC/platform disclosure requirement
   submitted_at         DateTime?             @db.Timestamptz(6)
-  status               String                @default("pending")
-  sponsor_notes        String?
+  status               String                @default("pending") // "pending" | "approved" | "rejected"
+  sponsor_notes        String?                                   // optional feedback from the sponsor
   created_at           DateTime              @default(now()) @db.Timestamptz(6)
   updated_at           DateTime              @updatedAt @db.Timestamptz(6)
-  proof_urls           String[]
+  proof_urls           String[]                                  // array of proof-of-post URLs (videos, posts, streams)
   admin_notes          String?
-  payout_status        String?
-  stripe_transfer_id   String?
-  ctr                  Decimal?              @db.Decimal(6, 2)
-  video_views          Json?
-  views_fetched_at     DateTime?             @db.Timestamptz(6)
+  payout_status        String?                                   // null | "pending" | "paid" — tracks Stripe payout state
+  stripe_transfer_id   String?                                   // Stripe Transfer ID after creator payout
+  ctr                  Decimal?              @db.Decimal(6, 2)  // click-through rate recalculated nightly by /api/cron/recalculate-ctr
+  video_views          Json?                                     // platform view counts fetched asynchronously; shape varies by platform
+  views_fetched_at     DateTime?             @db.Timestamptz(6) // timestamp of last video_views sync
   application          campaign_applications @relation(fields: [application_id], references: [id], onDelete: Cascade)
 }
 
+// Privacy-safe click tracking for campaign short links (/r/:code).
+// Raw IP addresses are never stored — only a SHA-256 hash for deduplication.
+// Deduplication: one row per (application_id, ip_hash) pair is enforced in application code,
+// not via a DB unique constraint — consider adding one for data integrity.
 model link_clicks {
   id             String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   application_id String                @db.Uuid
   clicked_at     DateTime              @default(now()) @db.Timestamptz(6)
-  ip_hash        String?
+  ip_hash        String?               // SHA-256 of visitor IP; null when IP headers are absent
   user_agent     String?
-  referrer       String?
+  referrer       String?               // HTTP Referer header value
   application    campaign_applications @relation(fields: [application_id], references: [id], onDelete: Cascade)
 
   @@index([application_id])
   @@index([clicked_at])
 }
 
+// Admin-approval workflow for sponsors who want to run age-restricted campaigns
+// (e.g. alcohol, gambling). A sponsor submits a request; an admin approves or rejects it,
+// which then updates the sponsor's age_restricted flag and age_restriction_type.
+// Status: "pending" | "approved" | "rejected"
 model sponsor_age_restriction_requests {
   id                             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   sponsor_id                     String   @db.Uuid
-  requested_age_restricted       Boolean
-  requested_age_restriction_type String?
-  sponsor_message                String
-  status                         String   @default("pending")
+  requested_age_restricted       Boolean                 // the value the sponsor wants set on their profile
+  requested_age_restriction_type String?                 // the restriction type being requested, e.g. "alcohol"
+  sponsor_message                String                  // sponsor's justification for the request
+  status                         String   @default("pending") // "pending" | "approved" | "rejected"
   admin_notes                    String?
   created_at                     DateTime @default(now()) @db.Timestamptz(6)
   updated_at                     DateTime @updatedAt @db.Timestamptz(6)
@@ -263,16 +313,20 @@ model sponsor_age_restriction_requests {
   @@index([status])
 }
 
+// In-app notification record. Named in PascalCase (unlike the snake_case models above)
+// — this is a naming inconsistency introduced when the notifications feature was added.
+// dedupeKey is used to prevent duplicate notifications for the same logical event
+// (e.g. campaign approved); enforced in application code, not via a unique constraint.
 model Notification {
   id         String   @id @default(cuid())
-  userId     String
-  role       String
-  type       String
+  userId     String                      // Clerk user ID of the notification recipient
+  role       String                      // recipient's role at time of creation — used for role-specific queries
+  type       String                      // notification category, e.g. "campaign_approved", "new_application"
   title      String
   message    String
-  link       String?
+  link       String?                     // optional deep link to the relevant page
   read       Boolean  @default(false)
-  dedupeKey  String?
+  dedupeKey  String?                     // opaque key to prevent duplicate notifications for the same event
   createdAt  DateTime @default(now())
 
   @@index([userId, read])
@@ -280,8 +334,11 @@ model Notification {
   @@index([userId, type, dedupeKey])
 }
 
+// Per-user notification opt-in/out preferences stored as an opaque JSON blob.
+// Shape of `prefs` is managed by the application layer (no schema enforcement here).
+// Example: { "campaign_approved": true, "new_application": false }
 model NotificationPreference {
   id     String @id @default(cuid())
-  userId String @unique
-  prefs  Json
+  userId String @unique  // Clerk user ID; one row per user
+  prefs  Json            // JSON map of notification type → boolean enabled flag
 }

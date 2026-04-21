@@ -1,3 +1,16 @@
+/**
+ * CreatorMissionsSection — client component panel that renders the creator's
+ * active objectives (missions).
+ *
+ * IMPORTANT: The `MISSIONS` array is **hardcoded mock data**. Progress bars
+ * are static (value is always 0 or 1 out of max 1), and mission completion
+ * is not gated — clicking "Complete" on any mission immediately awards the
+ * listed XP regardless of actual progress. Real mission tracking has not yet
+ * been implemented.
+ *
+ * Clicking "Complete" calls `addCreatorXp` then refreshes the route so the
+ * progress panel updates.
+ */
 'use client'
 
 import { useRouter } from 'next/navigation'

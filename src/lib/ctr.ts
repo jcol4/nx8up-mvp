@@ -1,7 +1,19 @@
+/**
+ * CTR (click-through rate) computation utilities.
+ *
+ * Two public functions:
+ *  - computeAndStoreSubmissionCtr: fetches live view counts from YouTube/Twitch
+ *    and writes CTR to the deal_submissions row.
+ *  - recomputeCreatorAggregateCtr: averages stored per-submission CTRs and
+ *    writes the result to content_creators.engagement_rate.
+ *
+ * CTR formula: (tracked link clicks / avg video views) * 100, capped at 999.99%.
+ */
 import { prisma } from './prisma'
 
 // ── URL parsers (mirrors verify-proof-url.ts — kept local to avoid coupling) ─
 
+/** Extracts a YouTube video ID from any supported URL format (watch, youtu.be, shorts, live, embed). */
 function extractYouTubeVideoId(rawUrl: string): string | null {
   try {
     const url = new URL(rawUrl)
@@ -16,6 +28,7 @@ function extractYouTubeVideoId(rawUrl: string): string | null {
   return null
 }
 
+/** Extracts a Twitch VOD or clip ID from any supported URL format (twitch.tv/videos, /clip/, clips.twitch.tv). */
 function extractTwitchVideoId(rawUrl: string): { type: 'vod' | 'clip'; id: string } | null {
   try {
     const url = new URL(rawUrl)
@@ -34,6 +47,11 @@ function extractTwitchVideoId(rawUrl: string): { type: 'vod' | 'clip'; id: strin
   return null
 }
 
+/**
+ * Fetches a short-lived Twitch app access token via client credentials.
+ * Not cached — ctr.ts makes at most one Twitch call per submission, so a
+ * module-level cache would add complexity without meaningful benefit.
+ */
 async function getTwitchAppToken(): Promise<string> {
   const res = await fetch('https://id.twitch.tv/oauth2/token', {
     method: 'POST',
@@ -50,6 +68,10 @@ async function getTwitchAppToken(): Promise<string> {
 
 // ── View count fetcher ───────────────────────────────────────────────────────
 
+/**
+ * Fetches the current view count for a single proof URL from YouTube or Twitch.
+ * Returns null for unsupported domains, missing API keys, or any fetch error.
+ */
 async function fetchViewsForUrl(rawUrl: string): Promise<number | null> {
   try {
     const url = new URL(rawUrl)

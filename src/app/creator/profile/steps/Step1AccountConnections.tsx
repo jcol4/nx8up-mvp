@@ -1,3 +1,17 @@
+/**
+ * Step 1 — Account Connections (profile wizard).
+ *
+ * Renders the Twitch and YouTube OAuth connection widgets wrapped in
+ * `<Suspense>` boundaries with a pulsing skeleton fallback.
+ *
+ * This step is intentionally read/write agnostic — it does not touch the
+ * `draft` state and has no save action. The "Next" button simply advances
+ * the wizard without persisting anything.
+ *
+ * OAuth linking is handled by dedicated routes:
+ *  - Twitch: `/api/auth/twitch` (OAuth redirect) via `TwitchConnect`
+ *  - YouTube: `/api/auth/google` (OAuth redirect) via `YouTubeConnect`
+ */
 'use client'
 
 import { Suspense } from 'react'

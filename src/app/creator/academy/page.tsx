@@ -1,8 +1,25 @@
+/**
+ * Academy listing page (`/creator/academy`).
+ *
+ * Server component that renders a scrollable list of all academy lessons
+ * sourced from the static `LESSONS` array in `@/lib/academy-lessons`.
+ * Each lesson card links to its individual lesson page.
+ *
+ * Lesson progress / completion state is not tracked — all lessons appear
+ * the same regardless of whether the creator has viewed them.
+ *
+ * Thumbnail images fall back to the YouTube `mqdefault.jpg` format derived
+ * from `getVideoId(lesson.videoUrl)` when no `thumbnailUrl` is set.
+ */
 import Link from 'next/link'
 import { LESSONS } from '@/lib/academy-lessons'
 import CreatorTopBar from '@/components/creator/CreatorTopBar'
 import Panel from '@/components/shared/Panel'
 
+/**
+ * Extracts the YouTube video ID from an embed or watch URL.
+ * e.g. `https://www.youtube.com/embed/abc123` → `"abc123"`
+ */
 function getVideoId(url: string): string {
   return url.split('/').pop()?.split('?')[0] ?? ''
 }

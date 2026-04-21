@@ -1,3 +1,7 @@
+/**
+ * TabBar — generic pill-style tab switcher.
+ * Generic over T to enforce that activeTab must be one of the provided tabs array values.
+ */
 "use client";
 
 type Tab = string;

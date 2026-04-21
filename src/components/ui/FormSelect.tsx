@@ -1,3 +1,7 @@
+/**
+ * FormSelect — themed <select> wrapper with two visual variants.
+ * Accepts all native <select> attributes via spread.
+ */
 import type { SelectHTMLAttributes } from "react";
 
 const BASE_CLASS =

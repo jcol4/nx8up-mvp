@@ -1,3 +1,12 @@
+/**
+ * Notification type registry.
+ *
+ * NOTIFICATION_TYPES is the single source of truth for all notification event keys.
+ * NOTIFICATION_LABELS maps each type to the category badge shown in the UI.
+ * The per-role arrays define which types each dashboard's notification feed displays.
+ */
+
+/** All valid notification event types, keyed by constant name for refactor safety. */
 export const NOTIFICATION_TYPES = {
   // Creator
   APPLICATION_ACCEPTED:   'application_accepted',
@@ -23,6 +32,7 @@ export const NOTIFICATION_TYPES = {
 
 export type NotificationType = typeof NOTIFICATION_TYPES[keyof typeof NOTIFICATION_TYPES]
 
+/** Short category label for each notification type, shown as a badge in the notifications list. */
 export const NOTIFICATION_LABELS: Record<NotificationType, string> = {
   campaign_launched:     'Campaign',
   direct_invite:         'Direct Invite',
@@ -45,6 +55,7 @@ export const NOTIFICATION_LABELS: Record<NotificationType, string> = {
 
 export type NotificationRole = 'creator' | 'sponsor' | 'admin'
 
+/** Notification types visible in the creator dashboard notification feed. */
 export const CREATOR_NOTIFICATION_TYPES: NotificationType[] = [
   'campaign_launched',
   'direct_invite',
@@ -60,6 +71,7 @@ export const CREATOR_NOTIFICATION_TYPES: NotificationType[] = [
   'system',
 ]
 
+/** Notification types visible in the sponsor dashboard notification feed. */
 export const SPONSOR_NOTIFICATION_TYPES: NotificationType[] = [
   'payment_success',
   'payment_failed',
@@ -67,6 +79,7 @@ export const SPONSOR_NOTIFICATION_TYPES: NotificationType[] = [
   'system',
 ]
 
+/** Notification types visible in the admin dashboard notification feed. */
 export const ADMIN_NOTIFICATION_TYPES: NotificationType[] = [
   'admin_queue',
   'system',

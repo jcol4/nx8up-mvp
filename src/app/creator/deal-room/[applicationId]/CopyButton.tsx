@@ -1,7 +1,15 @@
+/**
+ * CopyButton — small client component that copies `text` to the clipboard
+ * and briefly shows "Copied!" feedback for 2 seconds.
+ *
+ * Uses the Clipboard API (`navigator.clipboard.writeText`), which requires
+ * a secure context (HTTPS or localhost). No fallback for unsupported browsers.
+ */
 'use client'
 
 import { useState } from 'react'
 
+/** @param text - The string to copy to the clipboard when clicked. */
 export default function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false)
 

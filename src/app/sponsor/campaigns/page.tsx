@@ -1,3 +1,24 @@
+/**
+ * My Campaigns page — /sponsor/campaigns
+ *
+ * Lists all campaigns owned by the authenticated sponsor, split across two tabs:
+ * - "Active"   — all non-launched, non-cancelled campaigns (draft → live).
+ * - "Launched" — campaigns in the `launched` status (post-funding, creators notified).
+ *
+ * Key behaviors:
+ * - If the sponsor's profile is incomplete (checked via `getMissingSponsorProfileFields`),
+ *   the "New campaign" button is disabled and a warning lists the missing fields.
+ * - Shows an ACH processing banner when the URL contains `?payment=processing`,
+ *   which is set by the pay page after an ACH transfer is initiated.
+ * - Inline action buttons (Publish, Pay Now, Launch) trigger server actions or
+ *   navigate to sub-routes; Delete triggers a client-side confirmation via
+ *   DeleteCampaignButton.
+ * - `searchParams` is a Promise (Next.js 15 async params) and must be awaited.
+ *
+ * Status progression: draft → pending_payment → payment_in_progress → live → launched → completed.
+ *
+ * External services: Clerk (auth), Prisma.
+ */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'

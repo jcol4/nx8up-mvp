@@ -1,3 +1,25 @@
+/**
+ * Creator section layout (`/creator/**`).
+ *
+ * Wraps all creator pages with:
+ *  - Role guard: redirects unauthenticated users to `/sign-in` and non-creator
+ *    (non-admin) users to `/`.
+ *  - DashboardSidebar: renders section-level nav (creator/sponsor/admin tabs
+ *    for admins; creator-only tab otherwise) plus page-level nav links.
+ *  - Inline stats panel: live Twitch followers, avg VOD views, and connected
+ *    platform handles fetched directly from the database.
+ *  - Global CSS classes injected via a `<style>` block under the `cr-`
+ *    namespace (e.g. `.cr-panel`, `.cr-text-muted`) used throughout the
+ *    creator sub-tree.
+ *  - Custom Google Fonts (Rajdhani, Exo 2) loaded via a `@import` rule inside
+ *    the same `<style>` block.
+ *
+ * External services: Clerk (auth), Prisma/PostgreSQL (creator stats).
+ *
+ * Gotcha: Fonts are loaded via a CSS `@import` inside a `<style>` tag rather
+ * than via `next/font`. This works but bypasses Next.js font optimisation
+ * (preloading, self-hosting) and may cause a FOUT on first load.
+ */
 import type { Metadata } from 'next'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
@@ -29,6 +51,11 @@ const NAV_ITEMS = [
   { href: '/creator/settings/notifications', label: 'Notifications' },
 ]
 
+/**
+ * Root layout component for the creator section.
+ * Enforces auth/role, fetches sidebar stats, and renders the two-column
+ * shell (sidebar + main content area).
+ */
 export default async function CreatorLayout({
   children,
 }: {

@@ -1,3 +1,21 @@
+/**
+ * Creator Deal Room listing page (`/creator/deal-room`).
+ *
+ * Server component that shows all accepted campaign applications where the
+ * campaign is in "launched" status. Each card displays:
+ *  - Campaign title and brand name.
+ *  - Submission status (derived from `deal_submission.status`).
+ *  - Payout amount (per-creator if creator_count is set, else full creator pool).
+ *  - Content delivery deadline.
+ *
+ * Submission statuses and their display labels are defined in
+ * `SUBMISSION_STATUS`. The "pending" fallback is used when no
+ * `deal_submission` row exists yet.
+ *
+ * Each card links to the individual deal room page for that application.
+ *
+ * External services: Prisma/PostgreSQL (via `getMyDealRooms`).
+ */
 import Link from 'next/link'
 import { getMyDealRooms } from './_actions'
 import { calcFeeBreakdown } from '@/lib/constants'

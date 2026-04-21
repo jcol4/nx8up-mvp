@@ -1,3 +1,26 @@
+/**
+ * Creator Campaigns listing page (`/creator/campaigns`).
+ *
+ * Server component with three tabs driven by the `?tab=` query param:
+ *  - **Open**    (default) — live campaigns the creator is eligible for,
+ *                            ranked by match score, score >= 75 only.
+ *  - **Invites** — campaigns where the creator has an "invited" application.
+ *  - **Launched** — campaigns that have been fully launched; shows the
+ *                   creator's own application status if they applied.
+ *
+ * Access is gated by two checks performed before tab data is fetched:
+ *  1. **Stripe ready** — creator must have a complete Stripe Connect account.
+ *     Incomplete → shown a "set up payout" prompt.
+ *  2. **Platform verified** — creator must have at least one OAuth-connected
+ *     platform (Twitch or YouTube). Missing → shown a "connect platform" prompt.
+ *
+ * Tab data is fetched lazily — only the active tab's data is fetched.
+ *
+ * Budget figures are displayed as the "creator pool" (budget minus nx8up fee),
+ * computed by `calcFeeBreakdown`.
+ *
+ * External services: Prisma/PostgreSQL (via server actions).
+ */
 import Link from 'next/link'
 import { getOpenCampaignsWithEligibility, getLaunchedCampaigns, getCreatorOAuthStatus, getMyInvitations } from './_actions'
 import Panel from '@/components/shared/Panel'

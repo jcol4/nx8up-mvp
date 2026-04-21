@@ -1,3 +1,19 @@
+/**
+ * Admin top-bar header component.
+ *
+ * Server component that:
+ *  - Reads the current session via Clerk to obtain the user's role and display
+ *    name (falls back to "Admin" if neither `displayName` nor `username` is set).
+ *  - Renders a welcome greeting, a static summary strip (Active Campaigns,
+ *    Pending Approvals, Earnings), a link back to `/admin`, the notification
+ *    bell, and the `UserProfileBlock` set to the "admin" variant.
+ *
+ * Gotcha: the stats shown in the summary strip (Active Campaigns: 3,
+ * Pending Approvals: 5, Earnings: $12,350) are **hardcoded mock values** and
+ * do not reflect live database state.
+ *
+ * External services: Clerk (auth, `getUserDisplayInfo`).
+ */
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'

@@ -1,3 +1,8 @@
+/**
+ * AuthLayout — full-screen centered card layout for all auth pages (sign-in, sign-up, verify, etc.).
+ * Injects all shared auth CSS classes (nx-card, nx-input, nx-submit, nx-steps, etc.)
+ * so individual auth pages only need inline JSX, no per-page style tags.
+ */
 import Link from 'next/link'
 import Image from 'next/image'
 

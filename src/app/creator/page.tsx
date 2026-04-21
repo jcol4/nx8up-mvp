@@ -1,3 +1,20 @@
+/**
+ * Creator Dashboard page (`/creator`).
+ *
+ * Server component that renders the main creator hub. Fetches all data in
+ * parallel — XP state, calendar tasks, display info, and the creator's most
+ * recent campaign applications — before rendering the four dashboard panels.
+ *
+ * Auth: requires a Clerk session with role "creator" or "admin" (enforced by
+ * the layout). Unauthenticated users are never reached here.
+ *
+ * External services: Clerk (auth + publicMetadata for XP/calendar),
+ * Prisma/PostgreSQL (campaign applications).
+ *
+ * Gotcha: campaign applications are fetched directly from the DB here (not via
+ * a server action) to keep the parallel `Promise.all` in a single boundary.
+ * Limit is hard-coded to 20 most-recent applications.
+ */
 import { auth } from "@clerk/nextjs/server";
 import { getCreatorXp, getCreatorCalendarTasks } from "./_actions";
 import { getUserDisplayInfo } from "@/lib/get-user-display-info";
@@ -10,6 +27,10 @@ import NotificationBell from "@/components/shared/NotificationBell";
 import DealsAndCampaignsSection from "./DealsAndCampaignsSection";
 import { prisma } from "@/lib/prisma";
 
+/**
+ * Renders the creator dashboard grid — missions, progress/calendar,
+ * campaigns, and academy panels — for the authenticated creator.
+ */
 export default async function CreatorDashboardPage() {
   const [authResult, displayInfo, xpState, calendarTasks] =
     await Promise.all([

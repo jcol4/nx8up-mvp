@@ -1,3 +1,18 @@
+/**
+ * Step 2 — Audience
+ *
+ * Collects audience targeting criteria:
+ * - Age range (min/max) via a custom AgeStepper component with +/− buttons.
+ *   When `sponsorAgeRestriction` is set (18+ or 21+), the minimum selectable
+ *   age is floored to the restriction value and a warning banner is shown.
+ * - Gender targeting (multi-select: Male / Female / All).
+ * - Required audience countries (multi-select from AUDIENCE_LOCATIONS).
+ * - Target cities (free-text, optional).
+ * - Target interests / game categories (free-text tag input with Enter/Add button).
+ *
+ * All fields are optional from a wizard-flow perspective (Step 2 has no
+ * `validateStep` rules in the parent form).
+ */
 'use client'
 
 import { useState } from 'react'
@@ -8,6 +23,11 @@ import {
   GENDERS, AUDIENCE_LOCATIONS,
 } from '../_shared'
 
+/**
+ * AgeStepper — a number input with increment/decrement buttons, used for setting
+ * the audience age range. Clamps the value to [min, max] on each interaction.
+ * Accepts an empty string as a valid (unset) state.
+ */
 function AgeStepper({
   value,
   onChange,

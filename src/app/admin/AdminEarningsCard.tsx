@@ -1,3 +1,13 @@
+/**
+ * Admin dashboard widget — This Month's Earnings.
+ *
+ * Renders a decorative card with a background image showing a fixed monthly
+ * earnings figure and hours-played stat.
+ *
+ * Gotcha: all displayed values ($12,350 earnings, 42 hrs played) are
+ * **hardcoded mock data**. This component does not query Stripe, Prisma, or
+ * any payout ledger. It should be wired to real payout data before shipping.
+ */
 import { DashboardPanel } from '@/components/dashboard'
 
 export default function AdminEarningsCard() {

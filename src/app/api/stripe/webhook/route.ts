@@ -1,3 +1,23 @@
+/**
+ * POST /api/stripe/webhook
+ *
+ * Receives and processes Stripe webhook events. Signature is verified against
+ * STRIPE_WEBHOOK_SECRET before any processing occurs.
+ *
+ * Handled events:
+ *  payment_intent.processing     — ACH submitted: marks campaign 'payment_in_progress'
+ *  payment_intent.succeeded      — Payment confirmed: advances campaign to 'live',
+ *                                   stores charge ID, notifies sponsor, sends invoice PDF
+ *  payment_intent.payment_failed — Payment failed: resets campaign to 'pending_payment',
+ *                                   notifies sponsor to retry
+ *  charge.succeeded              — Backup charge capture for ACH timing edge cases where
+ *                                   pi.latest_charge is null on payment_intent.succeeded
+ *  account.updated               — Syncs stripe_onboarding_complete for Connect accounts
+ *  transfer.created              — Confirms payout_status='paid', notifies creator
+ *  payout.failed                 — Marks payout as failed, notifies creator to fix settings
+ *
+ * Always returns 200 { received: true } on success so Stripe stops retrying.
+ */
 import { NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
@@ -5,7 +25,7 @@ import { createNotification } from '@/lib/notifications'
 import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 import type Stripe from 'stripe'
 
-
+/** Verifies webhook signature and dispatches to per-event handlers. */
 export async function POST(request: Request) {
   const body = await request.text()
   const signature = request.headers.get('stripe-signature')

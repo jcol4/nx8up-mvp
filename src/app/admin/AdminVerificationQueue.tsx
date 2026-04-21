@@ -1,3 +1,18 @@
+/**
+ * Admin dashboard widget — Verification Queue preview.
+ *
+ * Async server component that queries Prisma for the five oldest
+ * `deal_submissions` with status `"submitted"` and renders them as a
+ * clickable list. Each row links to the full review page at
+ * `/admin/verification-queue/[applicationId]`.
+ *
+ * The creator handle is resolved with Twitch username taking priority over
+ * YouTube channel name, falling back to the literal string "Creator" when
+ * neither is set.
+ *
+ * External services: Prisma (deal_submissions, campaign_applications,
+ * content_creators, campaigns).
+ */
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { DashboardPanel } from '@/components/dashboard'

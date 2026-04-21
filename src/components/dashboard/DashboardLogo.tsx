@@ -1,3 +1,4 @@
+/** DashboardLogo — Logo locked to "md" size for consistent dashboard header height. */
 import Logo from '@/components/shared/Logo'
 
 type Props = { href?: string; className?: string }

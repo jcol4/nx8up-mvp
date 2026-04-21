@@ -1,3 +1,32 @@
+/**
+ * Admin Users page (`/admin/users`).
+ *
+ * Lists all Clerk-registered users paginated 25 per page. For each user the
+ * page also looks up the corresponding Prisma `content_creators` or `sponsors`
+ * record (if any) to surface platform-specific details such as follower counts,
+ * platform tags, campaign/application counts, and DB record health (missing row
+ * warnings).
+ *
+ * Features:
+ *  - **Role filter** – All / Creators / Sponsors / Admins / No role.
+ *    Client-side filtering applied to the current Clerk page, not a server-side
+ *    Clerk query filter.
+ *  - **Pagination** – uses Clerk `getUserList` offset pagination; page state
+ *    stored in the URL.
+ *  - **Inline role assignment** – `AdminUserRoleButton` opens a dropdown to
+ *    change a user's Clerk role without leaving the page.
+ *  - **DB record indicator** – shows green/red badge if the creator/sponsor row
+ *    exists in Prisma.
+ *
+ * External services: Clerk (`clerkClient`, `auth`), Prisma (content_creators,
+ * sponsors).
+ *
+ * Gotcha: role filtering is applied in JavaScript **after** fetching PAGE_SIZE
+ * users from Clerk. A user with the `"none"` filter tab selected will see fewer
+ * than 25 rows even when more exist on subsequent Clerk pages, because Clerk
+ * returns all users regardless of role and the filter narrows locally. The
+ * `totalCount` in the header always reflects the full unfiltered Clerk total.
+ */
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -71,6 +100,11 @@ export default async function AdminUsersPage({ searchParams }: Props) {
   const creatorMap = Object.fromEntries(creators.map((c) => [c.clerk_user_id, c]))
   const sponsorMap = Object.fromEntries(sponsors.map((s) => [s.clerk_user_id, s]))
 
+  /**
+   * Builds a URL for the users page preserving the current role filter while
+   * allowing individual values to be overridden. Used for pagination and filter
+   * tab links.
+   */
   function buildUrl(overrides: Record<string, string>) {
     const params = new URLSearchParams({
       ...(roleFilter ? { role: roleFilter } : {}),

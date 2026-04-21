@@ -6,14 +6,19 @@
  */
 
 type Props = {
+  /** Current value as a string — controlled component. */
   value: string
   onChange: (v: string) => void
+  /** Amount to increment/decrement per button click (default 1). */
   step?: number
   min?: number
   max?: number
+  /** Text displayed before the number (e.g. "$"). */
   prefix?: string
+  /** Text displayed after the number (e.g. "hrs"). */
   suffix?: string
   placeholder?: string
+  /** When true, allows decimal input; uses parseFloat instead of parseInt. */
   allowDecimal?: boolean
   className?: string
 }

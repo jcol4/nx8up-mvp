@@ -1,3 +1,31 @@
+/**
+ * ProofSubmitForm — client component form for submitting proof of content
+ * delivery in the deal room.
+ *
+ * Features:
+ *  - Dynamic URL list: add/remove rows; minimum one row required.
+ *  - Auto-fill timestamp: on blur of a URL input, calls `getPostTimestamp`
+ *    (server action) to fetch the publish time from Twitch/YouTube. Also
+ *    re-fetches on submit from the first non-empty URL.
+ *  - Duplicate URL detection: validated client-side in real-time and
+ *    server-side in `submitProof`.
+ *  - Screenshot URL: optional direct image link.
+ *  - Posted-at datetime: auto-filled but manually editable.
+ *  - Disclosure checkbox: FTC-required acknowledgement.
+ *
+ * Form states:
+ *  - **Approved** → read-only success message.
+ *  - **Locked** (submitted or admin_verified) → locked message, no editing.
+ *  - **Revision requested / admin_rejected** → editable with contextual
+ *    admin/sponsor notes shown at the top.
+ *  - **Default** → standard submission form.
+ *
+ * The `isoToLocal` helper converts an ISO UTC timestamp to a
+ * `datetime-local` input value in the user's local timezone.
+ *
+ * Warning messages from `submitProof` (e.g. "URL could not be verified")
+ * are shown alongside the success message so the submission is not blocked.
+ */
 'use client'
 
 import { useState } from 'react'
@@ -17,6 +45,11 @@ type Props = {
   } | null
 }
 
+/**
+ * Converts an ISO UTC timestamp to a `datetime-local` input value
+ * (YYYY-MM-DDTHH:mm) in the user's local timezone by subtracting the
+ * timezone offset before slicing.
+ */
 function isoToLocal(iso: string): string {
   const d = new Date(iso)
   const local = new Date(d.getTime() - d.getTimezoneOffset() * 60_000)

@@ -1,3 +1,21 @@
+/**
+ * Step 5 — Content
+ *
+ * Collects the creator deliverable requirements:
+ * - Campaign type / mission (use_and_show / explain_and_demo / mention_and_repeat /
+ *   compete_and_feature) — required.
+ * - Accepted media types (filtered to platforms selected in Step 1):
+ *   YouTube Video, YouTube Short, Twitch Stream, Twitch Clip.
+ * - Per-platform deliverable counts (# videos, shorts, streams, clips) and
+ *   YouTube "include in" flags — shown only when the relevant media type is selected.
+ * - TikTok / Instagram counts (posts, short videos) — shown when those platforms
+ *   are in the draft.
+ * - Content guidelines (free-text, max 1000 chars).
+ * - Required elements: must include link / promo code / tag brand (boolean toggles).
+ *
+ * The `Toggle` helper renders a styled boolean checkbox with consistent active/
+ * inactive styles.
+ */
 'use client'
 
 import NXStepper from '@/components/ui/NXStepper'
@@ -16,6 +34,11 @@ type Props = {
   onBack: () => void
 }
 
+/**
+ * Toggle — a styled boolean checkbox button used for the "Required Elements"
+ * section (must include link / promo code / tag brand). Renders as a full-width
+ * row with a visual checkmark indicator when active.
+ */
 function Toggle({ label, active, onChange }: { label: string; active: boolean; onChange: (v: boolean) => void }) {
   return (
     <button

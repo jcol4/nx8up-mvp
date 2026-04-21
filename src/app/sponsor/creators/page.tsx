@@ -1,3 +1,26 @@
+/**
+ * Sponsor Creators page — /sponsor/creators
+ *
+ * Displays a ranked table of available creators for the authenticated sponsor.
+ * Creators are ranked by combined follower count (Twitch + YouTube) after fetching.
+ *
+ * Features:
+ * - Platform filter (All / Twitch / YouTube) via URL query param `platform`.
+ * - Creator size filter (All / large / mid / micro / nano) via URL query param `size`.
+ * - Filter links are constructed by `buildUrl` which merges the new param with the
+ *   existing ones, removing empty values to keep URLs clean.
+ * - Max 100 creators returned (pre-filter, sorted by Twitch followers server-side;
+ *   client-side re-sort by combined followers is applied after).
+ * - Columns: rank, handle/location/categories, platforms, followers (split by
+ *   platform), avg views, CTR (color-coded: green ≥5%, yellow ≥2%), content type,
+ *   creator size.
+ *
+ * Gotcha: The `take: 100` and `orderBy: { subs_followers: 'desc' }` on the Prisma
+ * query means the server-side sort is Twitch-only. If a YouTube-only creator has
+ * more total followers than a Twitch creator at rank ~100, they may be excluded.
+ *
+ * External services: Clerk (auth), Prisma.
+ */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'

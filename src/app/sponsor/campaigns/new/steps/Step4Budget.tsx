@@ -1,3 +1,23 @@
+/**
+ * Step 4 — Budget
+ *
+ * Collects:
+ * - Total campaign budget (USD) — stepped by $500, capped at BUDGET_MAX (Stripe
+ *   ACH ceiling). Renders an inline budget breakdown showing the nx8up fee,
+ *   creator payout pool, and per-creator estimate.
+ * - Number of creators (hidden when direct-invite mode is active; fixed at 1).
+ * - Payment model — currently locked to "Fixed per Creator" (others coming soon).
+ * - Preferred payment method (card / ACH / either) — ACH triggers a latency
+ *   warning and, if combined with a near-term start date, an additional
+ *   "start date conflict" warning.
+ * - Campaign start and end dates via NXDatePicker.
+ *
+ * Key behaviors:
+ * - `businessDaysUntil` counts Mon–Fri weekdays from today to the start date.
+ *   If < 5 business days and ACH is selected, `showAchStartWarning` is true.
+ * - Budget exceeding BUDGET_MAX shows an amber warning but does NOT block
+ *   navigation — the server action enforces the hard limit.
+ */
 'use client'
 
 import NXStepper from '@/components/ui/NXStepper'

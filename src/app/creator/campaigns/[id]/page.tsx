@@ -1,3 +1,31 @@
+/**
+ * Campaign detail page (`/creator/campaigns/[id]`).
+ *
+ * Server component that renders the full campaign brief for an individual
+ * campaign, including:
+ *  - Header card: title, sponsor, description, platform/content tags.
+ *  - Campaign brief: objective, brand, product, payment model.
+ *  - Content deliverables: video/stream/post/clip counts.
+ *  - Content requirements: guidelines, must-include-link, promo code, etc.
+ *  - Creator requirements: min followers/views/CTR, audience age/location.
+ *    If the creator's profile is loaded, shows their match score and
+ *    ineligibility reasons.
+ *  - Budget sidebar: creator pool breakdown (budget minus nx8up fee).
+ *  - Apply panel: conditionally renders ApplyButton, InviteResponseButtons,
+ *    or a "already applied / launched" status message.
+ *
+ * Calls `notFound()` when:
+ *  - The campaign does not exist.
+ *  - The campaign has a legal age restriction the creator's audience violates
+ *    (effectively hides the page rather than showing an error message).
+ *
+ * External services: Prisma/PostgreSQL (via server actions and direct query),
+ * Clerk (auth).
+ *
+ * Gotcha: the legal age restriction `notFound()` path silently hides the page
+ * from ineligible creators with no explanation. This may confuse creators
+ * who reach the page via a direct URL.
+ */
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'

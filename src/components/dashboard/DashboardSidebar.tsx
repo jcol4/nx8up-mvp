@@ -1,3 +1,8 @@
+/**
+ * DashboardSidebar — collapsible sidebar used by sponsor and admin dashboards.
+ * Collapses to icon-only (w-16) mode via a toggle button and click on the empty area.
+ * statsNode slot is hidden in collapsed mode but always reserves vertical space when expanded.
+ */
 'use client'
 
 import { useState } from 'react'
@@ -7,10 +12,15 @@ import { DashboardLogo, NavItem } from '@/components/dashboard'
 export type NavItemType = { href: string; label: string }
 
 type Props = {
+  /** Base route for the logo link and the Profile nav item (e.g. "/sponsor"). */
   logoHref: string
+  /** Primary section nav links (Sections group). */
   sectionNavItems: NavItemType[]
+  /** Label for the role-specific nav group heading. */
   sectionTitle: string
+  /** Role-specific nav links shown below the section group. */
   navItems: NavItemType[]
+  /** Optional stats block rendered at the top of the sidebar (e.g. XP bar). */
   statsNode?: React.ReactNode
 }
 

@@ -1,3 +1,20 @@
+/**
+ * Inline role-assignment dropdown for the admin Users table.
+ *
+ * Client component that renders a "Set role" button. Clicking it opens a
+ * small dropdown listing all assignable roles. Selecting a role calls the
+ * `setUserRole` server action and — on success — reloads the page via
+ * `window.location.reload()` to reflect the updated role badge.
+ *
+ * The currently active role is highlighted with a checkmark (✓) in the
+ * dropdown. Errors returned by the server action are displayed inline below
+ * the button.
+ *
+ * Gotcha: the page reload (`window.location.reload()`) discards any in-memory
+ * state (e.g., scroll position, open filters). A future improvement would be
+ * to use Next.js `router.refresh()` instead, which re-fetches server data
+ * without a full navigation.
+ */
 'use client'
 
 import { useState } from 'react'
@@ -15,6 +32,7 @@ export default function AdminUserRoleButton({ userId, currentRole }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  /** Calls the server action to set the role, then reloads the page on success. */
   const handleSetRole = async (role: string) => {
     setLoading(true)
     setError('')

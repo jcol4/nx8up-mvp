@@ -1,3 +1,7 @@
+/**
+ * SecondaryButton — muted outline button for non-primary actions.
+ * "danger" variant renders a red destructive style.
+ */
 import type { ButtonHTMLAttributes } from "react";
 
 const VARIANT_CLASS = {

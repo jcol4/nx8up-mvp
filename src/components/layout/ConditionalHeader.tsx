@@ -1,3 +1,8 @@
+/**
+ * ConditionalHeader — public-facing header rendered on non-dashboard routes.
+ * Returns null on /creator, /admin, and /sponsor routes (those dashboards have their own headers).
+ * NOTE: variant is always 'creator' or 'admin' — sponsors incorrectly receive the 'admin' variant.
+ */
 'use client'
 
 import { usePathname } from 'next/navigation'

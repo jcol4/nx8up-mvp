@@ -1,4 +1,10 @@
+/**
+ * Alert — inline status/error message banner.
+ * Uses ARIA roles: role="alert" for errors (assertive), role="status" for success (polite).
+ */
+
 type Props = {
+  /** Visual style and ARIA role. "error" uses role="alert"; "success" uses role="status". */
   variant: "success" | "error";
   children: React.ReactNode;
   className?: string;

@@ -1,3 +1,29 @@
+/**
+ * @file layout.tsx
+ * @description Root application layout for the nx8up Next.js App Router project.
+ *
+ * Responsibilities:
+ * - Wraps the entire app in ClerkProvider with a custom dark/branded theme matching
+ *   the nx8up design system (cyan accent #00c8ff, dark navy background #0a1223).
+ * - Loads the user's role from Clerk session claims (set server-side via Clerk metadata)
+ *   and display info (display name, username, avatar) to pass to the site header.
+ * - Renders ConditionalHeader, which hides itself on certain routes (e.g. onboarding).
+ * - Configures global metadata including Open Graph image and favicon.
+ *
+ * Environment variables:
+ * - NEXT_PUBLIC_APP_URL — canonical base URL used for metadataBase; falls back to
+ *   http://localhost:3000 in development.
+ *
+ * External services: Clerk (authentication + session claims)
+ *
+ * Gotchas:
+ * - `getUserDisplayInfo` is only called when userId is present to avoid an unnecessary
+ *   server-side fetch for unauthenticated visitors.
+ * - Role is read from `sessionClaims.metadata.role`; if the Clerk JWT template is not
+ *   configured to expose this field the value will always be undefined.
+ * - `unsafe_disableDevelopmentModeWarnings` is set to true intentionally to reduce noise
+ *   in local development — remove this flag before auditing Clerk config in production.
+ */
 import type { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -31,6 +57,15 @@ export const metadata = {
   },
 }
 
+/**
+ * Root layout component rendered for every route in the application.
+ *
+ * Fetches the authenticated user's role and display information server-side so
+ * that the header can be rendered with the correct user context without a
+ * client-side data fetch.
+ *
+ * @param children - The page or nested layout content to render inside the shell.
+ */
 export default async function RootLayout({
   children,
 }: Readonly<{

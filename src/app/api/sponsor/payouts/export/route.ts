@@ -1,8 +1,18 @@
+/**
+ * GET /api/sponsor/payouts/export
+ *
+ * Streams the sponsor's full payout ledger as a downloadable CSV file.
+ * Filename is derived from the sponsor's company name and today's date
+ * (e.g. "acme-corp-payouts-2026-04-20.csv").
+ *
+ * Returns: CSV file with Content-Disposition: attachment header.
+ */
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getPayoutLedger, type LedgerRow } from '@/app/sponsor/payouts/_data'
 
+/** RFC 4180-compliant CSV escape: wraps values in double-quotes if they contain commas, quotes, or newlines. */
 function csvEscape(value: string | null | undefined): string {
   if (value == null) return ''
   const s = String(value)
@@ -13,6 +23,7 @@ function csvEscape(value: string | null | undefined): string {
   return s
 }
 
+/** Converts ledger rows into a RFC 4180 CSV string with a fixed header row. */
 function buildCsv(rows: LedgerRow[]): string {
   const headers = [
     'Campaign',
@@ -43,6 +54,7 @@ function buildCsv(rows: LedgerRow[]): string {
   return [headers.join(','), ...dataRows.map((cols) => cols.join(','))].join('\r\n')
 }
 
+/** Generates and returns the sponsor's payout ledger as a downloadable CSV. */
 export async function GET() {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

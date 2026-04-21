@@ -1,3 +1,8 @@
+/**
+ * NavItem — sidebar navigation link with active-state highlighting.
+ * Root-level hrefs (e.g. /creator) use exact match; deeper hrefs use prefix match.
+ * In collapsed mode shows only the first letter with a title tooltip.
+ */
 'use client'
 
 import Link from 'next/link'
@@ -7,6 +12,7 @@ type Props = {
   href: string
   label: string
   icon?: React.ReactNode
+  /** When true, renders icon/initial only and collapses text label. */
   collapsed?: boolean
 }
 

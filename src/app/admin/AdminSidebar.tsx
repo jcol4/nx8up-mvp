@@ -1,3 +1,19 @@
+/**
+ * Admin sidebar component.
+ *
+ * Client component that wraps the shared `DashboardSidebar` and injects an
+ * admin-specific "Platform Overview" stats panel showing platform-wide user and
+ * campaign counts.
+ *
+ * The `stats` prop is populated by the parent layout (`/admin/layout.tsx`) via a
+ * server-side Prisma query. If `stats` is null or omitted the component falls
+ * back to all-zero values.
+ *
+ * Gotcha: this file also defines a `SECTION_NAV_ITEMS` constant but it is only
+ * used when the parent does **not** pass a `sectionNavItems` prop. In practice
+ * the layout always passes its own array, so this local constant is effectively
+ * dead code and may diverge from the layout's definition over time.
+ */
 'use client'
 
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar'

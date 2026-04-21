@@ -1,3 +1,8 @@
+/**
+ * DashboardStyles — injects all shared dashboard CSS utility classes via a <style> tag.
+ * Used by both sponsor and admin dashboard layouts to share a single source of truth
+ * for dash-* class definitions (dash-panel, dash-stat, dash-nav-item, dash-text-*, etc.).
+ */
 export default function DashboardStyles() {
   return (
     <style>{`

@@ -1,3 +1,19 @@
+/**
+ * Sponsor section layout — wraps every page under /sponsor/*.
+ *
+ * Responsibilities:
+ * - Auth guard: redirects unauthenticated users to /sign-in and non-sponsor/admin
+ *   roles back to /.
+ * - Fetches live campaign stats for the sidebar (active campaign count, total live
+ *   budget, accepted-creator count) via `getSponsorStats`.
+ * - Renders the shared DashboardSidebar with sponsor-specific nav items and an
+ *   inline stats widget.
+ * - Admins see cross-section nav (Creator / Sponsor / Admin), sponsors see only
+ *   the Sponsor section.
+ *
+ * External services: Clerk (auth), Prisma (campaign stats).
+ * Env vars: none directly — inherited from @clerk/nextjs and Prisma config.
+ */
 import type { Metadata } from 'next'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
@@ -30,6 +46,13 @@ const NAV_ITEMS = [
   { href: '/sponsor/settings/notifications', label: 'Notifications' },
 ]
 
+/**
+ * Fetches aggregate campaign stats for a sponsor user.
+ *
+ * Queries live campaigns for total budget and counts accepted applications
+ * across all campaigns owned by the sponsor. Returns null if the user has
+ * no sponsor record (e.g. incomplete onboarding).
+ */
 async function getSponsorStats(userId: string) {
   const sponsor = await prisma.sponsors.findUnique({
     where: { clerk_user_id: userId },

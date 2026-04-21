@@ -1,3 +1,32 @@
+/**
+ * Campaign Pay page — /sponsor/campaigns/[id]/pay
+ *
+ * Handles Stripe payment for a campaign that is in `pending_payment` status.
+ *
+ * Flow:
+ * 1. Validates auth, ownership, campaign status, and non-zero budget.
+ * 2. Calls `getOrCreatePaymentIntent` to get (or reuse) a Stripe PaymentIntent
+ *    client secret for the Stripe Elements form.
+ * 3. On Stripe redirect-back (querystring contains `payment_intent` + `redirect_status`):
+ *    - `processing` (ACH) → marks campaign as `payment_in_progress` and redirects
+ *      to campaigns list with `?payment=processing` banner.
+ *    - `succeeded` (card) → marks campaign as `live`, stores charge ID, redirects
+ *      to campaigns list.
+ * 4. Renders `PaymentForm` (Stripe Elements) with the fee breakdown.
+ *
+ * `getOrCreatePaymentIntent`:
+ * - Re-uses an existing open PI if the amount matches the current budget.
+ * - Cancels and recreates if the budget changed since the PI was created.
+ * - Creates or reuses a Stripe Customer for the sponsor and stores the customer ID.
+ * - Budgets > $999,999 force ACH-only (card payments are capped by Stripe).
+ *
+ * Gotcha: The return URL is constructed from the `host` header. On localhost it
+ * uses http; on any other host it uses https. Ensure the production host header
+ * is accurate (e.g., behind a proxy that sets X-Forwarded-Host correctly).
+ *
+ * External services: Clerk (auth), Prisma, Stripe (PaymentIntents, Customers).
+ * Env vars: STRIPE_SECRET_KEY (via @/lib/stripe).
+ */
 import { auth } from '@clerk/nextjs/server'
 import { redirect, notFound } from 'next/navigation'
 import { headers } from 'next/headers'
@@ -9,9 +38,13 @@ import { calcFeeBreakdown } from '@/lib/constants'
 import SponsorHeader from '../../../SponsorHeader'
 import PaymentForm from './PaymentForm'
 
-// Stripe card payments cap at $999,999 — above that, ACH only
+/** Stripe caps card payment charges at $999,999; budgets above this amount are restricted to ACH bank transfer only. */
 const CARD_MAX_BUDGET = 999_999
 
+/**
+ * Returns the Stripe `payment_method_types` array to include on the PaymentIntent.
+ * For budgets above the card ceiling, only ACH (`us_bank_account`) is offered.
+ */
 function resolvePaymentMethodTypes(budget: number): string[] {
   if (budget > CARD_MAX_BUDGET) return ['us_bank_account']
   return ['card', 'us_bank_account']

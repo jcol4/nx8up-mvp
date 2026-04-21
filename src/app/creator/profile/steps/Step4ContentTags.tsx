@@ -1,3 +1,19 @@
+/**
+ * Step 4 — Content & Audience Tags (profile wizard).
+ *
+ * Collects content classification and audience demographic data:
+ *  - Platforms (multi-select, all platforms the creator is active on).
+ *  - Game genres (free-form tags; Enter or "Add" button to append).
+ *  - Content style (multi-select: Educational, Entertaining, etc.).
+ *  - Content categories (multi-select: Gaming, Vlogging, etc.).
+ *  - Audience interests (free-form tags).
+ *  - Audience gender (multi-select: Male / Female / Mixed).
+ *  - Audience age range (min/max stepper inputs, 13–65).
+ *  - Audience locations (multi-select from a predefined country list).
+ *
+ * Free-form tag inputs (game genres, audience interests) maintain their own
+ * local state and are committed to the draft on "Add" or Enter.
+ */
 'use client'
 
 import { useState } from 'react'

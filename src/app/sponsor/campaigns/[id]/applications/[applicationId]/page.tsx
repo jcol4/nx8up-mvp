@@ -1,3 +1,23 @@
+/**
+ * Application Review page — /sponsor/campaigns/[id]/applications/[applicationId]
+ *
+ * Detailed view of a single creator application, with pagination (Previous / Next)
+ * through all applications for the campaign.
+ *
+ * Displays:
+ * - Creator identity (handle, email, status badge, submission timestamp)
+ * - Application pitch / message
+ * - Audience data (age range, locations) — prefers application-specific overrides
+ *   (`app_audience_age_min/max`, `app_audience_locations`) over the creator's profile.
+ * - General stats (platforms, content type, game categories, followers)
+ * - Twitch-specific stats (broadcaster type, paid subs, avg VOD views, sync date)
+ * - YouTube-specific stats (channel, subs, members, avg views, watch time, categories)
+ * - Accept / Reject decision buttons via `ApplicationDecisionButtons`
+ *
+ * Access: 404 if the campaign doesn't belong to the authenticated sponsor.
+ *
+ * External services: Clerk (auth), Prisma.
+ */
 import { auth } from '@clerk/nextjs/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -10,6 +30,7 @@ type Props = {
   params: Promise<{ id?: string; applicationId?: string }>
 }
 
+/** Renders a labeled stat cell in the creator profile grid; shows "Not specified" when value is null/undefined. */
 function StatCell({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>

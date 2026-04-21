@@ -1,3 +1,17 @@
+/**
+ * GET /api/auth/youtube
+ *
+ * Initiates the Google/YouTube OAuth 2.0 authorization code flow.
+ * Generates a CSRF state token, stores it in a 10-minute HttpOnly cookie,
+ * then redirects to Google's consent screen.
+ *
+ * `access_type=offline` and `prompt=consent` are required to always receive
+ * a refresh token — without them Google only issues one on first authorization.
+ *
+ * Required env vars: GOOGLE_CLIENT_ID, YOUTUBE_REDIRECT_URI
+ * On success: redirects to Google authorization URL.
+ * On failure: redirects to /sign-in or returns 500.
+ */
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { randomBytes } from 'crypto'
@@ -15,6 +29,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/youtube.channel-memberships.creator',
 ].join(' ')
 
+/** Redirects authenticated users to Google's OAuth consent screen for YouTube access. */
 export async function GET() {
   const { userId } = await auth()
   if (!userId) {

@@ -1,3 +1,17 @@
+/**
+ * SponsorHeader — top bar rendered on every page inside the sponsor dashboard.
+ *
+ * Fetches the signed-in user's display name via `getUserDisplayInfo` (Clerk) and
+ * renders a welcome greeting alongside quick-stats, a hub link, the notification
+ * bell, and a user profile block.
+ *
+ * Gotcha: The quick-stat numbers shown in the header (Active Campaigns: 3,
+ * Creators Reached: 24, Budget: $12,500) are HARDCODED placeholders and do NOT
+ * reflect real data. See bug report. These should be replaced with live data from
+ * the database.
+ *
+ * External services: Clerk (auth + user display info).
+ */
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'

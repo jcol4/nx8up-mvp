@@ -1,3 +1,19 @@
+/**
+ * Academy lesson detail page (`/creator/academy/[id]`).
+ *
+ * Server component that renders an individual academy lesson, including:
+ *  - An embedded YouTube (or other) video via an `<iframe>`.
+ *  - A numbered step-by-step guide with optional tip bullets.
+ *  - A dot-row progress indicator in the panel header, where each dot is a
+ *    clickable link to that lesson; the current lesson's dot is highlighted.
+ *
+ * Calls `notFound()` when the `id` param does not match any lesson in
+ * `LESSONS`. No XP is awarded here — that requires a separate "complete"
+ * action (not yet implemented on this page).
+ *
+ * `params` is a `Promise<{ id: string }>` as required by the Next.js 15
+ * App Router dynamic params API.
+ */
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getLesson, LESSONS } from '@/lib/academy-lessons'

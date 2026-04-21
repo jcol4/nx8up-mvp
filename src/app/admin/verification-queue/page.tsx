@@ -1,3 +1,25 @@
+/**
+ * Admin Verification Queue page (`/admin/verification-queue`).
+ *
+ * Two-tab review queue for admins:
+ *
+ * **Campaign Submissions tab** (default)
+ *   Lists all `deal_submissions` with status `"submitted"` fetched via
+ *   `getAdminDealRoomQueue`. Each row links to the individual review page at
+ *   `/admin/verification-queue/[applicationId]`. Shows creator handle, campaign
+ *   title, brand name, and submission date.
+ *
+ * **Profile Changes tab** (`?tab=profile-changes`)
+ *   Lists all pending `sponsor_age_restriction_requests` fetched via
+ *   `getAgeRestrictionChangeQueue`. Each row shows the sponsor name, current
+ *   age restriction setting, and the requested change. Links to
+ *   `/admin/sponsor-profile-changes/[id]`.
+ *
+ * Tab counts are shown as badge pills next to each tab label.
+ *
+ * External services: Clerk (auth), Prisma (via server actions in `_actions.ts`
+ * and `sponsor-profile-changes/_actions.ts`).
+ */
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'

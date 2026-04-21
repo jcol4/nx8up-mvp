@@ -1,20 +1,36 @@
+/**
+ * Creator Academy lesson content — static data for the learning/XP system.
+ * Add new lessons to the LESSONS array; no DB changes required.
+ */
+
+/** A single instructional step within a lesson. */
 export type LessonStep = {
   title: string
   description: string
+  /** Optional bullet-point tips rendered below the description. */
   tips?: string[]
 }
 
+/** A single Creator Academy lesson. */
 export type Lesson = {
+  /** URL-safe unique identifier (used as route param and XP key). */
   id: string
   title: string
+  /** Broad topic label shown on the lesson card. */
   category: string
+  /** YouTube embed URL for the lesson video. */
   videoUrl: string
+  /** Optional thumbnail URL; falls back to YouTube's auto-thumbnail if omitted. */
   thumbnailUrl?: string
+  /** Human-readable duration string (e.g. "50 min"). */
   duration: string
+  /** XP awarded to the creator upon lesson completion. */
   xpReward: number
+  /** Ordered list of instructional steps shown below the video. */
   steps: LessonStep[]
 }
 
+/** All available Creator Academy lessons, in display order. */
 export const LESSONS: Lesson[] = [
   {
     id: 'media-kit',
@@ -80,10 +96,12 @@ export const LESSONS: Lesson[] = [
   },
 ]
 
+/** Returns the lesson with the given ID, or undefined if not found. */
 export function getLesson(id: string): Lesson | undefined {
   return LESSONS.find((l) => l.id === id)
 }
 
+/** Returns the lesson immediately after `currentId` in the LESSONS array, or undefined if at the end. */
 export function getNextLesson(currentId: string): Lesson | undefined {
   const idx = LESSONS.findIndex((l) => l.id === currentId)
   return idx >= 0 && idx < LESSONS.length - 1 ? LESSONS[idx + 1] : undefined

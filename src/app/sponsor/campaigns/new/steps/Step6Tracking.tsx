@@ -1,3 +1,16 @@
+/**
+ * Step 6 — Tracking
+ *
+ * Collects optional conversion tracking configuration:
+ * - Landing page URL — the destination sponsors want creators to drive traffic to.
+ *   When set and the campaign has accepted creators, a unique short tracking URL
+ *   is auto-generated per creator (see setApplicationStatus in campaigns/_actions.ts).
+ * - Tracking type — unique link, promo code, or both.
+ * - Conversion goal — purchase, sign-up, app install, or awareness only.
+ *
+ * All three fields are optional; the step has no validation rules in the parent
+ * wizard. Sponsors can skip this step entirely if they don't need click tracking.
+ */
 'use client'
 
 import FormInput from '@/components/ui/FormInput'

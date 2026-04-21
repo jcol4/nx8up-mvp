@@ -1,3 +1,26 @@
+/**
+ * Shared types, constants, and helpers for the creator profile wizard.
+ *
+ * `CreatorProfileDraft` is the in-memory shape of the wizard state, passed
+ * between steps and persisted to the DB via `updateCreatorProfileWizard`.
+ * Age and campaign-count fields are strings (not numbers) because they bind
+ * directly to `<input type="number">` values in React.
+ *
+ * All option arrays (`CREATOR_TYPE_OPTIONS`, etc.) are the source of truth
+ * for the wizard UI — they must stay in sync with DB enum values / matching
+ * logic in `@/lib/matching`.
+ *
+ * `toggleBtn` and the CSS class helpers (`labelClass`, `sectionTitle`) are
+ * shared across all step components to ensure visual consistency.
+ */
+
+/**
+ * Full profile draft shape. Every field maps to a wizard step:
+ *  - Step 3: displayName, bio, country, state, city, language, creator_types, primary_platform
+ *  - Step 4: platform, game_category, content_style, content_type, audience_*
+ *  - Step 5: preferred_campaign_types, preferred_product_types
+ *  - Step 6: is_available, max_campaigns_per_month
+ */
 export type CreatorProfileDraft = {
   // Step 3 - Creator Identity
   displayName: string
@@ -145,6 +168,10 @@ export const COMMON_LANGUAGES = [
 export const labelClass = 'block text-sm font-medium cr-text-muted mb-1.5'
 export const sectionTitle = 'text-xs font-semibold cr-text-muted uppercase tracking-wider mb-3'
 
+/**
+ * Returns the Tailwind class string for a toggle button, switching between
+ * active (cyan) and inactive (muted) visual states.
+ */
 export function toggleBtn(active: boolean): string {
   return `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
     active

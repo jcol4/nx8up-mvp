@@ -1,3 +1,21 @@
+/**
+ * New Campaign page — /sponsor/campaigns/new
+ *
+ * Server component that:
+ * 1. Guards access (redirects unauthenticated users).
+ * 2. Checks profile completeness via `getMissingSponsorProfileFields`; if any
+ *    required fields are missing, renders a blocking gate UI that lists the
+ *    missing fields and links to /sponsor/profile.
+ * 3. Fetches up to 200 available creators for the direct-invite picker in Step 3.
+ * 4. Pre-populates the campaign form draft (`profileDraft`) with values from the
+ *    sponsor's profile: brand name, platforms, min requirements, preferred payment
+ *    method, and a midpoint of their typical budget range.
+ *
+ * The `availableCreators` list is fetched without the role-guard check in the
+ * layout, so this page has its own auth + redirect logic.
+ *
+ * External services: Clerk (auth), Prisma.
+ */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'

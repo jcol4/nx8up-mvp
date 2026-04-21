@@ -1,3 +1,18 @@
+/**
+ * Shared types, constants, and Tailwind class helpers for the 7-step campaign
+ * creation wizard (NewCampaignForm and its step sub-components).
+ *
+ * Contains:
+ * - `CampaignDraft`    — full form state type shared across all steps.
+ * - `EMPTY_DRAFT`      — zero-value default for CampaignDraft (used on new campaigns).
+ * - CSS class helpers  — `labelClass`, `sectionClass`, `sectionTitle`, `toggleBtn`.
+ * - `STEP_LABELS`      — ordered display labels for the progress bar.
+ * - Static option lists — PRODUCT_TYPES, OBJECTIVES, PLATFORMS, MEDIA_TYPES,
+ *   GENDERS, AUDIENCE_LOCATIONS, CREATOR_TYPES, CREATOR_SIZES, MISSION_TYPES,
+ *   VIDEO_INCLUDES, TRACKING_TYPES, CONVERSION_GOALS.
+ *
+ * All values in this file are pure constants — no server or async logic.
+ */
 // Shared types and style helpers for the campaign creation wizard
 
 export type CampaignDraft = {

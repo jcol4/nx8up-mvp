@@ -1,8 +1,18 @@
-export const NX_FEE_RATE = 0.1 // 10%
+/**
+ * Platform-wide financial constants and fee calculation utilities.
+ * All monetary values are in USD cents unless noted otherwise.
+ */
 
-/** Stripe's default ACH debit limit — budgets must not exceed this. */
+/** Platform fee taken from each campaign budget before paying creators (10%). */
+export const NX_FEE_RATE = 0.1
+
+/** Maximum allowed campaign budget in USD. Matches Stripe's ACH debit transaction limit. */
 export const BUDGET_MAX = 999_999
 
+/**
+ * Breaks down a campaign budget into platform fee, creator pool, and per-creator amount.
+ * `dust` is the remainder (in dollars) when the creator pool doesn't divide evenly.
+ */
 export function calcFeeBreakdown(budget: number, creatorCount?: number | null) {
   const fee = Math.round(budget * NX_FEE_RATE)
   const creatorPool = budget - fee

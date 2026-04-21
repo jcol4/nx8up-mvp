@@ -1,3 +1,22 @@
+/**
+ * Admin Notification Preferences page (`/admin/settings/notifications`).
+ *
+ * Renders a `NotificationPreferencesForm` pre-populated with admin-specific
+ * notification types sourced from `ADMIN_NOTIFICATION_TYPES`. Inline
+ * descriptions are provided for each type via the `DESCRIPTIONS` map.
+ *
+ * Currently supported admin notification types:
+ *  - `admin_queue` – new submission added to the verification queue
+ *  - `system`      – platform announcements and system updates
+ *
+ * Gotcha: this page renders `AdminHeader` directly, which is unusual since the
+ * admin layout already renders `AdminHeader` for every page under `/admin`.
+ * This causes the header to be rendered **twice** on this page. The import of
+ * `AdminHeader` here appears to be an oversight and should be removed.
+ *
+ * External services: `@/lib/notification-types` (ADMIN_NOTIFICATION_TYPES,
+ * NOTIFICATION_LABELS).
+ */
 import AdminHeader from '../../AdminHeader'
 import NotificationPreferencesForm from '@/components/shared/NotificationPreferencesForm'
 import { ADMIN_NOTIFICATION_TYPES, NOTIFICATION_LABELS } from '@/lib/notification-types'

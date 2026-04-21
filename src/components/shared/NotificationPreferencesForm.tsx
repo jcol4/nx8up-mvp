@@ -1,3 +1,8 @@
+/**
+ * NotificationPreferencesForm — per-type toggle grid for in-app and email notification channels.
+ * Loads current prefs from /api/notifications/preferences on mount and PATCHes on save.
+ * Defaults to inApp=true, email=false for any type with no saved pref.
+ */
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -5,6 +10,7 @@ import { useState, useEffect } from 'react'
 type PrefEntry = {
   type: string
   label: string
+  /** Describes what triggers this notification type. */
   description: string
 }
 

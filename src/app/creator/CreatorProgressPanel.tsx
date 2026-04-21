@@ -1,3 +1,14 @@
+/**
+ * CreatorProgressPanel — server component panel that shows the creator's
+ * current XP / level progress and embeds the interactive calendar.
+ *
+ * The XP progress bar uses `xp / xpForNext` to calculate the fill percentage,
+ * clamped to 100 to prevent overflow on edge cases.
+ *
+ * `CreatorCalendarSection` is rendered as a client-component island within
+ * this server component; the full `calendarTasks` map is passed as a prop to
+ * avoid an extra client-side fetch.
+ */
 import type { CreatorXpState } from '@/lib/creator-xp'
 import type { CalendarTasksMap } from './_actions'
 import CreatorCalendarSection from './CreatorCalendarSection'

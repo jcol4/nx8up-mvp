@@ -1,3 +1,19 @@
+/**
+ * PayoutBanner — client component that renders a warning banner when the
+ * creator has not completed Stripe Connect onboarding.
+ *
+ * Clicking the action button POSTs to `/api/stripe/connect/onboard` which
+ * returns a Stripe-hosted onboarding URL. The user is redirected to Stripe
+ * via `window.location.href`.
+ *
+ * Two states:
+ *  - `hasAccount = false` → "Connect payout" (no Stripe account yet)
+ *  - `hasAccount = true`  → "Complete setup" (account exists but onboarding
+ *    is incomplete, e.g. documents pending)
+ *
+ * External services: Stripe Connect via the `/api/stripe/connect/onboard`
+ * route. No env vars are consumed directly in this component.
+ */
 'use client'
 
 import { useState } from 'react'

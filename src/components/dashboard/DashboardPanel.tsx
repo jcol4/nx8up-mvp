@@ -1,3 +1,4 @@
+/** DashboardPanel — thin wrapper that locks Panel to the "dashboard" variant. */
 import Panel from '@/components/shared/Panel'
 
 type Props = {

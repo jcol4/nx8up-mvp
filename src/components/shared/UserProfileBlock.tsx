@@ -1,3 +1,7 @@
+/**
+ * UserProfileBlock — Clerk UserButton with role-aware profile links injected as menu items.
+ * Admins see both creator and sponsor profile links; creators/sponsors see only their own.
+ */
 'use client'
 
 import Link from "next/link";

@@ -1,3 +1,9 @@
+/**
+ * NXSelect — custom branded dropdown replacing native <select>.
+ * Supports optional per-option descriptions and close-on-outside-click.
+ * NOTE: The `required` prop renders a hidden input with `required`, but browsers
+ * don't validate hidden inputs — it does not enforce selection.
+ */
 'use client'
 
 import * as React from 'react'
@@ -5,14 +11,17 @@ import * as React from 'react'
 export interface NXSelectOption {
   value: string
   label: string
+  /** Optional secondary line shown beneath the label in the dropdown. */
   description?: string
 }
 
 interface NXSelectProps {
   options: NXSelectOption[]
+  /** Currently selected value — controlled component. */
   value: string
   onChange: (value: string) => void
   placeholder?: string
+  /** Renders a hidden required input for form compat (browser validation does not apply to hidden inputs). */
   required?: boolean
   id?: string
 }

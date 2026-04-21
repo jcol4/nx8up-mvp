@@ -1,3 +1,28 @@
+/**
+ * Creator Profile page (`/creator/profile`).
+ *
+ * Server component that orchestrates the profile setup experience:
+ *  1. Enforces auth + role guard (creator or admin).
+ *  2. Triggers background refresh of Twitch and YouTube stats when stale
+ *     (staleness window defined per-platform in `_actions.ts`).
+ *  3. Fetches the current profile draft (mixed from DB + Clerk metadata) and
+ *     the creator's full OAuth stats row from the database.
+ *  4. Renders `PayoutBanner` if Stripe Connect onboarding is incomplete.
+ *  5. Renders `CreatorProfileWizard` which drives the 7-step profile flow.
+ *
+ * `isProfileComplete` is a heuristic that jumps users to the summary step
+ * (step 7) when they have already set at least one meaningful field, avoiding
+ * forcing them to re-step through the wizard on every visit.
+ *
+ * External services: Clerk (auth), Stripe (onboarding status check via DB),
+ * Twitch API (background refresh), YouTube API (background refresh),
+ * Prisma/PostgreSQL.
+ *
+ * Env vars (used indirectly via called functions):
+ *  - `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`
+ *  - `YOUTUBE_API_KEY`
+ *  - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+ */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -9,6 +34,11 @@ import { prisma } from '@/lib/prisma'
 import { parseLocation } from '@/lib/location-options'
 import type { CreatorProfileDraft } from './_shared'
 
+/**
+ * Returns true if the creator has completed enough of the profile wizard to
+ * skip to the summary step. Any one of these being set is considered "complete":
+ * creator_types, displayName, platform, or preferred_campaign_types.
+ */
 function isProfileComplete(draft: CreatorProfileDraft): boolean {
   return (
     draft.creator_types.length > 0 ||

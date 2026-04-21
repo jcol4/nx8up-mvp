@@ -1,8 +1,30 @@
+/**
+ * @file not-found.tsx
+ * @description Custom 404 page rendered by Next.js App Router for any unmatched route.
+ *
+ * Responsibilities:
+ * - Renders a branded 404 screen consistent with the nx8up dark design system.
+ * - Provides two navigation escapes: "Go home" (hard link to /) and "Go back"
+ *   (calls router.back() to return to the previous history entry).
+ *
+ * This is a Client Component ('use client') because it uses useRouter for the
+ * browser history back action.
+ *
+ * Gotchas:
+ * - router.back() is a no-op if the user landed directly on the 404 URL with no
+ *   previous history entry (e.g. opened from a bookmark or external link).
+ *   Consider disabling or hiding the button in that case.
+ */
 'use client'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
+/**
+ * Renders the 404 not-found UI.
+ * No props — Next.js calls this automatically when notFound() is thrown or a
+ * route segment cannot be matched.
+ */
 export default function NotFound() {
   const router = useRouter()
 

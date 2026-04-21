@@ -1,3 +1,8 @@
+/**
+ * NotificationBell — header bell icon with unread count badge and dropdown panel.
+ * Polls /api/notifications/count every 60s and on window focus.
+ * Fetches the full list on every open (not just first open — loaded flag is effectively unused).
+ */
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'

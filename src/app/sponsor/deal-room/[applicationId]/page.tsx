@@ -1,3 +1,25 @@
+/**
+ * Sponsor Deal Room detail page — /sponsor/deal-room/[applicationId]
+ *
+ * Shows the full deal room for a single accepted creator application, including:
+ * - Submission status and review UI (approve / request revision) — only visible
+ *   once an admin has verified the submission (`admin_verified` or later).
+ * - Mission requirements (deliverable counts, required elements).
+ * - Creative package (brand, product, content guidelines, video includes).
+ * - Creator sidebar (handle, platforms, followers).
+ * - Link performance sidebar (total clicks, CTR, avg video views) — only shown
+ *   if a tracking short code exists for the application.
+ * - Campaign sidebar (payment model, budget breakdown, deadline).
+ * - RetryPayoutButton — shown when submission is approved but payout has not
+ *   been sent (i.e., `payout_status` is not 'paid').
+ *
+ * `video_views` is stored as a JSON Record<string, number> in the DB. This page
+ * computes an average across all video entries.
+ *
+ * Returns 404 if `getDealRoomForSponsor` returns null (wrong owner, not launched).
+ *
+ * External services: Clerk (auth, via _actions), Prisma (via _actions), Stripe (via _actions).
+ */
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import SponsorHeader from '../../SponsorHeader'

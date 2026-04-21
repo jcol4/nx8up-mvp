@@ -1,3 +1,7 @@
+/**
+ * PublishCampaignButton — moves a draft campaign to pending_payment and redirects to checkout.
+ * NOTE: Errors are shown via browser alert() — inconsistent with the rest of the app's error UI.
+ */
 'use client'
 
 import { useTransition } from 'react'

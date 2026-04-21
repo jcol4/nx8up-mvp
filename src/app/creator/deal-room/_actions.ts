@@ -1,3 +1,36 @@
+/**
+ * Deal room server actions.
+ *
+ * - **getMyDealRooms** — returns all accepted campaign applications where the
+ *   campaign is in "launched" status, including submission status for the
+ *   deal room listing page.
+ *
+ * - **getDealRoom** — returns a single accepted application with full campaign
+ *   and submission details. Lazily generates a unique 8-character tracking
+ *   short code (`tracking_short_code`) if the application lacks one and the
+ *   campaign has a `landing_page_url`. Short codes are collision-resistant via
+ *   a while-loop uniqueness check.
+ *
+ * - **getPostTimestamp** — wraps `fetchPostTimestamp` from `@/lib/verify-proof-url`
+ *   to return the publish time of a content URL. Called client-side on blur
+ *   to auto-fill the "posted at" field in the proof form.
+ *
+ * - **submitProof** — validates and upserts a `deal_submissions` row.
+ *   Validation includes:
+ *    - At least one URL required.
+ *    - No duplicate URLs.
+ *    - `posted_at` timestamp required.
+ *    - Disclosure confirmed.
+ *    - Each URL verified against the creator's Twitch/YouTube account via
+ *      `verifyProofUrl`. "failed" → hard error; "unverifiable" → soft warning.
+ *
+ * External services: Prisma/PostgreSQL, `@/lib/verify-proof-url` (URL
+ * verification against Twitch/YouTube APIs).
+ *
+ * Gotcha: `generateShortCode` uses `randomBytes(8)` mapped through a 36-char
+ * alphabet but slices the result to 8 characters. The collision loop is
+ * unbounded in theory, though collision probability is negligible.
+ */
 'use server'
 
 import { auth } from '@clerk/nextjs/server'
@@ -6,6 +39,10 @@ import { randomBytes } from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { verifyProofUrl, fetchPostTimestamp } from '@/lib/verify-proof-url'
 
+/**
+ * Generates a random 8-character alphanumeric short code for tracking links.
+ * Uses `randomBytes` from Node's `crypto` module for entropy.
+ */
 function generateShortCode(): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
   const bytes = randomBytes(8)
@@ -15,6 +52,10 @@ function generateShortCode(): string {
     .slice(0, 8)
 }
 
+/**
+ * Internal helper: looks up the `content_creators` row for the given Clerk
+ * `userId`, returning only the fields needed by deal room actions.
+ */
 async function getCreator(userId: string) {
   return prisma.content_creators.findUnique({
     where: { clerk_user_id: userId },
@@ -95,9 +136,12 @@ export async function getPostTimestamp(url: string): Promise<{ iso: string } | n
   return ts ? { iso: ts } : null
 }
 
+/** Payload submitted by the creator via `ProofSubmitForm`. */
 export type ProofData = {
   proof_urls: string[]
+  /** Optional URL to a screenshot image showing sponsor branding in content. */
   screenshot_url: string
+  /** ISO datetime string of when the content was published. */
   posted_at: string
   disclosure_confirmed: boolean
 }

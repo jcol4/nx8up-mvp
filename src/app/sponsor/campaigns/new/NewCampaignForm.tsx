@@ -1,3 +1,32 @@
+/**
+ * NewCampaignForm — multi-step campaign creation (and edit) wizard.
+ *
+ * Manages step state, draft data, and form submission for the 7-step campaign
+ * creation flow:
+ *   1. Basics    — name, brand, product, goal, platforms.
+ *   2. Audience  — age range, gender, locations, interests.
+ *   3. Creators  — open applications vs. direct invite; creator criteria.
+ *   4. Budget    — amount, creator count, payment method, dates.
+ *   5. Content   — campaign type, deliverables, guidelines, required elements.
+ *   6. Tracking  — landing page URL, tracking type, conversion goal.
+ *   7. Review    — summary + submit.
+ *
+ * Key behaviors:
+ * - Validates required fields on each step before allowing progression.
+ * - "Save Draft" at any step persists current data and redirects to /sponsor/campaigns.
+ * - "Free navigation" (jump to any step) is unlocked once the user reaches the
+ *   review step or when editing an existing draft (`editingId` is set).
+ * - On final submit, redirects to the campaign pay page — campaigns do not go
+ *   live until funds are held in escrow.
+ * - Steps 1 and 4 use `overflow: visible` on their container to allow date pickers
+ *   and dropdowns to escape the panel boundary.
+ *
+ * Props:
+ * - `initialDraft`          — Pre-populated draft values (from profile or existing draft).
+ * - `editingId`             — If set, the form operates in edit mode (starts on step 7).
+ * - `sponsorAgeRestriction` — Passed to Step 2 to enforce age-targeting floor.
+ * - `availableCreators`     — Creator list for the Step 3 direct-invite picker.
+ */
 'use client'
 
 import { useState } from 'react'
@@ -21,6 +50,11 @@ type Props = {
   availableCreators?: AvailableCreator[]
 }
 
+/**
+ * Validates the required fields for a given step of the campaign wizard.
+ * Returns an error message string if validation fails, or an empty string if
+ * the step is valid. Steps without required fields always return ''.
+ */
 function validateStep(step: number, draft: CampaignDraft): string {
   switch (step) {
     case 1:

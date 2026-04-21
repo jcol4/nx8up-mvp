@@ -1,3 +1,11 @@
+/**
+ * SponsorPostCampaignSection — full-width dashboard panel containing a CTA to
+ * create a new campaign.
+ *
+ * Renders a brief description and a "Post a campaign" button that links to the
+ * multi-step campaign creation wizard at /sponsor/campaigns/new. No server-side
+ * data fetching — purely presentational.
+ */
 'use client'
 
 import Link from 'next/link'

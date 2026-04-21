@@ -1,3 +1,22 @@
+/**
+ * Admin section root layout (`/admin/**`).
+ *
+ * Responsibilities:
+ *  1. **Auth guard** – reads Clerk `sessionClaims.metadata.role`; redirects to
+ *     `/` if the caller is not an admin. This is the single enforcement point
+ *     for the entire `/admin` subtree.
+ *  2. **Stats prefetch** – fetches aggregate counts (total creators, sponsors,
+ *     and active campaigns) from Prisma in a single `Promise.all` to populate
+ *     the sidebar's "Platform Overview" widget.
+ *  3. **Shell** – wraps all admin pages with `DashboardStyles`, `AdminSidebar`,
+ *     and `AdminHeader`.
+ *
+ * External services: Clerk (auth), Prisma (DB).
+ *
+ * Gotcha: `SECTION_NAV_ITEMS` defined here differ from the duplicate constant
+ * inside `AdminSidebar.tsx`. The layout passes its own array as a prop, so the
+ * sidebar's local constant is silently overridden.
+ */
 import type { Metadata } from 'next'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'

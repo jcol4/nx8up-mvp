@@ -1,3 +1,7 @@
+/**
+ * Panel — themed content card for both creator and dashboard contexts.
+ * Renders an optional title row with heading, link, and headerRight slot.
+ */
 import Link from "next/link";
 
 type Props = {

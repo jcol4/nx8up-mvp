@@ -1,3 +1,50 @@
+/**
+ * Creator profile server actions.
+ *
+ * Provides the following operations:
+ *
+ * - **getCreatorProfile** — reads the creator's profile from a hybrid source:
+ *   structured fields (platform, location, game_category, etc.) come from the
+ *   `content_creators` DB row; displayName, bio, categories, and urls come
+ *   from Clerk `publicMetadata`.
+ *
+ * - **updateCreatorProfile** — legacy flat-form save; validates URLs, upserts
+ *   the DB row, and updates Clerk `publicMetadata`.
+ *
+ * - **updateCreatorProfileWizard** — wizard-based save; upserts the DB row
+ *   with all 7-step fields and recomputes `creator_size` based on follower
+ *   counts.
+ *
+ * - **deleteCreatorProfile** — clears structured fields from both DB and
+ *   Clerk metadata (display name, bio, categories, etc.).
+ *
+ * - **unlinkTwitchAccount** / **unlinkYouTubeAccount** — nulls out the
+ *   respective OAuth fields on the DB row.
+ *
+ * - **refreshTwitchDataIfStale** — re-fetches Twitch stats (followers, VOD
+ *   views) from the Twitch API when the last sync is older than the staleness
+ *   window. Recomputes `creator_size` and CTR aggregate afterward.
+ *
+ * - **refreshYouTubeDataIfStale** — re-fetches YouTube channel stats; also
+ *   attempts to refresh watch-time and member-count data using the stored
+ *   OAuth access token (refreshing it via the Google token endpoint if expired).
+ *
+ * Commented-out functions (`linkTwitchAccount`, `linkYouTubeAccount`) are
+ * the manual-link flows that predate OAuth; they are preserved as reference.
+ *
+ * External services: Clerk (auth + publicMetadata), Prisma/PostgreSQL,
+ * Twitch Helix API, YouTube Data API v3, YouTube Analytics API,
+ * Google OAuth2 token endpoint.
+ *
+ * Env vars:
+ *  - `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`
+ *  - `YOUTUBE_API_KEY`
+ *  - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+ *
+ * Gotcha: `refreshYouTubeDataIfStale` performs an extra DB query inside the
+ * `creator_size` computation within the main update call (lines ~666-669),
+ * resulting in two sequential DB hits. This could be collapsed into one.
+ */
 'use server'
 
 import { auth, clerkClient } from '@clerk/nextjs/server'
@@ -21,6 +68,11 @@ import {
 } from '@/lib/youtube'
 import { decryptToken, encryptToken } from '@/lib/token-encryption'
 
+/**
+ * Validates a URL string, prepending `https://` if no protocol is present.
+ * Accepts `localhost` and any hostname containing a dot.
+ * Returns `false` for empty, null-ish, or malformed inputs.
+ */
 function isValidUrl(s: string): boolean {
   const trimmed = s?.trim()
   if (!trimmed) return false
@@ -35,11 +87,24 @@ function isValidUrl(s: string): boolean {
   }
 }
 
+/**
+ * Joins non-empty city, state, and country values with ", " to produce a
+ * human-readable location string stored in the `location` DB column.
+ */
 function formatLocationString(city: string, state: string, country: string): string {
   const parts = [city.trim(), state.trim(), country.trim()].filter(Boolean)
   return parts.join(', ')
 }
 
+/**
+ * Fetches the current creator profile for the authenticated user.
+ * Data is merged from two sources:
+ *  - Clerk `publicMetadata`: displayName, bio, categories, urls.
+ *  - `content_creators` DB row: all structured fields (location, platform,
+ *    language, audience demographics, etc.).
+ *
+ * Returns `null` for unauthenticated users.
+ */
 export async function getCreatorProfile(): Promise<CreatorProfile | null> {
   const { userId } = await auth()
   if (!userId) return null
@@ -95,6 +160,12 @@ export async function getCreatorProfile(): Promise<CreatorProfile | null> {
   }
 }
 
+/**
+ * Saves the legacy flat-form profile. Validates all provided URLs, upserts
+ * the `content_creators` DB row, and writes displayName/bio/categories/urls
+ * to Clerk `publicMetadata`. Revalidates `/creator`, `/creator/profile`, and
+ * `/admin` on success.
+ */
 export async function updateCreatorProfile(data: CreatorProfile): Promise<{ error?: string }> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
@@ -177,6 +248,12 @@ export async function updateCreatorProfile(data: CreatorProfile): Promise<{ erro
   }
 }
 
+/**
+ * Wizard save action — upserts the full `CreatorProfileDraft` into the DB
+ * and writes displayName/bio to Clerk `publicMetadata`. Also recomputes
+ * `creator_size` from the latest follower counts stored in the DB.
+ * Called on every "Save & Continue" step in the wizard.
+ */
 export async function updateCreatorProfileWizard(data: import('./_shared').CreatorProfileDraft): Promise<{ error?: string }> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
@@ -263,6 +340,14 @@ export async function updateCreatorProfileWizard(data: import('./_shared').Creat
   }
 }
 
+/**
+ * Clears the creator's profile data from both Clerk `publicMetadata` and the
+ * `content_creators` DB row. OAuth connection fields (twitch_id, etc.) are
+ * NOT cleared — only the manually entered profile fields.
+ *
+ * Gotcha: uses `updateMany` (not `update`) in case no DB row exists yet for
+ * the user, which silently no-ops rather than throwing.
+ */
 export async function deleteCreatorProfile(): Promise<{ error?: string }> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
@@ -365,7 +450,11 @@ export async function linkTwitchAccount(formData: FormData) {
 }
 */
 
-// Unlink Twitch account
+/**
+ * Unlinks the creator's Twitch account by nulling all Twitch fields on the
+ * `content_creators` DB row. Does NOT remove Twitch stats from the DB —
+ * follower counts and VOD views are left as-is until overwritten on next link.
+ */
 export async function unlinkTwitchAccount() {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
@@ -391,6 +480,18 @@ export async function unlinkTwitchAccount() {
   }
 }
 
+/**
+ * Re-fetches Twitch stats for the creator identified by `userId` when the
+ * last sync timestamp is considered stale (determined by `isTwitchDataStale`).
+ *
+ * Lookback window for VOD stats: 60 days for partners, 14 days for others.
+ *
+ * On success: updates followers, broadcaster type, profile image, avg VOD
+ * views, `twitch_synced_at`, and recomputes `creator_size` and CTR aggregate.
+ *
+ * Swallows all errors — failures are logged but do not surface to the user.
+ * This function is called fire-and-forget from the profile page.
+ */
 export async function refreshTwitchDataIfStale(userId: string) {
   try {
     const creator = await prisma.content_creators.findUnique({
@@ -511,6 +612,10 @@ export async function linkYouTubeAccount(formData: FormData) {
 }
 */
 
+/**
+ * Unlinks the creator's YouTube channel by nulling all YouTube fields on the
+ * `content_creators` DB row.
+ */
 export async function unlinkYouTubeAccount() {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
@@ -585,6 +690,21 @@ async function getValidYouTubeAccessToken(
   return newAccessToken
 }
 
+/**
+ * Re-fetches YouTube channel stats for the creator identified by `userId`
+ * when the last sync is stale (determined by `isYouTubeDataStale`).
+ *
+ * If the creator has a stored OAuth access token, also fetches:
+ *  - 30-day watch-time hours (YouTube Analytics API).
+ *  - Channel member count (YouTube Data API members endpoint).
+ *  The access token is transparently refreshed via `getValidYouTubeAccessToken`
+ *  when expired, and the new token is persisted to the DB.
+ *
+ * Requires `YOUTUBE_API_KEY` to be set; returns early otherwise.
+ * Swallows all errors — failures are logged but do not surface to the user.
+ *
+ * Env vars: `YOUTUBE_API_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
+ */
 export async function refreshYouTubeDataIfStale(userId: string) {
   if (!process.env.YOUTUBE_API_KEY) return
   try {

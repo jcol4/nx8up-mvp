@@ -1,3 +1,17 @@
+/**
+ * Step 1 — Basics
+ *
+ * First step of the campaign creation wizard. Collects:
+ * - Campaign name (required, max 80 chars)
+ * - Brand name (optional)
+ * - Product/service name (optional)
+ * - Product type (required, selected via NXSelect)
+ * - Campaign goal / objective (required, one of: awareness, engagement, traffic, conversions)
+ * - Target platforms (required, multi-select toggle buttons)
+ *
+ * Validation errors are passed in from the parent `NewCampaignForm` and displayed
+ * below the last form section.
+ */
 'use client'
 
 import FormInput from '@/components/ui/FormInput'

@@ -19,42 +19,77 @@
 
 import { SYNONYMS } from './tag-synonyms'
 
+/** All targeting criteria defined by a sponsor when creating a campaign. */
 export type CampaignCriteria = {
+  /** Platforms required (e.g. ["twitch", "youtube"]). Empty = any platform. */
   platform: string[]
+  /** Minimum combined follower/subscriber count across all platforms. null = no requirement. */
   min_subs_followers: number | null
+  /** Minimum combined average concurrent viewers across all platforms. null = no requirement. */
   min_avg_viewers: number | null
+  /** Minimum click-through / engagement rate (%). Accepts Prisma Decimal or plain number. null = no requirement. */
   min_engagement_rate: { toNumber(): number } | number | null
+  /** Lower bound of target audience age range. null = no lower bound. */
   min_audience_age: number | null
+  /** Upper bound of target audience age range. null = no upper bound. */
   max_audience_age: number | null
+  /** Required audience country/region tags (e.g. ["US", "Canada"]). Empty = any location. */
   required_audience_locations: string[]
+  /** Target audience genders (e.g. ["Male", "Female", "All"]). Empty = any gender. */
   target_genders: string[]
+  /** Audience interest tags the campaign wants to reach. Empty = any interests. */
   target_interests: string[]
+  /** Creator archetype tags the campaign prefers (e.g. ["Streamer", "YouTuber"]). */
   creator_types: string[]
+  /** Acceptable creator size tiers (e.g. ["micro", "mid"]). */
   creator_sizes: string[]
+  /** Game/genre category tags required (e.g. ["fps", "valorant"]). */
   game_category: string[]
+  /** Content format tags required (e.g. ["let's play", "review"]). */
   content_type: string[]
+  /** Campaign delivery format (e.g. "Sponsored segment"). null = any type. */
   campaign_type: string | null
+  /** Product/brand category (e.g. "Gaming Peripherals"). null = any type. */
   product_type: string | null
 }
 
+/** Subset of a creator's profile fields used by the matching engine. */
 export type CreatorForMatching = {
+  /** Platforms the creator is active on (e.g. ["twitch", "youtube"]). */
   platform: string[]
+  /** Twitch follower count. null if not connected. */
   subs_followers: number | null
+  /** YouTube subscriber count. null if not connected. */
   youtube_subscribers: number | null
+  /** Twitch average VOD/clip views. null if not connected. */
   average_vod_views: number | null
+  /** YouTube average views per video. null if not connected. */
   youtube_avg_views: number | null
+  /** Creator's engagement/click-through rate (%). Accepts Prisma Decimal or plain number. */
   engagement_rate: { toNumber(): number } | number | null
+  /** Lower bound of creator's self-reported audience age range. */
   audience_age_min: number | null
+  /** Upper bound of creator's self-reported audience age range. */
   audience_age_max: number | null
+  /** Country/region tags describing where the creator's audience is located. */
   audience_locations: string[]
+  /** Audience gender breakdown tags (e.g. ["Male", "Female"]). */
   audience_gender: string[]
+  /** Interest/topic tags describing the creator's audience. */
   audience_interests: string[]
+  /** Creator archetype tags (e.g. ["Streamer", "Educator"]). */
   creator_types: string[]
+  /** Size tier: "nano" | "micro" | "mid" | "large". null if unset. */
   creator_size: string | null
+  /** Game/genre category tags on the creator's profile. */
   game_category: string[]
+  /** Content format tags on the creator's profile. */
   content_type: string[]
+  /** Campaign delivery formats the creator prefers to work with. */
   preferred_campaign_types: string[]
+  /** Product/brand categories the creator prefers to promote. */
   preferred_product_types: string[]
+  /** Whether the creator has marked themselves as open to new sponsorships. */
   is_available: boolean
 }
 
@@ -67,6 +102,7 @@ export type MatchResult = {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+/** Unwraps a Prisma Decimal object or plain number to a JS number. Returns null if input is null. */
 function toNum(v: { toNumber(): number } | number | null): number | null {
   if (v == null) return null
   return typeof v === 'object' ? v.toNumber() : v
@@ -141,6 +177,22 @@ function ageOverlapRatio(
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 
+/**
+ * Score a creator against a campaign's full targeting specification.
+ *
+ * Returns a MatchResult with:
+ *  - `eligible`: false if any hard-block criterion fails
+ *  - `score`: 0–100 weighted average of all soft criteria that the campaign specifies
+ *  - `reasons`: human-readable hard-block explanations shown to the creator
+ *  - `notes`: soft-mismatch hints (informational only, do not block)
+ *
+ * Score weight budget (only criteria the campaign actually specifies contribute):
+ *  Platform         20 pts   Min followers     15 pts   Min avg viewers  15 pts
+ *  CTR              10 pts   Creator types      8 pts   Creator size      7 pts
+ *  Game categories   7 pts   Content types      5 pts   Audience location 5 pts
+ *  Audience age      4 pts   Audience interests 4 pts   Campaign type     3 pts
+ *  Product type      3 pts   Audience gender    3 pts
+ */
 export function matchCreatorToCampaign(
   creator: CreatorForMatching,
   campaign: CampaignCriteria,

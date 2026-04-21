@@ -1,3 +1,28 @@
+/**
+ * ApplyButton — client component that renders the campaign application UI.
+ *
+ * Behaviour depends on eligibility:
+ *  - **Ineligible** → disabled "Requirements Not Met" button with reason list.
+ *  - **Eligible, not open** → "Apply to This Campaign" button that opens the
+ *    application form inline (replaces the button area, not a modal).
+ *
+ * The application form collects:
+ *  - Pitch message (required, max 1000 chars).
+ *  - Creator location (pre-filled from profile; editable).
+ *  - Audience age range (pre-filled from profile; editable).
+ *  - Audience locations (multi-select; pre-filled from profile).
+ *  - Media types (multi-select from `acceptedMediaTypes`; required if non-empty).
+ *
+ * Pre-filled profile values show a "Reset to profile values" link when the
+ * user has edited them.
+ *
+ * Legal age restriction warnings are shown as an orange notice when present.
+ *
+ * Validation quirk: the media-type required check runs after `setLoading(true)`
+ * (line ~74–77), which means `loading` is true briefly before the early return.
+ * The button won't appear stuck because `setLoading(false)` is not called in
+ * that branch, but the error state is set correctly.
+ */
 'use client'
 
 import { useState } from 'react'

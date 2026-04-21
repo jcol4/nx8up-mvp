@@ -1,3 +1,4 @@
+/** Logo — nx8up logo image wrapped in a Next.js Link. Three size presets: sm/md/lg. */
 import Image from 'next/image'
 import Link from 'next/link'
 

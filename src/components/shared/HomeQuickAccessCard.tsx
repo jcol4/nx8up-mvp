@@ -1,3 +1,4 @@
+/** HomeQuickAccessCard — branded link card used on the public home page quick-access grid. */
 import Link from "next/link";
 
 type Props = {

@@ -1,3 +1,7 @@
+/**
+ * FormTextarea — themed <textarea> wrapper with two visual variants.
+ * Accepts all native <textarea> attributes via spread. Min height 80px, vertically resizable.
+ */
 import type { TextareaHTMLAttributes } from "react";
 
 const BASE_CLASS =

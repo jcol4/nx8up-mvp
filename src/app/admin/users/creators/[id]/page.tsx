@@ -1,3 +1,25 @@
+/**
+ * Admin Creator Detail page (`/admin/users/creators/[id]`).
+ *
+ * Displays comprehensive information about a single `content_creators` record,
+ * including:
+ *  - Profile stats (followers, avg VOD views, engagement rate / CTR, age,
+ *    location, languages, game tags, content categories)
+ *  - Connected platform cards for Twitch and YouTube with sync metadata
+ *  - All campaign applications with status, sponsor, and message preview
+ *
+ * The `id` param is the Prisma `content_creators.id` UUID (not the Clerk user
+ * ID). Returns a 404 (`notFound()`) if the record does not exist.
+ *
+ * The display handle resolves as: Twitch username → YouTube handle → email.
+ *
+ * External services: Clerk (auth), Prisma (content_creators,
+ * campaign_applications, campaigns, sponsors).
+ *
+ * Gotcha: the field labeled "CTR" in the UI actually maps to
+ * `creator.engagement_rate`, which is the engagement rate, not the
+ * click-through rate. The label is misleading.
+ */
 import { auth } from '@clerk/nextjs/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'

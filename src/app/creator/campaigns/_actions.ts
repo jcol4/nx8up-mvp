@@ -1,3 +1,44 @@
+/**
+ * Creator campaigns server actions.
+ *
+ * - **getCreatorOAuthStatus** — checks whether the creator has at least one
+ *   verified platform (Twitch or YouTube) and a completed Stripe Connect
+ *   account. Used to gate access to the campaigns page.
+ *
+ * - **getOpenCampaigns** — simple list of live, non-direct-invite campaigns
+ *   (used by other parts of the app; no eligibility filtering).
+ *
+ * - **getOpenCampaignsWithEligibility** — fetches live campaigns and runs
+ *   `matchCreatorToCampaign` against the authenticated creator's profile.
+ *   Filters out campaigns with score < 75 or with a legal age restriction
+ *   the creator's audience does not satisfy.
+ *
+ * - **getLaunchedCampaigns** — fetches campaigns in "launched" status and
+ *   attaches the creator's own application (if any) for status display.
+ *
+ * - **getCampaignById** — single-campaign lookup including sponsor name and
+ *   application count.
+ *
+ * - **getMyApplication** — looks up the creator's application for a specific
+ *   campaign by the composite unique key `campaign_id + creator_id`.
+ *
+ * - **applyToCampaign** — validates eligibility, checks for duplicates, creates
+ *   the application, and sends a notification to the sponsoring company.
+ *   Also enforces legal age restrictions before creating the application.
+ *
+ * - **getMyInvitations** — returns all "invited" applications for the current
+ *   creator where the campaign is still live or launched.
+ *
+ * - **respondToInvitation** — accept or decline a direct invite. Accepting
+ *   sets status to "accepted" and notifies the sponsor.
+ *
+ * External services: Prisma/PostgreSQL, Clerk (auth).
+ *
+ * Gotcha: `getOpenCampaignsWithEligibility` also filters inside `.filter()`
+ * after the `.map()` (the legal age check at line ~85). This means the initial
+ * score filter (score < 75) and the legal check run as separate passes over
+ * the same array. Both could be merged into one `.filter()` call.
+ */
 'use server'
 
 import { auth } from '@clerk/nextjs/server'
@@ -7,6 +48,10 @@ import { matchCreatorToCampaign } from '@/lib/matching'
 import { createNotification } from '@/lib/notifications'
 import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 
+/**
+ * Returns whether the creator has a verified platform connection and a
+ * complete Stripe Connect account. Used to gate campaign page access.
+ */
 export async function getCreatorOAuthStatus(): Promise<{ verified: boolean; stripeReady: boolean }> {
   const { userId } = await auth()
   if (!userId) return { verified: false, stripeReady: false }
@@ -41,6 +86,11 @@ const CREATOR_MATCHING_SELECT = {
   is_available: true,
 } as const
 
+/**
+ * Fetches live, publicly-available campaigns ordered by newest first.
+ * No eligibility filtering — use `getOpenCampaignsWithEligibility` for
+ * creator-facing display.
+ */
 export async function getOpenCampaigns(limit = 10) {
   return prisma.campaigns.findMany({
     where: { status: 'live', is_direct_invite: false },
@@ -53,6 +103,15 @@ export async function getOpenCampaigns(limit = 10) {
   })
 }
 
+/**
+ * Fetches live campaigns and scores them against the authenticated creator's
+ * profile using `matchCreatorToCampaign`. Filters out campaigns where the
+ * score is below 75 or the legal age restriction is not met by the creator's
+ * declared audience age minimum.
+ *
+ * When the user is not authenticated, all campaigns are returned with
+ * score 100 / eligible = true (fallback for unauthenticated browsing).
+ */
 export async function getOpenCampaignsWithEligibility(limit = 50) {
   const { userId } = await auth()
 
@@ -90,6 +149,12 @@ export async function getOpenCampaignsWithEligibility(limit = 50) {
     })
 }
 
+/**
+ * Fetches all campaigns in "launched" status and annotates each with the
+ * authenticated creator's own application (status field only), if one exists.
+ * The application is looked up by `creator_id` via a nested include with
+ * `take: 1`.
+ */
 export async function getLaunchedCampaigns(limit = 50) {
   const { userId } = await auth()
 
@@ -159,6 +224,20 @@ export type ApplicationData = {
   mediaTypes?: string[]
 }
 
+/**
+ * Applies the authenticated creator to a campaign.
+ *
+ * Validation order:
+ *  1. Creator profile must exist.
+ *  2. Campaign must exist and be in "live" status.
+ *  3. Legal age restriction (if set) must be satisfied by the creator's
+ *     declared `audience_age_min`.
+ *  4. `matchCreatorToCampaign` must return `eligible = true`.
+ *  5. No existing application for this creator + campaign.
+ *
+ * On success, creates the application with status "pending" and sends a
+ * notification to the sponsoring company's Clerk user.
+ */
 export async function applyToCampaign(
   campaignId: string,
   data: ApplicationData
@@ -281,6 +360,12 @@ export async function getMyInvitations() {
   return applications
 }
 
+/**
+ * Accepts or declines a direct invite (`application.status === "invited"`).
+ * Validates that the application belongs to the authenticated creator and that
+ * the campaign is funded (not "pending_payment"). Accepting sends a
+ * notification to the sponsor.
+ */
 export async function respondToInvitation(
   applicationId: string,
   response: 'accept' | 'decline',

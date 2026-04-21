@@ -1,9 +1,15 @@
+/**
+ * ProgressBar — accessible bar with ARIA progressbar role.
+ * Fill color is controlled by variant; "custom" uses className for the fill element.
+ */
 type Props = {
+  /** Current value — compared against max to compute percentage. */
   value: number;
   max?: number;
   /** "gradient" (yellow→green), "purple", or "custom" (use className for fill) */
   variant?: "gradient" | "purple" | "custom";
   height?: "sm" | "md";
+  /** Applied to the fill div when variant="custom". */
   className?: string;
 };
 

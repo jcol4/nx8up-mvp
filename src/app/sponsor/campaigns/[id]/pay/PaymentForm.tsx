@@ -1,3 +1,27 @@
+/**
+ * PaymentForm — Stripe Elements wrapper for campaign funding.
+ *
+ * Composed of two components:
+ * - `CheckoutForm` (internal) — the actual Stripe `<PaymentElement>` form with
+ *   submit handling. Supports both card (synchronous completion) and ACH bank
+ *   transfer (async, enters `processing` state). Redirects the browser manually
+ *   after payment rather than relying entirely on Stripe's redirect mechanism,
+ *   so the campaign status can be updated server-side on the return visit.
+ * - `PaymentForm` (exported) — wraps CheckoutForm in a Stripe `<Elements>`
+ *   provider with the campaign-specific `clientSecret` and the dark-mode
+ *   Stripe theme configured to match the nx8up dashboard design system.
+ *
+ * Payment method tab order respects `preferredPaymentMethod`: ACH-preferred
+ * sponsors see `us_bank_account` first.
+ *
+ * Gotcha: When `redirect: 'if_required'` is used with `confirmPayment`, card
+ * payments resolve synchronously and the `paymentIntent` object is available.
+ * ACH payments may also resolve here with `status: 'processing'`. Redirect-based
+ * flows (some ACH paths) are handled by Stripe before the promise resolves.
+ *
+ * External services: Stripe JS SDK (client-side).
+ * Env vars: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (must be set at build time).
+ */
 'use client'
 
 import { useState } from 'react'

@@ -1,3 +1,46 @@
+/**
+ * @file sign-in/[[...sign-in]]/page.tsx
+ *
+ * Custom Clerk sign-in page for the nx8up platform. Uses the low-level
+ * Clerk `useSignIn` hook instead of Clerk's pre-built `<SignIn>` component
+ * so that the UI can fully match the platform's design system.
+ *
+ * Rendered screens (controlled by local state):
+ *   1. Main sign-in form  – email/username + password.
+ *   2. Email code screen  – shown when Clerk requires a second factor via
+ *      `email_code` strategy (MFA).
+ *   3. Opt-out prompt     – after successful MFA, asks the user whether to
+ *      skip email verification on this device in future sessions. The
+ *      preference is persisted to `localStorage` under the key
+ *      `"nx8up_verificationOptOut"`.
+ *
+ * Post-sign-in redirect:
+ *   Role is fetched from a server action (`getUserRole`) and the user is
+ *   sent to /admin, /creator, /sponsor, or / accordingly. A 150 ms delay
+ *   is introduced before the role fetch to allow the Clerk session cookie
+ *   to propagate.
+ *
+ * External services:
+ *   - Clerk (`useSignIn`, `useSignIn.setActive`) – authentication.
+ *   - `getUserRole` server action (`@/lib/get-role`) – role-based redirect.
+ *   - `localStorage` – opt-out preference (client-side only, guarded by
+ *     `typeof window !== 'undefined'`).
+ *
+ * Gotchas:
+ *   - `Image` is imported from 'next/image' but never used in the JSX.
+ *   - `EmailCodeFactor` is imported from '@clerk/types' but never referenced.
+ *   - The `needs_second_factor` branch in `handleSubmit` has a comment
+ *     placeholder (`// ... MFA logic unchanged`) but never sets
+ *     `showEmailCode` to `true`, so the email code screen is effectively
+ *     unreachable via the normal password flow — the MFA path silently falls
+ *     through and `redirectByRole()` is called without an active session,
+ *     which will fail.
+ *   - `redirectByRole` is called unconditionally after the try/catch in
+ *     `handleSubmit` even when sign-in failed (error set). This triggers an
+ *     extra server-action call on every failed sign-in attempt and, because
+ *     there is no active session, `getUserRole` will return null and the
+ *     router will push to `/`.
+ */
 'use client'
 
 import * as React from 'react'
@@ -22,6 +65,11 @@ export default function SignInPage() {
   const [pendingSessionId, setPendingSessionId] = React.useState<string | null>(null)
   const router = useRouter()
 
+  /**
+   * Fetches the signed-in user's role from the server and pushes the
+   * appropriate route. The 150 ms delay gives the Clerk session cookie time
+   * to be set in the browser before the server action reads it.
+   */
   // Fetch role from server action and redirect accordingly
   const redirectByRole = async () => {
     await new Promise(resolve => setTimeout(resolve, 150))
@@ -32,6 +80,16 @@ export default function SignInPage() {
     else router.push('/')
   }
 
+  /**
+   * Handles the user's response to the "skip verification next time?" prompt
+   * that appears after a successful MFA sign-in.
+   *
+   * @param optOut - `true` if the user wants to skip email verification on
+   *   this device in future; `false` to keep requiring it.
+   *
+   * Persists the choice to `localStorage` (key: `nx8up_verificationOptOut`),
+   * then activates the pending Clerk session and redirects by role.
+   */
   const handleOptOutChoice = async (optOut: boolean) => {
     if (typeof window !== 'undefined') {
       try {
@@ -44,6 +102,14 @@ export default function SignInPage() {
     await redirectByRole()
   }
 
+  /**
+   * Handles the main password sign-in form submission.
+   *
+   * On a `complete` status, activates the Clerk session and then calls
+   * `redirectByRole`. On `needs_second_factor`, the MFA branch is intended
+   * to show the email code screen (currently incomplete — see file-level
+   * gotchas). Any Clerk API errors are mapped to user-friendly messages.
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isLoaded) return
@@ -80,6 +146,14 @@ export default function SignInPage() {
     await redirectByRole()
   }
 
+  /**
+   * Handles submission of the MFA email verification code form.
+   *
+   * Calls `signIn.attemptSecondFactor` with strategy `email_code`. On
+   * success, stores the pending session ID and shows the opt-out prompt
+   * rather than immediately activating the session — this lets the user
+   * decide on the verification preference first.
+   */
   const handleEmailCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isLoaded) return

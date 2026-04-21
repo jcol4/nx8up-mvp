@@ -1,3 +1,8 @@
+/**
+ * YouTubeConnect — YouTube channel link/unlink card for the creator profile page.
+ * Reads OAuth result from URL search params (?youtube_linked=1 / ?youtube_error=...) on mount
+ * and clears them with router.replace. Shows subscriber count, avg views, and top categories.
+ */
 'use client'
 
 import * as React from 'react'

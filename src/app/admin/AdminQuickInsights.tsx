@@ -1,3 +1,14 @@
+/**
+ * Admin dashboard widget — Quick Insights.
+ *
+ * Renders a short list of headline platform metrics (creators verified,
+ * pending payouts, weekly views) with trend indicators. Links to
+ * `/admin/reports` for detailed reporting.
+ *
+ * Gotcha: all metric values ("25 Creators Verified +12%", "7 Pending Payouts
+ * $4,200", "285K Views This Week +8%") are **hardcoded mock data** and are not
+ * derived from the database or any analytics service.
+ */
 import Link from 'next/link'
 import { DashboardPanel, InsightRow } from '@/components/dashboard'
 

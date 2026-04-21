@@ -1,3 +1,4 @@
+/** BackLink — small "← Back" navigation link styled for the dashboard context. */
 import Link from "next/link";
 
 type Props = {

@@ -1,3 +1,15 @@
+/**
+ * Admin dashboard widget — Creator Academy.
+ *
+ * Displays a static set of featured lesson cards with a level badge and
+ * achievement pills. Links to `/admin/academy` for the full lesson listing.
+ *
+ * Gotcha: `LESSONS` is imported from `@/lib/academy-lessons` but is **never
+ * used** in this component. `LESSON_CARDS` is a separate static array of mock
+ * data. The import should either be removed or the component should derive its
+ * cards from `LESSONS`. The level ("Lvl 3 Rising Star") and badge counts are
+ * also hardcoded.
+ */
 import Link from 'next/link'
 import { DashboardPanel, CardWithImage } from '@/components/dashboard'
 import { LESSONS } from '@/lib/academy-lessons'

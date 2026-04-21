@@ -1,3 +1,22 @@
+/**
+ * Step 3 — Creators
+ *
+ * Lets the sponsor choose between two campaign modes:
+ *
+ * 1. Open Applications — creators browse and apply; sponsor reviews and accepts.
+ *    Sub-fields: creator type (competitive gamer / streamer / content creator),
+ *    creator size (nano / micro / mid / large), min followers, min CTR.
+ *
+ * 2. Direct Invite — sponsor picks a single creator from the available list.
+ *    The selected creator receives a DIRECT_INVITE notification. Only creators
+ *    with `is_available: true` appear in the list.
+ *
+ * `availableCreators` is fetched server-side on the parent page and passed as a
+ * prop (max 200 records, ordered by Twitch followers desc). The client-side
+ * search filters this list by handle/name.
+ *
+ * `getTotalFollowers` sums Twitch + YouTube followers for display purposes.
+ */
 'use client'
 
 import { useState } from 'react'
