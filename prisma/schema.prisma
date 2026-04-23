@@ -285,3 +285,41 @@ model NotificationPreference {
   userId String @unique
   prefs  Json
 }
+
+model Survey {
+  id          String           @id @default(cuid())
+  title       String
+  description String?
+  status      String           @default("draft")
+  targetRoles String[]
+  createdAt   DateTime         @default(now())
+  questions   SurveyQuestion[]
+  responses   SurveyResponse[]
+
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+}
+
+model SurveyQuestion {
+  id       String @id @default(cuid())
+  surveyId String
+  order    Int
+  text     String
+  options  String[]
+  survey   Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  @@index([surveyId, order])
+}
+
+model SurveyResponse {
+  id          String   @id @default(cuid())
+  surveyId    String
+  userId      String
+  role        String
+  answers     Json
+  submittedAt DateTime @default(now())
+  survey      Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  @@unique([surveyId, userId])
+  @@index([surveyId])
+}

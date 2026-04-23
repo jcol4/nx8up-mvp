@@ -1,7 +1,9 @@
 /**
  * NotificationBell — header bell icon with unread count badge and dropdown panel.
  * Polls /api/notifications/count every 60s and on window focus.
- * Fetches the full list on every open (not just first open — loaded flag is effectively unused).
+ * Fetches the full notification list and active survey on every panel open.
+ * When an active survey exists it is pinned above notifications and the badge increments by 1.
+ * Clicking "Take Survey" swaps the notification list for an inline survey form.
  */
 'use client'
 
@@ -22,6 +24,20 @@ type Notification = {
   createdAt: string
 }
 
+type SurveyQuestion = {
+  id: string
+  text: string
+  options: string[]
+  order: number
+}
+
+type ActiveSurvey = {
+  id: string
+  title: string
+  description: string | null
+  questions: SurveyQuestion[]
+}
+
 function isToday(dateStr: string): boolean {
   const d = new Date(dateStr)
   const now = new Date()
@@ -39,6 +55,12 @@ export default function NotificationBell() {
   const [unread, setUnread] = useState(0)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loaded, setLoaded] = useState(false)
+
+  const [activeSurvey, setActiveSurvey] = useState<ActiveSurvey | null>(null)
+  const [surveyView, setSurveyView] = useState(false)
+  const [surveyAnswers, setSurveyAnswers] = useState<Record<string, string>>({})
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   const fetchCount = useCallback(async () => {
     try {
@@ -65,6 +87,18 @@ export default function NotificationBell() {
     }
   }, [])
 
+  const fetchActiveSurvey = useCallback(async () => {
+    try {
+      const res = await fetch('/api/survey/active', { cache: 'no-store' })
+      if (res.ok) {
+        const data = await res.json()
+        setActiveSurvey(data.survey ?? null)
+      }
+    } catch {
+      // non-fatal
+    }
+  }, [])
+
   useEffect(() => {
     fetchCount()
     const interval = setInterval(fetchCount, 60_000)
@@ -76,11 +110,14 @@ export default function NotificationBell() {
   }, [fetchCount])
 
   useEffect(() => {
-    if (open && !loaded) {
+    if (open) {
       fetchNotifications()
+      fetchActiveSurvey()
     }
-    if (open && loaded) {
-      fetchNotifications()
+    if (!open) {
+      setSurveyView(false)
+      setSurveyAnswers({})
+      setSubmitError('')
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
@@ -121,9 +158,43 @@ export default function NotificationBell() {
     if (n.link) router.push(n.link)
   }
 
+  const handleSurveyAnswer = (questionId: string, option: string) => {
+    setSurveyAnswers(prev => ({ ...prev, [questionId]: option }))
+  }
+
+  const handleSurveySubmit = async () => {
+    if (!activeSurvey) return
+    setSubmitError('')
+    const unanswered = activeSurvey.questions.filter(q => !surveyAnswers[q.id])
+    if (unanswered.length > 0) {
+      setSubmitError('Please answer all questions before submitting.')
+      return
+    }
+    setSubmitting(true)
+    try {
+      const res = await fetch(`/api/survey/${activeSurvey.id}/respond`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answers: surveyAnswers }),
+      })
+      if (res.ok) {
+        setActiveSurvey(null)
+        setSurveyView(false)
+        setSurveyAnswers({})
+      } else {
+        setSubmitError('Failed to submit. Please try again.')
+      }
+    } catch {
+      setSubmitError('Something went wrong. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   const todayItems = notifications.filter((n) => isToday(n.createdAt))
   const earlierItems = notifications.filter((n) => !isToday(n.createdAt))
   const hasRead = notifications.some((n) => n.read)
+  const displayedUnread = unread + (activeSurvey ? 1 : 0)
 
   return (
     <div className="relative" ref={panelRef}>
@@ -137,9 +208,9 @@ export default function NotificationBell() {
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
         </svg>
-        {unread > 0 && (
+        {displayedUnread > 0 && (
           <span className="absolute top-1 right-1 min-w-[18px] h-[18px] rounded-full bg-[#00c8ff] text-[10px] font-bold text-black flex items-center justify-center px-1 pointer-events-none">
-            {unread > 99 ? '99+' : unread}
+            {displayedUnread > 99 ? '99+' : displayedUnread}
           </span>
         )}
       </button>
@@ -154,9 +225,11 @@ export default function NotificationBell() {
           }}
         >
           <div className="flex items-center justify-between p-3 border-b dash-border flex-shrink-0">
-            <span className="text-sm font-semibold dash-text-bright">Notifications</span>
+            <span className="text-sm font-semibold dash-text-bright">
+              {surveyView ? 'Survey' : 'Notifications'}
+            </span>
             <div className="flex items-center gap-3">
-              {hasRead && (
+              {!surveyView && hasRead && (
                 <button
                   type="button"
                   onClick={handleClearRead}
@@ -165,7 +238,7 @@ export default function NotificationBell() {
                   Clear read
                 </button>
               )}
-              {unread > 0 && (
+              {!surveyView && unread > 0 && (
                 <button
                   type="button"
                   onClick={handleMarkAllRead}
@@ -177,40 +250,128 @@ export default function NotificationBell() {
             </div>
           </div>
 
-          <div className="overflow-y-auto flex-1">
-            {notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                <svg className="w-10 h-10 dash-text-muted mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-                <p className="text-sm dash-text-muted">You&apos;re all caught up</p>
-                <p className="text-xs dash-text-muted opacity-60 mt-1">No notifications yet</p>
+          {surveyView && activeSurvey ? (
+            <div className="overflow-y-auto flex-1 p-4 space-y-4">
+              <div>
+                <p className="text-sm font-medium dash-text-bright">{activeSurvey.title}</p>
+                {activeSurvey.description && (
+                  <p className="text-xs dash-text-muted mt-1">{activeSurvey.description}</p>
+                )}
               </div>
-            ) : (
-              <>
-                {todayItems.length > 0 && (
-                  <div>
-                    <p className="px-3 pt-2 pb-1 text-[10px] font-semibold dash-text-muted uppercase tracking-wider">Today</p>
-                    <NotificationList
-                      items={todayItems}
-                      onDelete={handleDelete}
-                      onNotificationClick={handleNotificationClick}
-                    />
+
+              <div className="space-y-4">
+                {activeSurvey.questions.map((q, idx) => (
+                  <div key={q.id} className="space-y-2">
+                    <p className="text-xs font-medium dash-text-bright">
+                      {idx + 1}. {q.text}
+                    </p>
+                    <div className="space-y-1.5">
+                      {q.options.map(opt => (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => handleSurveyAnswer(q.id, opt)}
+                          className={`w-full text-left px-3 py-2 rounded-lg text-xs border transition-colors ${
+                            surveyAnswers[q.id] === opt
+                              ? 'border-[#00c8ff]/60 bg-[#00c8ff]/10 text-[#00c8ff]'
+                              : 'dash-border bg-white/5 dash-text-muted hover:bg-white/10 hover:dash-text-bright'
+                          }`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                )}
-                {earlierItems.length > 0 && (
-                  <div>
-                    <p className="px-3 pt-2 pb-1 text-[10px] font-semibold dash-text-muted uppercase tracking-wider">Earlier</p>
-                    <NotificationList
-                      items={earlierItems}
-                      onDelete={handleDelete}
-                      onNotificationClick={handleNotificationClick}
-                    />
+                ))}
+              </div>
+
+              {submitError && (
+                <p className="text-xs text-red-400">{submitError}</p>
+              )}
+
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleSurveySubmit}
+                  disabled={submitting}
+                  className="flex-1 py-2 rounded-lg text-xs font-medium bg-[#00c8ff] text-black hover:bg-[#00b8ef] disabled:opacity-50 transition-colors"
+                >
+                  {submitting ? 'Submitting…' : 'Submit'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setSurveyView(false); setSurveyAnswers({}); setSubmitError('') }}
+                  className="px-3 py-2 rounded-lg text-xs dash-text-muted hover:dash-text-bright bg-white/5 hover:bg-white/10 transition-colors"
+                >
+                  Back
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="overflow-y-auto flex-1">
+              {activeSurvey && (
+                <div
+                  className="p-3 border-b"
+                  style={{ borderColor: 'rgba(0,200,255,0.2)', background: 'rgba(0,200,255,0.05)' }}
+                >
+                  <div className="flex items-start gap-2">
+                    <div className="w-6 h-6 rounded-full bg-[#00c8ff]/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <svg className="w-3 h-3 text-[#00c8ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                      </svg>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs dash-accent font-medium">Survey</p>
+                      <p className="text-sm dash-text-bright font-medium mt-0.5">{activeSurvey.title}</p>
+                      {activeSurvey.description && (
+                        <p className="text-xs dash-text-muted mt-0.5 line-clamp-2">{activeSurvey.description}</p>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setSurveyView(true)}
+                        className="mt-2 px-3 py-1 rounded-md text-xs font-medium bg-[#00c8ff] text-black hover:bg-[#00b8ef] transition-colors"
+                      >
+                        Take Survey
+                      </button>
+                    </div>
                   </div>
-                )}
-              </>
-            )}
-          </div>
+                </div>
+              )}
+
+              {notifications.length === 0 && !activeSurvey ? (
+                <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                  <svg className="w-10 h-10 dash-text-muted mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  <p className="text-sm dash-text-muted">You&apos;re all caught up</p>
+                  <p className="text-xs dash-text-muted opacity-60 mt-1">No notifications yet</p>
+                </div>
+              ) : notifications.length === 0 && activeSurvey ? null : (
+                <>
+                  {todayItems.length > 0 && (
+                    <div>
+                      <p className="px-3 pt-2 pb-1 text-[10px] font-semibold dash-text-muted uppercase tracking-wider">Today</p>
+                      <NotificationList
+                        items={todayItems}
+                        onDelete={handleDelete}
+                        onNotificationClick={handleNotificationClick}
+                      />
+                    </div>
+                  )}
+                  {earlierItems.length > 0 && (
+                    <div>
+                      <p className="px-3 pt-2 pb-1 text-[10px] font-semibold dash-text-muted uppercase tracking-wider">Earlier</p>
+                      <NotificationList
+                        items={earlierItems}
+                        onDelete={handleDelete}
+                        onNotificationClick={handleNotificationClick}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

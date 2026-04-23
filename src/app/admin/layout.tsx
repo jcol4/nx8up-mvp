@@ -43,6 +43,7 @@ const NAV_ITEMS = [
   { href: '/admin/applications', label: 'Applications' },
   { href: '/admin/reports', label: 'Reports' },
   { href: '/admin/academy', label: 'Academy' },
+  { href: '/admin/surveys', label: 'Surveys' },
   { href: '/admin/users', label: 'Users' },
   { href: '/admin/profile', label: 'Profile' },
   { href: '/admin/settings/notifications', label: 'Notifications' },
