@@ -28,6 +28,7 @@ export const NOTIFICATION_TYPES = {
   CREATOR_APPLIED:        'creator_applied',
   // Admin
   ADMIN_QUEUE:            'admin_queue',
+  DISPUTE_CREATED:        'dispute_created',
 } as const
 
 export type NotificationType = typeof NOTIFICATION_TYPES[keyof typeof NOTIFICATION_TYPES]
@@ -51,6 +52,7 @@ export const NOTIFICATION_LABELS: Record<NotificationType, string> = {
   payment_failed:        'Payment',
   creator_applied:       'Application',
   admin_queue:           'Queue',
+  dispute_created:       'Dispute',
 }
 
 export type NotificationRole = 'creator' | 'sponsor' | 'admin'
@@ -82,5 +84,6 @@ export const SPONSOR_NOTIFICATION_TYPES: NotificationType[] = [
 /** Notification types visible in the admin dashboard notification feed. */
 export const ADMIN_NOTIFICATION_TYPES: NotificationType[] = [
   'admin_queue',
+  'dispute_created',
   'system',
 ]

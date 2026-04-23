@@ -23,6 +23,7 @@ import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { createNotification } from '@/lib/notifications'
 import { NOTIFICATION_TYPES } from '@/lib/notification-types'
+import { onDisputeCreated } from '@/lib/disputes'
 import type Stripe from 'stripe'
 
 /** Verifies webhook signature and dispatches to per-event handlers. */
@@ -233,6 +234,12 @@ export async function POST(request: Request) {
             dedupeKey: transfer.id,
           })
         }
+        break
+      }
+
+      case 'charge.dispute.created': {
+        const dispute = event.data.object as Stripe.Dispute
+        await onDisputeCreated(dispute)
         break
       }
 

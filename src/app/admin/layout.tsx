@@ -40,6 +40,7 @@ const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard' },
   { href: '/admin/campaigns', label: 'Campaigns' },
   { href: '/admin/verification-queue', label: 'Verification Queue' },
+  { href: '/admin/disputes', label: 'Disputes' },
   { href: '/admin/applications', label: 'Applications' },
   { href: '/admin/reports', label: 'Reports' },
   { href: '/admin/academy', label: 'Academy' },
