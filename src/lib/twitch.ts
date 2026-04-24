@@ -53,7 +53,7 @@ let cachedToken: AppToken | null = null
  * Returns a valid Twitch app access token, fetching a new one from the OAuth
  * endpoint only when the cached token is absent or within 60s of expiry.
  */
-async function getAppToken(): Promise<string> {
+export async function getAppToken(): Promise<string> {
   if (cachedToken && Date.now() < cachedToken.expires_at - 60_000) {
     return cachedToken.access_token
   }
@@ -66,6 +66,7 @@ async function getAppToken(): Promise<string> {
       client_secret: process.env.TWITCH_CLIENT_SECRET!,
       grant_type: 'client_credentials',
     }),
+    next: { revalidate: 3500 },
   })
 
   if (!res.ok) throw new Error(`Failed to get Twitch app token: ${res.status}`)
@@ -203,6 +204,10 @@ export async function getTwitchStreamStats(
   if (!res.ok) throw new Error(`Twitch videos API error: ${res.status}`)
   const data = await res.json()
   const videos: TwitchVideo[] = data.data ?? []
+
+  if (videos.length === 100) {
+    console.warn(`getTwitchStreamStats: userId=${userId} hit the 100-VOD API cap — averages may cover a shorter window than ${lookbackDays} days`)
+  }
 
   if (videos.length === 0) {
     return { average_vod_views: 0, most_played_games: [] }

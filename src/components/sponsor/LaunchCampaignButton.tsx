@@ -1,10 +1,6 @@
-/**
- * LaunchCampaignButton — transitions a paid campaign to "active" status.
- * NOTE: Errors are shown via browser alert() — inconsistent with the rest of the app's error UI.
- */
 'use client'
 
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { launchCampaign } from '@/app/sponsor/campaigns/_actions'
 
@@ -13,12 +9,14 @@ type Props = { id: string }
 export default function LaunchCampaignButton({ id }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState('')
 
   const handleLaunch = () => {
+    setError('')
     startTransition(async () => {
       const result = await launchCampaign(id)
       if (result.error) {
-        alert(result.error)
+        setError(result.error)
       } else {
         router.refresh()
       }
@@ -26,13 +24,16 @@ export default function LaunchCampaignButton({ id }: Props) {
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleLaunch}
-      disabled={isPending}
-      className="text-xs px-2.5 py-1 rounded-lg bg-[#a855f7] text-white font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
-    >
-      {isPending ? 'Launching...' : 'Launch'}
-    </button>
+    <div className="flex flex-col items-start gap-1">
+      <button
+        type="button"
+        onClick={handleLaunch}
+        disabled={isPending}
+        className="text-xs px-2.5 py-1 rounded-lg bg-[#a855f7] text-white font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
+      >
+        {isPending ? 'Launching...' : 'Launch'}
+      </button>
+      {error && <p className="text-xs text-red-400">{error}</p>}
+    </div>
   )
 }

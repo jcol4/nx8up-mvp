@@ -1,13 +1,7 @@
-/**
- * InsightRow — single labeled metric row for insight/analytics panels.
- * NOTE: `trend` is declared in Props but never destructured or used — it is dead code.
- */
 type Props = {
   label: string
   value: string
   icon?: React.ReactNode
-  /** Declared but unused — trend indicator is not yet rendered. */
-  trend?: 'up' | 'down' | 'neutral'
 }
 
 export default function InsightRow({ label, value, icon }: Props) {

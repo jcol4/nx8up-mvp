@@ -47,9 +47,16 @@ export async function POST(request: Request) {
     )
   }
 
-  const refund = await stripe.refunds.create({
-    payment_intent: campaign.stripe_payment_intent_id,
-  })
+  let refund
+  try {
+    refund = await stripe.refunds.create({
+      payment_intent: campaign.stripe_payment_intent_id,
+    })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Stripe refund failed'
+    console.error('stripe.refunds.create failed:', err)
+    return NextResponse.json({ error: message }, { status: 502 })
+  }
 
   await prisma.campaigns.update({
     where: { id: campaignId },

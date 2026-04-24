@@ -4,6 +4,7 @@
  * NOTE: Uses native <img> instead of Next.js <Image> — bypasses optimization and lazy loading.
  */
 import Link from 'next/link'
+import Image from 'next/image'
 
 type Props = {
   title: string
@@ -32,10 +33,12 @@ export default function CardWithImage({
     <>
       {imageUrl && (
         <div className="absolute inset-0">
-          <img
+          <Image
             src={imageUrl}
             alt=""
-            className="w-full h-full object-cover opacity-60"
+            fill
+            className="object-cover opacity-60"
+            sizes="(max-width: 768px) 100vw, 400px"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
         </div>

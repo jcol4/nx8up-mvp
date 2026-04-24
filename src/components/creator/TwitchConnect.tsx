@@ -7,6 +7,7 @@
 'use client'
 
 import * as React from 'react'
+import Image from 'next/image'
 import { unlinkTwitchAccount } from '@/app/creator/profile/_actions'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -112,7 +113,7 @@ export default function TwitchConnect({ initial }: TwitchConnectProps) {
           <>
             <div className="twitch-profile">
               {twitch.profile_image ? (
-                <img src={twitch.profile_image} alt={twitch.username} className="twitch-avatar" />
+                <Image src={twitch.profile_image} alt={twitch.username} width={48} height={48} className="twitch-avatar" />
               ) : (
                 <div className="twitch-avatar-placeholder">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">

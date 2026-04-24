@@ -1,8 +1,6 @@
 /**
  * NXSelect — custom branded dropdown replacing native <select>.
  * Supports optional per-option descriptions and close-on-outside-click.
- * NOTE: The `required` prop renders a hidden input with `required`, but browsers
- * don't validate hidden inputs — it does not enforce selection.
  */
 'use client'
 
@@ -21,7 +19,7 @@ interface NXSelectProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
-  /** Renders a hidden required input for form compat (browser validation does not apply to hidden inputs). */
+  /** Marks the trigger button as aria-required for assistive technology. */
   required?: boolean
   id?: string
 }
@@ -158,12 +156,10 @@ export default function NXSelect({ options, value, onChange, placeholder = 'Sele
         }
       `}</style>
 
-      {/* Hidden input for native form compat */}
-      {required && <input type="hidden" value={value} required />}
-
       <div className="nx-sel-wrap" ref={ref} id={id}>
         <button
           type="button"
+          aria-required={required}
           className={`nx-sel-trigger${isOpen ? ' nx-sel-trigger--open' : ''}${!selected ? ' nx-sel-trigger--placeholder' : ''}`}
           onClick={() => setIsOpen(o => !o)}
         >

@@ -10,6 +10,7 @@
  * CTR formula: (tracked link clicks / avg video views) * 100, capped at 999.99%.
  */
 import { prisma } from './prisma'
+import { getAppToken } from './twitch'
 
 // ── URL parsers (mirrors verify-proof-url.ts — kept local to avoid coupling) ─
 
@@ -47,24 +48,7 @@ function extractTwitchVideoId(rawUrl: string): { type: 'vod' | 'clip'; id: strin
   return null
 }
 
-/**
- * Fetches a short-lived Twitch app access token via client credentials.
- * Not cached — ctr.ts makes at most one Twitch call per submission, so a
- * module-level cache would add complexity without meaningful benefit.
- */
-async function getTwitchAppToken(): Promise<string> {
-  const res = await fetch('https://id.twitch.tv/oauth2/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id: process.env.TWITCH_CLIENT_ID!,
-      client_secret: process.env.TWITCH_CLIENT_SECRET!,
-      grant_type: 'client_credentials',
-    }),
-  })
-  if (!res.ok) throw new Error(`Twitch token error: ${res.status}`)
-  return (await res.json()).access_token
-}
+
 
 // ── View count fetcher ───────────────────────────────────────────────────────
 
@@ -95,7 +79,7 @@ async function fetchViewsForUrl(rawUrl: string): Promise<number | null> {
     if (hostname === 'twitch.tv' || hostname === 'www.twitch.tv' || hostname === 'clips.twitch.tv') {
       const parsed = extractTwitchVideoId(rawUrl)
       if (!parsed) return null
-      const token = await getTwitchAppToken()
+      const token = await getAppToken()
       const endpoint =
         parsed.type === 'vod'
           ? `https://api.twitch.tv/helix/videos?id=${encodeURIComponent(parsed.id)}`

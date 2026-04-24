@@ -10,6 +10,8 @@
  *                     to a different channel. Creator must resubmit.
  */
 
+import { getAppToken } from './twitch'
+
 /** Discriminated union returned by verifyProofUrl and its internal helpers. */
 export type VerifyResult =
   | { status: 'verified'; platform: string }
@@ -100,28 +102,12 @@ async function verifyYouTube(videoId: string, channelId: string): Promise<Verify
   return { status: 'verified', platform: 'YouTube' }
 }
 
-/** Fetches a short-lived Twitch app access token for proof verification. Not cached — one call per verification. */
-async function getTwitchAppToken(): Promise<string> {
-  const res = await fetch('https://id.twitch.tv/oauth2/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id: process.env.TWITCH_CLIENT_ID!,
-      client_secret: process.env.TWITCH_CLIENT_SECRET!,
-      grant_type: 'client_credentials',
-    }),
-    next: { revalidate: 0 },
-  })
-  if (!res.ok) throw new Error(`Twitch token error: ${res.status}`)
-  const data = await res.json()
-  return data.access_token
-}
 
 /** Verifies a Twitch VOD ID against the creator's connected Twitch user ID via GET /helix/videos. */
 async function verifyTwitchVod(videoId: string, twitchUserId: string): Promise<VerifyResult> {
   let token: string
   try {
-    token = await getTwitchAppToken()
+    token = await getAppToken()
   } catch {
     return { status: 'unverifiable', platform: 'Twitch', reason: 'Could not reach Twitch API.' }
   }
@@ -162,7 +148,7 @@ async function verifyTwitchVod(videoId: string, twitchUserId: string): Promise<V
 async function verifyTwitchClip(clipId: string, twitchUserId: string): Promise<VerifyResult> {
   let token: string
   try {
-    token = await getTwitchAppToken()
+    token = await getAppToken()
   } catch {
     return { status: 'unverifiable', platform: 'Twitch', reason: 'Could not reach Twitch API.' }
   }
@@ -235,7 +221,7 @@ export async function fetchPostTimestamp(rawUrl: string): Promise<string | null>
     const parsed = extractTwitchVideoId(url)
     if (!parsed) return null
     try {
-      const token = await getTwitchAppToken()
+      const token = await getAppToken()
       const endpoint =
         parsed.type === 'vod'
           ? `https://api.twitch.tv/helix/videos?id=${encodeURIComponent(parsed.id)}`

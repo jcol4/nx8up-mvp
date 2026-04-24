@@ -3,12 +3,11 @@
  *
  * Hard blocks (eligible = false):
  *   - Creator is not available
- *   - Platform: campaign specifies platforms and creator has zero overlap
  *   - Numeric minimums (followers, avg viewers, engagement): creator is more than
  *     25% below the requirement (i.e. < 75% of required value)
  *
  * Soft criteria (contribute to score, never block):
- *   - Creator types, sizes, game categories, content types
+ *   - Platform, Creator types, sizes, game categories, content types
  *   - Audience locations, age range, gender
  *   - Interest overlap (fuzzy + synonym-aware)
  *   - Campaign type / product type preference alignment
@@ -225,7 +224,7 @@ export function matchCreatorToCampaign(
     }
   }
 
-  // ── Min followers (25% tolerance) ────────────────────────────────────────
+  // ── Min followers (67% tolerance) ────────────────────────────────────────
   if (campaign.min_subs_followers != null) {
     const total = (creator.subs_followers ?? 0) + (creator.youtube_subscribers ?? 0)
     const hasData = creator.subs_followers != null || creator.youtube_subscribers != null
@@ -243,7 +242,7 @@ export function matchCreatorToCampaign(
     }
   }
 
-  // ── Min avg viewers (25% tolerance) ──────────────────────────────────────
+  // ── Min avg viewers (67% tolerance) ──────────────────────────────────────
   if (campaign.min_avg_viewers != null) {
     const total = (creator.average_vod_views ?? 0) + (creator.youtube_avg_views ?? 0)
     const hasData = creator.average_vod_views != null || creator.youtube_avg_views != null
@@ -261,7 +260,7 @@ export function matchCreatorToCampaign(
     }
   }
 
-  // ── Min CTR (25% tolerance) ───────────────────────────────────────────────
+  // ── Min CTR (67% tolerance) ───────────────────────────────────────────────
   const reqRate = toNum(campaign.min_engagement_rate)
   const creatorRate = toNum(creator.engagement_rate)
   if (reqRate != null && creatorRate != null) {

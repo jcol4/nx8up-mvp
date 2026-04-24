@@ -22,6 +22,8 @@ type Props = {
   navItems: NavItemType[]
   /** Optional stats block rendered at the top of the sidebar (e.g. XP bar). */
   statsNode?: React.ReactNode
+  /** Explicit href for the Profile nav item. Defaults to `${logoHref}/profile` if omitted. */
+  profileHref?: string
 }
 
 export default function DashboardSidebar({
@@ -30,6 +32,7 @@ export default function DashboardSidebar({
   sectionTitle,
   navItems,
   statsNode,
+  profileHref,
 }: Props) {
   const [collapsed, setCollapsed] = useState(false)
 
@@ -126,7 +129,7 @@ export default function DashboardSidebar({
         {/* Profile — pinned to bottom */}
         <div className={`shrink-0 border-t border-white/10 pt-2 ${collapsed ? 'flex justify-center' : ''}`}>
           <NavItem
-            href={`${logoHref}/profile`}
+            href={profileHref ?? `${logoHref}/profile`}
             label="Profile"
             collapsed={collapsed}
           />

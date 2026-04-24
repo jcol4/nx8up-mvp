@@ -2,6 +2,8 @@
  * UserAvatar — circular avatar image with initial-letter fallback.
  * NOTE: Uses native <img> instead of Next.js <Image> — no optimization or lazy loading.
  */
+import Image from 'next/image'
+
 type Props = {
   src?: string | null
   /** Used to derive the fallback initial when src is absent. */
@@ -25,7 +27,7 @@ export default function UserAvatar({ src, name, size = 'md', className = '' }: P
       className={`${sizeClass} rounded-full overflow-hidden flex-shrink-0 dash-avatar ${className}`}
     >
       {src ? (
-        <img src={src} alt="" className="w-full h-full object-cover" />
+        <Image src={src} alt="" fill className="object-cover" sizes="48px" />
       ) : (
         <div className="w-full h-full flex items-center justify-center dash-avatar-fallback">
           {initial}

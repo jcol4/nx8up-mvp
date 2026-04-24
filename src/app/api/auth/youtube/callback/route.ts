@@ -220,8 +220,10 @@ export async function GET(req: NextRequest) {
   if (analyticsRes.ok) {
     const analyticsData = await analyticsRes.json()
     const rows: number[][] = analyticsData.rows ?? []
-    const totalMinutes = rows.reduce((sum, row) => sum + (row[1] ?? 0), 0)
-    watchTimeHours = Math.round(totalMinutes / 60)
+    if (rows.length > 0) {
+      const totalMinutes = rows.reduce((sum, row) => sum + (row[1] ?? 0), 0)
+      watchTimeHours = Math.round(totalMinutes / 60)
+    }
   }
 
   // Encrypt tokens

@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const amountCents = campaign.budget * 100
+  const amountCents = Math.round(campaign.budget * 100)
 
   // Idempotency key ensures a network timeout on first creation doesn't produce
   // a duplicate PI — retrying returns the already-created object instead.

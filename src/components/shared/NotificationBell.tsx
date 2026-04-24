@@ -54,7 +54,6 @@ export default function NotificationBell() {
   const [open, setOpen] = useState(false)
   const [unread, setUnread] = useState(0)
   const [notifications, setNotifications] = useState<Notification[]>([])
-  const [loaded, setLoaded] = useState(false)
 
   const [activeSurvey, setActiveSurvey] = useState<ActiveSurvey | null>(null)
   const [surveyView, setSurveyView] = useState(false)
@@ -80,7 +79,6 @@ export default function NotificationBell() {
       if (res.ok) {
         const data = await res.json()
         setNotifications(data.notifications ?? [])
-        setLoaded(true)
       }
     } catch {
       // non-fatal
@@ -113,14 +111,12 @@ export default function NotificationBell() {
     if (open) {
       fetchNotifications()
       fetchActiveSurvey()
-    }
-    if (!open) {
+    } else {
       setSurveyView(false)
       setSurveyAnswers({})
       setSubmitError('')
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open])
+  }, [open, fetchNotifications, fetchActiveSurvey])
 
   useClickOutside(panelRef, () => setOpen(false), open)
 
