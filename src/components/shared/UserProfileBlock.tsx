@@ -28,8 +28,7 @@ function SponsorProfileIcon() {
 type Props = {
   displayName: string | null;
   username: string | null;
-  /** Use "creator" for creator dashboard, "admin" for admin dashboard */
-  variant?: "creator" | "admin";
+  variant?: "creator" | "admin" | "sponsor";
   editProfileLink?: string;
   /** Role used to show only the relevant profile link (creator → Creator profile, sponsor → Sponsor profile, admin → both) */
   role?: string;
@@ -42,8 +41,8 @@ export default function UserProfileBlock({
   editProfileLink,
   role,
 }: Props) {
-  const prefix = variant === "creator" ? "cr" : "dash";
-  const name = displayName || username || (variant === "creator" ? "Creator" : "Admin");
+  const prefix = variant === "creator" ? "cr" : variant === "sponsor" ? "sp" : "dash";
+  const name = displayName || username || (variant === "creator" ? "Creator" : variant === "sponsor" ? "Sponsor" : "Admin");
   const showCreatorProfile = role === "creator" || role === "admin";
   const showSponsorProfile = role === "sponsor" || role === "admin";
 
