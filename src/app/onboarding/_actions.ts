@@ -84,7 +84,18 @@ export const completeOnboarding = async (formData: FormData) => {
             clerk_user_id: userId,
             email,
             age,
+            language: [],
+            platform: [],
+            content_type: [],
+            game_category: [],
+            youtube_top_categories: [],
             audience_locations: [],
+            creator_types: [],
+            content_style: [],
+            audience_interests: [],
+            preferred_campaign_types: [],
+            preferred_product_types: [],
+            audience_gender: [],
           }
         })
       }
