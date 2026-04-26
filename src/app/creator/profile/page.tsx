@@ -164,7 +164,7 @@ export default async function CreatorProfilePage() {
             subs_followers: creator?.subs_followers ?? null,
             average_vod_views: creator?.average_vod_views ?? null,
             twitch_subscriber_count: creator?.twitch_subscriber_count ?? null,
-            engagement_rate: creator?.engagement_rate != null ? Number(creator.engagement_rate) : null,
+            engagement_rate: creator?.engagement_rate ?? null,
             youtube_channel_id: creator?.youtube_channel_id ?? null,
             youtube_channel_name: creator?.youtube_channel_name ?? null,
             youtube_handle: creator?.youtube_handle ?? null,
