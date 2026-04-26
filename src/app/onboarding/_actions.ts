@@ -84,6 +84,7 @@ export const completeOnboarding = async (formData: FormData) => {
             clerk_user_id: userId,
             email,
             age,
+            audience_locations: [],
           }
         })
       }
