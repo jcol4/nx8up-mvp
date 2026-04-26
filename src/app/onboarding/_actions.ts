@@ -115,6 +115,8 @@ export const completeOnboarding = async (formData: FormData) => {
     return { message: res.publicMetadata }
   } catch (err: any) {
     console.error('Onboarding error:', err)
+    console.error('Onboarding error meta:', JSON.stringify(err?.meta))
+    console.error('Onboarding error target:', JSON.stringify(err?.meta?.target))
     return { error: 'Failed to complete onboarding. Please try again.' }
   }
 }
