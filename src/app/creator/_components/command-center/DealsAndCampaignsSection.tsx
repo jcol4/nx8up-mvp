@@ -53,7 +53,7 @@ export default function DealsAndCampaignsSection({ applications }: Props) {
   const items = byTab[activeTab]
 
   return (
-    <Panel variant="creator" title="Campaigns" className="flex flex-col">
+    <Panel variant="creator" title="Campaigns" className="flex flex-col glass-panel interactive-panel neon-glow-teal">
       <TabBar tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} className="mb-4" />
 
       <ul className="space-y-2.5 flex-1 min-h-0 overflow-y-auto max-h-[280px] pr-1">
@@ -78,7 +78,7 @@ export default function DealsAndCampaignsSection({ applications }: Props) {
             <li key={app.id} className="shrink-0">
               <Link
                 href={`/creator/campaigns/${app.campaign.id}`}
-                className="block p-3 rounded-lg cr-border border cr-bg-inner hover:border-[rgba(0,200,255,0.3)] transition-colors group"
+                className="block p-3 rounded-lg cr-border border cr-bg-inner hover:border-[rgba(153,247,255,0.4)] transition-colors group"
               >
                 <div className="flex items-start justify-between gap-2">
                   <span className="text-sm font-medium cr-text-bright group-hover:text-[#00c8ff] transition-colors leading-tight">
@@ -124,7 +124,7 @@ export default function DealsAndCampaignsSection({ applications }: Props) {
 
       <Link
         href="/creator/campaigns"
-        className="mt-4 w-full text-center py-2 px-3 rounded-lg text-xs font-medium border cr-border cr-text-muted hover:border-[rgba(0,200,255,0.3)] hover:cr-text transition-colors"
+        className="mt-4 w-full text-center py-2 px-3 rounded-lg text-xs font-medium border cr-border cr-text-muted hover:border-[rgba(153,247,255,0.4)] hover:cr-text transition-colors"
       >
         View all campaigns
       </Link>

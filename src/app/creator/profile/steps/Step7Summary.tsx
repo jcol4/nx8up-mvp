@@ -64,12 +64,15 @@ type Props = {
   onFinish: () => void
 }
 
+const summaryCardClass =
+  'rounded-xl border border-white/16 bg-[linear-gradient(90deg,rgba(153,247,255,0.95),rgba(153,247,255,0.22))] bg-[length:100%_2px] bg-no-repeat bg-[position:top_left] bg-black/20 shadow-[inset_0_1px_0_rgba(153,247,255,0.28)] p-3 sm:p-4'
+
 function Row({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null
   return (
-    <div className="flex justify-between items-start gap-4 py-2 border-b border-white/5 last:border-0">
-      <span className="text-xs cr-text-muted shrink-0">{label}</span>
-      <span className="text-xs cr-text-bright text-right">{value}</span>
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 border-b border-white/18 py-2.5 last:border-0">
+      <span className="shrink-0 text-xs text-[#8f97ab]">{label}</span>
+      <span className="text-right text-xs text-[#e8f4ff]">{value}</span>
     </div>
   )
 }
@@ -77,11 +80,11 @@ function Row({ label, value }: { label: string; value?: string | null }) {
 function Pills({ label, values, color = 'cyan' }: { label: string; values: string[]; color?: 'cyan' | 'purple' }) {
   if (!values.length) return null
   const chip = color === 'purple'
-    ? 'text-[10px] px-1.5 py-0.5 rounded bg-[rgba(123,79,255,0.12)] text-[#a78bfa] border border-[rgba(123,79,255,0.25)]'
-    : 'text-[10px] px-1.5 py-0.5 rounded bg-[rgba(0,200,255,0.1)] text-[#00c8ff] border border-[rgba(0,200,255,0.2)]'
+    ? 'rounded border border-[#c084fc]/35 bg-[#c084fc]/15 px-1.5 py-0.5 text-[10px] text-[#d8b4fe]'
+    : 'rounded border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-1.5 py-0.5 text-[10px] text-[#99f7ff]'
   return (
-    <div className="flex justify-between items-start gap-4 py-2 border-b border-white/5 last:border-0">
-      <span className="text-xs cr-text-muted shrink-0">{label}</span>
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 border-b border-white/18 py-2.5 last:border-0">
+      <span className="shrink-0 text-xs text-[#8f97ab]">{label}</span>
       <div className="flex flex-wrap gap-1 justify-end">
         {values.map(v => <span key={v} className={chip}>{v}</span>)}
       </div>
@@ -91,12 +94,12 @@ function Pills({ label, values, color = 'cyan' }: { label: string; values: strin
 
 function SectionHeader({ title, step, onEdit }: { title: string; step: number; onEdit: (s: number) => void }) {
   return (
-    <div className="flex items-center justify-between mb-2">
-      <p className="text-[10px] font-semibold uppercase tracking-widest cr-text-muted">{title}</p>
+    <div className="mb-2 flex items-center justify-between">
+      <p className="font-headline text-[11px] font-semibold uppercase tracking-[0.2em] text-[#99f7ff]">{title}</p>
       <button
         type="button"
         onClick={() => onEdit(step)}
-        className="text-xs text-[#00c8ff] hover:opacity-80 transition-opacity"
+        className="text-xs font-medium text-[#99f7ff] transition-opacity hover:opacity-80"
       >
         Edit
       </button>
@@ -127,61 +130,63 @@ export default function Step7Summary({ draft, twitchInitial, youtubeInitial, cre
   const locationStr = [draft.city, draft.state, draft.country].filter(Boolean).join(', ')
 
   return (
-    <div className="space-y-5">
-      <p className="text-xs cr-text-muted">
+    <div className="space-y-6">
+      <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+        <p className="text-xs text-[#a9abb5]">
         Your profile is complete. You can edit any section below, or head to your dashboard.
-      </p>
+        </p>
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Accounts */}
-        <div>
+        <div className={summaryCardClass}>
           <SectionHeader title="Accounts" step={1} onEdit={onEditStep} />
-          <div className="cr-panel p-3 space-y-3">
+          <div className="rounded-lg border border-white/16 bg-black/25 p-3 space-y-3">
             {/* Twitch */}
             <div className="flex items-center gap-2">
               <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="#9146ff"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
               {twitchInitial.username ? (
                 <div className="flex-1 min-w-0">
-                  <span className="text-xs cr-text-bright truncate block">{twitchInitial.username}</span>
+                  <span className="text-xs text-[#e8f4ff] truncate block">{twitchInitial.username}</span>
                   {twitchInitial.broadcaster_type && (
-                    <span className="text-[10px] cr-text-muted capitalize">{twitchInitial.broadcaster_type || 'Standard'}</span>
+                    <span className="text-[10px] text-[#8f97ab] capitalize">{twitchInitial.broadcaster_type || 'Standard'}</span>
                   )}
                 </div>
               ) : (
-                <span className="text-xs cr-text-muted italic">Not connected</span>
+                <span className="text-xs text-[#8f97ab] italic">Not connected</span>
               )}
               {twitchInitial.username && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[rgba(145,70,255,0.12)] text-[#9146ff] border border-[rgba(145,70,255,0.25)] shrink-0">Connected</span>
+                <span className="shrink-0 rounded border border-[#a970ff]/35 bg-[#a970ff]/12 px-1.5 py-0.5 text-[10px] text-[#d8b4fe]">Connected</span>
               )}
             </div>
-            <div className="border-t border-white/5" />
+            <div className="border-t border-white/18" />
             {/* YouTube */}
             <div className="flex items-center gap-2">
               <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="#ff0000"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
               {youtubeInitial.channel_name || youtubeInitial.handle ? (
                 <div className="flex-1 min-w-0">
-                  <span className="text-xs cr-text-bright truncate block">{youtubeInitial.channel_name || youtubeInitial.handle}</span>
+                  <span className="text-xs text-[#e8f4ff] truncate block">{youtubeInitial.channel_name || youtubeInitial.handle}</span>
                   {youtubeInitial.handle && youtubeInitial.channel_name && (
-                    <span className="text-[10px] cr-text-muted">{youtubeInitial.handle}</span>
+                    <span className="text-[10px] text-[#8f97ab]">{youtubeInitial.handle}</span>
                   )}
                 </div>
               ) : (
-                <span className="text-xs cr-text-muted italic">Not connected</span>
+                <span className="text-xs text-[#8f97ab] italic">Not connected</span>
               )}
               {(youtubeInitial.channel_name || youtubeInitial.handle) && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[rgba(255,0,0,0.1)] text-[#ff6b6b] border border-[rgba(255,0,0,0.2)] shrink-0">Connected</span>
+                <span className="shrink-0 rounded border border-red-500/35 bg-red-500/10 px-1.5 py-0.5 text-[10px] text-red-300">Connected</span>
               )}
             </div>
           </div>
         </div>
 
         {/* Metrics */}
-        <div>
+        <div className={summaryCardClass}>
           <SectionHeader title="Metrics" step={2} onEdit={onEditStep} />
-          <div className="cr-panel p-3">
+          <div className="rounded-lg border border-white/16 bg-black/25 p-3">
             {creatorStats.twitch_username && (
               <>
-                <p className="text-[10px] font-semibold uppercase tracking-widest cr-text-muted mb-1.5">Twitch</p>
+                <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-[#8f97ab]">Twitch</p>
                 <Row label="Followers" value={fmt(creatorStats.subs_followers)} />
                 <Row label="Subscribers" value={fmt(creatorStats.twitch_subscriber_count)} />
                 <Row label="Avg VOD views" value={fmt(creatorStats.average_vod_views)} />
@@ -192,8 +197,8 @@ export default function Step7Summary({ draft, twitchInitial, youtubeInitial, cre
             )}
             {creatorStats.youtube_channel_name && (
               <>
-                {creatorStats.twitch_username && <div className="border-t border-white/5 my-2" />}
-                <p className="text-[10px] font-semibold uppercase tracking-widest cr-text-muted mb-1.5">YouTube</p>
+                {creatorStats.twitch_username && <div className="my-2 border-t border-white/18" />}
+                <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-[#8f97ab]">YouTube</p>
                 <Row label="Subscribers" value={fmt(creatorStats.youtube_subscribers)} />
                 <Row label="Avg views" value={fmt(creatorStats.youtube_avg_views)} />
                 {creatorStats.youtube_watch_time_hours != null && (
@@ -202,33 +207,33 @@ export default function Step7Summary({ draft, twitchInitial, youtubeInitial, cre
               </>
             )}
             {!creatorStats.twitch_username && !creatorStats.youtube_channel_name && (
-              <p className="text-xs cr-text-muted italic py-2">No accounts connected yet.</p>
+              <p className="py-2 text-xs text-[#8f97ab] italic">No accounts connected yet.</p>
             )}
           </div>
         </div>
 
         {/* Identity */}
-        <div>
+        <div className={summaryCardClass}>
           <SectionHeader title="Identity" step={3} onEdit={onEditStep} />
-          <div className="cr-panel p-3">
+          <div className="rounded-lg border border-white/16 bg-black/25 p-3">
             <Row label="Display name" value={draft.displayName || '—'} />
             <Row label="Location" value={locationStr || undefined} />
             <Pills label="Languages" values={draft.language} />
             <Pills label="Creator type" values={creatorTypeLabels} />
             <Row label="Primary platform" value={draft.primary_platform || undefined} />
             {draft.bio && (
-              <div className="py-2 border-b border-white/5 last:border-0">
-                <span className="text-xs cr-text-muted block mb-1">Bio</span>
-                <span className="text-xs cr-text-bright leading-relaxed line-clamp-3">{draft.bio}</span>
+              <div className="border-b border-white/10 py-2.5 last:border-0">
+                <span className="mb-1 block text-xs text-[#8f97ab]">Bio</span>
+                <span className="line-clamp-3 text-xs leading-relaxed text-[#e8f4ff]">{draft.bio}</span>
               </div>
             )}
           </div>
         </div>
 
         {/* Content & Audience */}
-        <div>
+        <div className={summaryCardClass}>
           <SectionHeader title="Content & Audience" step={4} onEdit={onEditStep} />
-          <div className="cr-panel p-3">
+          <div className="rounded-lg border border-white/16 bg-black/25 p-3">
             <Pills label="Platforms" values={draft.platform} />
             <Pills label="Game genres" values={draft.game_category} />
             <Pills label="Content style" values={draft.content_style} />
@@ -246,21 +251,21 @@ export default function Step7Summary({ draft, twitchInitial, youtubeInitial, cre
         </div>
 
         {/* Brand preferences */}
-        <div>
+        <div className={summaryCardClass}>
           <SectionHeader title="Brand Preferences" step={5} onEdit={onEditStep} />
-          <div className="cr-panel p-3">
+          <div className="rounded-lg border border-white/16 bg-black/25 p-3">
             <Pills label="Campaign types" values={campaignTypeLabels} />
             <Pills label="Product types" values={productTypeLabels} color="purple" />
             {!campaignTypeLabels.length && !productTypeLabels.length && (
-              <p className="text-xs cr-text-muted italic py-2">No preferences set</p>
+              <p className="py-2 text-xs text-[#8f97ab] italic">No preferences set</p>
             )}
           </div>
         </div>
 
         {/* Eligibility */}
-        <div>
+        <div className={summaryCardClass}>
           <SectionHeader title="Eligibility" step={6} onEdit={onEditStep} />
-          <div className="cr-panel p-3">
+          <div className="rounded-lg border border-white/16 bg-black/25 p-3">
             <Row
               label="Availability"
               value={draft.is_available ? 'Available' : 'Not available'}
@@ -273,11 +278,11 @@ export default function Step7Summary({ draft, twitchInitial, youtubeInitial, cre
         </div>
       </div>
 
-      <div className="flex justify-end pt-2 border-t border-white/5">
+      <div className="flex justify-end border-t border-white/10 pt-2">
         <button
           type="button"
           onClick={onFinish}
-          className="py-2.5 px-7 rounded-lg bg-[#00c8ff] text-black text-sm font-bold hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(0,200,255,0.2)]"
+          className="rounded-lg bg-[#99f7ff] px-7 py-2.5 text-sm font-bold text-slate-900 transition-opacity hover:opacity-90 shadow-[0_0_20px_rgba(153,247,255,0.22)]"
         >
           Go to Dashboard
         </button>

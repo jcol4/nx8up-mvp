@@ -24,7 +24,7 @@ import {
   deleteCreatorDayTask,
   toggleCreatorDayTask,
   type CalendarTask,
-} from './_actions'
+} from '../../_actions'
 import FormInput from '@/components/ui/FormInput'
 
 type Props = {

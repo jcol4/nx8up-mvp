@@ -70,28 +70,38 @@ export default function TwitchConnect({ initial }: TwitchConnectProps) {
   return (
     <>
       <style>{`
-        .twitch-card { background: rgba(6,13,24,0.6); border: 1px solid rgba(0,200,255,0.1); border-radius: 10px; padding: 1.25rem; transition: border-color 0.2s; }
-        .twitch-card:hover { border-color: rgba(0,200,255,0.18); }
+        .twitch-card {
+          background:
+            radial-gradient(120% 160% at 10% 0%, rgba(145,70,255,0.2) 0%, rgba(145,70,255,0.06) 35%, rgba(6,13,24,0.78) 72%),
+            rgba(6,13,24,0.72);
+          border: 1px solid rgba(145,70,255,0.28);
+          border-top: 2px solid rgba(185,139,255,0.92);
+          border-radius: 12px;
+          padding: 1.25rem;
+          transition: border-color 0.2s, box-shadow 0.2s;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 18px 48px rgba(68,24,140,0.18);
+        }
+        .twitch-card:hover { border-color: rgba(170,108,255,0.5); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 24px 60px rgba(68,24,140,0.26); }
         .twitch-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-        .twitch-card-title { display: flex; align-items: center; gap: 8px; font-family: 'Rajdhani', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #3a5570; }
+        .twitch-card-title { display: flex; align-items: center; gap: 8px; font-family: 'Rajdhani', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #bfa3ff; }
         .twitch-icon { color: #9146ff; }
         .twitch-profile { display: flex; align-items: center; gap: 12px; }
         .twitch-avatar { width: 48px; height: 48px; border-radius: 50%; border: 2px solid rgba(145,70,255,0.3); object-fit: cover; flex-shrink: 0; }
         .twitch-avatar-placeholder { width: 48px; height: 48px; border-radius: 50%; border: 2px solid rgba(145,70,255,0.3); background: rgba(145,70,255,0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #9146ff; }
         .twitch-info { flex: 1; min-width: 0; }
         .twitch-display-name { font-family: 'Rajdhani', sans-serif; font-size: 1rem; font-weight: 700; color: #c8dff0; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .twitch-username { font-family: 'Exo 2', sans-serif; font-size: 0.75rem; color: #3a5570; }
+        .twitch-username { font-family: 'Exo 2', sans-serif; font-size: 0.75rem; color: #8f7ab8; }
         .twitch-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-family: 'Rajdhani', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border: 1px solid; margin-top: 4px; }
-        .twitch-description { margin-top: 0.75rem; font-family: 'Exo 2', sans-serif; font-size: 0.8rem; color: #3a5570; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .twitch-description { margin-top: 0.75rem; font-family: 'Exo 2', sans-serif; font-size: 0.8rem; color: #9b89c4; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .twitch-actions { display: flex; gap: 8px; margin-top: 0.875rem; }
         .twitch-btn { padding: 0.45rem 0.875rem; border-radius: 6px; font-family: 'Rajdhani', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 5px; }
         .twitch-btn--unlink { background: rgba(255,107,138,0.05); border: 1px solid rgba(255,107,138,0.15); color: #ff6b8a; }
         .twitch-btn--unlink:hover { background: rgba(255,107,138,0.1); border-color: rgba(255,107,138,0.3); }
         .twitch-btn--unlink:disabled { opacity: 0.5; cursor: not-allowed; }
-        .twitch-synced { font-family: 'Exo 2', sans-serif; font-size: 0.7rem; color: #2a3f55; margin-left: auto; align-self: flex-end; }
+        .twitch-synced { font-family: 'Exo 2', sans-serif; font-size: 0.7rem; color: #927ab8; margin-left: auto; align-self: flex-end; }
         .twitch-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0.75rem 0; gap: 0.5rem; }
         .twitch-empty-title { font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; font-weight: 600; color: #c8dff0; letter-spacing: 0.03em; }
-        .twitch-empty-sub { font-family: 'Exo 2', sans-serif; font-size: 0.78rem; color: #3a5570; line-height: 1.5; max-width: 260px; }
+        .twitch-empty-sub { font-family: 'Exo 2', sans-serif; font-size: 0.78rem; color: #9b89c4; line-height: 1.5; max-width: 260px; }
         .twitch-btn--connect { background: rgba(145,70,255,0.1); border: 1px solid rgba(145,70,255,0.25); color: #9146ff; margin-top: 0.25rem; text-decoration: none; }
         .twitch-btn--connect:hover { background: rgba(145,70,255,0.18); border-color: rgba(145,70,255,0.4); box-shadow: 0 0 16px rgba(145,70,255,0.15); }
         .twitch-error { display: flex; align-items: center; gap: 6px; font-family: 'Exo 2', sans-serif; font-size: 0.78rem; color: #ff6b8a; margin-top: 0.5rem; }

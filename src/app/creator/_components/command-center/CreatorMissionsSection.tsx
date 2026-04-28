@@ -14,7 +14,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { addCreatorXp } from './_actions'
+import { addCreatorXp } from '../../_actions'
 import Panel from '@/components/shared/Panel'
 import ProgressBar from '@/components/ui/ProgressBar'
 
@@ -34,12 +34,12 @@ export default function CreatorMissionsSection() {
   }
 
   return (
-    <Panel variant="creator" title="Active Objectives">
+    <Panel variant="creator" title="Active Objectives" className="glass-panel interactive-panel neon-glow-purple">
       <ul className="space-y-3 flex-1">
         {MISSIONS.map((m, i) => (
           <li
             key={i}
-            className="p-3 rounded-lg cr-border border cr-bg-inner hover:border-[rgba(0,200,255,0.25)] transition-colors"
+            className="p-3 rounded-lg cr-border border cr-bg-inner hover:border-[rgba(153,247,255,0.35)] transition-colors"
           >
             <div className="flex items-start justify-between gap-2">
               <span className="text-sm cr-text flex-1">{m.title}</span>

@@ -37,10 +37,10 @@ export default function PayoutBanner({ hasAccount }: { hasAccount: boolean }) {
   }
 
   return (
-    <div className="mb-6 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 flex items-center justify-between gap-4">
+    <div className="dash-panel dash-panel--nx-top mb-6 flex items-center justify-between gap-4 rounded-xl border border-[#99f7ff]/25 border-t-2 border-t-[#bffcff] bg-[#99f7ff]/[0.08] px-4 py-3">
       <div>
-        <p className="text-sm font-medium text-yellow-300">Payout account required</p>
-        <p className="text-xs cr-text-muted mt-0.5">
+        <p className="text-sm font-medium text-[#99f7ff]">Payout account required</p>
+        <p className="mt-0.5 text-xs text-[#a9abb5]">
           {hasAccount
             ? 'Your payout setup is incomplete. Finish connecting to receive payments.'
             : 'Connect a bank account to receive payments from sponsors.'}
@@ -50,7 +50,7 @@ export default function PayoutBanner({ hasAccount }: { hasAccount: boolean }) {
       <button
         onClick={handleConnect}
         disabled={loading}
-        className="shrink-0 text-sm font-medium px-3 py-1.5 rounded-md bg-yellow-500 text-black hover:bg-yellow-400 disabled:opacity-50 transition-colors"
+        className="shrink-0 rounded-md bg-[#99f7ff] px-3 py-1.5 text-sm font-medium text-slate-900 transition-colors hover:opacity-90 disabled:opacity-50"
       >
         {loading ? 'Redirecting…' : hasAccount ? 'Complete setup' : 'Connect payout'}
       </button>

@@ -17,6 +17,12 @@ import { LESSONS } from '@/lib/academy-lessons'
 import Panel from '@/components/shared/Panel'
 
 const NEXT_LESSON = LESSONS[0]
+const MR_FRUIT_PREVIEW = {
+  videoId: 'K5qh58o5A-M',
+  title: 'Mr. Fruit Feature Lesson',
+  category: 'Gaming / Creator',
+  durationMinutes: '12',
+}
 
 export default function CreatorAcademySection() {
   return (
@@ -25,6 +31,7 @@ export default function CreatorAcademySection() {
       title="Academy"
       href="/creator/academy"
       linkLabel="View all"
+      className="glass-panel interactive-panel neon-glow-purple"
       headerRight={
         <div className="flex gap-1.5" aria-label="Lesson progress">
           {LESSONS.map((_, i) => (
@@ -44,8 +51,8 @@ export default function CreatorAcademySection() {
         className="block rounded-lg cr-border border cr-bg-inner overflow-hidden mb-3 aspect-video relative group"
       >
         <img
-          src={NEXT_LESSON.thumbnailUrl ?? `https://img.youtube.com/vi/${NEXT_LESSON.videoUrl.split('/').pop()?.split('?')[0] ?? ''}/mqdefault.jpg`}
-          alt={NEXT_LESSON.title}
+          src={`https://img.youtube.com/vi/${MR_FRUIT_PREVIEW.videoId}/mqdefault.jpg`}
+          alt={MR_FRUIT_PREVIEW.title}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/30 transition-colors">
@@ -56,9 +63,9 @@ export default function CreatorAcademySection() {
           </span>
         </div>
       </Link>
-      <p className="text-sm font-medium cr-text-bright">{NEXT_LESSON.title}</p>
-      <p className="text-xs cr-text-muted mt-0.5">{NEXT_LESSON.category}</p>
-      <p className="text-xs cr-text-muted mt-1">0/{NEXT_LESSON.duration.replace(' min', '')} min</p>
+      <p className="text-sm font-medium cr-text-bright">{MR_FRUIT_PREVIEW.title}</p>
+      <p className="text-xs cr-text-muted mt-0.5">{MR_FRUIT_PREVIEW.category}</p>
+      <p className="text-xs cr-text-muted mt-1">0/{MR_FRUIT_PREVIEW.durationMinutes} min</p>
       <Link
         href={`/creator/academy/${NEXT_LESSON.id}`}
         className="mt-4 inline-block py-2 px-5 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 transition-opacity"

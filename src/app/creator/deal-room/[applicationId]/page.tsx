@@ -27,10 +27,14 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { headers } from 'next/headers'
+import { auth } from '@clerk/nextjs/server'
 import { getDealRoom } from '../_actions'
 import ProofSubmitForm from './ProofSubmitForm'
 import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
 import CopyButton from './CopyButton'
+import { getUserDisplayInfo } from '@/lib/get-user-display-info'
+import CreatorRouteShell from '@/components/creator/CreatorRouteShell'
+import NxHudCard from '@/components/nx-shell/NxHudCard'
 
 const DELIVERABLE_LABELS: Record<string, string> = {
   gameplay_footage: 'Gameplay footage',
@@ -47,6 +51,8 @@ export default async function CreatorDealRoomDetailPage({
 }: {
   params: Promise<{ applicationId: string }>
 }) {
+  const [{ sessionClaims }, { displayName, username }] = await Promise.all([auth(), getUserDisplayInfo()])
+  const role = (sessionClaims?.metadata as { role?: string } | undefined)?.role
   const { applicationId } = await params
   const app = await getDealRoom(applicationId)
   if (!app) notFound()
@@ -65,19 +71,22 @@ export default async function CreatorDealRoomDetailPage({
   const hasDeliverables = c.num_videos || c.num_streams || c.num_posts || c.num_short_videos
 
   return (
-    <main className="max-w-5xl mx-auto p-6 sm:p-8 space-y-6">
-      <Link
-        href="/creator/deal-room"
-        className="inline-flex items-center gap-1.5 text-xs cr-text-muted hover:text-[#c8dff0] transition-colors"
-      >
-        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-        Back to Deal Room
-      </Link>
+    <CreatorRouteShell displayName={displayName} username={username} role={role}>
+      <main className="mx-auto max-w-6xl space-y-6 p-6 sm:p-8">
+        <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
+          <Link
+            href="/creator/deal-room"
+            className="inline-flex items-center gap-1.5 text-xs cr-text-muted transition-colors hover:text-[#c8dff0]"
+          >
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Deal Room
+          </Link>
+        </div>
 
       {/* Header */}
-      <div className="cr-panel p-5 sm:p-6">
+      <NxHudCard as="div" className="p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -121,11 +130,11 @@ export default async function CreatorDealRoomDetailPage({
             )}
           </div>
         </div>
-      </div>
+      </NxHudCard>
 
       {/* Tracking link — shown whenever the campaign has a link to include */}
       {(trackingUrl ?? c.landing_page_url) && (
-        <div className="rounded-xl border border-[#00c8ff]/30 bg-[#00c8ff]/[0.06] p-4 sm:p-5">
+        <NxHudCard as="div" className="p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-3">
             <svg className="w-4 h-4 text-[#00c8ff] shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -134,27 +143,28 @@ export default async function CreatorDealRoomDetailPage({
               {trackingUrl ? 'Your Tracking Link' : 'Link to Include'}
             </p>
           </div>
-          <p className="text-xs cr-text-muted mb-3">
+          <p className="mb-3 text-xs leading-relaxed cr-text-muted">
             {trackingUrl
               ? 'Use this personalised link in your bio and content description. Every click is tracked and counts toward your campaign performance.'
               : 'Include this link in your bio and content description as specified by the sponsor.'}
           </p>
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-black/30 border border-[#00c8ff]/20">
+          <div className="flex items-center gap-2 rounded-lg border border-[#00c8ff]/20 bg-black/30 p-3">
             <code className="text-sm text-[#00c8ff] break-all flex-1 select-all">
               {trackingUrl ?? c.landing_page_url}
             </code>
             <CopyButton text={(trackingUrl ?? c.landing_page_url)!} />
           </div>
-        </div>
+        </NxHudCard>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-5">
+      <div className="grid gap-6 lg:grid-cols-12">
+        <div className="space-y-5 lg:col-span-8">
 
           {/* Mission Requirements */}
           {hasDeliverables && (
-            <section className="cr-panel p-5">
+            <NxHudCard className="p-5">
               <h2 className="cr-panel-title">Mission Requirements</h2>
+              <p className="mb-4 mt-1 text-xs cr-text-muted">Complete each required deliverable before submitting proof.</p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 {c.num_videos ? (
                   <div className="text-center p-3 rounded-lg bg-[#00c8ff]/5 border border-[#00c8ff]/15">
@@ -250,12 +260,13 @@ export default async function CreatorDealRoomDetailPage({
                   Submit proof below
                 </li>
               </ul>
-            </section>
+            </NxHudCard>
           )}
 
           {/* Creative Package */}
-          <section className="cr-panel p-5">
+          <NxHudCard className="p-5">
             <h2 className="cr-panel-title">Creative Package</h2>
+            <p className="mb-4 mt-1 text-xs cr-text-muted">Use this brief as your source of truth for production details.</p>
             <dl className="space-y-3">
               {c.brand_name && (
                 <div>
@@ -321,10 +332,10 @@ export default async function CreatorDealRoomDetailPage({
                 </div>
               )}
             </dl>
-          </section>
+          </NxHudCard>
 
           {/* Disclosure Reminder */}
-          <section className="cr-panel p-5 border-[#eab308]/30" style={{ borderColor: 'rgba(234,179,8,0.25)' }}>
+          <NxHudCard className="p-5 border-[#eab308]/25">
             <h2 className="cr-panel-title" style={{ color: '#eab308' }}>Disclosure Reminder</h2>
             <div className="space-y-3 text-sm cr-text">
               <p>
@@ -353,19 +364,20 @@ export default async function CreatorDealRoomDetailPage({
                 Reference: <a href="https://www.ftc.gov/business-guidance/resources/ftcs-endorsement-guides-what-people-are-asking" target="_blank" rel="noopener noreferrer" className="cr-accent hover:underline">FTC Endorsement Guides</a>
               </p>
             </div>
-          </section>
+          </NxHudCard>
 
           {/* Submit Proof */}
-          <section className="cr-panel p-5">
+          <NxHudCard className="p-5">
             <h2 className="cr-panel-title">Submit Proof of Delivery</h2>
+            <p className="mb-4 mt-1 text-xs cr-text-muted">Submit your links once content is live and disclosures are in place.</p>
             <ProofSubmitForm applicationId={applicationId} existing={sub ?? null} />
-          </section>
+          </NxHudCard>
 
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-4">
-          <div className="cr-panel p-4">
+        <div className="space-y-4 lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
+          <NxHudCard as="div" className="p-4">
             <h3 className="cr-panel-title">Campaign Info</h3>
             <dl className="space-y-2.5 text-sm">
               {c.payment_model && (
@@ -422,10 +434,10 @@ export default async function CreatorDealRoomDetailPage({
                 </div>
               )}
             </dl>
-          </div>
+          </NxHudCard>
 
           {sub && (
-            <div className="cr-panel p-4">
+            <NxHudCard as="div" className="p-4">
               <h3 className="cr-panel-title">Your Submission</h3>
               <dl className="space-y-2.5 text-sm">
                 <div className="flex justify-between gap-2">
@@ -461,21 +473,22 @@ export default async function CreatorDealRoomDetailPage({
                 )}
                 {sub.admin_notes && (
                   <div className="rounded-lg p-3 bg-red-500/10 border border-red-500/20">
-                    <dt className="text-xs font-semibold text-red-400 uppercase tracking-wide mb-1">nx8up Admin</dt>
+                    <dt className="mb-1 text-xs font-semibold uppercase tracking-wide text-red-400">nx8up Admin Notes</dt>
                     <dd className="text-red-300 text-xs leading-relaxed">{sub.admin_notes}</dd>
                   </div>
                 )}
                 {sub.sponsor_notes && (
                   <div className="rounded-lg p-3 bg-orange-500/10 border border-orange-500/20">
-                    <dt className="text-xs font-semibold text-orange-400 uppercase tracking-wide mb-1">Sponsor</dt>
+                    <dt className="mb-1 text-xs font-semibold uppercase tracking-wide text-orange-400">Sponsor Notes</dt>
                     <dd className="text-orange-300 text-xs leading-relaxed">{sub.sponsor_notes}</dd>
                   </div>
                 )}
               </dl>
-            </div>
+            </NxHudCard>
           )}
         </div>
       </div>
-    </main>
+      </main>
+    </CreatorRouteShell>
   )
 }
