@@ -15,7 +15,7 @@ import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import { LESSONS } from '@/lib/academy-lessons'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
-import CreatorRouteShell from '@/components/creator/CreatorRouteShell'
+import CreatorShell from '@/components/creator/CreatorShell'
 
 /**
  * Extracts the YouTube video ID from an embed or watch URL.
@@ -34,7 +34,7 @@ async function AcademyPageInner() {
   const role = (sessionClaims?.metadata as { role?: string } | undefined)?.role
 
   return (
-    <CreatorRouteShell displayName={displayName} username={username} role={role}>
+    <CreatorShell>
       <main className="mx-auto max-w-5xl p-6 sm:p-8">
         <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
           <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Academy</p>
@@ -88,6 +88,6 @@ async function AcademyPageInner() {
           ))}
         </div>
       </main>
-    </CreatorRouteShell>
+    </CreatorShell>
   )
 }

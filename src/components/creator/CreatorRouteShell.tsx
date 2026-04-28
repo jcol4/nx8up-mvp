@@ -1,7 +1,7 @@
 'use client'
 
 import RoleLayoutShell from '@/components/nx-shell/RoleLayoutShell'
-import { type SidebarNavGroup, type SidebarNavItem } from '@/components/nx-shell/RoleSidebar'
+import { type SidebarNavGroup, type SidebarNavItem, type SidebarStatRow } from '@/components/nx-shell/RoleSidebar'
 import NxHudHeader from '@/components/nx-shell/NxHudHeader'
 
 type Props = {
@@ -9,6 +9,8 @@ type Props = {
   displayName?: string | null
   username?: string | null
   role?: string
+  statsRows?: SidebarStatRow[]
+  statsUnavailable?: boolean
 }
 
 export default function CreatorRouteShell({
@@ -16,6 +18,8 @@ export default function CreatorRouteShell({
   displayName = 'Creator',
   username = null,
   role,
+  statsRows,
+  statsUnavailable,
 }: Props) {
   const isAdmin = role === 'admin'
   const collapsedNavItems: SidebarNavItem[] = [
@@ -31,6 +35,7 @@ export default function CreatorRouteShell({
     { href: '/creator/campaigns', label: 'Campaigns', icon: 'campaigns' },
     { href: '/creator/deal-room', label: 'Deal Room', icon: 'dealRoom' },
     { href: '/creator/academy', label: 'Academy', icon: 'academy' },
+    { href: '/creator/steam-lookup', label: 'Steam Lookup', icon: 'creators' },
     { href: '/creator/settings/notifications', label: 'Notifications', icon: 'notifications' },
   ]
 
@@ -55,6 +60,7 @@ export default function CreatorRouteShell({
         { href: '/creator/campaigns', label: 'Campaigns', icon: 'campaigns' },
         { href: '/creator/deal-room', label: 'Deal Room', icon: 'dealRoom' },
         { href: '/creator/academy', label: 'Academy', icon: 'academy' },
+        { href: '/creator/steam-lookup', label: 'Steam Lookup', icon: 'creators' },
       ] as SidebarNavItem[],
     },
     {
@@ -69,6 +75,9 @@ export default function CreatorRouteShell({
       homeHref="/creator"
       navGroups={navGroups}
       collapsedNavItems={collapsedNavItems}
+      statsTitle="My Stats"
+      statsRows={statsRows}
+      statsUnavailable={statsUnavailable}
       animateContentOffset={false}
     >
       {(collapsed) => (

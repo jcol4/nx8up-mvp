@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { calcFeeBreakdown } from '@/lib/constants'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
-import CreatorRouteShell from '@/components/creator/CreatorRouteShell'
+import CreatorShell from '@/components/creator/CreatorShell'
 
 export default async function CreatorActiveCampaignsPage() {
   const [{ userId, sessionClaims }, { displayName, username }] = await Promise.all([auth(), getUserDisplayInfo()])
@@ -20,7 +20,7 @@ export default async function CreatorActiveCampaignsPage() {
 
   if (!creator?.id) {
     return (
-      <CreatorRouteShell displayName={displayName} username={username} role={role}>
+      <CreatorShell>
         <main className="mx-auto max-w-5xl space-y-6 p-6 sm:p-8">
           <div className="rounded-xl border border-white/10 bg-black/20 p-5">
             <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
@@ -28,7 +28,7 @@ export default async function CreatorActiveCampaignsPage() {
             <p className="mt-2 text-sm text-[#a9abb5]">We could not load your creator profile.</p>
           </div>
         </main>
-      </CreatorRouteShell>
+      </CreatorShell>
     )
   }
 
@@ -52,7 +52,7 @@ export default async function CreatorActiveCampaignsPage() {
   })
 
   return (
-    <CreatorRouteShell displayName={displayName} username={username} role={role}>
+    <CreatorShell>
       <main className="mx-auto max-w-5xl space-y-6 p-6 sm:p-8">
         <div className="rounded-xl border border-white/10 bg-black/20 p-5">
           <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
@@ -115,6 +115,6 @@ export default async function CreatorActiveCampaignsPage() {
           </ul>
         )}
       </main>
-    </CreatorRouteShell>
+    </CreatorShell>
   )
 }

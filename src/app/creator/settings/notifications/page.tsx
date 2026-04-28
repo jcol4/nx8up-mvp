@@ -23,7 +23,7 @@ import NotificationPreferencesForm from '@/components/shared/NotificationPrefere
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import { auth } from '@clerk/nextjs/server'
 import { CREATOR_NOTIFICATION_TYPES, NOTIFICATION_LABELS } from '@/lib/notification-types'
-import CreatorRouteShell from '@/components/creator/CreatorRouteShell'
+import CreatorShell from '@/components/creator/CreatorShell'
 
 const DESCRIPTIONS: Record<string, string> = {
   campaign_launched:    'When a campaign you were accepted to officially launches.',
@@ -52,7 +52,7 @@ export default async function CreatorNotificationPreferencesPage() {
   const { displayName, username } = await getUserDisplayInfo()
 
   return (
-    <CreatorRouteShell displayName={displayName} username={username} role={role}>
+    <CreatorShell>
       <main className="mx-auto max-w-4xl p-6 sm:p-8">
         <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
           <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Settings</p>
@@ -64,6 +64,6 @@ export default async function CreatorNotificationPreferencesPage() {
         </div>
         <NotificationPreferencesForm entries={ENTRIES} />
       </main>
-    </CreatorRouteShell>
+    </CreatorShell>
   )
 }

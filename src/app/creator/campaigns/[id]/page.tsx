@@ -36,7 +36,7 @@ import { prisma } from '@/lib/prisma'
 import { matchCreatorToCampaign } from '@/lib/matching'
 import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
-import CreatorRouteShell from '@/components/creator/CreatorRouteShell'
+import CreatorShell from '@/components/creator/CreatorShell'
 import NxHudCard from '@/components/nx-shell/NxHudCard'
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -121,7 +121,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
     campaign.tracking_type
 
   return (
-    <CreatorRouteShell displayName={displayName} username={username} role={role}>
+    <CreatorShell>
     <main className="max-w-5xl mx-auto p-6 sm:p-8 space-y-6">
       {/* Back link */}
       <Link
@@ -542,6 +542,6 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
         )}
       </NxHudCard>
     </main>
-    </CreatorRouteShell>
+    </CreatorShell>
   )
 }

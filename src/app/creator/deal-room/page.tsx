@@ -17,11 +17,9 @@
  * External services: Prisma/PostgreSQL (via `getMyDealRooms`).
  */
 import Link from 'next/link'
-import { auth } from '@clerk/nextjs/server'
 import { getMyDealRooms } from './_actions'
 import { calcFeeBreakdown } from '@/lib/constants'
-import { getUserDisplayInfo } from '@/lib/get-user-display-info'
-import CreatorRouteShell from '@/components/creator/CreatorRouteShell'
+import CreatorShell from '@/components/creator/CreatorShell'
 
 const SUBMISSION_STATUS: Record<string, { label: string; className: string }> = {
   pending: { label: 'Not submitted', className: 'border border-white/12 bg-white/8 text-[#a9abb5]' },
@@ -36,12 +34,10 @@ const DEAL_CARD_CLASS =
   'rounded-xl border border-white/16 bg-[linear-gradient(90deg,rgba(153,247,255,0.95),rgba(153,247,255,0.22))] bg-[length:100%_2px] bg-no-repeat bg-[position:top_left] bg-black/20 shadow-[inset_0_1px_0_rgba(153,247,255,0.28)] p-4 transition-colors'
 
 export default async function CreatorDealRoomPage() {
-  const [{ sessionClaims }, { displayName, username }] = await Promise.all([auth(), getUserDisplayInfo()])
-  const role = (sessionClaims?.metadata as { role?: string } | undefined)?.role
   const applications = await getMyDealRooms()
 
   return (
-    <CreatorRouteShell displayName={displayName} username={username} role={role}>
+    <CreatorShell>
     <main className="max-w-4xl mx-auto p-6 sm:p-8">
       <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
         <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Deal Room</p>
@@ -129,6 +125,6 @@ export default async function CreatorDealRoomPage() {
         </ul>
       )}
     </main>
-    </CreatorRouteShell>
+    </CreatorShell>
   )
 }

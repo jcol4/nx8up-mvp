@@ -32,7 +32,7 @@ import { prisma } from '@/lib/prisma'
 import { parseLocation } from '@/lib/location-options'
 import type { CreatorProfileDraft } from './_shared'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
-import CreatorRouteShell from '@/components/creator/CreatorRouteShell'
+import CreatorShell from '@/components/creator/CreatorShell'
 
 /**
  * Returns true if the creator has completed enough of the profile wizard to
@@ -115,7 +115,7 @@ export default async function CreatorProfilePage() {
   }
 
   return (
-    <CreatorRouteShell displayName={displayName} username={username} role={role}>
+    <CreatorShell>
       <main className="w-full max-w-3xl mx-auto p-6 sm:p-8">
         <div className="dash-panel dash-panel--nx-top mb-6 rounded-xl border border-white/16 border-t-2 border-t-[#bffcff] bg-black/20 p-4">
           <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Creator</p>
@@ -168,6 +168,6 @@ export default async function CreatorProfilePage() {
           }}
         />
       </main>
-    </CreatorRouteShell>
+    </CreatorShell>
   )
 }

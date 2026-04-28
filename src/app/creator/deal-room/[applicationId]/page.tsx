@@ -33,7 +33,7 @@ import ProofSubmitForm from './ProofSubmitForm'
 import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
 import CopyButton from './CopyButton'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
-import CreatorRouteShell from '@/components/creator/CreatorRouteShell'
+import CreatorShell from '@/components/creator/CreatorShell'
 import NxHudCard from '@/components/nx-shell/NxHudCard'
 
 const DELIVERABLE_LABELS: Record<string, string> = {
@@ -71,7 +71,7 @@ export default async function CreatorDealRoomDetailPage({
   const hasDeliverables = c.num_videos || c.num_streams || c.num_posts || c.num_short_videos
 
   return (
-    <CreatorRouteShell displayName={displayName} username={username} role={role}>
+    <CreatorShell>
       <main className="mx-auto max-w-6xl space-y-6 p-6 sm:p-8">
         <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
           <Link
@@ -489,6 +489,6 @@ export default async function CreatorDealRoomDetailPage({
         </div>
       </div>
       </main>
-    </CreatorRouteShell>
+    </CreatorShell>
   )
 }

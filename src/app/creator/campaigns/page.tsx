@@ -22,13 +22,11 @@
  * External services: Prisma/PostgreSQL (via server actions).
  */
 import Link from 'next/link'
-import { auth } from '@clerk/nextjs/server'
 import { getOpenCampaignsWithEligibility, getLaunchedCampaigns, getCreatorOAuthStatus, getMyInvitations } from './_actions'
 import Panel from '@/components/shared/Panel'
 import InviteResponseButtons from '@/components/creator/InviteResponseButtons'
 import { calcFeeBreakdown } from '@/lib/constants'
-import { getUserDisplayInfo } from '@/lib/get-user-display-info'
-import CreatorRouteShell from '@/components/creator/CreatorRouteShell'
+import CreatorShell from '@/components/creator/CreatorShell'
 
 const APPLICATION_STATUS_STYLES: Record<string, string> = {
   accepted: 'border border-green-500/30 bg-green-500/15 text-green-300',
@@ -52,13 +50,11 @@ export default async function CreatorCampaignsPage({
 }: {
   searchParams: Promise<{ tab?: string; page?: string }>
 }) {
-  const [{ sessionClaims }, { displayName, username }] = await Promise.all([auth(), getUserDisplayInfo()])
-  const role = (sessionClaims?.metadata as { role?: string } | undefined)?.role
   const { verified, stripeReady } = await getCreatorOAuthStatus()
 
   if (!stripeReady) {
     return (
-      <CreatorRouteShell displayName={displayName} username={username} role={role}>
+      <CreatorShell>
       <main className="max-w-4xl mx-auto p-6 sm:p-8">
         <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
           <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
@@ -79,13 +75,13 @@ export default async function CreatorCampaignsPage({
           </div>
         </Panel>
       </main>
-      </CreatorRouteShell>
+      </CreatorShell>
     )
   }
 
   if (!verified) {
     return (
-      <CreatorRouteShell displayName={displayName} username={username} role={role}>
+      <CreatorShell>
       <main className="max-w-4xl mx-auto p-6 sm:p-8">
         <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
           <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
@@ -106,7 +102,7 @@ export default async function CreatorCampaignsPage({
           </div>
         </Panel>
       </main>
-      </CreatorRouteShell>
+      </CreatorShell>
     )
   }
 
@@ -144,7 +140,7 @@ export default async function CreatorCampaignsPage({
   }
 
   return (
-    <CreatorRouteShell displayName={displayName} username={username} role={role}>
+    <CreatorShell>
     <main className="max-w-4xl mx-auto p-6 sm:p-8">
       <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
         <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
@@ -402,6 +398,6 @@ export default async function CreatorCampaignsPage({
       )}
 
     </main>
-    </CreatorRouteShell>
+    </CreatorShell>
   )
 }
