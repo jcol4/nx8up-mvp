@@ -236,6 +236,7 @@ export default function CreatorCommandCenter({
     { href: '/creator/campaigns', label: 'Campaigns', icon: 'campaigns' },
     { href: '/creator/deal-room', label: 'Deal Room', icon: 'dealRoom' },
     { href: '/creator/academy', label: 'Academy', icon: 'academy' },
+    { href: '/creator/steam-lookup', label: 'Steam Lookup', icon: 'creators' },
     { href: '/creator/settings/notifications', label: 'Notifications', icon: 'notifications' },
   ]
   const navGroups: SidebarNavGroup[] = [
@@ -259,6 +260,7 @@ export default function CreatorCommandCenter({
         { href: '/creator/campaigns', label: 'Campaigns', icon: 'campaigns' },
         { href: '/creator/deal-room', label: 'Deal Room', icon: 'dealRoom' },
         { href: '/creator/academy', label: 'Academy', icon: 'academy' },
+        { href: '/creator/steam-lookup', label: 'Steam Lookup', icon: 'creators' },
       ],
     },
     {
