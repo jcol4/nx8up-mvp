@@ -8,9 +8,11 @@ const isSponsorRoute = createRouteMatcher(['/sponsor(.*)'])
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
 
 const isPublicRoute = createRouteMatcher([
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-])
+    '/sign-in(.*)',
+    '/sign-up(.*)',
+    '/forgot-password(.*)',
+
+  ])
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
     console.log('Middleware running for:', req.nextUrl.pathname)
