@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
   const client = await clerkClient()
   const user = await client.users.getUser(userId)
   const role = (user.publicMetadata?.role as string) ?? null
-  if (role !== 'sponsor' && role !== 'admin') {
+  if (role !== 'sponsor' && role !== 'admin' && role !== 'creator') {
     return NextResponse.json({ error: 'Forbidden.' }, { status: 403 })
   }
 

@@ -47,6 +47,7 @@ const NAV_ITEMS = [
   { href: '/creator/profile', label: 'Profile' },
   { href: '/creator/campaigns', label: 'Campaigns' },
   { href: '/creator/deal-room', label: 'Deal Room' },
+  { href: '/creator/steam-lookup', label: 'Steam Lookup' },
   { href: '/creator/academy', label: 'Academy' },
   { href: '/creator/settings/notifications', label: 'Notifications' },
 ]
