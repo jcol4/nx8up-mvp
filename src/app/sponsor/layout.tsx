@@ -42,6 +42,7 @@ const NAV_ITEMS = [
   { href: '/sponsor/campaigns', label: 'My Campaigns' },
   { href: '/sponsor/deal-room', label: 'Deal Room' },
   { href: '/sponsor/creators', label: 'Creators' },
+  { href: '/sponsor/steam-lookup', label: 'Steam Lookup' },
   { href: '/sponsor/payouts', label: 'Payouts' },
   { href: '/sponsor/settings/notifications', label: 'Notifications' },
 ]

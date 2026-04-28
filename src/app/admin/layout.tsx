@@ -46,6 +46,7 @@ const NAV_ITEMS = [
   { href: '/admin/academy', label: 'Academy' },
   { href: '/admin/surveys', label: 'Surveys' },
   { href: '/admin/users', label: 'Users' },
+  { href: '/admin/steam-lookup', label: 'Steam Lookup' },
   { href: '/admin/profile', label: 'Profile' },
   { href: '/admin/settings/notifications', label: 'Notifications' },
 ]
