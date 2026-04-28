@@ -29,7 +29,7 @@ export default function LaunchCampaignButton({ id }: Props) {
         type="button"
         onClick={handleLaunch}
         disabled={isPending}
-        className="text-xs px-2.5 py-1 rounded-lg bg-[#a855f7] text-white font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
+        className="rounded-lg bg-[#c084fc] px-2.5 py-1 text-xs font-semibold text-slate-950 transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {isPending ? 'Launching...' : 'Launch'}
       </button>

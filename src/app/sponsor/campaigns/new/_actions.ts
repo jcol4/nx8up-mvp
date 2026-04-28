@@ -1,38 +1,8 @@
-/**
- * Server actions for the campaign creation wizard (/sponsor/campaigns/new).
- *
- * Exports:
- * - `saveCampaignDraft`  — upserts a campaign row with status `draft`. Silently
- *                          caps the budget at BUDGET_MAX rather than erroring.
- *                          Returns the campaign ID so the client can track the draft.
- * - `createCampaign`     — fully validates all required fields server-side and
- *                          creates/updates the campaign with status `pending_payment`.
- *                          For direct-invite campaigns, also creates the application
- *                          record and notifies the invited creator.
- *
- * Shared private helpers:
- * - `parseOptionalInt` / `parseOptionalFloat` / `parseOptionalDate` — safe parsers
- *   that return null for empty or invalid input.
- * - `parseStringArray`  — JSON.parse wrapper for array fields transmitted as JSON
- *   strings in FormData.
- * - `parseBool`         — converts the string "true" to boolean true.
- * - `generateCampaignCode` — generates a unique NX-XXXXXXXX campaign code.
- *
- * Validation layers:
- * - Client-side: `validateStep` in NewCampaignForm.tsx (UX convenience only).
- * - Server-side: `createCampaign` re-validates all critical fields independently.
- *
- * Gotcha: `saveCampaignDraft` maps `target_interests` to BOTH `game_category` and
- * `target_interests` columns (the field is stored twice). This may be intentional
- * for search/filter purposes but is worth reviewing for data consistency.
- *
- * External services: Clerk (auth), Prisma, @/lib/notifications.
- * Env vars: BUDGET_MAX via @/lib/constants.
- */
 'use server'
 
 import { auth } from '@clerk/nextjs/server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
+import { sponsorDashboardCacheTag } from '@/lib/sponsor-dashboard-cache'
 import { randomUUID } from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { BUDGET_MAX } from '@/lib/constants'
@@ -46,31 +16,24 @@ const VALID_PAYMENT_MODELS = ['fixed_per_creator', 'performance_based', 'hybrid'
 const VALID_PRODUCT_TYPES = ['consumable', 'gaming_hardware', 'digital_product', 'fashion_lifestyle', 'event_experience'] as const
 const VALID_CAMPAIGN_TYPES = ['use_and_show', 'explain_and_demo', 'mention_and_repeat', 'compete_and_feature'] as const
 
-/** Parses a string to an integer, returning null for empty strings or NaN. */
 function parseOptionalInt(value: string | null): number | null {
   if (value == null || value.trim() === '') return null
   const n = parseInt(value, 10)
   return Number.isNaN(n) ? null : n
 }
 
-/** Parses a string to a float, returning null for empty strings or NaN. */
 function parseOptionalFloat(value: string | null): number | null {
   if (value == null || value.trim() === '') return null
   const n = parseFloat(value)
   return Number.isNaN(n) ? null : n
 }
 
-/** Parses an ISO date string to a Date, returning null for empty/invalid values. */
 function parseOptionalDate(value: string | null): Date | null {
   if (value == null || value.trim() === '') return null
   const d = new Date(value)
   return Number.isNaN(d.getTime()) ? null : d
 }
 
-/**
- * Parses a JSON-encoded string array from FormData. Returns an empty array for
- * null, empty strings, or non-array JSON values.
- */
 function parseStringArray(value: string | null): string[] {
   if (value == null || value.trim() === '') return []
   try {
@@ -81,28 +44,14 @@ function parseStringArray(value: string | null): string[] {
   }
 }
 
-/** Returns true only for the exact string "true"; all other values return false. */
 function parseBool(value: string | null): boolean {
   return value === 'true'
 }
 
-/**
- * Generates a unique campaign display code in the format "NX-XXXXXXXX" where X
- * is an uppercase hex character derived from a random UUID. Used for human-readable
- * campaign identification.
- */
 function generateCampaignCode(): string {
   return 'NX-' + randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase()
 }
 
-/**
- * Upserts a campaign in `draft` status with minimal validation. Intended for
- * auto-save / "Save Draft" flows. Budget is silently capped at BUDGET_MAX rather
- * than returning an error. If `draft_id` is present in the form data and the
- * record belongs to this sponsor, it is updated; otherwise a new draft is created.
- *
- * Returns the campaign ID in `res.id` so the client can persist the draft reference.
- */
 export async function saveCampaignDraft(formData: FormData): Promise<CreateCampaignResult> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
@@ -201,18 +150,10 @@ export async function saveCampaignDraft(formData: FormData): Promise<CreateCampa
 
   revalidatePath('/sponsor/campaigns')
   revalidatePath('/sponsor')
+  revalidateTag(sponsorDashboardCacheTag(sponsor.id))
   return { success: true, id: campaignId }
 }
 
-/**
- * Fully validates and creates (or promotes from draft) a campaign with status
- * `pending_payment`. Enforces all required fields, legal age restriction floors,
- * and the BUDGET_MAX ceiling. For direct-invite campaigns, immediately creates
- * an `invited` application record and notifies the creator.
- *
- * On success, the caller should redirect to /sponsor/campaigns/[id]/pay to
- * complete funding before the campaign goes live.
- */
 export async function createCampaign(formData: FormData): Promise<CreateCampaignResult> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
@@ -437,5 +378,6 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
 
   revalidatePath('/sponsor/campaigns')
   revalidatePath('/sponsor')
+  revalidateTag(sponsorDashboardCacheTag(sponsor.id))
   return { success: true, id: campaignId }
 }

@@ -1,32 +1,10 @@
-/**
- * Sponsor Deal Room detail page — /sponsor/deal-room/[applicationId]
- *
- * Shows the full deal room for a single accepted creator application, including:
- * - Submission status and review UI (approve / request revision) — only visible
- *   once an admin has verified the submission (`admin_verified` or later).
- * - Mission requirements (deliverable counts, required elements).
- * - Creative package (brand, product, content guidelines, video includes).
- * - Creator sidebar (handle, platforms, followers).
- * - Link performance sidebar (total clicks, CTR, avg video views) — only shown
- *   if a tracking short code exists for the application.
- * - Campaign sidebar (payment model, budget breakdown, deadline).
- * - RetryPayoutButton — shown when submission is approved but payout has not
- *   been sent (i.e., `payout_status` is not 'paid').
- *
- * `video_views` is stored as a JSON Record<string, number> in the DB. This page
- * computes an average across all video entries.
- *
- * Returns 404 if `getDealRoomForSponsor` returns null (wrong owner, not launched).
- *
- * External services: Clerk (auth, via _actions), Prisma (via _actions), Stripe (via _actions).
- */
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import SponsorHeader from '../../SponsorHeader'
 import { getDealRoomForSponsor } from '../_actions'
 import ReviewButtons from './ReviewButtons'
 import RetryPayoutButton from './RetryPayoutButton'
 import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
+import NxHudCard from '@/components/nx-shell/NxHudCard'
 
 const DELIVERABLE_LABELS: Record<string, string> = {
   gameplay_footage: 'Gameplay footage',
@@ -67,22 +45,21 @@ export default async function SponsorDealRoomDetailPage({
   const hasDeliverables = c.num_videos || c.num_streams || c.num_posts || c.num_short_videos
 
   return (
-    <>
-      <SponsorHeader />
-      <div className="flex-1 p-6 overflow-auto">
-        <div className="max-w-5xl mx-auto space-y-6">
-          <Link
-            href="/sponsor/deal-room"
-            className="inline-flex items-center gap-1.5 text-xs dash-text-muted hover:text-[#c8dff0] transition-colors"
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Deal Room
-          </Link>
+    <main className="mx-auto max-w-5xl space-y-5 p-5 sm:p-6">
+          <div className="flex items-center justify-start">
+            <Link
+              href="/sponsor/deal-room"
+              className="inline-flex items-center gap-2 rounded-lg border border-[#99f7ff]/45 bg-[#99f7ff]/12 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#bffcff] shadow-[0_0_0_1px_rgba(153,247,255,0.2)] transition hover:border-[#99f7ff]/70 hover:bg-[#99f7ff]/20 hover:text-[#e9fdff]"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Deal Room
+            </Link>
+          </div>
 
           {/* Header */}
-          <div className="dash-panel p-5">
+          <NxHudCard as="div" className="p-5 sm:p-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -126,13 +103,13 @@ export default async function SponsorDealRoomDetailPage({
                 )}
               </div>
             </div>
-          </div>
+          </NxHudCard>
 
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2 space-y-5">
+          <div className="grid gap-5 lg:grid-cols-12">
+            <div className="space-y-5 lg:col-span-8">
 
               {/* Creator Submission */}
-              <section className="dash-panel p-5">
+              <NxHudCard as="section" className="p-5">
                 <h2 className="dash-panel-title">Creator Submission</h2>
 
                 {/* Not yet submitted or pending admin review — hide content from sponsor */}
@@ -240,11 +217,11 @@ export default async function SponsorDealRoomDetailPage({
                     )}
                   </div>
                 )}
-              </section>
+              </NxHudCard>
 
               {/* Mission Requirements */}
               {hasDeliverables && (
-                <section className="dash-panel p-5">
+                <NxHudCard as="section" className="p-5">
                   <h2 className="dash-panel-title">Mission Requirements</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                     {c.num_videos ? (
@@ -289,11 +266,11 @@ export default async function SponsorDealRoomDetailPage({
                       <li className="flex gap-2"><span className="dash-accent">▸</span> Tag / mention the brand</li>
                     )}
                   </ul>
-                </section>
+                </NxHudCard>
               )}
 
               {/* Creative Package */}
-              <section className="dash-panel p-5">
+              <NxHudCard as="section" className="p-5">
                 <h2 className="dash-panel-title">Creative Package</h2>
                 <dl className="space-y-3 text-sm">
                   {c.brand_name && (
@@ -327,12 +304,12 @@ export default async function SponsorDealRoomDetailPage({
                     </div>
                   )}
                 </dl>
-              </section>
+              </NxHudCard>
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-4">
-              <div className="dash-panel p-4">
+            <div className="space-y-4 lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
+              <NxHudCard as="div" className="p-4">
                 <h3 className="dash-panel-title">Creator</h3>
                 <dl className="space-y-2 text-sm">
                   <div className="flex justify-between gap-2">
@@ -358,10 +335,10 @@ export default async function SponsorDealRoomDetailPage({
                     </div>
                   )}
                 </dl>
-              </div>
+              </NxHudCard>
 
               {app.tracking_short_code && (
-                <div className="dash-panel p-4">
+                <NxHudCard as="div" className="p-4">
                   <h3 className="dash-panel-title">Link Performance</h3>
                   <dl className="space-y-2 text-sm">
                     <div className="flex justify-between gap-2">
@@ -381,10 +358,10 @@ export default async function SponsorDealRoomDetailPage({
                       </div>
                     )}
                   </dl>
-                </div>
+                </NxHudCard>
               )}
 
-              <div className="dash-panel p-4">
+              <NxHudCard as="div" className="p-4">
                 <h3 className="dash-panel-title">Campaign</h3>
                 <dl className="space-y-2 text-sm">
                   {c.payment_model && (
@@ -425,11 +402,9 @@ export default async function SponsorDealRoomDetailPage({
                     </div>
                   )}
                 </dl>
-              </div>
+              </NxHudCard>
             </div>
           </div>
-        </div>
-      </div>
-    </>
+    </main>
   )
 }

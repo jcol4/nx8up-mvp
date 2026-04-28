@@ -29,7 +29,7 @@ export default function PublishCampaignButton({ id }: Props) {
         type="button"
         onClick={handlePublish}
         disabled={isPending}
-        className="text-xs px-2.5 py-1 rounded-lg bg-[#00c8ff] text-black font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
+        className="rounded-lg bg-[#99f7ff] px-2.5 py-1 text-xs font-semibold text-slate-900 transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {isPending ? 'Publishing...' : 'Publish'}
       </button>

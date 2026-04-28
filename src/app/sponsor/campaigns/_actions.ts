@@ -1,39 +1,13 @@
-/**
- * Server actions for sponsor campaign management (/sponsor/campaigns).
- *
- * Exports:
- * - `publishCampaign`       — advances a draft campaign to `pending_payment`
- *                             status so the sponsor is directed to pay.
- * - `launchCampaign`        — advances a `live` (funded) campaign to `launched`,
- *                             notifying all accepted creators via the notification
- *                             system. Requires at least one accepted creator and
- *                             a confirmed Stripe charge ID on the campaign.
- * - `deleteCampaign`        — hard-deletes a campaign record. No status restriction
- *                             is enforced here — any campaign owned by the sponsor
- *                             can be deleted, including live ones.
- * - `setApplicationStatus`  — accepts or rejects a creator application. On accept,
- *                             generates a unique 8-char tracking short code (if the
- *                             campaign has a landing page URL) and notifies the creator.
- *
- * All actions verify that the calling user owns the campaign/application before
- * mutating data.
- *
- * External services: Clerk (auth), Prisma, @/lib/notifications (in-app notifications).
- */
 'use server'
 
 import { auth } from '@clerk/nextjs/server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
+import { sponsorDashboardCacheTag } from '@/lib/sponsor-dashboard-cache'
 import { randomBytes } from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { createNotification } from '@/lib/notifications'
 import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 
-/**
- * Generates a cryptographically random 8-character lowercase alphanumeric code
- * used as a per-creator tracking URL short code. Uses `randomBytes` (not
- * Math.random) to avoid predictable codes.
- */
 function generateShortCode(): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
   const bytes = randomBytes(8)
@@ -43,10 +17,6 @@ function generateShortCode(): string {
     .slice(0, 8)
 }
 
-/**
- * Advances a draft campaign to `pending_payment` status, prompting the sponsor
- * to complete payment. Verifies ownership before updating.
- */
 export async function publishCampaign(id: string): Promise<{ error?: string; success?: boolean }> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
@@ -63,19 +33,11 @@ export async function publishCampaign(id: string): Promise<{ error?: string; suc
 
   revalidatePath('/sponsor/campaigns')
   revalidatePath('/sponsor')
+  revalidateTag(sponsorDashboardCacheTag(sponsor.id))
 
   return { success: true }
 }
 
-/**
- * Advances a funded (`live`) campaign to `launched` status and sends a
- * CAMPAIGN_LAUNCHED notification to all accepted creators.
- *
- * Guards:
- * - Campaign must be `live` (not pending payment or already launched).
- * - `stripe_charge_id` must be set (payment has settled).
- * - At least one accepted creator application must exist.
- */
 export async function launchCampaign(id: string): Promise<{ error?: string; success?: boolean }> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
@@ -125,15 +87,11 @@ export async function launchCampaign(id: string): Promise<{ error?: string; succ
 
   revalidatePath('/sponsor/campaigns')
   revalidatePath('/sponsor')
+  revalidateTag(sponsorDashboardCacheTag(sponsor.id))
 
   return { success: true }
 }
 
-/**
- * Hard-deletes a campaign. No guard on status — any campaign owned by the
- * authenticated sponsor can be deleted. Cascading deletes on applications /
- * submissions are handled at the database level.
- */
 export async function deleteCampaign(id: string): Promise<{ error?: string; success?: boolean }> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
@@ -150,19 +108,11 @@ export async function deleteCampaign(id: string): Promise<{ error?: string; succ
 
   revalidatePath('/sponsor/campaigns')
   revalidatePath('/sponsor')
+  revalidateTag(sponsorDashboardCacheTag(sponsor.id))
 
   return { success: true }
 }
 
-/**
- * Sets an application's status to `accepted` or `rejected` and notifies the
- * creator. On accept, generates a unique tracking short code (if the campaign
- * has a landing page URL) using a collision-safe loop.
- *
- * @param applicationId - The campaign application record to update.
- * @param campaignId    - Used to verify the application belongs to the right campaign.
- * @param status        - 'accepted' or 'rejected'.
- */
 export async function setApplicationStatus(
   applicationId: string,
   campaignId: string,
@@ -214,6 +164,8 @@ export async function setApplicationStatus(
 
   revalidatePath(`/sponsor/campaigns/${campaignId}/applications`)
   revalidatePath('/sponsor/campaigns')
+  revalidatePath('/sponsor')
+  revalidateTag(sponsorDashboardCacheTag(sponsor.id))
 
   return { success: true }
 }
