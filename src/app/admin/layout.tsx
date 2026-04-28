@@ -52,6 +52,7 @@ export default async function AdminLayout({
         { href: '/admin/reports', label: 'Reports', icon: 'reports' },
         { href: '/admin/academy', label: 'Academy', icon: 'academy' },
         { href: '/admin/surveys', label: 'Surveys', icon: 'academy' },
+        { href: '/admin/steam-lookup', label: 'Steam Lookup', icon: 'creators' },
         { href: '/admin/profile', label: 'Profile', icon: 'profile' },
       ],
     },

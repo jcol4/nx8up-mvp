@@ -52,6 +52,7 @@ export default async function SponsorLayout({
         { href: '/sponsor/campaigns', label: 'My Campaigns', icon: 'campaigns' },
         { href: '/sponsor/deal-room', label: 'Deal Room', icon: 'dealRoom' },
         { href: '/sponsor/creators', label: 'Creators', icon: 'creators' },
+        { href: '/sponsor/steam-lookup', label: 'Steam Lookup', icon: 'creators' },
         { href: '/sponsor/payouts', label: 'Payouts', icon: 'payouts' },
       ] as SidebarNavItem[],
     },
