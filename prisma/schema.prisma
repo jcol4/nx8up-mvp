@@ -30,6 +30,14 @@ model content_creators {
   twitch_profile_image       String?
   twitch_synced_at           DateTime?               @db.Timestamptz(6)
   twitch_username            String?
+  steam_id                   String?                 @unique
+  steam_username             String?
+  steam_profile_url          String?
+  steam_avatar_url           String?
+  steam_profile_visibility   Int?
+  steam_top_games            Json?
+  steam_recent_games         Json?
+  steam_synced_at            DateTime?               @db.Timestamptz(6)
   youtube_avg_views          Int?
   youtube_channel_id         String?                 @unique
   youtube_channel_name       String?
@@ -73,6 +81,7 @@ model content_creators {
   @@index([subs_followers])
   @@index([twitch_id])
   @@index([twitch_broadcaster_type])
+  @@index([steam_id])
   @@index([youtube_channel_id])
   @@index([youtube_subscribers])
 }
