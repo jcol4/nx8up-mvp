@@ -19,14 +19,11 @@
  *
  * External services: Clerk (auth + `getUserDisplayInfo`).
  */
-import CreatorTopBar from '@/components/creator/CreatorTopBar'
-import NotificationBell from '@/components/shared/NotificationBell'
-import UserProfileBlock from '@/components/shared/UserProfileBlock'
 import NotificationPreferencesForm from '@/components/shared/NotificationPreferencesForm'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import { auth } from '@clerk/nextjs/server'
 import { CREATOR_NOTIFICATION_TYPES, NOTIFICATION_LABELS } from '@/lib/notification-types'
-import BackLink from '@/components/shared/BackLink'
+import CreatorRouteShell from '@/components/creator/CreatorRouteShell'
 
 const DESCRIPTIONS: Record<string, string> = {
   campaign_launched:    'When a campaign you were accepted to officially launches.',
@@ -55,27 +52,18 @@ export default async function CreatorNotificationPreferencesPage() {
   const { displayName, username } = await getUserDisplayInfo()
 
   return (
-    <>
-      <CreatorTopBar
-        rightContent={
-          <div className="flex items-center gap-3 sm:gap-4">
-            <NotificationBell />
-            <UserProfileBlock
-              displayName={displayName}
-              username={username}
-              variant="creator"
-              editProfileLink="/creator/profile"
-              role={role}
-            />
+    <CreatorRouteShell displayName={displayName} username={username} role={role}>
+      <main className="mx-auto max-w-4xl p-6 sm:p-8">
+        <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
+          <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Settings</p>
+          <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Notification Preferences</h1>
+          <p className="mt-1 text-sm text-[#a9abb5]">Choose how you want to be notified for each event type.</p>
+          <div className="mt-3 inline-flex items-center rounded-full border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2.5 py-1 text-[11px] text-[#99f7ff]">
+            {ENTRIES.length} notification types
           </div>
-        }
-      />
-      <main className="max-w-2xl mx-auto p-6 sm:p-8">
-        <BackLink href="/creator">← Back to Dashboard</BackLink>
-        <h1 className="text-xl font-bold cr-text-bright mt-4 mb-1">Notification Preferences</h1>
-        <p className="text-sm cr-text-muted mb-6">Choose how you want to be notified for each event type.</p>
+        </div>
         <NotificationPreferencesForm entries={ENTRIES} />
       </main>
-    </>
+    </CreatorRouteShell>
   )
 }

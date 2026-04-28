@@ -14,7 +14,7 @@
 import { useState } from 'react'
 import CreatorCalendar from './CreatorCalendar'
 import CreatorDayTasks from './CreatorDayTasks'
-import type { CalendarTasksMap } from './_actions'
+import type { CalendarTasksMap } from '../../_actions'
 
 function toDateKey(d: Date): string {
   return d.toISOString().slice(0, 10)

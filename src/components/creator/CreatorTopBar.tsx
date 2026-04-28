@@ -5,7 +5,6 @@
  */
 import { auth } from '@clerk/nextjs/server'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
-import UserProfileBlock from '@/components/shared/UserProfileBlock'
 import { prisma } from '@/lib/prisma'
 
 type Props = {
@@ -13,8 +12,7 @@ type Props = {
 }
 
 export default async function CreatorTopBar({ rightContent }: Props) {
-  const { userId, sessionClaims } = await auth()
-  const role = (sessionClaims?.metadata as { role?: string } | undefined)?.role
+  const { userId } = await auth()
   const { displayName, username } = await getUserDisplayInfo()
   const userName = displayName || username || 'Creator'
 
@@ -61,7 +59,7 @@ export default async function CreatorTopBar({ rightContent }: Props) {
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-black/20 px-2 py-1">
         {rightContent}
       </div>
     </header>

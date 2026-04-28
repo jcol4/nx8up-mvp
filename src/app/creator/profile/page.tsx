@@ -25,14 +25,14 @@
  */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { getCreatorProfile, refreshTwitchDataIfStale, refreshYouTubeDataIfStale } from './_actions'
-import CreatorTopBar from '@/components/creator/CreatorTopBar'
 import CreatorProfileWizard from './CreatorProfileWizard'
 import PayoutBanner from './PayoutBanner'
 import { prisma } from '@/lib/prisma'
 import { parseLocation } from '@/lib/location-options'
 import type { CreatorProfileDraft } from './_shared'
+import { getUserDisplayInfo } from '@/lib/get-user-display-info'
+import CreatorRouteShell from '@/components/creator/CreatorRouteShell'
 
 /**
  * Returns true if the creator has completed enough of the profile wizard to
@@ -59,7 +59,8 @@ export default async function CreatorProfilePage() {
     refreshYouTubeDataIfStale(userId),
   ])
 
-  const [profile, creator] = await Promise.all([
+  const [{ displayName, username }, profile, creator] = await Promise.all([
+    getUserDisplayInfo(),
     getCreatorProfile(),
     prisma.content_creators.findUnique({
       where: { clerk_user_id: userId },
@@ -114,22 +115,12 @@ export default async function CreatorProfilePage() {
   }
 
   return (
-    <>
-      <CreatorTopBar
-        rightContent={
-          <Link
-            href="/creator"
-            className="text-sm cr-text-muted hover:text-[#c8dff0] transition-colors"
-          >
-            ← Dashboard
-          </Link>
-        }
-      />
-
+    <CreatorRouteShell displayName={displayName} username={username} role={role}>
       <main className="w-full max-w-3xl mx-auto p-6 sm:p-8">
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold cr-text-bright">Creator Profile</h1>
-          <p className="text-sm cr-text-muted mt-1">
+        <div className="dash-panel dash-panel--nx-top mb-6 rounded-xl border border-white/16 border-t-2 border-t-[#bffcff] bg-black/20 p-4">
+          <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Creator</p>
+          <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Creator Profile</h1>
+          <p className="mt-1 text-sm text-[#a9abb5]">
             Complete your profile to get discovered by sponsors.
           </p>
         </div>
@@ -177,6 +168,6 @@ export default async function CreatorProfilePage() {
           }}
         />
       </main>
-    </>
+    </CreatorRouteShell>
   )
 }

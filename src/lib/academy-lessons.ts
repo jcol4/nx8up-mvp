@@ -34,8 +34,8 @@ export type Lesson = {
 export const LESSONS: Lesson[] = [
   {
     id: 'media-kit',
-    title: 'How to Build Your Media Kit',
-    category: 'Warzone / Apex',
+    title: 'Build a Sponsorship-Ready Creator Profile',
+    category: 'Creator Business',
     videoUrl: 'https://www.youtube.com/embed/8jLOx1hD3_o',
     thumbnailUrl: 'https://img.youtube.com/vi/8jLOx1hD3_o/mqdefault.jpg',
     duration: '50 min',

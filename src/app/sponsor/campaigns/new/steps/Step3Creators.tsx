@@ -1,22 +1,3 @@
-/**
- * Step 3 — Creators
- *
- * Lets the sponsor choose between two campaign modes:
- *
- * 1. Open Applications — creators browse and apply; sponsor reviews and accepts.
- *    Sub-fields: creator type (competitive gamer / streamer / content creator),
- *    creator size (nano / micro / mid / large), min followers, min CTR.
- *
- * 2. Direct Invite — sponsor picks a single creator from the available list.
- *    The selected creator receives a DIRECT_INVITE notification. Only creators
- *    with `is_available: true` appear in the list.
- *
- * `availableCreators` is fetched server-side on the parent page and passed as a
- * prop (max 200 records, ordered by Twitch followers desc). The client-side
- * search filters this list by handle/name.
- *
- * `getTotalFollowers` sums Twitch + YouTube followers for display purposes.
- */
 'use client'
 
 import { useState } from 'react'
@@ -88,11 +69,11 @@ export default function Step3Creators({ draft, setDraft, onNext, onBack, availab
             onClick={() => setDraft(prev => ({ ...prev, is_direct_invite: false, invited_creator_id: '' }))}
             className={`flex flex-col gap-1.5 p-4 rounded-lg border text-left transition-all duration-150 ${
               !draft.is_direct_invite
-                ? 'border-[#00c8ff] bg-[rgba(0,200,255,0.06)] shadow-[0_0_18px_rgba(0,200,255,0.12)]'
-                : 'dash-border hover:border-[rgba(0,200,255,0.3)] hover:bg-[rgba(0,200,255,0.03)]'
+                ? 'border-[#99f7ff] bg-[rgba(153,247,255,0.06)] shadow-[0_0_18px_rgba(153,247,255,0.12)]'
+                : 'dash-border hover:border-[rgba(153,247,255,0.3)] hover:bg-[rgba(153,247,255,0.03)]'
             }`}
           >
-            <p className={`text-sm font-semibold ${!draft.is_direct_invite ? 'text-[#00c8ff]' : 'dash-text-bright'}`}>
+            <p className={`text-sm font-semibold ${!draft.is_direct_invite ? 'text-[#99f7ff]' : 'dash-text-bright'}`}>
               Open Applications
             </p>
             <p className="text-xs dash-text-muted leading-relaxed">
@@ -104,11 +85,11 @@ export default function Step3Creators({ draft, setDraft, onNext, onBack, availab
             onClick={() => setDraft(prev => ({ ...prev, is_direct_invite: true }))}
             className={`flex flex-col gap-1.5 p-4 rounded-lg border text-left transition-all duration-150 ${
               draft.is_direct_invite
-                ? 'border-[#00c8ff] bg-[rgba(0,200,255,0.06)] shadow-[0_0_18px_rgba(0,200,255,0.12)]'
-                : 'dash-border hover:border-[rgba(0,200,255,0.3)] hover:bg-[rgba(0,200,255,0.03)]'
+                ? 'border-[#99f7ff] bg-[rgba(153,247,255,0.06)] shadow-[0_0_18px_rgba(153,247,255,0.12)]'
+                : 'dash-border hover:border-[rgba(153,247,255,0.3)] hover:bg-[rgba(153,247,255,0.03)]'
             }`}
           >
-            <p className={`text-sm font-semibold ${draft.is_direct_invite ? 'text-[#00c8ff]' : 'dash-text-bright'}`}>
+            <p className={`text-sm font-semibold ${draft.is_direct_invite ? 'text-[#99f7ff]' : 'dash-text-bright'}`}>
               Direct Invite
             </p>
             <p className="text-xs dash-text-muted leading-relaxed">
@@ -124,9 +105,9 @@ export default function Step3Creators({ draft, setDraft, onNext, onBack, availab
           <p className={sectionTitle}>Select a Creator</p>
 
           {selectedCreator && (
-            <div className="flex items-center justify-between p-3 rounded-lg border border-[#00c8ff]/40 bg-[rgba(0,200,255,0.05)]">
+            <div className="flex items-center justify-between p-3 rounded-lg border border-[#99f7ff]/40 bg-[rgba(153,247,255,0.05)]">
               <div>
-                <p className="text-sm font-semibold text-[#00c8ff]">{getHandle(selectedCreator)}</p>
+                <p className="text-sm font-semibold text-[#99f7ff]">{getHandle(selectedCreator)}</p>
                 <p className="text-xs dash-text-muted">
                   {selectedCreator.platform.join(' · ')}
                   {getTotalFollowers(selectedCreator) > 0 && (
@@ -152,7 +133,7 @@ export default function Step3Creators({ draft, setDraft, onNext, onBack, availab
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search by handle or name..."
-            className="w-full px-3 py-2 rounded-lg border dash-border bg-transparent text-sm dash-text-bright placeholder:dash-text-muted focus:outline-none focus:border-[rgba(0,200,255,0.5)]"
+            className="w-full px-3 py-2 rounded-lg border dash-border bg-transparent text-sm dash-text-bright placeholder:dash-text-muted focus:outline-none focus:border-[rgba(153,247,255,0.5)]"
           />
 
           {availableCreators.length === 0 ? (
@@ -170,12 +151,12 @@ export default function Step3Creators({ draft, setDraft, onNext, onBack, availab
                     onClick={() => setDraft(prev => ({ ...prev, invited_creator_id: c.id }))}
                     className={`w-full flex items-center justify-between p-3 rounded-lg border text-left transition-all duration-150 ${
                       isSelected
-                        ? 'border-[#00c8ff] bg-[rgba(0,200,255,0.06)]'
-                        : 'dash-border hover:border-[rgba(0,200,255,0.3)] hover:bg-[rgba(0,200,255,0.03)]'
+                        ? 'border-[#99f7ff] bg-[rgba(153,247,255,0.06)]'
+                        : 'dash-border hover:border-[rgba(153,247,255,0.3)] hover:bg-[rgba(153,247,255,0.03)]'
                     }`}
                   >
                     <div>
-                      <p className={`text-sm font-medium ${isSelected ? 'text-[#00c8ff]' : 'dash-text-bright'}`}>
+                      <p className={`text-sm font-medium ${isSelected ? 'text-[#99f7ff]' : 'dash-text-bright'}`}>
                         {getHandle(c)}
                       </p>
                       <p className="text-xs dash-text-muted mt-0.5">
@@ -212,11 +193,11 @@ export default function Step3Creators({ draft, setDraft, onNext, onBack, availab
                     onClick={() => toggleArr('creator_types', ct.value)}
                     className={`flex flex-col gap-1.5 p-4 rounded-lg border text-left transition-all duration-150 ${
                       active
-                        ? 'border-[#00c8ff] bg-[rgba(0,200,255,0.06)] shadow-[0_0_18px_rgba(0,200,255,0.12)]'
-                        : 'dash-border hover:border-[rgba(0,200,255,0.3)] hover:bg-[rgba(0,200,255,0.03)]'
+                        ? 'border-[#99f7ff] bg-[rgba(153,247,255,0.06)] shadow-[0_0_18px_rgba(153,247,255,0.12)]'
+                        : 'dash-border hover:border-[rgba(153,247,255,0.3)] hover:bg-[rgba(153,247,255,0.03)]'
                     }`}
                   >
-                    <p className={`text-sm font-semibold ${active ? 'text-[#00c8ff]' : 'dash-text-bright'}`}>
+                    <p className={`text-sm font-semibold ${active ? 'text-[#99f7ff]' : 'dash-text-bright'}`}>
                       {ct.label}
                     </p>
                     <p className="text-xs dash-text-muted leading-relaxed">{ct.description}</p>
@@ -239,11 +220,11 @@ export default function Step3Creators({ draft, setDraft, onNext, onBack, availab
                     onClick={() => toggleArr('creator_sizes', cs.value)}
                     className={`flex flex-col items-center p-3 rounded-lg border text-center transition-all duration-150 ${
                       active
-                        ? 'border-[#00c8ff] bg-[rgba(0,200,255,0.06)] shadow-[0_0_14px_rgba(0,200,255,0.2)]'
-                        : 'dash-border hover:border-[rgba(0,200,255,0.3)] hover:bg-[rgba(0,200,255,0.03)]'
+                        ? 'border-[#99f7ff] bg-[rgba(153,247,255,0.06)] shadow-[0_0_14px_rgba(153,247,255,0.2)]'
+                        : 'dash-border hover:border-[rgba(153,247,255,0.3)] hover:bg-[rgba(153,247,255,0.03)]'
                     }`}
                   >
-                    <p className={`text-sm font-semibold ${active ? 'text-[#00c8ff]' : 'dash-text-bright'}`}>
+                    <p className={`text-sm font-semibold ${active ? 'text-[#99f7ff]' : 'dash-text-bright'}`}>
                       {cs.label}
                     </p>
                     <p className="text-xs dash-text-muted mt-0.5">{cs.description}</p>
@@ -289,7 +270,7 @@ export default function Step3Creators({ draft, setDraft, onNext, onBack, availab
         <button type="button" onClick={onBack} className="py-2.5 px-5 rounded-lg border dash-border dash-text-muted text-sm font-medium hover:text-[#c8dff0] transition-colors">
           ← Back
         </button>
-        <button type="button" onClick={onNext} className="py-2.5 px-6 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 transition-opacity">
+        <button type="button" onClick={onNext} className="py-2.5 px-6 rounded-lg bg-[#99f7ff] text-slate-900 text-sm font-semibold hover:opacity-90 transition-opacity">
           Next →
         </button>
       </div>

@@ -13,9 +13,15 @@ export async function GET() {
   const { userId } = await auth()
   if (!userId) return Response.json({ unread: 0 })
 
-  const unread = await prisma.notification.count({
-    where: { userId, read: false },
-  })
+  try {
+    const unread = await prisma.notification.count({
+      where: { userId, read: false },
+    })
 
-  return Response.json({ unread })
+    return Response.json({ unread })
+  } catch (error) {
+    console.error('Notifications count query failed:', error)
+    // Keep the UI stable during transient DB timeouts.
+    return Response.json({ unread: 0 })
+  }
 }

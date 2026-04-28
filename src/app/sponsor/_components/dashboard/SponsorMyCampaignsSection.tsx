@@ -1,45 +1,25 @@
-/**
- * SponsorMyCampaignsSection — async server component that fetches and displays the
- * sponsor's three most recently created campaigns on the dashboard.
- *
- * Behavior:
- * - Returns null silently if the user is unauthenticated or has no sponsor record
- *   (the parent layout handles the actual redirect guard).
- * - Shows up to 3 campaigns ordered by creation date descending, with application
- *   counts and status badges.
- * - Campaign cards link to /sponsor/campaigns (list view), not the individual
- *   campaign detail, intentionally.
- *
- * External services: Clerk (auth), Prisma (campaigns + application counts).
- */
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
+import { getSponsorMyCampaignsPreviewCached } from '@/lib/sponsor-dashboard-cache'
 import { DashboardPanel } from '@/components/dashboard'
 
 export default async function SponsorMyCampaignsSection() {
   const { userId } = await auth()
   if (!userId) {
-    // Nothing to show if not authenticated; layout will handle redirect at page level
     return null
   }
 
   const sponsor = await prisma.sponsors.findUnique({
     where: { clerk_user_id: userId },
+    select: { id: true },
   })
 
   if (!sponsor) {
     return null
   }
 
-  const campaigns = await prisma.campaigns.findMany({
-    where: { sponsor_id: sponsor.id },
-    orderBy: { created_at: 'desc' },
-    take: 3,
-    include: {
-      _count: { select: { applications: true } },
-    },
-  })
+  const campaigns = await getSponsorMyCampaignsPreviewCached(sponsor.id)
 
   return (
     <DashboardPanel title="My Campaigns" href="/sponsor/campaigns" linkLabel="View all">
@@ -56,7 +36,7 @@ export default async function SponsorMyCampaignsSection() {
             <Link
               key={c.id}
               href="/sponsor/campaigns"
-              className="block p-3 rounded-lg dash-border border dash-bg-inner hover:border-[#00c8ff]/30 transition-colors"
+              className="block p-3 rounded-lg dash-border border dash-bg-inner hover:border-[#99f7ff]/30 transition-colors"
             >
               <div className="flex items-start justify-between gap-2">
                 <span className="text-sm font-medium dash-text-bright">{c.title}</span>
@@ -80,11 +60,13 @@ export default async function SponsorMyCampaignsSection() {
                 {(c.game_category?.length ? c.game_category.join(' · ') : 'Gaming')}{' '}
                 {c.budget != null && `· $${c.budget.toLocaleString()}`}
               </p>
-              <p className="text-xs dash-accent mt-1">
-                {c._count.applications > 0
-                  ? `${c._count.applications} applicant${c._count.applications === 1 ? '' : 's'}`
-                  : 'No applicants yet'}
-              </p>
+              <div className="mt-2 flex items-center gap-2">
+                <p className="text-xs dash-accent">
+                  {c._count.applications > 0
+                    ? `${c._count.applications} applicant${c._count.applications === 1 ? '' : 's'}`
+                    : 'No applicants yet'}
+                </p>
+              </div>
             </Link>
           ))}
         </div>

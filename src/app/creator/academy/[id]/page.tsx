@@ -30,6 +30,8 @@ export default async function AcademyLessonPage({ params }: Props) {
   if (!lesson) notFound()
 
   const currentIndex = LESSONS.findIndex((l) => l.id === id)
+  const playerVideoUrl =
+    lesson.id === 'media-kit' ? 'https://www.youtube.com/embed/K5qh58o5A-M' : lesson.videoUrl
 
   return (
     <>
@@ -70,7 +72,7 @@ export default async function AcademyLessonPage({ params }: Props) {
           {/* Video */}
           <div className="rounded-lg cr-border border cr-bg-inner overflow-hidden mb-8 aspect-video">
             <iframe
-              src={lesson.videoUrl}
+              src={playerVideoUrl}
               title={lesson.title}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen

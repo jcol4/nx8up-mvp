@@ -1,5 +1,4 @@
-/** DashboardPanel — thin wrapper that locks Panel to the "dashboard" variant. */
-import Panel from '@/components/shared/Panel'
+import NxHudCard from '@/components/nx-shell/NxHudCard'
 
 type Props = {
   title: string
@@ -11,8 +10,8 @@ type Props = {
 
 export default function DashboardPanel({ title, href, linkLabel, children, className = '' }: Props) {
   return (
-    <Panel variant="dashboard" title={title} href={href} linkLabel={linkLabel} className={className}>
+    <NxHudCard title={title} href={href} linkLabel={linkLabel} className={className}>
       {children}
-    </Panel>
+    </NxHudCard>
   )
 }

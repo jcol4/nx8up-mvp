@@ -36,7 +36,7 @@ function Toggle({
       aria-label={label}
       onClick={() => onChange(!checked)}
       className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
-        checked ? 'bg-[#00c8ff]' : 'bg-white/10'
+        checked ? 'bg-[#99f7ff]' : 'bg-white/10'
       }`}
     >
       <span
@@ -97,30 +97,30 @@ export default function NotificationPreferencesForm({ entries }: Props) {
 
   if (loading) {
     return (
-      <div className="cr-panel rounded-xl p-6">
-        <p className="text-sm cr-text-muted">Loading preferences…</p>
+      <div className="dash-panel dash-panel--nx-top rounded-xl border border-white/16 border-t-2 border-t-[#bffcff] bg-black/20 p-6">
+        <p className="text-sm text-[#a9abb5]">Loading preferences…</p>
       </div>
     )
   }
 
   return (
     <div className="space-y-4">
-      <div className="cr-panel rounded-xl overflow-hidden">
-        <div className="grid grid-cols-[1fr_auto_auto] items-center gap-4 px-4 py-2 border-b cr-border">
-          <span className="text-xs font-semibold cr-text-muted uppercase tracking-wider">Notification</span>
-          <span className="text-xs font-semibold cr-text-muted uppercase tracking-wider text-center w-16">In-App</span>
-          <span className="text-xs font-semibold cr-text-muted uppercase tracking-wider text-center w-16">Email</span>
+      <div className="dash-panel dash-panel--nx-top overflow-hidden rounded-xl border border-white/16 border-t-2 border-t-[#bffcff] bg-black/20">
+        <div className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-white/12 bg-black/30 px-4 py-2.5">
+          <span className="font-headline text-[11px] font-semibold uppercase tracking-[0.18em] text-[#99f7ff]">Notification</span>
+          <span className="w-16 text-center font-headline text-[11px] font-semibold uppercase tracking-[0.18em] text-[#99f7ff]">In-App</span>
+          <span className="w-16 text-center font-headline text-[11px] font-semibold uppercase tracking-[0.18em] text-[#99f7ff]">Email</span>
         </div>
         {entries.map((entry, i) => (
           <div
             key={entry.type}
-            className={`grid grid-cols-[1fr_auto_auto] items-center gap-4 px-4 py-3 ${
-              i < entries.length - 1 ? 'border-b cr-border' : ''
+            className={`grid grid-cols-[1fr_auto_auto] items-center gap-4 px-4 py-3.5 transition-colors hover:bg-white/[0.02] ${
+              i < entries.length - 1 ? 'border-b border-white/12' : ''
             }`}
           >
             <div>
-              <p className="text-sm cr-text-bright font-medium">{entry.label}</p>
-              <p className="text-xs cr-text-muted mt-0.5">{entry.description}</p>
+              <p className="text-sm font-semibold text-[#e8f4ff]">{entry.label}</p>
+              <p className="mt-0.5 text-xs text-[#a9abb5]">{entry.description}</p>
             </div>
             <div className="flex justify-center w-16">
               <Toggle
@@ -140,21 +140,22 @@ export default function NotificationPreferencesForm({ entries }: Props) {
         ))}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="rounded-xl border border-white/12 bg-black/20 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="px-5 py-2 rounded-lg text-sm font-semibold bg-[#00c8ff]/20 text-[#00c8ff] border border-[#00c8ff]/30 hover:bg-[#00c8ff]/30 disabled:opacity-50 transition-colors"
+          className="rounded-lg border border-[#99f7ff]/35 bg-[#99f7ff]/15 px-5 py-2 text-sm font-semibold text-[#99f7ff] transition-colors hover:bg-[#99f7ff]/20 disabled:opacity-50"
         >
           {saving ? 'Saving…' : 'Save preferences'}
         </button>
-        {saved && <span className="text-xs text-green-400">Saved!</span>}
+        {saved && <span className="text-xs text-emerald-300">Saved successfully.</span>}
+        </div>
+        <p className="mt-2 text-xs text-[#a9abb5]">
+          Email notifications require <span className="text-[#99f7ff]">RESEND_API_KEY</span> to be configured.
+        </p>
       </div>
-
-      <p className="text-xs cr-text-muted">
-        Email notifications require <span className="cr-accent">RESEND_API_KEY</span> to be configured.
-      </p>
     </div>
   )
 }

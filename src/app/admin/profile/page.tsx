@@ -1,28 +1,3 @@
-/**
- * Admin Profile page (`/admin/profile`).
- *
- * Displays the profile of the currently authenticated admin user, combining
- * Clerk user data with live Prisma platform-wide statistics.
- *
- * Data fetched in parallel:
- *  - Clerk user record (avatar, name, email, metadata, timestamps)
- *  - `content_creators` count
- *  - `sponsors` count
- *  - `campaigns` grouped by status
- *  - `campaign_applications` grouped by status
- *
- * The page renders:
- *  1. Profile header with avatar, role badge, and primary email
- *  2. Account details (user ID, onboarding status, join date, last sign-in)
- *  3. Platform overview stat cards
- *  4. Campaigns and applications broken down by status
- *
- * External services: Clerk (`clerkClient`, `auth`), Prisma.
- *
- * Gotcha: `displayName` is derived from Clerk `publicMetadata.displayName`
- * first, then assembled from `firstName` + `lastName`. If all three are absent,
- * the heading renders an italic "No name set" placeholder.
- */
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
@@ -54,12 +29,20 @@ export default async function AdminProfilePage() {
 
   const totalCampaigns = campaigns.reduce((s, c) => s + c._count, 0)
   const totalApplications = applications.reduce((s, a) => s + a._count, 0)
+  const themedCardClass =
+    'glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20'
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl">
+    <div className="flex-1 overflow-auto p-6 sm:p-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
+          <h1 className="mt-1 font-headline text-2xl font-semibold text-[#e8f4ff]">Admin Profile</h1>
+          <p className="mt-1 text-sm text-[#c4cad6]">Your account and platform overview.</p>
+        </div>
 
       {/* Header */}
-      <div className="dash-panel p-6 flex items-start gap-5">
+      <div className={`${themedCardClass} p-6 flex items-start gap-5`}>
         {user.imageUrl && (
           <img
             src={user.imageUrl}
@@ -76,23 +59,23 @@ export default async function AdminProfilePage() {
               admin
             </span>
           </div>
-          <p className="text-sm dash-text-muted mt-0.5">{primaryEmail ?? '—'}</p>
+          <p className="mt-0.5 text-sm text-[#d6deea]">{primaryEmail ?? '—'}</p>
           {user.username && (
-            <p className="text-xs dash-text-muted mt-0.5">@{user.username}</p>
+            <p className="mt-0.5 text-xs text-[#b9c5d8]">@{user.username}</p>
           )}
         </div>
       </div>
 
       {/* Account details */}
-      <div className="dash-panel p-5 space-y-4">
-        <h2 className="text-sm font-semibold dash-text-bright">Account</h2>
+      <div className={`${themedCardClass} p-5 space-y-4`}>
+        <h2 className="text-sm font-semibold text-[#eaf6ff]">Account</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
           <div>
-            <p className="dash-text-muted mb-0.5">User ID</p>
-            <p className="dash-text-bright font-mono text-xs truncate" title={user.id}>{user.id}</p>
+            <p className="mb-0.5 text-[#b9c5d8]">User ID</p>
+            <p className="truncate font-mono text-xs text-[#e8f4ff]" title={user.id}>{user.id}</p>
           </div>
           <div>
-            <p className="dash-text-muted mb-0.5">Onboarding</p>
+            <p className="mb-0.5 text-[#b9c5d8]">Onboarding</p>
             <span className={`text-xs px-2 py-0.5 rounded ${
               meta.onboardingComplete ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'
             }`}>
@@ -100,16 +83,16 @@ export default async function AdminProfilePage() {
             </span>
           </div>
           <div>
-            <p className="dash-text-muted mb-0.5">Joined</p>
-            <p className="dash-text-bright">
+            <p className="mb-0.5 text-[#b9c5d8]">Joined</p>
+            <p className="text-[#e8f4ff]">
               {new Date(user.createdAt).toLocaleDateString('en-US', {
                 month: 'short', day: 'numeric', year: 'numeric',
               })}
             </p>
           </div>
           <div>
-            <p className="dash-text-muted mb-0.5">Last sign-in</p>
-            <p className="dash-text-bright">
+            <p className="mb-0.5 text-[#b9c5d8]">Last sign-in</p>
+            <p className="text-[#e8f4ff]">
               {user.lastSignInAt
                 ? new Date(user.lastSignInAt).toLocaleDateString('en-US', {
                     month: 'short', day: 'numeric', year: 'numeric',
@@ -122,17 +105,17 @@ export default async function AdminProfilePage() {
 
       {/* Platform stats */}
       <div>
-        <h2 className="text-sm font-semibold dash-text-bright mb-3">Platform Overview</h2>
+        <h2 className="mb-3 text-sm font-semibold text-[#eaf6ff]">Platform Overview</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { label: 'Creators',     value: creators,                       color: 'text-[#7b4fff]' },
             { label: 'Sponsors',     value: sponsors,                       color: 'text-[#00c8ff]' },
-            { label: 'Total users',  value: creators + sponsors,            color: 'dash-text-bright' },
-            { label: 'Campaigns',    value: totalCampaigns,                 color: 'dash-text-bright' },
+            { label: 'Total users',  value: creators + sponsors,            color: 'text-[#e8f4ff]' },
+            { label: 'Campaigns',    value: totalCampaigns,                 color: 'text-[#e8f4ff]' },
           ].map(({ label, value, color }) => (
-            <div key={label} className="dash-panel p-4 text-center">
+            <div key={label} className={`${themedCardClass} p-4 text-center`}>
               <p className={`text-2xl font-bold ${color}`}>{value.toLocaleString()}</p>
-              <p className="text-xs dash-text-muted mt-1">{label}</p>
+              <p className="mt-1 text-xs text-[#c4cad6]">{label}</p>
             </div>
           ))}
         </div>
@@ -140,8 +123,8 @@ export default async function AdminProfilePage() {
 
       {/* Campaign breakdown */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="dash-panel p-5 space-y-3">
-          <h2 className="text-sm font-semibold dash-text-bright">Campaigns by Status</h2>
+        <div className={`${themedCardClass} p-5 space-y-3`}>
+          <h2 className="text-sm font-semibold text-[#eaf6ff]">Campaigns by Status</h2>
           <div className="space-y-2 text-sm">
             {[
               { label: 'Live',      key: 'live',      color: 'text-[#22c55e]' },
@@ -149,19 +132,19 @@ export default async function AdminProfilePage() {
               { label: 'Cancelled', key: 'cancelled', color: 'text-[#f87171]' },
             ].map(({ label, key, color }) => (
               <div key={key} className="flex items-center justify-between">
-                <span className="dash-text-muted">{label}</span>
+                <span className="text-[#c4cad6]">{label}</span>
                 <span className={`font-semibold ${color}`}>{(campaignCounts[key] ?? 0).toLocaleString()}</span>
               </div>
             ))}
             <div className="flex items-center justify-between pt-2 border-t border-white/5">
-              <span className="dash-text-muted">Total</span>
-              <span className="dash-text-bright font-semibold">{totalCampaigns.toLocaleString()}</span>
+              <span className="text-[#c4cad6]">Total</span>
+              <span className="font-semibold text-[#e8f4ff]">{totalCampaigns.toLocaleString()}</span>
             </div>
           </div>
         </div>
 
-        <div className="dash-panel p-5 space-y-3">
-          <h2 className="text-sm font-semibold dash-text-bright">Applications by Status</h2>
+        <div className={`${themedCardClass} p-5 space-y-3`}>
+          <h2 className="text-sm font-semibold text-[#eaf6ff]">Applications by Status</h2>
           <div className="space-y-2 text-sm">
             {[
               { label: 'Accepted', key: 'accepted', color: 'text-[#22c55e]' },
@@ -169,18 +152,18 @@ export default async function AdminProfilePage() {
               { label: 'Rejected', key: 'rejected', color: 'text-[#f87171]' },
             ].map(({ label, key, color }) => (
               <div key={key} className="flex items-center justify-between">
-                <span className="dash-text-muted">{label}</span>
+                <span className="text-[#c4cad6]">{label}</span>
                 <span className={`font-semibold ${color}`}>{(appCounts[key] ?? 0).toLocaleString()}</span>
               </div>
             ))}
             <div className="flex items-center justify-between pt-2 border-t border-white/5">
-              <span className="dash-text-muted">Total</span>
-              <span className="dash-text-bright font-semibold">{totalApplications.toLocaleString()}</span>
+              <span className="text-[#c4cad6]">Total</span>
+              <span className="font-semibold text-[#e8f4ff]">{totalApplications.toLocaleString()}</span>
             </div>
           </div>
         </div>
       </div>
-
+      </div>
     </div>
   )
 }

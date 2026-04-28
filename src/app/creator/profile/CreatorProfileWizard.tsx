@@ -182,7 +182,7 @@ export default function CreatorProfileWizard({
   return (
     <div className="space-y-6">
       {/* Step progress bar */}
-      <div className="cr-panel p-4">
+      <div className="dash-panel dash-panel--nx-top rounded-xl p-4">
         <div className="flex items-center justify-between">
           {STEP_LABELS.map((label, i) => {
             const n = i + 1
@@ -193,14 +193,14 @@ export default function CreatorProfileWizard({
             const circle = (
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                 isActive
-                  ? 'bg-[#00c8ff] text-black shadow-[0_0_12px_rgba(0,200,255,0.5)]'
+                  ? 'bg-[#99f7ff] text-slate-900 shadow-[0_0_12px_rgba(153,247,255,0.45)]'
                   : isDone
-                    ? 'bg-[rgba(0,200,255,0.2)] text-[#00c8ff] border border-[rgba(0,200,255,0.4)]'
-                    : 'bg-white/5 text-[#2a3f55] border border-white/10'
+                    ? 'border border-[#99f7ff]/40 bg-[#99f7ff]/15 text-[#99f7ff]'
+                    : 'border border-white/10 bg-white/5 text-[#4b5563]'
               }`}>
                 {isDone ? (
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M2 6l3 3 5-5" stroke="#00c8ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M2 6l3 3 5-5" stroke="#99f7ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 ) : n}
               </div>
@@ -220,14 +220,14 @@ export default function CreatorProfileWizard({
                     </button>
                   ) : circle}
                   <span className={`text-[10px] font-medium hidden sm:block ${
-                    isActive ? 'text-[#00c8ff]' : isDone ? 'text-[#3a5570]' : 'text-[#2a3f55]'
+                    isActive ? 'text-[#99f7ff]' : isDone ? 'text-[#8f97ab]' : 'text-[#4b5563]'
                   }`}>
                     {label}
                   </span>
                 </div>
                 {n < TOTAL_STEPS && (
                   <div className={`flex-1 h-px mx-1.5 mb-4 transition-all ${
-                    isDone ? 'bg-[rgba(0,200,255,0.35)]' : 'bg-white/5'
+                    isDone ? 'bg-[#99f7ff]/35' : 'bg-white/5'
                   }`} />
                 )}
               </div>
@@ -242,12 +242,12 @@ export default function CreatorProfileWizard({
           <h2 className="text-base font-semibold cr-text-bright">
             Step {step} — {STEP_LABELS[step - 1]}
           </h2>
-          <p className="text-xs cr-text-muted mt-0.5">{step} of {TOTAL_STEPS}</p>
+          <p className="text-xs text-[#a9abb5] mt-0.5">{step} of {TOTAL_STEPS}</p>
         </div>
       </div>
 
       {/* Step content */}
-      <div className="cr-panel p-6">
+      <div className="dash-panel dash-panel--nx-top rounded-xl p-6">
         {step === 1 && (
           <Step1AccountConnections
             twitchInitial={twitchInitial}

@@ -45,12 +45,12 @@ const geistMono = Geist_Mono({
 export const metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-  ),  
+  ),
   title: 'nx8up',
-  icons: { 
+  icons: {
     icon: '/icon.png',
     shortcut: '/icon.png',
-    apple: '/icon.png', 
+    apple: '/icon.png',
   },
   openGraph: {
     images: ['/nx8up_logo_transparent.png'],

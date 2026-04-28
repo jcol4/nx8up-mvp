@@ -1,20 +1,3 @@
-/**
- * Step 7 — Review
- *
- * Final review step of the campaign creation wizard. Displays a read-only summary
- * of all campaign settings across four grid columns (Campaign, Audience, Creators,
- * Deliverables) plus a Duration row and a Budget Breakdown panel.
- *
- * Renders `Row` and `Pills` helper components that conditionally hide themselves
- * when the value is empty/null, keeping the review UI clean for optional fields.
- *
- * The "Launch Campaign" button triggers the `createCampaign` server action and
- * redirects to the payment page on success. Funds are NOT charged here — the
- * campaign goes into `pending_payment` status until the payment step completes.
- *
- * Note: The "10%" fee label in the budget breakdown is hardcoded. It should use
- * `NX_FEE_RATE * 100` (already imported) to stay in sync if the rate ever changes.
- */
 'use client'
 
 import type { CampaignDraft } from '../_shared'
@@ -29,26 +12,24 @@ type Props = {
   onBack: () => void
 }
 
-/** Renders a label/value row inside a review panel; hidden when value is falsy. */
 function Row({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null
   return (
     <div className="flex justify-between items-start gap-4 py-2 border-b border-white/5 last:border-0">
-      <span className="text-xs dash-text-muted shrink-0">{label}</span>
-      <span className="text-xs dash-text-bright text-right">{value}</span>
+      <span className="text-xs text-[#a9abb5] shrink-0">{label}</span>
+      <span className="text-xs text-[#e8f4ff] text-right">{value}</span>
     </div>
   )
 }
 
-/** Renders a label with a row of pill badges; hidden when `values` is empty. */
 function Pills({ label, values }: { label: string; values: string[] }) {
   if (!values.length) return null
   return (
     <div className="flex justify-between items-start gap-4 py-2 border-b border-white/5 last:border-0">
-      <span className="text-xs dash-text-muted shrink-0">{label}</span>
+      <span className="text-xs text-[#a9abb5] shrink-0">{label}</span>
       <div className="flex flex-wrap gap-1 justify-end">
         {values.map(v => (
-          <span key={v} className="text-[10px] px-1.5 py-0.5 rounded bg-[rgba(0,200,255,0.1)] text-[#00c8ff] border border-[rgba(0,200,255,0.2)]">{v}</span>
+          <span key={v} className="text-[10px] px-1.5 py-0.5 rounded bg-[rgba(153,247,255,0.1)] text-[#99f7ff] border border-[rgba(153,247,255,0.22)]">{v}</span>
         ))}
       </div>
     </div>
@@ -70,14 +51,14 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
 
   return (
     <div className="space-y-5">
-      <p className="text-xs dash-text-muted">Review your campaign before launching. You can go back to edit any section.</p>
+      <p className="text-xs text-[#a9abb5]">Review your campaign before launching. You can go back to edit any section.</p>
 
       {/* Campaign summary */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Column 1 */}
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest dash-text-muted mb-2">Campaign</p>
-          <div className="dash-panel p-3">
+          <p className="font-headline text-[10px] font-semibold uppercase tracking-[0.18em] text-[#99f7ff] mb-2">Campaign</p>
+          <div className="rounded-lg border border-white/10 bg-black/25 p-3">
             <Row label="Name" value={draft.title || '—'} />
             <Row label="Brand" value={draft.brand_name || '—'} />
             <Row label="Product" value={draft.product_name || '—'} />
@@ -89,8 +70,8 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
 
         {/* Column 2 */}
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest dash-text-muted mb-2">Audience</p>
-          <div className="dash-panel p-3">
+          <p className="font-headline text-[10px] font-semibold uppercase tracking-[0.18em] text-[#99f7ff] mb-2">Audience</p>
+          <div className="rounded-lg border border-white/10 bg-black/25 p-3">
             {(draft.audience_age_min || draft.audience_age_max) && (
               <Row
                 label="Audience age"
@@ -106,8 +87,8 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
 
         {/* Column 3 */}
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest dash-text-muted mb-2">Creators</p>
-          <div className="dash-panel p-3">
+          <p className="font-headline text-[10px] font-semibold uppercase tracking-[0.18em] text-[#99f7ff] mb-2">Creators</p>
+          <div className="rounded-lg border border-white/10 bg-black/25 p-3">
             <Pills label="Type" values={creatorTypeLabels} />
             <Pills label="Size" values={creatorSizeLabels} />
             <Row label="Min. followers" value={draft.min_subs_followers || undefined} />
@@ -117,8 +98,8 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
 
         {/* Column 4 */}
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest dash-text-muted mb-2">Deliverables</p>
-          <div className="dash-panel p-3">
+          <p className="font-headline text-[10px] font-semibold uppercase tracking-[0.18em] text-[#99f7ff] mb-2">Deliverables</p>
+          <div className="rounded-lg border border-white/10 bg-black/25 p-3">
             <Row label="Mission type" value={missionType?.label} />
             {draft.num_videos && <Row label="YT videos" value={draft.num_videos} />}
             {draft.num_streams && <Row label="Streams" value={draft.num_streams} />}
@@ -133,7 +114,7 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
       </div>
 
       {/* Duration */}
-      <div className="dash-panel p-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="rounded-lg border border-white/10 bg-black/25 p-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Row label="Start date" value={draft.start_date} />
         <Row label="End date" value={draft.end_date} />
         <Row label="Creators" value={draft.creator_count || undefined} />
@@ -141,28 +122,28 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
       </div>
 
       {/* Budget breakdown */}
-      <div className="dash-panel p-4">
-        <p className="text-[10px] font-semibold uppercase tracking-widest dash-text-muted mb-4">Budget Breakdown</p>
+      <div className="rounded-lg border border-white/10 bg-black/25 p-4">
+        <p className="font-headline text-[10px] font-semibold uppercase tracking-[0.18em] text-[#99f7ff] mb-4">Budget Breakdown</p>
         <div className="space-y-2.5">
           <div className="flex justify-between items-center">
-            <span className="text-sm dash-text-muted">Total Campaign Budget</span>
-            <span className="text-sm font-semibold dash-text-bright">
+            <span className="text-sm text-[#a9abb5]">Total Campaign Budget</span>
+            <span className="text-sm font-semibold text-[#e8f4ff]">
               ${budgetNum > 0 ? budgetNum.toLocaleString() : '—'}
             </span>
           </div>
           {budgetNum > 0 && (
             <>
               <div className="flex justify-between items-center">
-                <span className="text-sm dash-text-muted">nx8up Fee (10%)</span>
+                <span className="text-sm text-[#a9abb5]">nx8up Fee (10%)</span>
                 <span className="text-sm text-red-400">−${fee.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between items-center pt-2 border-t dash-border">
-                <span className="text-sm font-semibold dash-text-bright">Creator Payout Pool</span>
+              <div className="flex justify-between items-center pt-2 border-t border-white/10">
+                <span className="text-sm font-semibold text-[#e8f4ff]">Creator Payout Pool</span>
                 <span className="text-sm font-bold text-[#22c55e]">${creatorPool.toLocaleString()}</span>
               </div>
               {perCreator && (
                 <div className="flex justify-between items-center">
-                  <span className="text-xs dash-text-muted">Per creator ({draft.creator_count} creators)</span>
+                  <span className="text-xs text-[#a9abb5]">Per creator ({draft.creator_count} creators)</span>
                   <span className="text-xs font-semibold text-[#22c55e]">≈ ${perCreator.toLocaleString()}</span>
                 </div>
               )}
@@ -173,20 +154,20 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
 
       {/* Conversion goal */}
       {conversionGoal && (
-        <div className="flex items-center gap-3 p-3 rounded-lg border dash-border">
+        <div className="flex items-center gap-3 p-3 rounded-lg border border-white/10 bg-black/20">
           <div>
-            <p className="text-xs dash-text-muted">Conversion goal</p>
-            <p className="text-sm font-semibold dash-text-bright">{conversionGoal.label}</p>
+            <p className="text-xs text-[#a9abb5]">Conversion goal</p>
+            <p className="text-sm font-semibold text-[#e8f4ff]">{conversionGoal.label}</p>
           </div>
         </div>
       )}
 
       {/* Escrow notice */}
-      <div className="flex gap-3 p-4 rounded-lg bg-[rgba(0,200,255,0.04)] border border-[rgba(0,200,255,0.15)]">
-        <svg className="w-5 h-5 text-[#00c8ff] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="flex gap-3 p-4 rounded-lg bg-[rgba(153,247,255,0.06)] border border-[rgba(153,247,255,0.18)]">
+        <svg className="w-5 h-5 text-[#99f7ff] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
-        <p className="text-xs dash-text-muted leading-relaxed">
+        <p className="text-xs text-[#a9abb5] leading-relaxed">
           Funds are held securely by nx8up and released to creators upon verified campaign completion.
         </p>
       </div>
@@ -195,15 +176,15 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
         <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2.5">{error}</p>
       )}
 
-      <div className="flex justify-between pt-2 border-t dash-border">
-        <button type="button" onClick={onBack} className="py-2.5 px-5 rounded-lg border dash-border dash-text-muted text-sm font-medium hover:text-[#c8dff0] transition-colors">
+      <div className="flex justify-between pt-2 border-t border-white/10">
+        <button type="button" onClick={onBack} className="py-2.5 px-5 rounded-lg border border-white/10 text-[#a9abb5] text-sm font-medium hover:text-[#e8f4ff] transition-colors">
           ← Back
         </button>
         <button
           type="button"
           onClick={onSubmit}
           disabled={isSubmitting}
-          className="py-2.5 px-7 rounded-lg bg-[#00c8ff] text-black text-sm font-bold hover:opacity-90 disabled:opacity-50 transition-opacity shadow-[0_0_20px_rgba(0,200,255,0.3)]"
+          className="py-2.5 px-7 rounded-lg bg-[#99f7ff] text-slate-900 text-sm font-bold hover:opacity-90 disabled:opacity-50 transition-opacity shadow-[0_0_20px_rgba(153,247,255,0.28)]"
         >
           {isSubmitting ? 'Launching...' : 'Launch Campaign'}
         </button>

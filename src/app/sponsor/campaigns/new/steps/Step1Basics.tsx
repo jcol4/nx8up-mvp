@@ -1,17 +1,3 @@
-/**
- * Step 1 — Basics
- *
- * First step of the campaign creation wizard. Collects:
- * - Campaign name (required, max 80 chars)
- * - Brand name (optional)
- * - Product/service name (optional)
- * - Product type (required, selected via NXSelect)
- * - Campaign goal / objective (required, one of: awareness, engagement, traffic, conversions)
- * - Target platforms (required, multi-select toggle buttons)
- *
- * Validation errors are passed in from the parent `NewCampaignForm` and displayed
- * below the last form section.
- */
 'use client'
 
 import FormInput from '@/components/ui/FormInput'
@@ -43,7 +29,7 @@ export default function Step1Basics({ draft, setDraft, error, onNext }: Props) {
 
         <div>
           <label className={labelClass}>
-            Campaign name <span className="text-[#00c8ff]">*</span>
+            Campaign name <span className="text-[#99f7ff]">*</span>
           </label>
           <FormInput
             type="text"
@@ -86,7 +72,7 @@ export default function Step1Basics({ draft, setDraft, error, onNext }: Props) {
 
         <div>
           <label className={labelClass}>
-            Product type <span className="text-[#00c8ff]">*</span>
+            Product type <span className="text-[#99f7ff]">*</span>
           </label>
           <NXSelect
             options={PRODUCT_TYPES}
@@ -102,11 +88,11 @@ export default function Step1Basics({ draft, setDraft, error, onNext }: Props) {
       <div className={sectionClass}>
         <div className="flex items-center gap-2 mb-3">
           <p className={sectionTitle.replace('mb-3', 'mb-0')}>
-            Campaign Goal <span className="text-[#00c8ff]">*</span>
+            Campaign Goal <span className="text-[#99f7ff]">*</span>
           </p>
           <div className="group relative">
-            <span className="w-4 h-4 rounded-full border border-[rgba(0,200,255,0.3)] text-[#3a5570] text-[10px] flex items-center justify-center cursor-default select-none">?</span>
-            <div className="absolute left-6 top-0 w-52 bg-[rgba(8,16,32,0.98)] border border-[rgba(0,200,255,0.18)] rounded-lg p-3 text-xs dash-text-muted leading-relaxed z-20 hidden group-hover:block shadow-xl">
+            <span className="w-4 h-4 rounded-full border border-[rgba(153,247,255,0.35)] text-[#3a5570] text-[10px] flex items-center justify-center cursor-default select-none">?</span>
+            <div className="absolute left-6 top-0 w-52 bg-[rgba(8,16,32,0.98)] border border-[rgba(153,247,255,0.2)] rounded-lg p-3 text-xs dash-text-muted leading-relaxed z-20 hidden group-hover:block shadow-xl">
               This determines how your campaign is structured and the type of creators matched to it.
             </div>
           </div>
@@ -120,11 +106,11 @@ export default function Step1Basics({ draft, setDraft, error, onNext }: Props) {
               onClick={() => set('objective', obj.value)}
               className={`flex flex-col gap-1 p-3 rounded-lg border text-left transition-all duration-150 ${
                 draft.objective === obj.value
-                  ? 'border-[#00c8ff] bg-[rgba(0,200,255,0.06)] shadow-[0_0_18px_rgba(0,200,255,0.12)]'
-                  : 'dash-border hover:border-[rgba(0,200,255,0.3)] hover:bg-[rgba(0,200,255,0.03)]'
+                  ? 'border-[#99f7ff] bg-[rgba(153,247,255,0.08)] shadow-[0_0_18px_rgba(153,247,255,0.14)]'
+                  : 'dash-border hover:border-[rgba(153,247,255,0.35)] hover:bg-[rgba(153,247,255,0.05)]'
               }`}
             >
-              <p className={`text-sm font-semibold ${draft.objective === obj.value ? 'text-[#00c8ff]' : 'dash-text-bright'}`}>
+              <p className={`text-sm font-semibold ${draft.objective === obj.value ? 'text-[#99f7ff]' : 'dash-text-bright'}`}>
                 {obj.label}
               </p>
               <p className="text-xs dash-text-muted">{obj.description}</p>
@@ -136,7 +122,7 @@ export default function Step1Basics({ draft, setDraft, error, onNext }: Props) {
       {/* Platforms */}
       <div className="space-y-3">
         <p className={sectionTitle}>
-          Platforms <span className="text-[#00c8ff]">*</span>
+          Platforms <span className="text-[#99f7ff]">*</span>
         </p>
         <div className="flex flex-wrap gap-2">
           {PLATFORMS.map(p => (
@@ -160,7 +146,7 @@ export default function Step1Basics({ draft, setDraft, error, onNext }: Props) {
         <button
           type="button"
           onClick={onNext}
-          className="py-2.5 px-6 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 transition-opacity"
+          className="py-2.5 px-6 rounded-lg bg-[#99f7ff] text-slate-900 text-sm font-semibold hover:opacity-90 transition-opacity"
         >
           Next →
         </button>

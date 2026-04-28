@@ -1,12 +1,4 @@
-/**
- * Admin Academy page (`/admin/academy`).
- *
- * Placeholder page for future academy management functionality.
- * Currently renders a "coming soon" message inside a `DashboardPanel`.
- * Access is already gated by the parent admin layout.
- */
 import { BackLink } from '@/components/shared'
-import AdminHeader from '../AdminHeader'
 import { DashboardPanel } from '@/components/dashboard'
 
 export default function AdminAcademyPage() {

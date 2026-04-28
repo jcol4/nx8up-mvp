@@ -1,18 +1,7 @@
-/**
- * Sponsor Profile page — /sponsor/profile
- *
- * Server component that guards access (sponsor/admin only), loads the sponsor's
- * current profile via `getSponsorProfile`, and renders SponsorProfileForm
- * pre-populated with existing data.
- *
- * If no profile exists yet (new sponsor), `profile` is null and the form renders
- * with empty defaults, allowing the sponsor to create one via upsert.
- *
- * External services: Clerk (auth).
- */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import SponsorHeader from '../_components/dashboard/SponsorHeader'
 import { getSponsorProfile } from './_actions'
 import SponsorProfileForm from './SponsorProfileForm'
 
@@ -25,29 +14,29 @@ export default async function SponsorProfilePage() {
   const profile = await getSponsorProfile()
 
   return (
-    <div className="p-6 sm:p-8">
-      <div className="max-w-3xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold dash-text-bright">Sponsor Profile</h1>
-            <p className="text-sm dash-text-muted mt-0.5">
-              Manage your company info, campaign preferences, and creator requirements.
-            </p>
+    <>
+      <SponsorHeader />
+      <div className="flex-1 overflow-auto p-6 sm:p-8">
+        <div className="mx-auto max-w-5xl space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+              <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Sponsor</p>
+              <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Sponsor Profile</h1>
+              <p className="mt-1 text-sm leading-relaxed text-[#a9abb5]">
+                Manage your company info, campaign preferences, and creator requirements.
+              </p>
+            </div>
+            <Link
+              href="/sponsor"
+              className="shrink-0 text-sm text-[#a9abb5] transition-colors hover:text-[#99f7ff]"
+            >
+              ← Dashboard
+            </Link>
           </div>
-          <Link
-            href="/sponsor"
-            className="text-sm dash-text-muted hover:text-[#c8dff0] transition-colors"
-          >
-            ← Dashboard
-          </Link>
-        </div>
 
-        {/* Form card */}
-        <div className="dash-panel p-6">
           <SponsorProfileForm profile={profile} />
         </div>
       </div>
-    </div>
+    </>
   )
 }

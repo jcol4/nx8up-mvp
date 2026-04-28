@@ -1,23 +1,3 @@
-/**
- * Step 4 — Budget
- *
- * Collects:
- * - Total campaign budget (USD) — stepped by $500, capped at BUDGET_MAX (Stripe
- *   ACH ceiling). Renders an inline budget breakdown showing the nx8up fee,
- *   creator payout pool, and per-creator estimate.
- * - Number of creators (hidden when direct-invite mode is active; fixed at 1).
- * - Payment model — currently locked to "Fixed per Creator" (others coming soon).
- * - Preferred payment method (card / ACH / either) — ACH triggers a latency
- *   warning and, if combined with a near-term start date, an additional
- *   "start date conflict" warning.
- * - Campaign start and end dates via NXDatePicker.
- *
- * Key behaviors:
- * - `businessDaysUntil` counts Mon–Fri weekdays from today to the start date.
- *   If < 5 business days and ACH is selected, `showAchStartWarning` is true.
- * - Budget exceeding BUDGET_MAX shows an amber warning but does NOT block
- *   navigation — the server action enforces the hard limit.
- */
 'use client'
 
 import NXStepper from '@/components/ui/NXStepper'
@@ -74,7 +54,7 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
         <p className={sectionTitle}>Budget</p>
         <div>
           <label className={labelClass}>
-            Total campaign budget (USD) <span className="text-[#00c8ff]">*</span>
+            Total campaign budget (USD) <span className="text-[#99f7ff]">*</span>
           </label>
           <NXStepper
             value={draft.budget}
@@ -101,7 +81,7 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
             </div>
           )}
           {budgetNum > 0 && (
-            <div className="mt-3 p-3 rounded-lg border border-[rgba(0,200,255,0.15)] bg-[rgba(0,200,255,0.04)] space-y-1.5">
+            <div className="mt-3 p-3 rounded-lg border border-[rgba(153,247,255,0.15)] bg-[rgba(153,247,255,0.04)] space-y-1.5">
               <p className="text-[10px] font-semibold uppercase tracking-widest dash-text-muted">Budget Breakdown</p>
               <div className="flex justify-between text-xs">
                 <span className="dash-text-muted">Total Budget</span>
@@ -129,7 +109,7 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
           <p className={sectionTitle}>Creator Count</p>
           <div>
             <label className={labelClass}>
-              Number of creators <span className="text-[#00c8ff]">*</span>
+              Number of creators <span className="text-[#99f7ff]">*</span>
             </label>
             <NXStepper
               value={draft.creator_count}
@@ -151,8 +131,8 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
       {/* Payment model */}
       <div className={sectionClass}>
         <p className={sectionTitle}>Payment Model</p>
-        <div className="flex items-center gap-3 p-3 rounded-lg border border-[rgba(0,200,255,0.18)] bg-[rgba(0,200,255,0.04)]">
-          <div className="w-2.5 h-2.5 rounded-full bg-[#00c8ff] shadow-[0_0_8px_rgba(0,200,255,0.6)] shrink-0" />
+        <div className="flex items-center gap-3 p-3 rounded-lg border border-[rgba(153,247,255,0.18)] bg-[rgba(153,247,255,0.04)]">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#99f7ff] shadow-[0_0_8px_rgba(153,247,255,0.6)] shrink-0" />
           <div>
             <p className="text-sm font-semibold dash-text-bright">Fixed per Creator</p>
             <p className="text-xs dash-text-muted">Set rate per creator — more models coming soon</p>
@@ -180,12 +160,12 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
                 onClick={() => set('preferred_payment_method', opt.value)}
                 className={`text-left p-3.5 rounded-lg border transition-all ${
                   active
-                    ? 'border-[#00c8ff] bg-[rgba(0,200,255,0.08)] shadow-[0_0_12px_rgba(0,200,255,0.15)]'
+                    ? 'border-[#99f7ff] bg-[rgba(153,247,255,0.08)] shadow-[0_0_12px_rgba(153,247,255,0.15)]'
                     : 'border-white/10 bg-white/[0.02] hover:border-white/20'
                 }`}
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <span className={`text-sm font-semibold ${active ? 'text-[#00c8ff]' : 'dash-text-bright'}`}>
+                  <span className={`text-sm font-semibold ${active ? 'text-[#99f7ff]' : 'dash-text-bright'}`}>
                     {opt.label}
                   </span>
                 </div>
@@ -226,7 +206,7 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
         <p className={sectionTitle}>Campaign Duration</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className={labelClass}>Start date <span className="text-[#00c8ff]">*</span></label>
+            <label className={labelClass}>Start date <span className="text-[#99f7ff]">*</span></label>
             <NXDatePicker
               name="start_date_hidden"
               min={today}
@@ -235,7 +215,7 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
             />
           </div>
           <div>
-            <label className={labelClass}>End date <span className="text-[#00c8ff]">*</span></label>
+            <label className={labelClass}>End date <span className="text-[#99f7ff]">*</span></label>
             <NXDatePicker
               name="end_date_hidden"
               min={draft.start_date || today}
@@ -254,7 +234,7 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
         <button type="button" onClick={onBack} className="py-2.5 px-5 rounded-lg border dash-border dash-text-muted text-sm font-medium hover:text-[#c8dff0] transition-colors">
           ← Back
         </button>
-        <button type="button" onClick={onNext} className="py-2.5 px-6 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 transition-opacity">
+        <button type="button" onClick={onNext} className="py-2.5 px-6 rounded-lg bg-[#99f7ff] text-slate-900 text-sm font-semibold hover:opacity-90 transition-opacity">
           Next →
         </button>
       </div>

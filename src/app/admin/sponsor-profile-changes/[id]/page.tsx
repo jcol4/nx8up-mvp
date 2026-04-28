@@ -1,29 +1,3 @@
-/**
- * Admin Sponsor Profile Change detail page
- * (`/admin/sponsor-profile-changes/[id]`).
- *
- * Shows the full context for a single `sponsor_age_restriction_requests` record:
- *  - Request header with status badge and submission date
- *  - Sponsor identity (company name / email)
- *  - Current vs. requested age restriction settings
- *  - Sponsor's written explanation (`sponsor_message`)
- *  - **If pending**: `ReviewButtons` with notes textarea and approve/deny
- *    buttons.
- *  - **If already reviewed**: static decision panel with optional admin notes.
- *
- * `currentLabel` and `requestedLabel` derive human-readable descriptions from
- * the boolean `age_restricted` and the `age_restriction_type` string; falls
- * back to `"Enabled (no type)"` / `"No restriction"` as needed.
- *
- * Returns a 404 (`notFound()`) if no request with the given `id` exists.
- *
- * External services: Clerk (auth), Prisma (via `getAgeRestrictionChangeRequest`).
- *
- * Gotcha: the back-link points to `/admin/sponsor-profile-changes` but that
- * route has no dedicated page file — it only exists as the list view within the
- * verification queue (`/admin/verification-queue?tab=profile-changes`). Users
- * following the back-link will land on a 404.
- */
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'

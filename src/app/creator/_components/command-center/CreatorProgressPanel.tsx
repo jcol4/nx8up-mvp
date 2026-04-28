@@ -10,7 +10,7 @@
  * avoid an extra client-side fetch.
  */
 import type { CreatorXpState } from '@/lib/creator-xp'
-import type { CalendarTasksMap } from './_actions'
+import type { CalendarTasksMap } from '../../_actions'
 import CreatorCalendarSection from './CreatorCalendarSection'
 import Panel from '@/components/shared/Panel'
 import ProgressBar from '@/components/ui/ProgressBar'
@@ -22,10 +22,9 @@ type Props = {
 
 export default function CreatorProgressPanel({ xpState, calendarTasks }: Props) {
   const { xp, level, xpForNext, rankName } = xpState
-  const progressPercent = xpForNext > 0 ? Math.min(100, (xp / xpForNext) * 100) : 0
 
   return (
-    <Panel variant="creator">
+    <Panel variant="creator" className="glass-panel interactive-panel neon-glow-teal">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-8 h-8 rounded flex items-center justify-center bg-white/5 border border-white/10 shrink-0">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">

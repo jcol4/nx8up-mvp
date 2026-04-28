@@ -165,8 +165,9 @@ export const COMMON_LANGUAGES = [
   'Arabic',
 ]
 
-export const labelClass = 'block text-sm font-medium cr-text-muted mb-1.5'
-export const sectionTitle = 'text-xs font-semibold cr-text-muted uppercase tracking-wider mb-3'
+export const labelClass = 'block text-sm font-medium text-[#a9abb5] mb-1.5'
+export const sectionTitle =
+  'font-headline text-[11px] font-semibold uppercase tracking-[0.2em] text-[#99f7ff] mb-3'
 
 /**
  * Returns the Tailwind class string for a toggle button, switching between
@@ -175,7 +176,7 @@ export const sectionTitle = 'text-xs font-semibold cr-text-muted uppercase track
 export function toggleBtn(active: boolean): string {
   return `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
     active
-      ? 'bg-[#00c8ff]/20 text-[#00c8ff] border-[#00c8ff]/40'
-      : 'border-white/10 text-[#3a5570] hover:text-[#c8dff0] hover:border-white/20'
+      ? 'bg-[#99f7ff] text-slate-900 border-[#99f7ff] shadow-[0_0_14px_rgba(153,247,255,0.3)]'
+      : 'border-white/10 text-[#a9abb5] hover:text-[#e8f4ff] hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/5'
   }`
 }

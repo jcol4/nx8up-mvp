@@ -1,29 +1,6 @@
-/**
- * Sponsor Notification Preferences page — /sponsor/settings/notifications
- *
- * Renders notification preference toggles for all sponsor-specific notification
- * types defined in `SPONSOR_NOTIFICATION_TYPES`. Each entry has a label (from
- * `NOTIFICATION_LABELS`) and a human-readable description defined locally in
- * `DESCRIPTIONS`.
- *
- * The actual preference form is handled by the shared `NotificationPreferencesForm`
- * component which manages loading/saving preferences server-side.
- *
- * Notification types covered:
- * - `payment_success`  — campaign payment confirmed, campaign goes live.
- * - `payment_failed`   — payment attempt failed.
- * - `creator_applied`  — a creator applied to one of the sponsor's campaigns.
- * - `system`           — platform announcements and system updates.
- *
- * Note: Types not listed in `DESCRIPTIONS` will show an empty string for their
- * description. New notification types should be added to `DESCRIPTIONS` here.
- *
- * No auth check here — the parent layout (SponsorLayout) handles the redirect guard.
- */
-import SponsorHeader from '../../SponsorHeader'
+import SponsorHeader from '../../_components/dashboard/SponsorHeader'
 import NotificationPreferencesForm from '@/components/shared/NotificationPreferencesForm'
 import { SPONSOR_NOTIFICATION_TYPES, NOTIFICATION_LABELS } from '@/lib/notification-types'
-import BackLink from '@/components/shared/BackLink'
 
 const DESCRIPTIONS: Record<string, string> = {
   payment_success: 'When a campaign payment is confirmed and the campaign goes live.',
@@ -42,11 +19,15 @@ export default function SponsorNotificationPreferencesPage() {
   return (
     <>
       <SponsorHeader />
-      <main className="max-w-2xl mx-auto p-6 sm:p-8">
-        <BackLink href="/sponsor">← Back to Dashboard</BackLink>
-        <h1 className="text-xl font-bold cr-text-bright mt-4 mb-1">Notification Preferences</h1>
-        <p className="text-sm cr-text-muted mb-6">Choose how you want to be notified for each event type.</p>
-        <NotificationPreferencesForm entries={ENTRIES} />
+      <main className="flex-1 overflow-auto p-6 sm:p-8">
+        <div className="mx-auto max-w-2xl">
+          <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
+            <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Notifications</p>
+            <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Notification Preferences</h1>
+            <p className="mt-1 text-sm text-[#a9abb5]">Choose how you want to be notified for each event type.</p>
+          </div>
+          <NotificationPreferencesForm entries={ENTRIES} />
+        </div>
       </main>
     </>
   )

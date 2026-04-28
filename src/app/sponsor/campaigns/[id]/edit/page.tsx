@@ -1,23 +1,7 @@
-/**
- * Edit Campaign page — /sponsor/campaigns/[id]/edit
- *
- * Loads an existing draft campaign owned by the authenticated sponsor and renders
- * the NewCampaignForm in edit mode (starts directly on Step 7 / Review with free
- * navigation enabled so the sponsor can jump to any step).
- *
- * Only `draft` status campaigns can be edited — the query uses a compound filter
- * on `{ id, sponsor_id, status: 'draft' }`. Returns 404 if the campaign does not
- * exist, is not owned by the sponsor, or is no longer a draft.
- *
- * All campaign fields are mapped back to the `CampaignDraft` shape (strings /
- * booleans / arrays) so the wizard form can re-hydrate correctly.
- *
- * External services: Clerk (auth), Prisma.
- */
 import { auth } from '@clerk/nextjs/server'
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
-import SponsorHeader from '../../../SponsorHeader'
+import SponsorHeader from '../../../_components/dashboard/SponsorHeader'
 import NewCampaignForm from '../../new/NewCampaignForm'
 import type { CampaignDraft } from '../../new/_shared'
 import { EMPTY_DRAFT } from '../../new/_shared'

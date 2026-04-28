@@ -30,77 +30,82 @@ export default async function AdminSurveysPage() {
   const closed = surveys.filter(s => s.status === 'closed').length
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="flex-1 overflow-auto p-6 sm:p-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+      <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold dash-text-bright">Surveys</h1>
-          <p className="text-sm dash-text-muted mt-0.5">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
+          <h1 className="mt-1 font-headline text-2xl font-semibold text-[#e8f4ff]">Surveys</h1>
+          <p className="mt-1 text-sm text-[#c4cad6]">
             {surveys.length} total · {active} active · {draft} draft · {closed} closed
           </p>
         </div>
         <Link
           href="/admin/surveys/new"
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-[#00c8ff] text-black hover:bg-[#00b8ef] transition-colors"
+          className="rounded-lg border border-[#99f7ff]/45 bg-[#99f7ff]/15 px-4 py-2 text-sm font-semibold text-[#bffcff] transition hover:border-[#99f7ff]/70 hover:bg-[#99f7ff]/22 hover:text-[#e8f4ff]"
         >
           New Survey
         </Link>
       </div>
+      </div>
 
       {surveys.length === 0 ? (
-        <div className="dash-panel p-8 text-center">
-          <p className="dash-text-muted">No surveys yet.</p>
+        <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-8 text-center">
+          <p className="text-[#c4cad6]">No surveys yet.</p>
           <Link href="/admin/surveys/new" className="mt-3 inline-block text-sm dash-accent hover:underline">
             Create your first survey
           </Link>
         </div>
       ) : (
-        <div className="dash-panel overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="glass-panel interactive-panel overflow-hidden rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[860px] text-sm">
             <thead>
-              <tr className="border-b dash-border">
-                <th className="px-4 py-3 text-left text-xs font-semibold dash-text-muted uppercase tracking-wider">Title</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold dash-text-muted uppercase tracking-wider">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold dash-text-muted uppercase tracking-wider">Target</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold dash-text-muted uppercase tracking-wider">Responses</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold dash-text-muted uppercase tracking-wider">Created</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold dash-text-muted uppercase tracking-wider">Actions</th>
+              <tr className="border-b border-white/10 bg-black/25">
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Title</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Status</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Target</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Responses</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Created</th>
+                <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y dash-border divide-opacity-50">
+            <tbody className="divide-y divide-white/5">
               {surveys.map(survey => (
-                <tr key={survey.id} className="hover:bg-white/5 transition-colors">
+                <tr key={survey.id} className="transition-colors hover:bg-white/[0.03]">
                   <td className="px-4 py-3">
-                    <span className="dash-text-bright font-medium">{survey.title}</span>
+                    <span className="font-medium text-[#e8f4ff]">{survey.title}</span>
                     {survey.description && (
-                      <p className="text-xs dash-text-muted mt-0.5 line-clamp-1">{survey.description}</p>
+                      <p className="mt-0.5 line-clamp-1 text-xs text-[#a9abb5]">{survey.description}</p>
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_STYLE[survey.status] ?? 'bg-[#94a3b8]/20 text-[#94a3b8]'}`}>
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_STYLE[survey.status] ?? 'bg-[#94a3b8]/20 text-[#94a3b8]'}`}>
                       {survey.status}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="dash-text-muted capitalize">
+                    <span className="capitalize text-[#c4cad6]">
                       {survey.targetRoles.join(', ')}
                     </span>
                   </td>
-                  <td className="px-4 py-3 dash-text-muted">{survey._count.responses}</td>
-                  <td className="px-4 py-3 dash-text-muted text-xs">
+                  <td className="px-4 py-3 text-[#c4cad6]">{survey._count.responses}</td>
+                  <td className="px-4 py-3 text-xs text-[#a9abb5]">
                     {new Date(survey.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-end gap-2.5">
                       <Link
                         href={`/admin/surveys/${survey.id}/edit`}
-                        className="text-xs dash-accent hover:underline"
+                        className="text-xs font-medium text-[#99f7ff] transition-colors hover:text-[#d7fbff]"
                       >
                         Edit
                       </Link>
                       <SurveyStatusToggle id={survey.id} status={survey.status} />
                       <Link
                         href={`/admin/surveys/${survey.id}/results`}
-                        className="text-xs dash-text-muted hover:dash-text-bright transition-colors"
+                        className="text-xs font-medium text-[#a9abb5] transition-colors hover:text-[#e8f4ff]"
                       >
                         Results
                       </Link>
@@ -111,8 +116,10 @@ export default async function AdminSurveysPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
+      </div>
     </div>
   )
 }
