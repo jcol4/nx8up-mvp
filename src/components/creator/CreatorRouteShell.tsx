@@ -20,11 +20,11 @@ export default function CreatorRouteShell({
   const isAdmin = role === 'admin'
   const collapsedNavItems: SidebarNavItem[] = [
     ...(isAdmin
-      ? [
+      ? ([
           { href: '/admin', label: 'Admin', icon: 'verification' },
           { href: '/creator', label: 'Creator', icon: 'creators', exact: true },
           { href: '/sponsor', label: 'Sponsor', icon: 'payouts' },
-        ]
+        ] as SidebarNavItem[])
       : []),
     { href: '/creator', label: 'Dashboard', icon: 'dashboard', exact: true },
     { href: '/creator/profile', label: 'Profile', icon: 'profile' },
@@ -43,7 +43,7 @@ export default function CreatorRouteShell({
               { href: '/admin', label: 'Admin', icon: 'verification' },
               { href: '/creator', label: 'Creator', icon: 'creators', exact: true },
               { href: '/sponsor', label: 'Sponsor', icon: 'payouts' },
-            ],
+            ] as SidebarNavItem[],
           } as SidebarNavGroup,
         ]
       : []),
@@ -55,12 +55,12 @@ export default function CreatorRouteShell({
         { href: '/creator/campaigns', label: 'Campaigns', icon: 'campaigns' },
         { href: '/creator/deal-room', label: 'Deal Room', icon: 'dealRoom' },
         { href: '/creator/academy', label: 'Academy', icon: 'academy' },
-      ],
+      ] as SidebarNavItem[],
     },
     {
       title: 'Notifications',
       borderTop: true,
-      items: [{ href: '/creator/settings/notifications', label: 'Preferences', icon: 'notifications' }],
+      items: [{ href: '/creator/settings/notifications', label: 'Preferences', icon: 'notifications' }] as SidebarNavItem[],
     },
   ]
 

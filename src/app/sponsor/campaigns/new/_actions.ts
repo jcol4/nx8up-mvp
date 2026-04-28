@@ -150,7 +150,7 @@ export async function saveCampaignDraft(formData: FormData): Promise<CreateCampa
 
   revalidatePath('/sponsor/campaigns')
   revalidatePath('/sponsor')
-  revalidateTag(sponsorDashboardCacheTag(sponsor.id))
+  revalidateTag(sponsorDashboardCacheTag(sponsor.id), 'default')
   return { success: true, id: campaignId }
 }
 
@@ -378,6 +378,6 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
 
   revalidatePath('/sponsor/campaigns')
   revalidatePath('/sponsor')
-  revalidateTag(sponsorDashboardCacheTag(sponsor.id))
+  revalidateTag(sponsorDashboardCacheTag(sponsor.id), 'default')
   return { success: true, id: campaignId }
 }

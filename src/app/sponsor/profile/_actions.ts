@@ -124,7 +124,7 @@ export async function updateSponsorProfile(
 
     revalidatePath('/sponsor')
     revalidatePath('/sponsor/profile')
-    revalidateTag(sponsorDashboardCacheTag(sponsorRow.id))
+    revalidateTag(sponsorDashboardCacheTag(sponsorRow.id), 'default')
     return {}
   } catch {
     return { error: 'Failed to update profile' }

@@ -5,6 +5,7 @@ import { Inter, Space_Grotesk } from 'next/font/google'
 import DashboardStyles from '@/components/dashboard/DashboardStyles'
 import RoleLayoutShell from '@/components/nx-shell/RoleLayoutShell'
 import NxHudBackground from '@/components/nx-shell/NxHudBackground'
+import type { SidebarNavGroup, SidebarNavItem } from '@/components/nx-shell/RoleSidebar'
 
 export const metadata: Metadata = {
   title: 'Sponsor Hub | Nx8up',
@@ -28,7 +29,7 @@ export default async function SponsorLayout({
   const role = (sessionClaims?.metadata as { role?: string })?.role
   if (!userId) redirect('/sign-in')
   if (role !== 'sponsor' && role !== 'admin') redirect('/')
-  const adminSectionGroup =
+  const adminSectionGroup: SidebarNavGroup[] =
     role === 'admin'
       ? [
         {
@@ -37,11 +38,11 @@ export default async function SponsorLayout({
             { href: '/admin', label: 'Admin', icon: 'verification' },
             { href: '/creator', label: 'Creator', icon: 'creators' },
             { href: '/sponsor', label: 'Sponsor', icon: 'payouts', exact: true },
-          ],
+          ] as SidebarNavItem[],
         },
       ]
       : []
-  const navGroups = [
+  const navGroups: SidebarNavGroup[] = [
     ...adminSectionGroup,
     {
       title: 'Sponsor',
@@ -52,25 +53,25 @@ export default async function SponsorLayout({
         { href: '/sponsor/deal-room', label: 'Deal Room', icon: 'dealRoom' },
         { href: '/sponsor/creators', label: 'Creators', icon: 'creators' },
         { href: '/sponsor/payouts', label: 'Payouts', icon: 'payouts' },
-      ],
+      ] as SidebarNavItem[],
     },
     {
       title: 'Notifications',
       borderTop: true,
       items: [
         { href: '/sponsor/settings/notifications', label: 'Preferences', icon: 'notifications' },
-      ],
+      ] as SidebarNavItem[],
     },
   ]
-  const adminCollapsedItems =
+  const adminCollapsedItems: SidebarNavItem[] =
     role === 'admin'
       ? [
         { href: '/admin', label: 'Admin', icon: 'verification' },
         { href: '/creator', label: 'Creator', icon: 'creators' },
         { href: '/sponsor', label: 'Sponsor', icon: 'payouts', exact: true },
-      ]
+      ] as SidebarNavItem[]
       : []
-  const collapsedNavItems = [
+  const collapsedNavItems: SidebarNavItem[] = [
     ...adminCollapsedItems,
     { href: '/sponsor', label: 'Dashboard', icon: 'dashboard', exact: true },
     { href: '/sponsor/profile', label: 'Profile', icon: 'profile' },

@@ -33,7 +33,7 @@ export async function publishCampaign(id: string): Promise<{ error?: string; suc
 
   revalidatePath('/sponsor/campaigns')
   revalidatePath('/sponsor')
-  revalidateTag(sponsorDashboardCacheTag(sponsor.id))
+  revalidateTag(sponsorDashboardCacheTag(sponsor.id), 'default')
 
   return { success: true }
 }
@@ -87,7 +87,7 @@ export async function launchCampaign(id: string): Promise<{ error?: string; succ
 
   revalidatePath('/sponsor/campaigns')
   revalidatePath('/sponsor')
-  revalidateTag(sponsorDashboardCacheTag(sponsor.id))
+  revalidateTag(sponsorDashboardCacheTag(sponsor.id), 'default')
 
   return { success: true }
 }
@@ -108,7 +108,7 @@ export async function deleteCampaign(id: string): Promise<{ error?: string; succ
 
   revalidatePath('/sponsor/campaigns')
   revalidatePath('/sponsor')
-  revalidateTag(sponsorDashboardCacheTag(sponsor.id))
+  revalidateTag(sponsorDashboardCacheTag(sponsor.id), 'default')
 
   return { success: true }
 }
@@ -165,7 +165,7 @@ export async function setApplicationStatus(
   revalidatePath(`/sponsor/campaigns/${campaignId}/applications`)
   revalidatePath('/sponsor/campaigns')
   revalidatePath('/sponsor')
-  revalidateTag(sponsorDashboardCacheTag(sponsor.id))
+  revalidateTag(sponsorDashboardCacheTag(sponsor.id), 'default')
 
   return { success: true }
 }
