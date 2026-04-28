@@ -1,32 +1,3 @@
-/**
- * Admin Users page (`/admin/users`).
- *
- * Lists all Clerk-registered users paginated 25 per page. For each user the
- * page also looks up the corresponding Prisma `content_creators` or `sponsors`
- * record (if any) to surface platform-specific details such as follower counts,
- * platform tags, campaign/application counts, and DB record health (missing row
- * warnings).
- *
- * Features:
- *  - **Role filter** – All / Creators / Sponsors / Admins / No role.
- *    Client-side filtering applied to the current Clerk page, not a server-side
- *    Clerk query filter.
- *  - **Pagination** – uses Clerk `getUserList` offset pagination; page state
- *    stored in the URL.
- *  - **Inline role assignment** – `AdminUserRoleButton` opens a dropdown to
- *    change a user's Clerk role without leaving the page.
- *  - **DB record indicator** – shows green/red badge if the creator/sponsor row
- *    exists in Prisma.
- *
- * External services: Clerk (`clerkClient`, `auth`), Prisma (content_creators,
- * sponsors).
- *
- * Gotcha: role filtering is applied in JavaScript **after** fetching PAGE_SIZE
- * users from Clerk. A user with the `"none"` filter tab selected will see fewer
- * than 25 rows even when more exist on subsequent Clerk pages, because Clerk
- * returns all users regardless of role and the filter narrows locally. The
- * `totalCount` in the header always reflects the full unfiltered Clerk total.
- */
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -66,45 +37,42 @@ export default async function AdminUsersPage({ searchParams }: Props) {
 
   const clerkIds = filtered.map((u) => u.id)
 
-  const [creators, sponsors] = await Promise.all([
-    prisma.content_creators.findMany({
-      where: { clerk_user_id: { in: clerkIds } },
-      select: {
-        id: true,
-        clerk_user_id: true,
-        twitch_username: true,
-        youtube_handle: true,
-        subs_followers: true,
-        youtube_subscribers: true,
-        average_vod_views: true,
-        platform: true,
-        location: true,
-        _count: { select: { applications: true } },
-      },
-    }),
-    prisma.sponsors.findMany({
-      where: { clerk_user_id: { in: clerkIds } },
-      select: {
-        id: true,
-        clerk_user_id: true,
-        company_name: true,
-        location: true,
-        budget_min: true,
-        budget_max: true,
-        platform: true,
-        _count: { select: { campaigns: true } },
-      },
-    }),
-  ])
+  const [creators, sponsors] = clerkIds.length > 0
+    ? await Promise.all([
+      prisma.content_creators.findMany({
+        where: { clerk_user_id: { in: clerkIds } },
+        select: {
+          id: true,
+          clerk_user_id: true,
+          twitch_username: true,
+          youtube_handle: true,
+          subs_followers: true,
+          youtube_subscribers: true,
+          average_vod_views: true,
+          platform: true,
+          location: true,
+          _count: { select: { applications: true } },
+        },
+      }),
+      prisma.sponsors.findMany({
+        where: { clerk_user_id: { in: clerkIds } },
+        select: {
+          id: true,
+          clerk_user_id: true,
+          company_name: true,
+          location: true,
+          budget_min: true,
+          budget_max: true,
+          platform: true,
+          _count: { select: { campaigns: true } },
+        },
+      }),
+    ])
+    : [[], []]
 
   const creatorMap = Object.fromEntries(creators.map((c) => [c.clerk_user_id, c]))
   const sponsorMap = Object.fromEntries(sponsors.map((s) => [s.clerk_user_id, s]))
 
-  /**
-   * Builds a URL for the users page preserving the current role filter while
-   * allowing individual values to be overridden. Used for pagination and filter
-   * tab links.
-   */
   function buildUrl(overrides: Record<string, string>) {
     const params = new URLSearchParams({
       ...(roleFilter ? { role: roleFilter } : {}),
@@ -115,13 +83,17 @@ export default async function AdminUsersPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold dash-text-bright">Users</h1>
-          <p className="text-sm dash-text-muted mt-0.5">
-            {totalCount.toLocaleString()} registered user{totalCount !== 1 ? 's' : ''} in Clerk
-          </p>
+    <div className="flex-1 overflow-auto p-6 sm:p-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+      <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
+            <h1 className="mt-1 font-headline text-2xl font-semibold text-[#e8f4ff]">Users</h1>
+            <p className="mt-1 text-sm text-[#c4cad6]">
+              {totalCount.toLocaleString()} registered user{totalCount !== 1 ? 's' : ''} in Clerk
+            </p>
+          </div>
         </div>
       </div>
 
@@ -134,39 +106,41 @@ export default async function AdminUsersPage({ searchParams }: Props) {
           { label: 'Admins',   value: 'admin' },
           { label: 'No role',  value: 'none' },
         ].map(({ label, value }) => (
-          <a
+          <Link
             key={value}
             href={buildUrl({ role: value, page: '1' })}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+            prefetch
+            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
               roleFilter === value
-                ? 'bg-[#00c8ff] text-black'
-                : 'dash-panel dash-text-muted hover:dash-text-bright'
+                ? 'border border-[#99f7ff]/45 bg-[#99f7ff]/15 text-[#bffcff]'
+                : 'border border-white/12 bg-black/20 text-[#a9abb5] hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]'
             }`}
           >
             {label}
-          </a>
+          </Link>
         ))}
       </div>
 
       {filtered.length === 0 ? (
-        <div className="dash-panel p-8 text-center">
-          <p className="dash-text-muted text-sm">No users match this filter.</p>
+        <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-8 text-center">
+          <p className="text-sm text-[#c4cad6]">No users match this filter.</p>
         </div>
       ) : (
-        <div className="dash-panel overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="glass-panel interactive-panel overflow-hidden rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[1180px] text-sm">
             <thead>
-              <tr className="border-b border-white/10">
-                <th className="text-left px-4 py-3 dash-text-muted font-medium">User</th>
-                <th className="text-left px-4 py-3 dash-text-muted font-medium">Role</th>
-                <th className="text-left px-4 py-3 dash-text-muted font-medium">Details</th>
-                <th className="text-left px-4 py-3 dash-text-muted font-medium">DB record</th>
-                <th className="text-left px-4 py-3 dash-text-muted font-medium">Onboarding</th>
-                <th className="text-left px-4 py-3 dash-text-muted font-medium">Joined</th>
-                <th className="text-left px-4 py-3 dash-text-muted font-medium">Actions</th>
+              <tr className="border-b border-white/10 bg-black/25">
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">User</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Role</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Details</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">DB record</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Onboarding</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Joined</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-white/5">
               {filtered.map((u, i) => {
                 const meta = u.publicMetadata as { role?: string; onboardingComplete?: boolean }
                 const userRole = meta?.role ?? null
@@ -190,12 +164,11 @@ export default async function AdminUsersPage({ searchParams }: Props) {
                   >
                     {/* User */}
                     <td className="px-4 py-3">
-                      <p className="dash-text-bright font-medium">
+                      <p className="font-medium text-[#e8f4ff]">
                         {u.firstName || u.lastName
-                          ? `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim()
-                          : <span className="dash-text-muted italic">No name</span>}
+                          ? `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() : <span className="italic text-[#8f97ab]">No name</span>}
                       </p>
-                      <p className="text-xs dash-text-muted">{primaryEmail ?? '—'}</p>
+                      <p className="text-xs text-[#a9abb5]">{primaryEmail ?? '—'}</p>
                       {creator?.twitch_username && (
                         <p className="text-xs text-[#7b4fff]">@{creator.twitch_username}</p>
                       )}
@@ -302,7 +275,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
                     </td>
 
                     {/* Joined */}
-                    <td className="px-4 py-3 dash-text-muted text-xs">
+                    <td className="px-4 py-3 text-xs text-[#a9abb5]">
                       {new Date(u.createdAt).toLocaleDateString('en-US', {
                         month: 'short', day: 'numeric', year: 'numeric',
                       })}
@@ -329,25 +302,27 @@ export default async function AdminUsersPage({ searchParams }: Props) {
               })}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center gap-3 text-sm">
+        <div className="glass-panel interactive-panel flex items-center gap-3 rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-3 text-sm">
           {page > 1 && (
-            <a href={buildUrl({ page: String(page - 1) })} className="px-3 py-1.5 rounded-lg dash-panel dash-text-muted hover:dash-text-bright transition-colors">
+            <Link href={buildUrl({ page: String(page - 1) })} prefetch className="rounded-lg border border-white/12 bg-black/20 px-3 py-1.5 text-[#a9abb5] transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]">
               ← Previous
-            </a>
+            </Link>
           )}
-          <span className="dash-text-muted">Page {page} of {totalPages}</span>
+          <span className="text-[#c4cad6]">Page {page} of {totalPages}</span>
           {page < totalPages && (
-            <a href={buildUrl({ page: String(page + 1) })} className="px-3 py-1.5 rounded-lg dash-panel dash-text-muted hover:dash-text-bright transition-colors">
+            <Link href={buildUrl({ page: String(page + 1) })} prefetch className="rounded-lg border border-white/12 bg-black/20 px-3 py-1.5 text-[#a9abb5] transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]">
               Next →
-            </a>
+            </Link>
           )}
         </div>
       )}
+      </div>
     </div>
   )
 }

@@ -1,36 +1,30 @@
-/**
- * Admin dashboard widget — Verification Queue preview.
- *
- * Async server component that queries Prisma for the five oldest
- * `deal_submissions` with status `"submitted"` and renders them as a
- * clickable list. Each row links to the full review page at
- * `/admin/verification-queue/[applicationId]`.
- *
- * The creator handle is resolved with Twitch username taking priority over
- * YouTube channel name, falling back to the literal string "Creator" when
- * neither is set.
- *
- * External services: Prisma (deal_submissions, campaign_applications,
- * content_creators, campaigns).
- */
 import Link from 'next/link'
+import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { DashboardPanel } from '@/components/dashboard'
 
-export default async function AdminVerificationQueue() {
-  const pending = await prisma.deal_submissions.findMany({
-    where: { status: 'submitted' },
-    orderBy: { submitted_at: 'asc' },
-    take: 5,
-    include: {
-      application: {
-        include: {
-          creator: { select: { twitch_username: true, youtube_channel_name: true } },
-          campaign: { select: { title: true } },
+const getVerificationQueue = unstable_cache(
+  async () => {
+    return prisma.deal_submissions.findMany({
+      where: { status: 'submitted' },
+      orderBy: { submitted_at: 'asc' },
+      take: 5,
+      include: {
+        application: {
+          include: {
+            creator: { select: { twitch_username: true, youtube_channel_name: true } },
+            campaign: { select: { title: true } },
+          },
         },
       },
-    },
-  })
+    })
+  },
+  ['admin-verification-queue'],
+  { revalidate: 15 },
+)
+
+export default async function AdminVerificationQueue() {
+  const pending = await getVerificationQueue()
 
   return (
     <DashboardPanel

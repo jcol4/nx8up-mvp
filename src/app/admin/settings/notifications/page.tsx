@@ -1,23 +1,3 @@
-/**
- * Admin Notification Preferences page (`/admin/settings/notifications`).
- *
- * Renders a `NotificationPreferencesForm` pre-populated with admin-specific
- * notification types sourced from `ADMIN_NOTIFICATION_TYPES`. Inline
- * descriptions are provided for each type via the `DESCRIPTIONS` map.
- *
- * Currently supported admin notification types:
- *  - `admin_queue` – new submission added to the verification queue
- *  - `system`      – platform announcements and system updates
- *
- * Gotcha: this page renders `AdminHeader` directly, which is unusual since the
- * admin layout already renders `AdminHeader` for every page under `/admin`.
- * This causes the header to be rendered **twice** on this page. The import of
- * `AdminHeader` here appears to be an oversight and should be removed.
- *
- * External services: `@/lib/notification-types` (ADMIN_NOTIFICATION_TYPES,
- * NOTIFICATION_LABELS).
- */
-import AdminHeader from '../../AdminHeader'
 import NotificationPreferencesForm from '@/components/shared/NotificationPreferencesForm'
 import { ADMIN_NOTIFICATION_TYPES, NOTIFICATION_LABELS } from '@/lib/notification-types'
 import BackLink from '@/components/shared/BackLink'
@@ -35,14 +15,11 @@ const ENTRIES = ADMIN_NOTIFICATION_TYPES.map((type) => ({
 
 export default function AdminNotificationPreferencesPage() {
   return (
-    <>
-      <AdminHeader />
-      <main className="max-w-2xl mx-auto p-6 sm:p-8">
-        <BackLink href="/admin">← Back to Dashboard</BackLink>
-        <h1 className="text-xl font-bold cr-text-bright mt-4 mb-1">Notification Preferences</h1>
-        <p className="text-sm cr-text-muted mb-6">Choose how you want to be notified for each event type.</p>
-        <NotificationPreferencesForm entries={ENTRIES} />
-      </main>
-    </>
+    <main className="max-w-2xl mx-auto p-6 sm:p-8">
+      <BackLink href="/admin">← Back to Dashboard</BackLink>
+      <h1 className="text-xl font-bold cr-text-bright mt-4 mb-1">Notification Preferences</h1>
+      <p className="text-sm cr-text-muted mb-6">Choose how you want to be notified for each event type.</p>
+      <NotificationPreferencesForm entries={ENTRIES} />
+    </main>
   )
 }
