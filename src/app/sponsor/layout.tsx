@@ -6,6 +6,7 @@ import DashboardStyles from '@/components/dashboard/DashboardStyles'
 import RoleLayoutShell from '@/components/nx-shell/RoleLayoutShell'
 import NxHudBackground from '@/components/nx-shell/NxHudBackground'
 import type { SidebarNavGroup, SidebarNavItem } from '@/components/nx-shell/RoleSidebar'
+import { prisma } from '@/lib/prisma'
 
 export const metadata: Metadata = {
   title: 'Sponsor Hub | Nx8up',
@@ -29,6 +30,24 @@ export default async function SponsorLayout({
   const role = (sessionClaims?.metadata as { role?: string })?.role
   if (!userId) redirect('/sign-in')
   if (role !== 'sponsor' && role !== 'admin') redirect('/')
+
+  const sponsor = await prisma.sponsors.findUnique({ where: { clerk_user_id: userId } })
+  const [liveCampaigns, acceptedCreators] = sponsor
+    ? await Promise.all([
+        prisma.campaigns.findMany({
+          where: { sponsor_id: sponsor.id, status: 'active' },
+          select: { budget: true },
+        }),
+        prisma.campaign_applications.count({
+          where: {
+            campaign: { sponsor_id: sponsor.id },
+            status: 'accepted',
+          },
+        }),
+      ])
+    : [[], 0]
+
+  const liveBudget = liveCampaigns.reduce((sum, c) => sum + (c.budget ?? 0), 0)
   const adminSectionGroup: SidebarNavGroup[] =
     role === 'admin'
       ? [
@@ -82,9 +101,9 @@ export default async function SponsorLayout({
     { href: '/sponsor/settings/notifications', label: 'Alerts', icon: 'notifications' },
   ]
   const statsRows = [
-    { label: 'Live campaigns', value: '—', valueClassName: 'font-bold text-[#00c8ff]' },
-    { label: 'Live budget', value: '—', valueClassName: 'font-bold text-[#00e5a0]' },
-    { label: 'Creators accepted', value: '—', valueClassName: 'font-bold text-[#c084fc]' },
+    { label: 'Live campaigns', value: liveCampaigns.length.toString(), valueClassName: 'font-bold text-[#00c8ff]' },
+    { label: 'Live budget', value: liveBudget > 0 ? `$${liveBudget.toLocaleString()}` : '—', valueClassName: 'font-bold text-[#00e5a0]' },
+    { label: 'Creators accepted', value: acceptedCreators.toString(), valueClassName: 'font-bold text-[#c084fc]' },
   ]
 
   return (
