@@ -117,15 +117,13 @@ export default function SignInPage() {
 
     try {
       const result = await signIn.create({ identifier: identifier.trim(), password })
-      console.log('[sign-in] result.status:', result.status)
-
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId })
-        console.log('[sign-in] clerk.user after setActive:', clerk.user, 'role:', clerk.user?.publicMetadata?.role)
         redirectByRole()
         return
       } else if (result.status === 'needs_second_factor') {
-        // ... MFA logic unchanged
+        await signIn.prepareSecondFactor({ strategy: 'email_code' })
+        setShowEmailCode(true)
       } else {
         setError('Sign-in requires additional steps. Please try again.')
       }
@@ -165,8 +163,9 @@ export default function SignInPage() {
         code,
       })
       if (result.status === 'complete') {
-        setPendingSessionId(result.createdSessionId ?? null)
-        setShowOptOutPrompt(true)
+        await setActive({ session: result.createdSessionId })
+        redirectByRole()
+        return
       } else {
         setError('Verification incomplete. Please try again.')
       }
