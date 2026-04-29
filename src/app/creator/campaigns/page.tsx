@@ -155,9 +155,9 @@ export default async function CreatorCampaignsPage({
       <Image
         src={src}
         alt={name}
-        width={20}
-        height={20}
-        className="inline-block h-5 w-5 rounded-full object-cover border border-white/15 align-middle mr-1"
+        width={40}
+        height={40}
+        className="h-10 w-10 shrink-0 rounded-lg object-cover border border-white/20"
         unoptimized
       />
     )
@@ -254,15 +254,16 @@ export default async function CreatorCampaignsPage({
                   style={{ borderTopWidth: '2px', borderTopColor: '#bffcff' }}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <SponsorAvatar clerkUserId={c.sponsor.clerk_user_id} name={c.sponsor.company_name ?? 'Sponsor'} />
+                      <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-0.5">
                         <span className="text-sm font-semibold text-[#e8f4ff]">{c.title}</span>
                         <span className="rounded border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-2 py-0.5 text-xs text-[#99f7ff]">
                           Invited
                         </span>
                       </div>
-                      <p className="mt-0.5 flex items-center text-xs text-[#a9abb5]">
-                        <SponsorAvatar clerkUserId={c.sponsor.clerk_user_id} name={c.sponsor.company_name ?? 'Sponsor'} />
+                      <p className="mt-0.5 text-xs text-[#a9abb5]">
                         {c.sponsor.company_name ?? 'Sponsor'} ·{' '}
                         {c.platform.join(', ')}
                         {c.end_date ? ` · Ends: ${new Date(c.end_date).toLocaleDateString()}` : ''}
@@ -284,6 +285,7 @@ export default async function CreatorCampaignsPage({
                       >
                         View campaign details →
                       </Link>
+                      </div>
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
                       {c.budget != null && (() => {
@@ -318,24 +320,26 @@ export default async function CreatorCampaignsPage({
                   style={{ borderTopWidth: '2px', borderTopColor: '#bffcff' }}
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm font-semibold text-[#e8f4ff] group-hover:text-[#f4fdff]">{c.title}</span>
-                      <p className="mt-0.5 flex items-center text-xs text-[#a9abb5]">
-                        <SponsorAvatar clerkUserId={c.sponsor.clerk_user_id} name={c.sponsor.company_name ?? 'Sponsor'} />
-                        {c.sponsor.company_name ?? 'Sponsor'} ·{' '}
-                        {c.platform.join(', ')}
-                        {c.end_date ? ` · Ends: ${new Date(c.end_date).toLocaleDateString()}` : ''}
-                      </p>
-                      {c.description && (
-                        <p className="mt-1 line-clamp-2 text-xs text-[#e8f4ff]">{c.description}</p>
-                      )}
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {c.game_category.slice(0, 3).map((g: string) => (
-                          <span key={g} className="rounded border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2 py-0.5 text-xs text-[#99f7ff]">{g}</span>
-                        ))}
-                        {c.content_type.slice(0, 2).map((t: string) => (
-                          <span key={t} className="rounded border border-[#c084fc]/30 bg-[#c084fc]/10 px-2 py-0.5 text-xs text-[#d8b4fe]">{t}</span>
-                        ))}
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <SponsorAvatar clerkUserId={c.sponsor.clerk_user_id} name={c.sponsor.company_name ?? 'Sponsor'} />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-semibold text-[#e8f4ff] group-hover:text-[#f4fdff]">{c.title}</span>
+                        <p className="mt-0.5 text-xs text-[#a9abb5]">
+                          {c.sponsor.company_name ?? 'Sponsor'} ·{' '}
+                          {c.platform.join(', ')}
+                          {c.end_date ? ` · Ends: ${new Date(c.end_date).toLocaleDateString()}` : ''}
+                        </p>
+                        {c.description && (
+                          <p className="mt-1 line-clamp-2 text-xs text-[#e8f4ff]">{c.description}</p>
+                        )}
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {c.game_category.slice(0, 3).map((g: string) => (
+                            <span key={g} className="rounded border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2 py-0.5 text-xs text-[#99f7ff]">{g}</span>
+                          ))}
+                          {c.content_type.slice(0, 2).map((t: string) => (
+                            <span key={t} className="rounded border border-[#c084fc]/30 bg-[#c084fc]/10 px-2 py-0.5 text-xs text-[#d8b4fe]">{t}</span>
+                          ))}
+                        </div>
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
@@ -376,32 +380,34 @@ export default async function CreatorCampaignsPage({
                   style={{ borderTopWidth: '2px', borderTopColor: '#bffcff' }}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                        <span className="text-sm font-semibold text-[#e8f4ff] group-hover:text-[#f4fdff]">{c.title}</span>
-                        <span className="rounded border border-[#a855f7]/35 bg-[#a855f7]/20 px-2 py-0.5 text-xs text-[#d8b4fe]">Launched</span>
-                        {myApplication && (
-                          <span className={`text-xs px-2 py-0.5 rounded ${APPLICATION_STATUS_STYLES[myApplication.status] ?? ''}`}>
-                            {APPLICATION_STATUS_LABELS[myApplication.status] ?? myApplication.status}
-                          </span>
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <SponsorAvatar clerkUserId={c.sponsor.clerk_user_id} name={c.sponsor.company_name ?? 'Sponsor'} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                          <span className="text-sm font-semibold text-[#e8f4ff] group-hover:text-[#f4fdff]">{c.title}</span>
+                          <span className="rounded border border-[#a855f7]/35 bg-[#a855f7]/20 px-2 py-0.5 text-xs text-[#d8b4fe]">Launched</span>
+                          {myApplication && (
+                            <span className={`text-xs px-2 py-0.5 rounded ${APPLICATION_STATUS_STYLES[myApplication.status] ?? ''}`}>
+                              {APPLICATION_STATUS_LABELS[myApplication.status] ?? myApplication.status}
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-0.5 text-xs text-[#a9abb5]">
+                          {c.sponsor.company_name ?? 'Sponsor'} ·{' '}
+                          {c.platform.join(', ')}
+                          {c.end_date ? ` · Ends: ${new Date(c.end_date).toLocaleDateString()}` : ''}
+                        </p>
+                        {c.description && (
+                          <p className="mt-1 line-clamp-2 text-xs text-[#e8f4ff]">{c.description}</p>
                         )}
-                      </div>
-                      <p className="mt-0.5 flex items-center text-xs text-[#a9abb5]">
-                        <SponsorAvatar clerkUserId={c.sponsor.clerk_user_id} name={c.sponsor.company_name ?? 'Sponsor'} />
-                        {c.sponsor.company_name ?? 'Sponsor'} ·{' '}
-                        {c.platform.join(', ')}
-                        {c.end_date ? ` · Ends: ${new Date(c.end_date).toLocaleDateString()}` : ''}
-                      </p>
-                      {c.description && (
-                        <p className="mt-1 line-clamp-2 text-xs text-[#e8f4ff]">{c.description}</p>
-                      )}
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {c.game_category.slice(0, 3).map((g: string) => (
-                          <span key={g} className="rounded border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2 py-0.5 text-xs text-[#99f7ff]">{g}</span>
-                        ))}
-                        {c.content_type.slice(0, 2).map((t: string) => (
-                          <span key={t} className="rounded border border-[#c084fc]/30 bg-[#c084fc]/10 px-2 py-0.5 text-xs text-[#d8b4fe]">{t}</span>
-                        ))}
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {c.game_category.slice(0, 3).map((g: string) => (
+                            <span key={g} className="rounded border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2 py-0.5 text-xs text-[#99f7ff]">{g}</span>
+                          ))}
+                          {c.content_type.slice(0, 2).map((t: string) => (
+                            <span key={t} className="rounded border border-[#c084fc]/30 bg-[#c084fc]/10 px-2 py-0.5 text-xs text-[#d8b4fe]">{t}</span>
+                          ))}
+                        </div>
                       </div>
                     </div>
                     <div className="text-right shrink-0">

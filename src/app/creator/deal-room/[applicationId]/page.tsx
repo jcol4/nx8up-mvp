@@ -113,14 +113,14 @@ export default async function CreatorDealRoomDetailPage({
               )}
             </div>
             <h1 className="text-xl font-bold cr-text-bright">{c.title}</h1>
-            <div className="mt-0.5 flex items-center gap-2">
+            <div className="mt-1 flex items-center gap-3">
               {sponsorImageUrl && (
                 <Image
                   src={sponsorImageUrl}
                   alt={c.sponsor.company_name ?? 'Sponsor'}
-                  width={24}
-                  height={24}
-                  className="h-6 w-6 rounded-full object-cover border border-white/15"
+                  width={56}
+                  height={56}
+                  className="h-14 w-14 rounded-xl object-cover border border-white/20 shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
                   unoptimized
                 />
               )}

@@ -160,19 +160,19 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             </div>
 
             <h1 className="text-xl sm:text-2xl font-bold cr-text-bright mb-1">{campaign.title}</h1>
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-3 mb-4">
               {sponsorImageUrl && (
                 <Image
                   src={sponsorImageUrl}
                   alt={campaign.sponsor.company_name ?? 'Sponsor'}
-                  width={28}
-                  height={28}
-                  className="h-7 w-7 rounded-full object-cover border border-white/15"
+                  width={56}
+                  height={56}
+                  className="h-14 w-14 rounded-xl object-cover border border-white/20 shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
                   unoptimized
                 />
               )}
               <p className="text-sm cr-text-muted">
-                by <span className="cr-text">{campaign.sponsor.company_name ?? 'Sponsor'}</span>
+                by <span className="cr-text font-medium">{campaign.sponsor.company_name ?? 'Sponsor'}</span>
               </p>
             </div>
 

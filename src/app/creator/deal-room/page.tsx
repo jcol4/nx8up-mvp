@@ -82,22 +82,23 @@ export default async function CreatorDealRoomPage() {
                   className={`group block ${DEAL_CARD_CLASS} hover:border-[#99f7ff]/35 hover:bg-black/25`}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      {(() => {
+                        const sponsor = (app.campaign as typeof app.campaign & { sponsor?: { company_name: string | null; clerk_user_id: string } }).sponsor
+                        const imgSrc = sponsor?.clerk_user_id ? sponsorImages[sponsor.clerk_user_id] : undefined
+                        return imgSrc ? (
+                          <Image
+                            src={imgSrc}
+                            alt={sponsor?.company_name ?? 'Sponsor'}
+                            width={40}
+                            height={40}
+                            className="h-10 w-10 shrink-0 rounded-lg object-cover border border-white/20"
+                            unoptimized
+                          />
+                        ) : null
+                      })()}
+                      <div className="flex-1 min-w-0">
                       <div className="mb-1 flex flex-wrap items-center gap-2">
-                        {(() => {
-                          const sponsor = (app.campaign as typeof app.campaign & { sponsor?: { company_name: string | null; clerk_user_id: string } }).sponsor
-                          const imgSrc = sponsor?.clerk_user_id ? sponsorImages[sponsor.clerk_user_id] : undefined
-                          return imgSrc ? (
-                            <Image
-                              src={imgSrc}
-                              alt={sponsor?.company_name ?? 'Sponsor'}
-                              width={20}
-                              height={20}
-                              className="h-5 w-5 rounded-full object-cover border border-white/15"
-                              unoptimized
-                            />
-                          ) : null
-                        })()}
                         <span className="text-sm font-semibold text-[#e8f4ff] group-hover:text-[#f4fdff]">{app.campaign.title}</span>
                         <span className={`text-xs px-2 py-0.5 rounded ${subStatus.className}`}>
                           {subStatus.label}
@@ -122,6 +123,7 @@ export default async function CreatorDealRoomPage() {
                             Due {new Date(app.campaign.end_date).toLocaleDateString()}
                           </span>
                         )}
+                      </div>
                       </div>
                     </div>
                     <div className="text-right shrink-0">
