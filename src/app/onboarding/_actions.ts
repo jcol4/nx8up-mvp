@@ -84,6 +84,18 @@ export const completeOnboarding = async (formData: FormData) => {
             clerk_user_id: userId,
             email,
             age,
+            language: [],
+            platform: [],
+            content_type: [],
+            game_category: [],
+            youtube_top_categories: [],
+            audience_locations: [],
+            creator_types: [],
+            content_style: [],
+            audience_interests: [],
+            preferred_campaign_types: [],
+            preferred_product_types: [],
+            audience_gender: [],
           }
         })
       }
@@ -115,6 +127,8 @@ export const completeOnboarding = async (formData: FormData) => {
     return { message: res.publicMetadata }
   } catch (err: any) {
     console.error('Onboarding error:', err)
+    console.error('Onboarding error meta:', JSON.stringify(err?.meta))
+    console.error('Onboarding error target:', JSON.stringify(err?.meta?.target))
     return { error: 'Failed to complete onboarding. Please try again.' }
   }
 }

@@ -30,6 +30,14 @@ model content_creators {
   twitch_profile_image       String?
   twitch_synced_at           DateTime?               @db.Timestamptz(6)
   twitch_username            String?
+  steam_id                   String?                 @unique
+  steam_username             String?
+  steam_profile_url          String?
+  steam_avatar_url           String?
+  steam_profile_visibility   Int?
+  steam_top_games            Json?
+  steam_recent_games         Json?
+  steam_synced_at            DateTime?               @db.Timestamptz(6)
   youtube_avg_views          Int?
   youtube_channel_id         String?                 @unique
   youtube_channel_name       String?
@@ -81,6 +89,7 @@ model content_creators {
   @@index([subs_followers])
   @@index([twitch_id])
   @@index([twitch_broadcaster_type])
+  @@index([steam_id])
   @@index([youtube_channel_id])
   @@index([youtube_subscribers])
 }
@@ -186,8 +195,8 @@ model campaigns {
   stripe_charge_id            String?
   preferred_payment_method    String?                 @default("card")
   applications                campaign_applications[]
-  disputes                    disputes[]
   sponsor                     sponsors                @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
+  disputes                    disputes[]
 
   @@index([status])
   @@index([sponsor_id])
@@ -310,12 +319,12 @@ model Survey {
 }
 
 model SurveyQuestion {
-  id       String @id @default(cuid())
+  id       String   @id @default(cuid())
   surveyId String
   order    Int
   text     String
   options  String[]
-  survey   Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  survey   Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
 
   @@index([surveyId, order])
 }
@@ -338,8 +347,8 @@ model disputes {
   submitted_at             DateTime?        @db.Timestamptz(6)
   created_at               DateTime         @default(now()) @db.Timestamptz(6)
   updated_at               DateTime         @updatedAt @db.Timestamptz(6)
-  campaign                 campaigns?       @relation(fields: [campaign_id], references: [id], onDelete: SetNull)
   events                   dispute_events[]
+  campaign                 campaigns?       @relation(fields: [campaign_id], references: [id])
 
   @@index([campaign_id])
   @@index([status])

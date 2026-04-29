@@ -802,3 +802,42 @@ export async function refreshYouTubeDataIfStale(userId: string) {
     console.error('refreshYouTubeDataIfStale error:', err)
   }
 }
+
+
+
+// ─────────────────────────────────────────────────────────────────────────
+// APPEND THE FOLLOWING to: src/app/creator/profile/_actions.ts
+// (Place at the bottom of the file, alongside unlinkTwitchAccount and
+//  unlinkYouTubeAccount.)
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * Unlinks the creator's Steam account by nulling all Steam fields on the
+ * `content_creators` DB row. Cached game data is also cleared since it's
+ * no longer authorized.
+ */
+export async function unlinkSteamAccount() {
+  const { userId } = await auth()
+  if (!userId) return { error: 'Not authenticated' }
+
+  try {
+    await prisma.content_creators.update({
+      where: { clerk_user_id: userId },
+      data: {
+        steam_id: null,
+        steam_username: null,
+        steam_profile_url: null,
+        steam_avatar_url: null,
+        steam_profile_visibility: null,
+        steam_top_games: null,
+        steam_recent_games: null,
+        steam_synced_at: null,
+      },
+    })
+
+    return { success: true }
+  } catch (err: any) {
+    console.error('unlinkSteamAccount error:', err)
+    return { error: 'Failed to unlink Steam account.' }
+  }
+}
