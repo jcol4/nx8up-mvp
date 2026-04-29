@@ -26,6 +26,7 @@
  */
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { headers } from 'next/headers'
 import { auth } from '@clerk/nextjs/server'
 import { getDealRoom } from '../_actions'
@@ -35,6 +36,7 @@ import CopyButton from './CopyButton'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import CreatorShell from '@/components/creator/CreatorShell'
 import NxHudCard from '@/components/nx-shell/NxHudCard'
+import { getClerkImageUrls } from '@/lib/get-clerk-images'
 
 const DELIVERABLE_LABELS: Record<string, string> = {
   gameplay_footage: 'Gameplay footage',
@@ -58,6 +60,9 @@ export default async function CreatorDealRoomDetailPage({
   if (!app) notFound()
 
   const c = app.campaign
+  const sponsorClerkId = (c.sponsor as typeof c.sponsor & { clerk_user_id?: string }).clerk_user_id
+  const sponsorImages = await getClerkImageUrls(sponsorClerkId ? [sponsorClerkId] : [])
+  const sponsorImageUrl = sponsorClerkId ? sponsorImages[sponsorClerkId] : undefined
   const sub = app.deal_submission
 
   // Build the personalised tracking URL for this creator
@@ -108,10 +113,22 @@ export default async function CreatorDealRoomDetailPage({
               )}
             </div>
             <h1 className="text-xl font-bold cr-text-bright">{c.title}</h1>
-            <p className="text-sm cr-text-muted mt-0.5">
-              {c.sponsor.company_name ?? 'Sponsor'}
-              {c.brand_name ? ` · ${c.brand_name}` : ''}
-            </p>
+            <div className="mt-0.5 flex items-center gap-2">
+              {sponsorImageUrl && (
+                <Image
+                  src={sponsorImageUrl}
+                  alt={c.sponsor.company_name ?? 'Sponsor'}
+                  width={24}
+                  height={24}
+                  className="h-6 w-6 rounded-full object-cover border border-white/15"
+                  unoptimized
+                />
+              )}
+              <p className="text-sm cr-text-muted">
+                {c.sponsor.company_name ?? 'Sponsor'}
+                {c.brand_name ? ` · ${c.brand_name}` : ''}
+              </p>
+            </div>
           </div>
           <div className="text-right">
             {c.budget != null && (() => {

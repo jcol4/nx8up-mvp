@@ -84,6 +84,7 @@ export async function getMyDealRooms() {
           budget: true,
           creator_count: true,
           platform: true,
+          sponsor: { select: { company_name: true, clerk_user_id: true } },
         },
       },
       deal_submission: {
@@ -122,7 +123,7 @@ export async function getDealRoom(applicationId: string) {
       data: { tracking_short_code: code },
       include: {
         campaign: {
-          include: { sponsor: { select: { company_name: true } } },
+          include: { sponsor: { select: { company_name: true, clerk_user_id: true } } },
         },
         deal_submission: true,
       },
@@ -131,6 +132,7 @@ export async function getDealRoom(applicationId: string) {
 
   return app
 }
+
 
 export async function getPostTimestamp(url: string): Promise<{ iso: string } | null> {
   const ts = await fetchPostTimestamp(url)

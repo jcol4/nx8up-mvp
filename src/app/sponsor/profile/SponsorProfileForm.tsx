@@ -29,6 +29,7 @@ import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { updateSponsorProfile, requestAgeRestrictionChange, type SponsorProfile } from './_actions'
+import ProfilePictureUpload from '@/components/shared/ProfilePictureUpload'
 import {
   COUNTRIES,
   US_STATES,
@@ -225,6 +226,15 @@ export default function SponsorProfileForm({ profile }: Props) {
       {saveSuccessOverlay}
       <form onSubmit={handleSubmit} className="space-y-6">
       {error && <Alert variant="error">{error}</Alert>}
+
+      {/* ── Profile Picture ──────────────────────────────────────────── */}
+      <div className={sectionClass}>
+        <p className={sectionTitle}>Profile Picture</p>
+        <p className="mb-3 text-xs text-[#a9abb5]">
+          Your profile picture is shown to creators on campaign listings and deal room pages.
+        </p>
+        <ProfilePictureUpload />
+      </div>
 
       {/* ── Company Info ─────────────────────────────────────────────── */}
       <div className={sectionClass}>

@@ -35,9 +35,11 @@ import InviteResponseButtons from '@/components/creator/InviteResponseButtons'
 import { prisma } from '@/lib/prisma'
 import { matchCreatorToCampaign } from '@/lib/matching'
 import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
+import Image from 'next/image'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import CreatorShell from '@/components/creator/CreatorShell'
 import NxHudCard from '@/components/nx-shell/NxHudCard'
+import { getClerkImageUrls } from '@/lib/get-clerk-images'
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -76,6 +78,10 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
   ])
 
   if (!campaign) notFound()
+
+  const sponsorClerkId = campaign.sponsor.clerk_user_id
+  const sponsorImages = await getClerkImageUrls(sponsorClerkId ? [sponsorClerkId] : [])
+  const sponsorImageUrl = sponsorClerkId ? sponsorImages[sponsorClerkId] : undefined
 
   if (campaign.legal_age_restriction && creatorProfile?.audience_age_min != null) {
     const restrictionAge = campaign.legal_age_restriction === '21+' ? 21 : 18
@@ -154,9 +160,21 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             </div>
 
             <h1 className="text-xl sm:text-2xl font-bold cr-text-bright mb-1">{campaign.title}</h1>
-            <p className="text-sm cr-text-muted mb-4">
-              by <span className="cr-text">{campaign.sponsor.company_name ?? 'Sponsor'}</span>
-            </p>
+            <div className="flex items-center gap-2 mb-4">
+              {sponsorImageUrl && (
+                <Image
+                  src={sponsorImageUrl}
+                  alt={campaign.sponsor.company_name ?? 'Sponsor'}
+                  width={28}
+                  height={28}
+                  className="h-7 w-7 rounded-full object-cover border border-white/15"
+                  unoptimized
+                />
+              )}
+              <p className="text-sm cr-text-muted">
+                by <span className="cr-text">{campaign.sponsor.company_name ?? 'Sponsor'}</span>
+              </p>
+            </div>
 
             {campaign.description && (
               <p className="text-sm cr-text leading-relaxed">{campaign.description}</p>

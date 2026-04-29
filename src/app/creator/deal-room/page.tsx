@@ -17,9 +17,11 @@
  * External services: Prisma/PostgreSQL (via `getMyDealRooms`).
  */
 import Link from 'next/link'
+import Image from 'next/image'
 import { getMyDealRooms } from './_actions'
 import { calcFeeBreakdown } from '@/lib/constants'
 import CreatorShell from '@/components/creator/CreatorShell'
+import { getClerkImageUrls } from '@/lib/get-clerk-images'
 
 const SUBMISSION_STATUS: Record<string, { label: string; className: string }> = {
   pending: { label: 'Not submitted', className: 'border border-white/12 bg-white/8 text-[#a9abb5]' },
@@ -35,6 +37,11 @@ const DEAL_CARD_CLASS =
 
 export default async function CreatorDealRoomPage() {
   const applications = await getMyDealRooms()
+
+  const sponsorClerkIds = applications
+    .map((a) => (a.campaign as typeof a.campaign & { sponsor?: { clerk_user_id: string } }).sponsor?.clerk_user_id)
+    .filter((id): id is string => !!id)
+  const sponsorImages = await getClerkImageUrls(sponsorClerkIds)
 
   return (
     <CreatorShell>
@@ -77,6 +84,20 @@ export default async function CreatorDealRoomPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="mb-1 flex flex-wrap items-center gap-2">
+                        {(() => {
+                          const sponsor = (app.campaign as typeof app.campaign & { sponsor?: { company_name: string | null; clerk_user_id: string } }).sponsor
+                          const imgSrc = sponsor?.clerk_user_id ? sponsorImages[sponsor.clerk_user_id] : undefined
+                          return imgSrc ? (
+                            <Image
+                              src={imgSrc}
+                              alt={sponsor?.company_name ?? 'Sponsor'}
+                              width={20}
+                              height={20}
+                              className="h-5 w-5 rounded-full object-cover border border-white/15"
+                              unoptimized
+                            />
+                          ) : null
+                        })()}
                         <span className="text-sm font-semibold text-[#e8f4ff] group-hover:text-[#f4fdff]">{app.campaign.title}</span>
                         <span className={`text-xs px-2 py-0.5 rounded ${subStatus.className}`}>
                           {subStatus.label}

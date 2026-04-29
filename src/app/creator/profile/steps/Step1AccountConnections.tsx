@@ -77,6 +77,7 @@ import { Suspense } from 'react'
 import TwitchConnect from '@/components/creator/TwitchConnect'
 import YouTubeConnect from '@/components/creator/YoutubeConnect'
 import SteamConnect from '@/components/creator/SteamConnect'
+import ProfilePictureUpload from '@/components/shared/ProfilePictureUpload'
 
 type TwitchData = {
   username: string | null
@@ -114,6 +115,11 @@ type Props = {
 export default function Step1AccountConnections({ twitchInitial, youtubeInitial, steamInitial, onNext }: Props) {
   return (
     <div className="space-y-4">
+      <div className="dash-panel dash-panel--nx-top rounded-xl border border-white/16 border-t-2 border-t-[#bffcff] bg-black/20 p-4">
+        <p className="mb-3 font-headline text-[11px] font-semibold uppercase tracking-[0.2em] text-[#99f7ff]">Profile Picture</p>
+        <ProfilePictureUpload />
+      </div>
+
       <p className="text-sm cr-text-muted mb-4">
         Connect your accounts so NX8UP can verify your reach and sync your stats automatically.
       </p>

@@ -22,11 +22,13 @@
  * External services: Prisma/PostgreSQL (via server actions).
  */
 import Link from 'next/link'
+import Image from 'next/image'
 import { getOpenCampaignsWithEligibility, getLaunchedCampaigns, getCreatorOAuthStatus, getMyInvitations } from './_actions'
 import Panel from '@/components/shared/Panel'
 import InviteResponseButtons from '@/components/creator/InviteResponseButtons'
 import { calcFeeBreakdown } from '@/lib/constants'
 import CreatorShell from '@/components/creator/CreatorShell'
+import { getClerkImageUrls } from '@/lib/get-clerk-images'
 
 const APPLICATION_STATUS_STYLES: Record<string, string> = {
   accepted: 'border border-green-500/30 bg-green-500/15 text-green-300',
@@ -118,6 +120,13 @@ export default async function CreatorCampaignsPage({
     activeTab === 'invites' ? getMyInvitations() : Promise.resolve([]),
   ])
 
+  const sponsorClerkIds = [
+    ...allEntries.map((e) => e.campaign.sponsor.clerk_user_id),
+    ...launchedEntries.map((e) => e.campaign.sponsor.clerk_user_id),
+    ...invitations.map((a) => a.campaign.sponsor.clerk_user_id),
+  ].filter((id): id is string => !!id)
+  const sponsorImages = await getClerkImageUrls(sponsorClerkIds)
+
   const openEntries = allEntries.filter((e) => e.eligible).sort((a, b) => b.score - a.score)
   const totalEntries =
     activeTab === 'invites' ? invitations.length : activeTab === 'open' ? openEntries.length : launchedEntries.length
@@ -137,6 +146,21 @@ export default async function CreatorCampaignsPage({
     if (nextPage > 1) params.set('page', String(nextPage))
     const query = params.toString()
     return query ? `/creator/campaigns?${query}` : '/creator/campaigns'
+  }
+
+  const SponsorAvatar = ({ clerkUserId, name }: { clerkUserId: string | null; name: string }) => {
+    const src = clerkUserId ? sponsorImages[clerkUserId] : undefined
+    if (!src) return null
+    return (
+      <Image
+        src={src}
+        alt={name}
+        width={20}
+        height={20}
+        className="inline-block h-5 w-5 rounded-full object-cover border border-white/15 align-middle mr-1"
+        unoptimized
+      />
+    )
   }
 
   return (
@@ -237,7 +261,8 @@ export default async function CreatorCampaignsPage({
                           Invited
                         </span>
                       </div>
-                      <p className="mt-0.5 text-xs text-[#a9abb5]">
+                      <p className="mt-0.5 flex items-center text-xs text-[#a9abb5]">
+                        <SponsorAvatar clerkUserId={c.sponsor.clerk_user_id} name={c.sponsor.company_name ?? 'Sponsor'} />
                         {c.sponsor.company_name ?? 'Sponsor'} ·{' '}
                         {c.platform.join(', ')}
                         {c.end_date ? ` · Ends: ${new Date(c.end_date).toLocaleDateString()}` : ''}
@@ -295,7 +320,8 @@ export default async function CreatorCampaignsPage({
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <span className="text-sm font-semibold text-[#e8f4ff] group-hover:text-[#f4fdff]">{c.title}</span>
-                      <p className="mt-0.5 text-xs text-[#a9abb5]">
+                      <p className="mt-0.5 flex items-center text-xs text-[#a9abb5]">
+                        <SponsorAvatar clerkUserId={c.sponsor.clerk_user_id} name={c.sponsor.company_name ?? 'Sponsor'} />
                         {c.sponsor.company_name ?? 'Sponsor'} ·{' '}
                         {c.platform.join(', ')}
                         {c.end_date ? ` · Ends: ${new Date(c.end_date).toLocaleDateString()}` : ''}
@@ -360,7 +386,8 @@ export default async function CreatorCampaignsPage({
                           </span>
                         )}
                       </div>
-                      <p className="mt-0.5 text-xs text-[#a9abb5]">
+                      <p className="mt-0.5 flex items-center text-xs text-[#a9abb5]">
+                        <SponsorAvatar clerkUserId={c.sponsor.clerk_user_id} name={c.sponsor.company_name ?? 'Sponsor'} />
                         {c.sponsor.company_name ?? 'Sponsor'} ·{' '}
                         {c.platform.join(', ')}
                         {c.end_date ? ` · Ends: ${new Date(c.end_date).toLocaleDateString()}` : ''}

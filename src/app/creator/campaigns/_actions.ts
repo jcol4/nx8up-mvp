@@ -97,7 +97,7 @@ export async function getOpenCampaigns(limit = 10) {
     orderBy: { created_at: 'desc' },
     take: limit,
     include: {
-      sponsor: { select: { company_name: true } },
+      sponsor: { select: { company_name: true, clerk_user_id: true } },
       _count: { select: { applications: true } },
     },
   })
@@ -121,7 +121,7 @@ export async function getOpenCampaignsWithEligibility(limit = 50) {
       orderBy: { created_at: 'desc' },
       take: limit,
       include: {
-        sponsor: { select: { company_name: true } },
+        sponsor: { select: { company_name: true, clerk_user_id: true } },
         _count: { select: { applications: true } },
       },
     }),
@@ -170,7 +170,7 @@ export async function getLaunchedCampaigns(limit = 50) {
     orderBy: { created_at: 'desc' },
     take: limit,
     include: {
-      sponsor: { select: { company_name: true } },
+      sponsor: { select: { company_name: true, clerk_user_id: true } },
       _count: { select: { applications: true } },
       ...(creator
         ? {
@@ -194,7 +194,7 @@ export async function getCampaignById(id: string) {
   return prisma.campaigns.findUnique({
     where: { id },
     include: {
-      sponsor: { select: { company_name: true } },
+      sponsor: { select: { company_name: true, clerk_user_id: true } },
       _count: { select: { applications: true } },
     },
   })
@@ -350,7 +350,7 @@ export async function getMyInvitations() {
     include: {
       campaign: {
         include: {
-          sponsor: { select: { company_name: true } },
+          sponsor: { select: { company_name: true, clerk_user_id: true } },
         },
       },
     },
