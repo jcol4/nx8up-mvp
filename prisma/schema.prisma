@@ -70,14 +70,6 @@ model content_creators {
   creator_size               String?
   stripe_connect_id          String?
   stripe_onboarding_complete Boolean                 @default(false)
-  steam_id                   String?                 @unique
-  steam_username             String?
-  steam_avatar_url           String?
-  steam_profile_url          String?
-  steam_profile_visibility   Int?
-  steam_top_games            Json?
-  steam_recent_games         Json?
-  steam_synced_at            DateTime?               @db.Timestamptz(6)
   applications               campaign_applications[]
 
   @@index([average_vod_views])
