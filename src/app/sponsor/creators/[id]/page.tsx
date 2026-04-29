@@ -38,8 +38,6 @@ export default async function SponsorCreatorDetailPage({
       audience_gender: true,
       audience_interests: true,
       is_available: true,
-      steam_id: true,
-      steam_username: true,
     },
   })
 
@@ -127,24 +125,6 @@ export default async function SponsorCreatorDetailPage({
                       {t}
                     </span>
                   )) : <span className="text-xs text-[#a9abb5]">—</span>}
-                </div>
-              </div>
-              <div className="sm:col-span-2">
-                <p className="text-xs uppercase tracking-wide text-[#a9abb5]">Steam</p>
-                <div className="mt-1.5">
-                  {creator.steam_id ? (
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 rounded border border-[#66c0f4]/35 bg-[#66c0f4]/10 px-2 py-0.5 text-xs text-[#bcdcf2]">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="#66c0f4">
-                          <path d="M12 0C5.373 0 0 5.373 0 12c0 5.083 3.166 9.426 7.626 11.166l-.082-.041 3.547-1.452a3.375 3.375 0 1 0 4.064-4.86l3.6-2.594.139.001a4.5 4.5 0 1 0-4.5-4.5v.054l-2.586 3.745a3.376 3.376 0 0 0-2.748.92L0 12c.001 6.627 5.373 12 12 12s12-5.373 12-12S18.627 0 12 0zm-2.18 17.85l-1.13.464a2.531 2.531 0 1 0 1.466-3.34l1.166-.484c1.288.504 1.913 1.967 1.387 3.275-.523 1.288-1.967 1.913-3.275 1.387l.386-.302zm9.105-7.34a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
-                        </svg>
-                        {creator.steam_username ?? 'Connected'}
-                      </span>
-                      <span className="font-mono text-[11px] text-[#a9abb5]">{creator.steam_id}</span>
-                    </div>
-                  ) : (
-                    <span className="text-xs text-[#a9abb5]">— Not connected</span>
-                  )}
                 </div>
               </div>
             </div>

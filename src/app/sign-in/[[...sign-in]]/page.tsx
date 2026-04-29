@@ -44,16 +44,16 @@
 'use client'
 
 import * as React from 'react'
-import { useSignIn } from '@clerk/nextjs'
+import { useSignIn, useClerk } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import type { EmailCodeFactor } from '@clerk/types'
 import { AuthLayout } from '@/components/layout'
-import { getUserRole } from '@/lib/get-role'
 import Image from 'next/image'
 
 export default function SignInPage() {
   const { isLoaded, signIn, setActive } = useSignIn()
+  const clerk = useClerk()
   const [identifier, setIdentifier] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [code, setCode] = React.useState('')
@@ -71,13 +71,12 @@ export default function SignInPage() {
    * to be set in the browser before the server action reads it.
    */
   // Fetch role from server action and redirect accordingly
-  const redirectByRole = async () => {
-    await new Promise(resolve => setTimeout(resolve, 150))
-    const role = await getUserRole()
-    if (role === 'admin') router.push('/admin')
-    else if (role === 'creator') router.push('/creator')
-    else if (role === 'sponsor') router.push('/sponsor')
-    else router.push('/')
+  const redirectByRole = () => {
+    const role = clerk.user?.publicMetadata?.role as string | undefined
+    if (role === 'admin') window.location.href = '/admin'
+    else if (role === 'creator') window.location.href = '/creator'
+    else if (role === 'sponsor') window.location.href = '/sponsor'
+    else window.location.href = '/'
   }
 
   /**
@@ -99,7 +98,7 @@ export default function SignInPage() {
     if (pendingSessionId && setActive) {
       await setActive({ session: pendingSessionId })
     }
-    await redirectByRole()
+    redirectByRole()
   }
 
   /**
@@ -118,12 +117,13 @@ export default function SignInPage() {
 
     try {
       const result = await signIn.create({ identifier: identifier.trim(), password })
-
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId })
-        // Move redirect outside the try/catch so router errors don't hit setError
+        redirectByRole()
+        return
       } else if (result.status === 'needs_second_factor') {
-        // ... MFA logic unchanged
+        await signIn.prepareSecondFactor({ strategy: 'email_code' })
+        setShowEmailCode(true)
       } else {
         setError('Sign-in requires additional steps. Please try again.')
       }
@@ -135,15 +135,12 @@ export default function SignInPage() {
       } else if (errCode === 'form_identifier_not_found') {
         setError('No account found with that email or username.')
       } else if (errCode) {
-        // Only show error if there's an actual Clerk error code
         setError(message || 'Something went wrong. Please try again.')
       }
     } finally {
       setIsLoading(false)
     }
 
-    // After try/catch completes, redirect if sign-in succeeded
-    await redirectByRole()
   }
 
   /**
@@ -166,8 +163,9 @@ export default function SignInPage() {
         code,
       })
       if (result.status === 'complete') {
-        setPendingSessionId(result.createdSessionId ?? null)
-        setShowOptOutPrompt(true)
+        await setActive({ session: result.createdSessionId })
+        redirectByRole()
+        return
       } else {
         setError('Verification incomplete. Please try again.')
       }

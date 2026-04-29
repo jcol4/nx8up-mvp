@@ -6,11 +6,10 @@
  * and Eligibility. Each panel has an "Edit" link that calls `onEditStep`
  * to jump to that step while setting `returnToSummary = true`.
  *
- * The summary pulls data from these sources:
+ * The summary pulls data from three sources:
  *  - `draft`          — all user-entered fields from steps 3–6.
  *  - `twitchInitial`  — Twitch connection state (passed from profile page).
  *  - `youtubeInitial` — YouTube connection state (passed from profile page).
- *  - `steamInitial`   — Steam connection state (passed from profile page).
  *  - `creatorStats`   — live platform stats (from DB, passed from profile page).
  *
  * `fmt()` is a local helper that formats large numbers to K/M notation.
@@ -41,15 +40,6 @@ type YouTubeData = {
   synced_at: Date | null
 }
 
-type SteamData = {
-  steam_id: string | null
-  username: string | null
-  profile_url: string | null
-  avatar_url: string | null
-  visibility: number | null
-  synced_at: Date | null
-}
-
 type CreatorStats = {
   twitch_username: string | null
   subs_followers: number | null
@@ -69,7 +59,6 @@ type Props = {
   draft: CreatorProfileDraft
   twitchInitial: TwitchData
   youtubeInitial: YouTubeData
-  steamInitial: SteamData
   creatorStats: CreatorStats
   onEditStep: (step: number) => void
   onFinish: () => void
@@ -125,7 +114,7 @@ function fmt(n: number | null | undefined): string | undefined {
   return n.toString()
 }
 
-export default function Step7Summary({ draft, twitchInitial, youtubeInitial, steamInitial, creatorStats, onEditStep, onFinish }: Props) {
+export default function Step7Summary({ draft, twitchInitial, youtubeInitial, creatorStats, onEditStep, onFinish }: Props) {
   const creatorTypeLabels = CREATOR_TYPE_OPTIONS
     .filter(o => draft.creator_types.includes(o.value))
     .map(o => o.label)
@@ -186,22 +175,6 @@ export default function Step7Summary({ draft, twitchInitial, youtubeInitial, ste
               )}
               {(youtubeInitial.channel_name || youtubeInitial.handle) && (
                 <span className="shrink-0 rounded border border-red-500/35 bg-red-500/10 px-1.5 py-0.5 text-[10px] text-red-300">Connected</span>
-              )}
-            </div>
-            <div className="border-t border-white/18" />
-            {/* Steam */}
-            <div className="flex items-center gap-2">
-              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="#66c0f4"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.083 3.166 9.426 7.626 11.166l-.082-.041 3.547-1.452a3.375 3.375 0 1 0 4.064-4.86l3.6-2.594.139.001a4.5 4.5 0 1 0-4.5-4.5v.054l-2.586 3.745a3.376 3.376 0 0 0-2.748.92L0 12c.001 6.627 5.373 12 12 12s12-5.373 12-12S18.627 0 12 0zm-2.18 17.85l-1.13.464a2.531 2.531 0 1 0 1.466-3.34l1.166-.484c1.288.504 1.913 1.967 1.387 3.275-.523 1.288-1.967 1.913-3.275 1.387l.386-.302zm9.105-7.34a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
-              {steamInitial.steam_id ? (
-                <div className="flex-1 min-w-0">
-                  <span className="text-xs text-[#e8f4ff] truncate block">{steamInitial.username ?? 'Steam User'}</span>
-                  <span className="text-[10px] text-[#8f97ab] font-mono">{steamInitial.steam_id}</span>
-                </div>
-              ) : (
-                <span className="text-xs text-[#8f97ab] italic">Not connected</span>
-              )}
-              {steamInitial.steam_id && (
-                <span className="shrink-0 rounded border border-[#66c0f4]/35 bg-[#66c0f4]/10 px-1.5 py-0.5 text-[10px] text-[#bcdcf2]">Connected</span>
               )}
             </div>
           </div>
