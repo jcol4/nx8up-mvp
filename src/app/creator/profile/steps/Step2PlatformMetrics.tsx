@@ -28,6 +28,12 @@ type CreatorStats = {
   youtube_member_count: number | null
   youtube_top_categories: string[]
   youtube_synced_at: Date | null
+  steam_id: string | null
+  steam_username: string | null
+  steam_profile_visibility: number | null
+  steam_top_games: unknown
+  steam_recent_games: unknown
+  steam_synced_at: Date | null
 }
 
 type Props = {

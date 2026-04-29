@@ -40,6 +40,15 @@ type YouTubeData = {
   synced_at: Date | null
 }
 
+type SteamData = {
+  steam_id: string | null
+  steam_username: string | null
+  steam_profile_url: string | null
+  steam_avatar_url: string | null
+  steam_profile_visibility: number | null
+  steam_synced_at: Date | null
+}
+
 type CreatorStats = {
   twitch_username: string | null
   subs_followers: number | null
@@ -53,12 +62,19 @@ type CreatorStats = {
   youtube_avg_views: number | null
   youtube_watch_time_hours: number | null
   youtube_synced_at: Date | null
+  steam_id: string | null
+  steam_username: string | null
+  steam_profile_visibility: number | null
+  steam_top_games: unknown
+  steam_recent_games: unknown
+  steam_synced_at: Date | null
 }
 
 type Props = {
   draft: CreatorProfileDraft
   twitchInitial: TwitchData
   youtubeInitial: YouTubeData
+  steamInitial: SteamData
   creatorStats: CreatorStats
   onEditStep: (step: number) => void
   onFinish: () => void
@@ -114,7 +130,7 @@ function fmt(n: number | null | undefined): string | undefined {
   return n.toString()
 }
 
-export default function Step7Summary({ draft, twitchInitial, youtubeInitial, creatorStats, onEditStep, onFinish }: Props) {
+export default function Step7Summary({ draft, twitchInitial, youtubeInitial, steamInitial: _steamInitial, creatorStats, onEditStep, onFinish }: Props) {
   const creatorTypeLabels = CREATOR_TYPE_OPTIONS
     .filter(o => draft.creator_types.includes(o.value))
     .map(o => o.label)

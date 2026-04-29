@@ -19,6 +19,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 import { getPlayerSummary, getOwnedGames, getRecentlyPlayedGames } from '@/lib/steam'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL!
@@ -140,8 +141,8 @@ export async function GET(req: NextRequest) {
       steam_profile_url: profile.profileUrl,
       steam_avatar_url: profile.avatarUrl,
       steam_profile_visibility: profile.communityVisibilityState,
-      steam_top_games: topGames ?? undefined,
-      steam_recent_games: recentGames ?? undefined,
+      steam_top_games: (topGames ?? undefined) as Prisma.InputJsonValue | undefined,
+      steam_recent_games: (recentGames ?? undefined) as Prisma.InputJsonValue | undefined,
       steam_synced_at: new Date(),
       language: [],
       platform: [],
@@ -162,8 +163,8 @@ export async function GET(req: NextRequest) {
       steam_profile_url: profile.profileUrl,
       steam_avatar_url: profile.avatarUrl,
       steam_profile_visibility: profile.communityVisibilityState,
-      steam_top_games: topGames ?? undefined,
-      steam_recent_games: recentGames ?? undefined,
+      steam_top_games: (topGames ?? undefined) as Prisma.InputJsonValue | undefined,
+      steam_recent_games: (recentGames ?? undefined) as Prisma.InputJsonValue | undefined,
       steam_synced_at: new Date(),
       updated_at: new Date(),
     },
