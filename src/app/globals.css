@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../styles/creator-hud-theme.css";
 
 :root {
   --background: #ffffff;
@@ -65,10 +66,12 @@ body {
   border: 1px solid rgba(0, 200, 255, 0.18) !important;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
 }
+
 .cl-userButtonPopoverCard .cl-userPreviewMainIdentifier,
 .cl-userButtonPopoverCard .cl-userPreviewSecondaryIdentifier {
   color: #ffffff !important;
 }
+
 .cl-userButtonPopoverCard .cl-menuList,
 .cl-userButtonPopoverCard [data-localization-key],
 .cl-userButtonPopoverCard button,
@@ -77,46 +80,89 @@ body {
 .cl-userButtonPopoverCard .cl-menuButton {
   color: #ffffff !important;
 }
+
 .cl-userButtonPopoverCard button svg,
 .cl-userButtonPopoverCard .cl-menuButton svg {
   color: #ffffff !important;
   fill: #ffffff !important;
 }
+
 .cl-userButtonPopoverCard button:hover,
 .cl-userButtonPopoverCard .cl-menuButton:hover {
   background: rgba(0, 200, 255, 0.08) !important;
   color: #00c8ff !important;
 }
+
 .cl-userButtonPopoverCard button:hover svg,
 .cl-userButtonPopoverCard .cl-menuButton:hover svg {
   color: #00c8ff !important;
   fill: #00c8ff !important;
 }
+
 .cl-userButtonPopoverCard .cl-footer {
   display: none !important;
 }
+
 .cl-modalContent,
 .cl-profileSection {
   background: #0a1223 !important;
   color: #c8dff0 !important;
   border-color: rgba(0, 200, 255, 0.18) !important;
 }
+
 .cl-formFieldInput,
 .cl-formFieldInput input {
   background: rgba(0, 200, 255, 0.05) !important;
   border-color: rgba(0, 200, 255, 0.18) !important;
   color: #c8dff0 !important;
 }
+
 .cl-profileSectionTitle {
   color: #e8f4ff !important;
 }
+
 .cl-formFieldLabel {
   color: #4a6080 !important;
 }
+
 .cl-navbarButton {
   color: #c8dff0 !important;
 }
+
 .cl-navbarButton:hover {
   background: rgba(0, 200, 255, 0.08) !important;
   color: #00c8ff !important;
+}
+
+/* Ensure Clerk avatar upload controls are clearly visible on dark modal */
+.cl-profileSection .cl-avatarImageActionsUpload,
+.cl-profileSection .cl-avatarImageActionsRemove,
+.cl-profileSection [class*="avatarImageActions"] button,
+.cl-profileSection [class*="avatarImageActions"] a,
+.cl-profileSection [class*="avatarImageHint"],
+.cl-profileSection [class*="avatarImage"] [class*="text"] {
+  color: #ffffff !important;
+}
+
+.cl-profileSection .cl-avatarImageActionsRemove {
+  color: #ef4444 !important;
+}
+
+/* Force Clerk "Remove" action red in all render variants */
+.cl-profileSection [data-localization-key*="remove" i] {
+  color: #ef4444 !important;
+}
+
+.cl-profileSection [class*="avatarImageActionsRemove"],
+.cl-profileSection [class*="avatarImageActionsRemove"] *,
+.cl-profileSection button:has([data-localization-key*="remove" i]),
+.cl-profileSection a:has([data-localization-key*="remove" i]) {
+  color: #ef4444 !important;
+  -webkit-text-fill-color: #ef4444 !important;
+}
+
+.cl-profileSection button:has([data-localization-key*="remove" i]) span,
+.cl-profileSection a:has([data-localization-key*="remove" i]) span {
+  color: #ef4444 !important;
+  -webkit-text-fill-color: #ef4444 !important;
 }

@@ -1,55 +1,27 @@
-/**
- * Admin section root layout (`/admin/**`).
- *
- * Responsibilities:
- *  1. **Auth guard** – reads Clerk `sessionClaims.metadata.role`; redirects to
- *     `/` if the caller is not an admin. This is the single enforcement point
- *     for the entire `/admin` subtree.
- *  2. **Stats prefetch** – fetches aggregate counts (total creators, sponsors,
- *     and active campaigns) from Prisma in a single `Promise.all` to populate
- *     the sidebar's "Platform Overview" widget.
- *  3. **Shell** – wraps all admin pages with `DashboardStyles`, `AdminSidebar`,
- *     and `AdminHeader`.
- *
- * External services: Clerk (auth), Prisma (DB).
- *
- * Gotcha: `SECTION_NAV_ITEMS` defined here differ from the duplicate constant
- * inside `AdminSidebar.tsx`. The layout passes its own array as a prop, so the
- * sidebar's local constant is silently overridden.
- */
 import type { Metadata } from 'next'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
+import { Inter, Space_Grotesk } from 'next/font/google'
 import DashboardStyles from '@/components/dashboard/DashboardStyles'
-import AdminSidebar from './AdminSidebar'
-import { prisma } from '@/lib/prisma'
-import AdminHeader from './AdminHeader'
+import AdminHeader from './_components/AdminHeader'
+import RoleLayoutShell from '@/components/nx-shell/RoleLayoutShell'
+import NxHudBackground from '@/components/nx-shell/NxHudBackground'
+import type { SidebarNavGroup, SidebarNavItem } from '@/components/nx-shell/RoleSidebar'
 
 export const metadata: Metadata = {
   title: 'Admin Hub | nx8up',
   description: 'Admin dashboard',
 }
 
-const SECTION_NAV_ITEMS = [
-  { href: '/creator', label: 'Creator' },
-  { href: '/sponsor', label: 'Sponsor' },
-  { href: '/admin', label: 'Admin' },
-]
+const inter = Inter({
+  variable: '--font-body',
+  subsets: ['latin'],
+})
 
-const NAV_ITEMS = [
-  { href: '/admin', label: 'Dashboard' },
-  { href: '/admin/campaigns', label: 'Campaigns' },
-  { href: '/admin/verification-queue', label: 'Verification Queue' },
-  { href: '/admin/disputes', label: 'Disputes' },
-  { href: '/admin/applications', label: 'Applications' },
-  { href: '/admin/reports', label: 'Reports' },
-  { href: '/admin/academy', label: 'Academy' },
-  { href: '/admin/surveys', label: 'Surveys' },
-  { href: '/admin/users', label: 'Users' },
-  { href: '/admin/steam-lookup', label: 'Steam Lookup' },
-  { href: '/admin/profile', label: 'Profile' },
-  { href: '/admin/settings/notifications', label: 'Notifications' },
-]
+const spaceGrotesk = Space_Grotesk({
+  variable: '--font-headline',
+  subsets: ['latin'],
+})
 
 export default async function AdminLayout({
   children,
@@ -59,35 +31,77 @@ export default async function AdminLayout({
   const { sessionClaims } = await auth()
   const role = (sessionClaims?.metadata as { role?: string })?.role
   if (role !== 'admin') redirect('/')
-
-  const [totalCreators, totalSponsors, activeCampaigns] = await Promise.all([
-    prisma.content_creators.count(),
-    prisma.sponsors.count(),
-    prisma.campaigns.count({ where: { status: 'active' } }),
-  ])
-
-  const stats = {
-    totalUsers: totalCreators + totalSponsors,
-    totalCreators,
-    totalSponsors,
-    activeCampaigns,
-  }
+  const navGroups: SidebarNavGroup[] = [
+    {
+      title: 'Sections',
+      items: [
+        { href: '/admin', label: 'Admin', icon: 'verification' },
+        { href: '/creator', label: 'Creator', icon: 'creators' },
+        { href: '/sponsor', label: 'Sponsor', icon: 'payouts' },
+      ],
+    },
+    {
+      title: 'Admin',
+      items: [
+        { href: '/admin', label: 'Dashboard', icon: 'dashboard', exact: true },
+        { href: '/admin/users', label: 'Users', icon: 'users' },
+        { href: '/admin/campaigns', label: 'Campaigns', icon: 'campaigns' },
+        { href: '/admin/verification-queue', label: 'Verification Queue', icon: 'verification' },
+        { href: '/admin/disputes', label: 'Disputes', icon: 'reports' },
+        { href: '/admin/applications', label: 'Applications', icon: 'applications' },
+        { href: '/admin/reports', label: 'Reports', icon: 'reports' },
+        { href: '/admin/academy', label: 'Academy', icon: 'academy' },
+        { href: '/admin/surveys', label: 'Surveys', icon: 'academy' },
+        { href: '/admin/steam-lookup', label: 'Steam Lookup', icon: 'creators' },
+        { href: '/admin/profile', label: 'Profile', icon: 'profile' },
+      ],
+    },
+    {
+      title: 'Notifications',
+      borderTop: true,
+      items: [
+        { href: '/admin/settings/notifications', label: 'Preferences', icon: 'notifications' },
+      ],
+    },
+  ]
+  const collapsedNavItems: SidebarNavItem[] = [
+    { href: '/admin', label: 'Admin', icon: 'verification' },
+    { href: '/creator', label: 'Creator', icon: 'creators' },
+    { href: '/sponsor', label: 'Sponsor', icon: 'payouts' },
+    { href: '/admin', label: 'Dashboard', icon: 'dashboard', exact: true },
+    { href: '/admin/users', label: 'Users', icon: 'users' },
+    { href: '/admin/campaigns', label: 'Campaigns', icon: 'campaigns' },
+    { href: '/admin/verification-queue', label: 'Verification', icon: 'verification' },
+    { href: '/admin/disputes', label: 'Disputes', icon: 'reports' },
+    { href: '/admin/reports', label: 'Reports', icon: 'reports' },
+    { href: '/admin/surveys', label: 'Surveys', icon: 'academy' },
+    { href: '/admin/settings/notifications', label: 'Alerts', icon: 'notifications' },
+  ]
+  const statsRows = [
+    { label: 'Total users', value: '—' },
+    { label: 'Creators', value: '—', valueClassName: 'font-semibold text-[#7b4fff]' },
+    { label: 'Sponsors', value: '—', valueClassName: 'font-semibold text-[#00c8ff]' },
+    { label: 'Active campaigns', value: '—' },
+  ]
 
   return (
     <>
       <DashboardStyles />
-      <div className="dash-root">
-        <div className="relative z-10 flex min-h-screen">
-          <AdminSidebar
-            sectionNavItems={SECTION_NAV_ITEMS}
-            navItems={NAV_ITEMS}
-            stats={stats}
-          />
-        <main className="flex-1 flex flex-col min-w-0">
+      <div className={`creator-hud dash-root relative isolate ${inter.variable} ${spaceGrotesk.variable}`}>
+        <NxHudBackground />
+        <RoleLayoutShell
+          homeHref="/admin"
+          navGroups={navGroups}
+          collapsedNavItems={collapsedNavItems}
+          statsTitle="Platform Overview"
+          statsRows={statsRows}
+          animateContentOffset={false}
+        >
           <AdminHeader />
-          {children}
-        </main>
-        </div>
+          <div className="pt-4">
+            {children}
+          </div>
+        </RoleLayoutShell>
       </div>
     </>
   )

@@ -1,33 +1,34 @@
-/**
- * Sponsor Deal Room list page — /sponsor/deal-room
- *
- * Shows all accepted creator applications for the sponsor's launched campaigns,
- * grouped by campaign. Each row displays the creator handle, platform, deadline,
- * and current submission status.
- *
- * Status labels intentionally obscure early review stages from the sponsor:
- * - `pending` / `submitted` / `admin_rejected` all show "Under review" or
- *   "Awaiting submission" — the sponsor cannot see the submission until an admin
- *   has verified it (`admin_verified`).
- *
- * Data is fetched via `getSponsorDealRooms` which filters to `accepted` applications
- * on `launched` campaigns only.
- *
- * External services: Clerk (auth, via _actions).
- */
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { auth } from '@clerk/nextjs/server'
-import SponsorHeader from '../SponsorHeader'
+import SponsorHeader from '../_components/dashboard/SponsorHeader'
 import { getSponsorDealRooms } from './_actions'
 
 const SUBMISSION_STATUS: Record<string, { label: string; className: string }> = {
-  pending:            { label: 'Awaiting submission',  className: 'bg-[#94a3b8]/20 text-[#94a3b8]' },
-  submitted:          { label: 'Under review',         className: 'bg-[#94a3b8]/20 text-[#94a3b8]' },
-  admin_rejected:     { label: 'Under review',         className: 'bg-[#94a3b8]/20 text-[#94a3b8]' },
-  admin_verified:     { label: 'Needs your review',    className: 'bg-yellow-500/20 text-yellow-400' },
-  approved:           { label: 'Approved',             className: 'bg-green-500/20 text-green-400' },
-  revision_requested: { label: 'Revision requested',   className: 'bg-orange-500/20 text-orange-400' },
+  pending: {
+    label: 'Awaiting submission',
+    className: 'border border-white/10 bg-white/10 text-[#a9abb5]',
+  },
+  submitted: {
+    label: 'Under review',
+    className: 'border border-white/10 bg-white/10 text-[#a9abb5]',
+  },
+  admin_rejected: {
+    label: 'Under review',
+    className: 'border border-white/10 bg-white/10 text-[#a9abb5]',
+  },
+  admin_verified: {
+    label: 'Needs your review',
+    className: 'border border-yellow-500/25 bg-yellow-500/15 text-yellow-300',
+  },
+  approved: {
+    label: 'Approved',
+    className: 'border border-green-500/30 bg-green-500/15 text-green-300',
+  },
+  revision_requested: {
+    label: 'Revision requested',
+    className: 'border border-orange-500/30 bg-orange-500/15 text-orange-300',
+  },
 }
 
 export default async function SponsorDealRoomPage() {
@@ -51,32 +52,36 @@ export default async function SponsorDealRoomPage() {
   return (
     <>
       <SponsorHeader />
-      <div className="flex-1 p-6 overflow-auto">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-6">
-            <h1 className="text-xl font-semibold dash-text-bright mb-1">Deal Room</h1>
-            <p className="dash-text-muted text-sm">
+      <div className="flex-1 overflow-auto p-6 sm:p-8">
+        <div className="mx-auto max-w-4xl">
+          <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
+            <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Deals</p>
+            <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Deal Room</h1>
+            <p className="mt-1 text-sm text-[#a9abb5]">
               Review content submissions from your accepted creators.
             </p>
           </div>
 
           {applications.length === 0 ? (
-            <div className="dash-panel p-8 text-center dash-text-muted">
-              <p className="mb-2">No active deals yet.</p>
-              <p className="text-xs">
+            <div className="dash-panel dash-panel--nx-top rounded-xl p-8 text-center text-[#a9abb5]">
+              <p className="mb-2 text-[#e8f4ff]">No active deals yet.</p>
+              <p className="text-xs leading-relaxed">
                 Once you launch a campaign with accepted creators, their deal rooms will appear here.
               </p>
-              <Link href="/sponsor/campaigns" className="inline-block mt-4 text-sm dash-accent hover:underline">
+              <Link
+                href="/sponsor/campaigns"
+                className="mt-4 inline-block text-sm font-medium text-[#99f7ff] underline-offset-2 hover:underline"
+              >
                 View campaigns
               </Link>
             </div>
           ) : (
             <div className="space-y-6">
               {Object.values(grouped).map(({ campaignTitle, campaignId, items }) => (
-                <div key={campaignId}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h2 className="text-sm font-semibold dash-text-bright">{campaignTitle}</h2>
-                    <span className="text-xs dash-text-muted">
+                <div key={campaignId} className="dash-panel dash-panel--nx-top rounded-xl p-4 sm:p-5">
+                  <div className="mb-3 flex items-center gap-2">
+                    <h2 className="font-headline text-base font-semibold text-[#e8f4ff]">{campaignTitle}</h2>
+                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-[#a9abb5]">
                       {items.length} creator{items.length !== 1 ? 's' : ''}
                     </span>
                   </div>
@@ -94,11 +99,11 @@ export default async function SponsorDealRoomPage() {
                         <Link
                           key={app.id}
                           href={`/sponsor/deal-room/${app.id}`}
-                          className="flex items-center justify-between gap-3 p-4 dash-panel hover:border-[rgba(0,200,255,0.25)] transition-colors"
+                          className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/20 p-4 transition-colors hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/[0.04]"
                         >
                           <div className="min-w-0 flex-1">
-                            <p className="text-sm dash-text-bright font-medium">{handle}</p>
-                            <p className="text-xs dash-text-muted mt-0.5">
+                            <p className="text-sm font-medium text-[#e8f4ff]">{handle}</p>
+                            <p className="mt-0.5 text-xs text-[#a9abb5]">
                               {app.creator.platform.join(', ')}
                               {app.campaign.end_date
                                 ? ` · Deadline: ${new Date(app.campaign.end_date).toLocaleDateString()}`
@@ -106,10 +111,10 @@ export default async function SponsorDealRoomPage() {
                             </p>
                           </div>
                           <div className="flex items-center gap-3 shrink-0">
-                            <span className={`text-xs px-2 py-0.5 rounded ${subStatus.className}`}>
+                            <span className={`rounded-md px-2 py-0.5 text-xs ${subStatus.className}`}>
                               {subStatus.label}
                             </span>
-                            <span className="text-xs dash-text-muted">Review →</span>
+                            <span className="text-xs font-medium text-[#99f7ff]">Review →</span>
                           </div>
                         </Link>
                       )

@@ -1,16 +1,3 @@
-/**
- * RetryPayoutButton — client component that lets the sponsor manually retry a
- * failed Stripe payout for an approved submission.
- *
- * Shown in the deal room detail page when the submission is `approved` but
- * `payout_status` is not 'paid' (e.g., the automatic payout attempt failed due
- * to a missing charge ID or Stripe error).
- *
- * On success, replaces itself with a green "Payout sent successfully" confirmation.
- * On failure, shows the error message from `retryPayout` in red below the button.
- *
- * Uses `useTransition` for the pending state to avoid blocking the UI.
- */
 'use client'
 
 import { useState, useTransition } from 'react'

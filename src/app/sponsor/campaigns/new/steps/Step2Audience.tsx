@@ -1,18 +1,3 @@
-/**
- * Step 2 — Audience
- *
- * Collects audience targeting criteria:
- * - Age range (min/max) via a custom AgeStepper component with +/− buttons.
- *   When `sponsorAgeRestriction` is set (18+ or 21+), the minimum selectable
- *   age is floored to the restriction value and a warning banner is shown.
- * - Gender targeting (multi-select: Male / Female / All).
- * - Required audience countries (multi-select from AUDIENCE_LOCATIONS).
- * - Target cities (free-text, optional).
- * - Target interests / game categories (free-text tag input with Enter/Add button).
- *
- * All fields are optional from a wizard-flow perspective (Step 2 has no
- * `validateStep` rules in the parent form).
- */
 'use client'
 
 import { useState } from 'react'
@@ -23,11 +8,6 @@ import {
   GENDERS, AUDIENCE_LOCATIONS,
 } from '../_shared'
 
-/**
- * AgeStepper — a number input with increment/decrement buttons, used for setting
- * the audience age range. Clamps the value to [min, max] on each interaction.
- * Accepts an empty string as a valid (unset) state.
- */
 function AgeStepper({
   value,
   onChange,
@@ -51,7 +31,7 @@ function AgeStepper({
     if (num < max) onChange(String(num + 1))
   }
   const btnClass =
-    'w-8 h-8 flex items-center justify-center rounded-lg border dash-border dash-text-muted hover:text-[#c8dff0] hover:border-[rgba(0,200,255,0.35)] hover:bg-[rgba(0,200,255,0.05)] transition-all select-none shrink-0'
+    'w-8 h-8 flex items-center justify-center rounded-lg border dash-border dash-text-muted hover:text-[#c8dff0] hover:border-[rgba(153,247,255,0.35)] hover:bg-[rgba(153,247,255,0.05)] transition-all select-none shrink-0'
 
   return (
     <div className="flex items-center gap-1.5">
@@ -72,7 +52,7 @@ function AgeStepper({
         placeholder={placeholder}
         min={min}
         max={max}
-        className="w-14 text-center px-2 py-1.5 rounded-lg border dash-border dash-bg-inner dash-text text-sm focus:outline-none focus:ring-1 focus:ring-[#00c8ff]/50 hover:border-[rgba(0,200,255,0.3)] transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        className="w-14 text-center px-2 py-1.5 rounded-lg border dash-border dash-bg-inner dash-text text-sm focus:outline-none focus:ring-1 focus:ring-[#99f7ff]/50 hover:border-[rgba(153,247,255,0.3)] transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
       />
       <button type="button" onClick={increment} className={btnClass} aria-label="Increase">
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
@@ -205,7 +185,7 @@ export default function Step2Audience({ draft, setDraft, onNext, onBack, sponsor
 
         <div className="flex flex-wrap gap-1.5 mb-2">
           {draft.target_interests.map(t => (
-            <span key={t} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#00c8ff]/20 text-[#00c8ff] text-sm">
+            <span key={t} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#99f7ff]/20 text-[#99f7ff] text-sm">
               {t}
               <button
                 type="button"
@@ -234,7 +214,7 @@ export default function Step2Audience({ draft, setDraft, onNext, onBack, sponsor
           <button
             type="button"
             onClick={addInterest}
-            className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 border dash-border dash-text-muted hover:text-[#c8dff0] hover:border-[rgba(0,200,255,0.35)] hover:bg-[rgba(0,200,255,0.05)]"
+            className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 border dash-border dash-text-muted hover:text-[#c8dff0] hover:border-[rgba(153,247,255,0.35)] hover:bg-[rgba(153,247,255,0.05)]"
           >
             Add
           </button>
@@ -245,7 +225,7 @@ export default function Step2Audience({ draft, setDraft, onNext, onBack, sponsor
         <button type="button" onClick={onBack} className="py-2.5 px-5 rounded-lg border dash-border dash-text-muted text-sm font-medium hover:text-[#c8dff0] transition-colors">
           Back
         </button>
-        <button type="button" onClick={onNext} className="py-2.5 px-6 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 transition-opacity">
+        <button type="button" onClick={onNext} className="py-2.5 px-6 rounded-lg bg-[#99f7ff] text-slate-900 text-sm font-semibold hover:opacity-90 transition-opacity">
           Next
         </button>
       </div>

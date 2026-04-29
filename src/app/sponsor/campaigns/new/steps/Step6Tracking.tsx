@@ -1,16 +1,3 @@
-/**
- * Step 6 — Tracking
- *
- * Collects optional conversion tracking configuration:
- * - Landing page URL — the destination sponsors want creators to drive traffic to.
- *   When set and the campaign has accepted creators, a unique short tracking URL
- *   is auto-generated per creator (see setApplicationStatus in campaigns/_actions.ts).
- * - Tracking type — unique link, promo code, or both.
- * - Conversion goal — purchase, sign-up, app install, or awareness only.
- *
- * All three fields are optional; the step has no validation rules in the parent
- * wizard. Sponsors can skip this step entirely if they don't need click tracking.
- */
 'use client'
 
 import FormInput from '@/components/ui/FormInput'
@@ -56,11 +43,11 @@ export default function Step6Tracking({ draft, setDraft, onNext, onBack }: Props
               onClick={() => set('tracking_type', tt.value)}
               className={`flex flex-col gap-1 p-3 rounded-lg border text-left transition-all duration-150 ${
                 draft.tracking_type === tt.value
-                  ? 'border-[#00c8ff] bg-[rgba(0,200,255,0.06)] shadow-[0_0_14px_rgba(0,200,255,0.15)]'
-                  : 'dash-border hover:border-[rgba(0,200,255,0.3)] hover:bg-[rgba(0,200,255,0.03)]'
+                  ? 'border-[#99f7ff] bg-[rgba(153,247,255,0.06)] shadow-[0_0_14px_rgba(153,247,255,0.15)]'
+                  : 'dash-border hover:border-[rgba(153,247,255,0.3)] hover:bg-[rgba(153,247,255,0.03)]'
               }`}
             >
-              <p className={`text-sm font-semibold ${draft.tracking_type === tt.value ? 'text-[#00c8ff]' : 'dash-text-bright'}`}>
+              <p className={`text-sm font-semibold ${draft.tracking_type === tt.value ? 'text-[#99f7ff]' : 'dash-text-bright'}`}>
                 {tt.label}
               </p>
               <p className="text-xs dash-text-muted">{tt.description}</p>
@@ -80,11 +67,11 @@ export default function Step6Tracking({ draft, setDraft, onNext, onBack }: Props
               onClick={() => set('conversion_goal', cg.value)}
               className={`flex flex-col items-center p-3 rounded-lg border text-center transition-all duration-150 ${
                 draft.conversion_goal === cg.value
-                  ? 'border-[#00c8ff] bg-[rgba(0,200,255,0.06)] shadow-[0_0_14px_rgba(0,200,255,0.15)]'
-                  : 'dash-border hover:border-[rgba(0,200,255,0.3)] hover:bg-[rgba(0,200,255,0.03)]'
+                  ? 'border-[#99f7ff] bg-[rgba(153,247,255,0.06)] shadow-[0_0_14px_rgba(153,247,255,0.15)]'
+                  : 'dash-border hover:border-[rgba(153,247,255,0.3)] hover:bg-[rgba(153,247,255,0.03)]'
               }`}
             >
-              <p className={`text-sm font-semibold ${draft.conversion_goal === cg.value ? 'text-[#00c8ff]' : 'dash-text-bright'}`}>
+              <p className={`text-sm font-semibold ${draft.conversion_goal === cg.value ? 'text-[#99f7ff]' : 'dash-text-bright'}`}>
                 {cg.label}
               </p>
             </button>
@@ -96,7 +83,7 @@ export default function Step6Tracking({ draft, setDraft, onNext, onBack }: Props
         <button type="button" onClick={onBack} className="py-2.5 px-5 rounded-lg border dash-border dash-text-muted text-sm font-medium hover:text-[#c8dff0] transition-colors">
           ← Back
         </button>
-        <button type="button" onClick={onNext} className="py-2.5 px-6 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 transition-opacity">
+        <button type="button" onClick={onNext} className="py-2.5 px-6 rounded-lg bg-[#99f7ff] text-slate-900 text-sm font-semibold hover:opacity-90 transition-opacity">
           Review →
         </button>
       </div>

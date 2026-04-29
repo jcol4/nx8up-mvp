@@ -35,10 +35,14 @@ import InviteResponseButtons from '@/components/creator/InviteResponseButtons'
 import { prisma } from '@/lib/prisma'
 import { matchCreatorToCampaign } from '@/lib/matching'
 import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
+import { getUserDisplayInfo } from '@/lib/get-user-display-info'
+import CreatorShell from '@/components/creator/CreatorShell'
+import NxHudCard from '@/components/nx-shell/NxHudCard'
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const { userId } = await auth()
+  const [{ userId, sessionClaims }, { displayName, username }] = await Promise.all([auth(), getUserDisplayInfo()])
+  const role = (sessionClaims?.metadata as { role?: string } | undefined)?.role
 
   const [campaign, myApplication, creatorProfile] = await Promise.all([
     getCampaignById(id),
@@ -117,6 +121,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
     campaign.tracking_type
 
   return (
+    <CreatorShell>
     <main className="max-w-5xl mx-auto p-6 sm:p-8 space-y-6">
       {/* Back link */}
       <Link
@@ -134,7 +139,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
         <div className="lg:col-span-2 space-y-4">
 
           {/* Header card */}
-          <div className="cr-panel p-5 sm:p-6">
+          <NxHudCard as="div" className="p-5 sm:p-6">
             <div className="flex flex-wrap gap-1.5 mb-4">
               {campaign.platform.map((p: string) => (
                 <span key={p} className="text-[11px] px-2 py-0.5 rounded-full bg-[#22c55e]/10 text-[#22c55e] font-medium border border-[#22c55e]/20">
@@ -166,11 +171,11 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 ))}
               </div>
             )}
-          </div>
+          </NxHudCard>
 
           {/* Campaign Brief */}
           {hasBrief && (
-            <div className="cr-panel p-5">
+            <NxHudCard as="div" className="p-5">
               <h2 className="cr-panel-title mb-4">Campaign Brief</h2>
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
                 {campaign.objective && (
@@ -210,12 +215,12 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                   </div>
                 )}
               </dl>
-            </div>
+            </NxHudCard>
           )}
 
           {/* Content Deliverables */}
           {hasDeliverables && (
-            <div className="cr-panel p-5">
+            <NxHudCard as="div" className="p-5">
               <h2 className="cr-panel-title mb-4">Content Deliverables</h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {campaign.num_videos != null && campaign.num_videos > 0 && (
@@ -270,12 +275,12 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                   </div>
                 </div>
               )}
-            </div>
+            </NxHudCard>
           )}
 
           {/* Content Requirements */}
           {hasContentReqs && (
-            <div className="cr-panel p-5">
+            <NxHudCard as="div" className="p-5">
               <h2 className="cr-panel-title mb-4">Content Requirements</h2>
               {campaign.content_guidelines && (
                 <p className="text-sm cr-text leading-relaxed mb-4">{campaign.content_guidelines}</p>
@@ -315,12 +320,12 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                   </div>
                 )}
               </div>
-            </div>
+            </NxHudCard>
           )}
 
           {/* Requirements */}
           {hasRequirements && (
-            <div className="cr-panel p-5">
+            <NxHudCard as="div" className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="cr-panel-title mb-0">Creator Requirements</h2>
                 {creatorProfile && (
@@ -399,13 +404,13 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                   </ul>
                 </div>
               )}
-            </div>
+            </NxHudCard>
           )}
         </div>
 
         {/* ── Sidebar ── */}
-        <div className="space-y-4">
-          <div className="cr-panel p-5">
+        <div className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+          <NxHudCard as="div" className="p-5">
             {campaign.budget != null && (() => {
               const { fee, creatorPool, perCreator } = calcFeeBreakdown(campaign.budget, campaign.creator_count)
               return (
@@ -483,12 +488,12 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 </li>
               )}
             </ul>
-          </div>
+          </NxHudCard>
         </div>
       </div>
 
       {/* ── Full-width Apply panel ── */}
-      <div className="cr-panel px-6 py-4">
+      <NxHudCard as="div" className="px-6 py-4">
         {myApplication?.status === 'invited' ? (
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -535,7 +540,8 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             legalAgeRestriction={campaign.legal_age_restriction ?? null}
           />
         )}
-      </div>
+      </NxHudCard>
     </main>
+    </CreatorShell>
   )
 }

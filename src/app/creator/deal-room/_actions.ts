@@ -83,6 +83,7 @@ export async function getMyDealRooms() {
           end_date: true,
           budget: true,
           creator_count: true,
+          platform: true,
         },
       },
       deal_submission: {

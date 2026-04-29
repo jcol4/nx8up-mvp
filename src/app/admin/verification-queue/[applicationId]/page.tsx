@@ -1,35 +1,9 @@
-/**
- * Admin Verification Queue detail page
- * (`/admin/verification-queue/[applicationId]`).
- *
- * Full review view for a single `deal_submissions` record. Displays:
- *  - Submission header: campaign title, creator handle, sponsor, status badge,
- *    and campaign deadline.
- *  - Creator submission details: proof URLs, screenshot, posted-at timestamp,
- *    disclosure confirmation, and submitted-at timestamp.
- *  - Campaign requirements panel: deliverable counts and content guidelines,
- *    with `video_includes` items mapped to human-readable labels via
- *    `DELIVERABLE_LABELS`.
- *  - **If pending**: `AdminReviewButtons` with notes textarea and
- *    approve/reject buttons.
- *  - **If already reviewed**: static outcome banner (approved/rejected) with
- *    optional sponsor notes.
- *
- * Returns a 404 if no submission exists for the given `applicationId`.
- *
- * External services: Clerk (auth), Prisma (via `getAdminDealRoomSubmission`).
- *
- * Gotcha: the "already reviewed" state displays `sub.sponsor_notes` (the
- * sponsor's notes) rather than `sub.admin_notes`. If the sponsor has not yet
- * added notes this will be blank even when the admin left a note.
- */
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import { getAdminDealRoomSubmission } from '../_actions'
 import AdminReviewButtons from './AdminReviewButtons'
 
-/** Human-readable labels for `video_includes` deliverable keys. */
 const DELIVERABLE_LABELS: Record<string, string> = {
   gameplay_footage: 'Gameplay footage',
   facecam: 'Facecam',
@@ -67,11 +41,11 @@ export default async function AdminDealRoomDetailPage({
   const isPendingReview = sub.status === 'submitted'
 
   return (
-    <div className="flex-1 p-6 overflow-auto">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="flex-1 overflow-auto p-6 sm:p-8">
+      <div className="mx-auto max-w-6xl space-y-6">
         <Link
           href="/admin/verification-queue"
-          className="inline-flex items-center gap-1.5 text-xs dash-text-muted hover:text-[#c8dff0] transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-md border border-white/12 bg-black/20 px-2.5 py-1 text-[11px] text-[#a9abb5] transition-colors hover:border-[#99f7ff]/30 hover:text-[#99f7ff]"
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -80,7 +54,7 @@ export default async function AdminDealRoomDetailPage({
         </Link>
 
         {/* Header */}
-        <div className="dash-panel p-5">
+        <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -111,7 +85,7 @@ export default async function AdminDealRoomDetailPage({
         </div>
 
         {/* Submission Details */}
-        <div className="dash-panel p-5">
+        <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-5">
           <h2 className="dash-panel-title mb-4">Creator Submission</h2>
           <dl className="space-y-4">
             {sub.proof_urls.length > 0 && (
@@ -166,7 +140,7 @@ export default async function AdminDealRoomDetailPage({
         </div>
 
         {/* Campaign requirements for reference */}
-        <div className="dash-panel p-5">
+        <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-5">
           <h2 className="dash-panel-title mb-4">Campaign Requirements</h2>
           <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             {c.num_videos ? (
@@ -218,14 +192,14 @@ export default async function AdminDealRoomDetailPage({
 
         {/* Admin Review */}
         {isPendingReview && (
-          <div className="dash-panel p-5">
+          <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-5">
             <h2 className="dash-panel-title mb-4">Admin Decision</h2>
             <AdminReviewButtons applicationId={applicationId} />
           </div>
         )}
 
         {!isPendingReview && (
-          <div className={`dash-panel p-4 border ${sub.status === 'admin_verified' ? 'border-[#00c8ff]/30' : 'border-red-500/20'}`}>
+          <div className={`glass-panel interactive-panel rounded-xl p-4 border ${sub.status === 'admin_verified' ? 'border-[#00c8ff]/30' : 'border-red-500/20'}`}>
             <p className={`text-sm font-semibold ${sub.status === 'admin_verified' ? 'text-[#00c8ff]' : 'text-red-400'}`}>
               {sub.status === 'admin_verified' ? 'Approved — forwarded to sponsor for review.' : 'Rejected — creator has been notified.'}
             </p>

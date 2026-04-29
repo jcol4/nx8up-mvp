@@ -65,20 +65,30 @@ export default function YouTubeConnect({ initial }: YouTubeConnectProps) {
   return (
     <>
       <style>{`
-        .yt-card { background: rgba(6,13,24,0.6); border: 1px solid rgba(255,68,68,0.1); border-radius: 10px; padding: 1.25rem; transition: border-color 0.2s; }
-        .yt-card:hover { border-color: rgba(255,68,68,0.18); }
+        .yt-card {
+          background:
+            radial-gradient(120% 160% at 10% 0%, rgba(255,74,74,0.18) 0%, rgba(255,74,74,0.06) 35%, rgba(6,13,24,0.78) 72%),
+            rgba(6,13,24,0.72);
+          border: 1px solid rgba(255,74,74,0.3);
+          border-top: 2px solid rgba(255,125,125,0.9);
+          border-radius: 12px;
+          padding: 1.25rem;
+          transition: border-color 0.2s, box-shadow 0.2s;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 18px 48px rgba(130,24,24,0.16);
+        }
+        .yt-card:hover { border-color: rgba(255,110,110,0.52); box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 24px 60px rgba(130,24,24,0.24); }
         .yt-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-        .yt-card-title { display: flex; align-items: center; gap: 8px; font-family: 'Rajdhani', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #3a5570; }
+        .yt-card-title { display: flex; align-items: center; gap: 8px; font-family: 'Rajdhani', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #ff9a9a; }
         .yt-icon { color: #ff4444; }
         .yt-profile { display: flex; align-items: center; gap: 12px; }
         .yt-avatar-placeholder { width: 48px; height: 48px; border-radius: 50%; border: 2px solid rgba(255,68,68,0.3); background: rgba(255,68,68,0.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #ff4444; }
         .yt-info { flex: 1; min-width: 0; }
         .yt-display-name { font-family: 'Rajdhani', sans-serif; font-size: 1rem; font-weight: 700; color: #c8dff0; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .yt-handle { font-family: 'Exo 2', sans-serif; font-size: 0.75rem; color: #3a5570; }
+        .yt-handle { font-family: 'Exo 2', sans-serif; font-size: 0.75rem; color: #bf8f8f; }
         .yt-stats { display: flex; gap: 12px; margin-top: 0.75rem; flex-wrap: wrap; }
         .yt-stat { display: flex; flex-direction: column; gap: 2px; }
         .yt-stat-value { font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; font-weight: 700; color: #c8dff0; letter-spacing: 0.03em; }
-        .yt-stat-label { font-family: 'Exo 2', sans-serif; font-size: 0.7rem; color: #3a5570; text-transform: uppercase; letter-spacing: 0.06em; }
+        .yt-stat-label { font-family: 'Exo 2', sans-serif; font-size: 0.7rem; color: #bf8f8f; text-transform: uppercase; letter-spacing: 0.06em; }
         .yt-categories { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0.75rem; }
         .yt-category-tag { padding: 2px 8px; border-radius: 999px; font-family: 'Rajdhani', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,68,68,0.08); border: 1px solid rgba(255,68,68,0.2); color: #ff6b6b; }
         .yt-actions { display: flex; gap: 8px; margin-top: 0.875rem; align-items: center; }
@@ -86,11 +96,11 @@ export default function YouTubeConnect({ initial }: YouTubeConnectProps) {
         .yt-btn--unlink { background: rgba(255,107,138,0.05); border: 1px solid rgba(255,107,138,0.15); color: #ff6b8a; }
         .yt-btn--unlink:hover { background: rgba(255,107,138,0.1); border-color: rgba(255,107,138,0.3); }
         .yt-btn--unlink:disabled { opacity: 0.5; cursor: not-allowed; }
-        .yt-synced { font-family: 'Exo 2', sans-serif; font-size: 0.7rem; color: #2a3f55; margin-left: auto; }
-        .yt-approx-note { font-family: 'Exo 2', sans-serif; font-size: 0.7rem; color: #3a5570; margin-top: 0.4rem; font-style: italic; }
+        .yt-synced { font-family: 'Exo 2', sans-serif; font-size: 0.7rem; color: #bf8f8f; margin-left: auto; }
+        .yt-approx-note { font-family: 'Exo 2', sans-serif; font-size: 0.7rem; color: #bf8f8f; margin-top: 0.4rem; font-style: italic; }
         .yt-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0.75rem 0; gap: 0.5rem; }
         .yt-empty-title { font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; font-weight: 600; color: #c8dff0; letter-spacing: 0.03em; }
-        .yt-empty-sub { font-family: 'Exo 2', sans-serif; font-size: 0.78rem; color: #3a5570; line-height: 1.5; max-width: 260px; }
+        .yt-empty-sub { font-family: 'Exo 2', sans-serif; font-size: 0.78rem; color: #bf8f8f; line-height: 1.5; max-width: 260px; }
         .yt-btn--connect { background: rgba(255,68,68,0.08); border: 1px solid rgba(255,68,68,0.2); color: #ff4444; margin-top: 0.25rem; text-decoration: none; }
         .yt-btn--connect:hover { background: rgba(255,68,68,0.14); border-color: rgba(255,68,68,0.35); box-shadow: 0 0 16px rgba(255,68,68,0.1); }
         .yt-error { display: flex; align-items: center; gap: 6px; font-family: 'Exo 2', sans-serif; font-size: 0.78rem; color: #ff6b8a; margin-top: 0.5rem; }

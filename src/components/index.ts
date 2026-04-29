@@ -1,11 +1,12 @@
 /**
- * Component structure (see FRONTEND.md):
+ * Component structure:
  *
- * - layout/   – Auth and global layout (AuthLayout, ConditionalHeader)
- * - ui/       – Shared UI primitives (TabBar, ProgressBar, SecondaryButton, NXDatePicker)
- * - shared/   – Cross-role shared (Logo, UserProfileBlock)
+ * - layout/    – Auth and global layout (AuthLayout, ConditionalHeader)
+ * - ui/        – Shared UI primitives (TabBar, ProgressBar, SecondaryButton, NXDatePicker)
+ * - shared/    – Cross-role shared (Logo, UserProfileBlock)
+ * - nx-shell/  – Role sidebar + HUD chrome (RoleLayoutShell, NxHudHeader, …)
  * - dashboard/ – Dashboard building blocks (DashboardPanel, NavItem, etc.)
- * - creator/  – Creator-specific (CreatorTopBar)
+ * - creator/   – Creator-specific (CreatorTopBar)
  */
 
 export { AuthLayout, ConditionalHeader } from './layout'
@@ -17,7 +18,6 @@ export {
   DashboardLogo,
   NavItem,
   UserAvatar,
-  CardWithImage,
   InsightRow,
 } from './dashboard'
 export { default as CreatorTopBar } from './creator/CreatorTopBar'

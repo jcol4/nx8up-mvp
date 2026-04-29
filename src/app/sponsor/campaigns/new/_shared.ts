@@ -1,18 +1,3 @@
-/**
- * Shared types, constants, and Tailwind class helpers for the 7-step campaign
- * creation wizard (NewCampaignForm and its step sub-components).
- *
- * Contains:
- * - `CampaignDraft`    — full form state type shared across all steps.
- * - `EMPTY_DRAFT`      — zero-value default for CampaignDraft (used on new campaigns).
- * - CSS class helpers  — `labelClass`, `sectionClass`, `sectionTitle`, `toggleBtn`.
- * - `STEP_LABELS`      — ordered display labels for the progress bar.
- * - Static option lists — PRODUCT_TYPES, OBJECTIVES, PLATFORMS, MEDIA_TYPES,
- *   GENDERS, AUDIENCE_LOCATIONS, CREATOR_TYPES, CREATOR_SIZES, MISSION_TYPES,
- *   VIDEO_INCLUDES, TRACKING_TYPES, CONVERSION_GOALS.
- *
- * All values in this file are pure constants — no server or async logic.
- */
 // Shared types and style helpers for the campaign creation wizard
 
 export type CampaignDraft = {
@@ -114,15 +99,16 @@ export const EMPTY_DRAFT: CampaignDraft = {
   conversion_goal: '',
 }
 
-export const labelClass = 'block text-sm font-medium dash-text-muted mb-1.5'
-export const sectionClass = 'space-y-4 pb-6 border-b dash-border'
-export const sectionTitle = 'text-xs font-semibold uppercase tracking-widest dash-text-muted mb-3'
+export const labelClass = 'block text-sm font-medium text-[#a9abb5] mb-1.5'
+export const sectionClass = 'space-y-4 pb-6 border-b border-white/10'
+export const sectionTitle =
+  'font-headline text-[11px] font-semibold uppercase tracking-[0.2em] text-[#99f7ff] mb-3'
 
 export const toggleBtn = (active: boolean) =>
   `px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 border ${
     active
-      ? 'bg-[#00c8ff] text-black border-[#00c8ff] shadow-[0_0_14px_rgba(0,200,255,0.35)]'
-      : 'dash-border dash-text-muted hover:text-[#c8dff0] hover:border-[rgba(0,200,255,0.35)] hover:bg-[rgba(0,200,255,0.05)] hover:shadow-[0_0_14px_rgba(0,200,255,0.12)]'
+      ? 'bg-[#99f7ff] text-slate-900 border-[#99f7ff] shadow-[0_0_14px_rgba(153,247,255,0.35)]'
+      : 'border-white/10 text-[#a9abb5] hover:text-[#e8f4ff] hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/5 hover:shadow-[0_0_14px_rgba(153,247,255,0.12)]'
   }`
 
 export const STEP_LABELS = [

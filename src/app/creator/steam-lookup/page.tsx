@@ -1,1 +1,10 @@
-export { default } from '@/app/sponsor/steam-lookup/page'
+import CreatorShell from '@/components/creator/CreatorShell'
+import SteamLookupUI from '@/components/steam/SteamLookupUI'
+
+export default function CreatorSteamLookupPage() {
+  return (
+    <CreatorShell>
+      <SteamLookupUI />
+    </CreatorShell>
+  )
+}

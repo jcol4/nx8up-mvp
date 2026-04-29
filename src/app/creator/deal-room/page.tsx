@@ -19,41 +19,52 @@
 import Link from 'next/link'
 import { getMyDealRooms } from './_actions'
 import { calcFeeBreakdown } from '@/lib/constants'
+import CreatorShell from '@/components/creator/CreatorShell'
 
 const SUBMISSION_STATUS: Record<string, { label: string; className: string }> = {
-  pending:            { label: 'Not submitted',          className: 'bg-[#94a3b8]/20 text-[#94a3b8]' },
-  submitted:          { label: 'Pending review',         className: 'bg-yellow-500/20 text-yellow-400' },
-  admin_verified:     { label: 'Verified — awaiting sponsor', className: 'bg-[#00c8ff]/20 text-[#00c8ff]' },
-  admin_rejected:     { label: 'Rejected — resubmit',   className: 'bg-red-500/20 text-red-400' },
-  approved:           { label: 'Approved',               className: 'bg-green-500/20 text-green-400' },
-  revision_requested: { label: 'Revision requested',     className: 'bg-orange-500/20 text-orange-400' },
+  pending: { label: 'Not submitted', className: 'border border-white/12 bg-white/8 text-[#a9abb5]' },
+  submitted: { label: 'Pending review', className: 'border border-yellow-500/30 bg-yellow-500/15 text-yellow-300' },
+  admin_verified: { label: 'Verified - awaiting sponsor', className: 'border border-[#99f7ff]/30 bg-[#99f7ff]/12 text-[#99f7ff]' },
+  admin_rejected: { label: 'Rejected - resubmit', className: 'border border-red-500/30 bg-red-500/15 text-red-300' },
+  approved: { label: 'Approved', className: 'border border-green-500/30 bg-green-500/15 text-green-300' },
+  revision_requested: { label: 'Revision requested', className: 'border border-orange-500/30 bg-orange-500/15 text-orange-300' },
 }
+
+const DEAL_CARD_CLASS =
+  'rounded-xl border border-white/16 bg-[linear-gradient(90deg,rgba(153,247,255,0.95),rgba(153,247,255,0.22))] bg-[length:100%_2px] bg-no-repeat bg-[position:top_left] bg-black/20 shadow-[inset_0_1px_0_rgba(153,247,255,0.28)] p-4 transition-colors'
 
 export default async function CreatorDealRoomPage() {
   const applications = await getMyDealRooms()
 
   return (
+    <CreatorShell>
     <main className="max-w-4xl mx-auto p-6 sm:p-8">
-      <div className="mb-6">
-        <Link href="/creator" className="text-xs cr-accent hover:underline">← Back to Dashboard</Link>
-        <h1 className="text-xl font-semibold cr-text-bright mt-2">Deal Room</h1>
-        <p className="text-sm cr-text-muted mt-1">
+      <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
+        <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Deal Room</p>
+        <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Deal Room</h1>
+        <p className="mt-1 text-sm text-[#a9abb5]">
           Your accepted campaigns. Submit proof of content delivery here.
         </p>
+        <div className="mt-3 inline-flex items-center rounded-full border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2.5 py-1 text-[11px] text-[#99f7ff]">
+          {applications.length} active {applications.length === 1 ? 'deal' : 'deals'}
+        </div>
       </div>
 
       {applications.length === 0 ? (
-        <div className="cr-panel p-8 text-center">
-          <p className="cr-text-muted text-sm mb-2">No active deals yet.</p>
-          <p className="text-xs cr-text-muted">
+        <div className="rounded-xl border border-white/16 bg-[linear-gradient(90deg,rgba(153,247,255,0.95),rgba(153,247,255,0.22))] bg-[length:100%_2px] bg-no-repeat bg-[position:top_left] bg-black/20 shadow-[inset_0_1px_0_rgba(153,247,255,0.28)] p-8 text-center">
+          <p className="mb-2 text-sm text-[#a9abb5]">No active deals yet.</p>
+          <p className="text-xs text-[#a9abb5]">
             Once a sponsor accepts your application, your deal room will appear here.
           </p>
-          <Link href="/creator/campaigns" className="inline-block mt-4 text-sm cr-accent hover:underline">
+          <Link
+            href="/creator/campaigns"
+            className="mt-4 inline-block rounded-md border border-[#99f7ff]/35 bg-[#99f7ff]/12 px-4 py-2 text-sm font-medium text-[#99f7ff] transition-colors hover:bg-[#99f7ff]/18"
+          >
             Browse campaigns
           </Link>
         </div>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-3.5">
           {applications.map((app) => {
             const sub = app.deal_submission
             const subStatus = SUBMISSION_STATUS[sub?.status ?? 'pending'] ?? SUBMISSION_STATUS.pending
@@ -61,38 +72,50 @@ export default async function CreatorDealRoomPage() {
               <li key={app.id}>
                 <Link
                   href={`/creator/deal-room/${app.id}`}
-                  className="block p-4 rounded-lg border cr-border cr-bg-inner hover:border-[rgba(0,200,255,0.3)] transition-colors"
+                  className={`group block ${DEAL_CARD_CLASS} hover:border-[#99f7ff]/35 hover:bg-black/25`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <span className="text-sm font-semibold cr-text-bright">{app.campaign.title}</span>
+                      <div className="mb-1 flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-semibold text-[#e8f4ff] group-hover:text-[#f4fdff]">{app.campaign.title}</span>
                         <span className={`text-xs px-2 py-0.5 rounded ${subStatus.className}`}>
                           {subStatus.label}
                         </span>
                       </div>
-                      {app.campaign.brand_name && (
-                        <p className="text-xs cr-text-muted">{app.campaign.brand_name}</p>
-                      )}
-                      {app.campaign.end_date && (
-                        <p className="text-xs cr-text-muted mt-0.5">
-                          Deadline: {new Date(app.campaign.end_date).toLocaleDateString()}
-                        </p>
-                      )}
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {app.campaign.brand_name && (
+                          <span className="rounded border border-white/12 bg-white/6 px-2 py-0.5 text-[11px] text-[#a9abb5]">
+                            {app.campaign.brand_name}
+                          </span>
+                        )}
+                        {(app.campaign.platform ?? []).map((platform) => (
+                          <span
+                            key={platform}
+                            className="rounded border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2 py-0.5 text-[11px] uppercase tracking-wide text-[#99f7ff]"
+                          >
+                            {platform}
+                          </span>
+                        ))}
+                        {app.campaign.end_date && (
+                          <span className="rounded border border-white/12 bg-white/6 px-2 py-0.5 text-[11px] text-[#a9abb5]">
+                            Due {new Date(app.campaign.end_date).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="text-right shrink-0">
                       {app.campaign.budget != null && (() => {
                         const { perCreator, creatorPool } = calcFeeBreakdown(app.campaign.budget, app.campaign.creator_count)
                         return (
                           <div>
-                            <span className="text-sm font-bold cr-success">
+                            <span className="text-sm font-bold text-emerald-300">
                               ${(perCreator ?? creatorPool).toLocaleString()}
                             </span>
-                            <p className="text-[10px] cr-text-muted">{perCreator ? 'your payout' : 'creator pool'}</p>
+                            <p className="text-[10px] text-[#a9abb5]">{perCreator ? 'your payout' : 'creator pool'}</p>
                           </div>
                         )
                       })()}
-                      <p className="text-xs cr-text-muted mt-0.5">View deal →</p>
+                      <p className="mt-2 text-xs font-medium text-[#99f7ff] transition-colors group-hover:text-[#c9fbff]">View deal →</p>
                     </div>
                   </div>
                 </Link>
@@ -102,5 +125,6 @@ export default async function CreatorDealRoomPage() {
         </ul>
       )}
     </main>
+    </CreatorShell>
   )
 }

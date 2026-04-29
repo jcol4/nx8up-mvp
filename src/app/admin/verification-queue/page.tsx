@@ -1,25 +1,3 @@
-/**
- * Admin Verification Queue page (`/admin/verification-queue`).
- *
- * Two-tab review queue for admins:
- *
- * **Campaign Submissions tab** (default)
- *   Lists all `deal_submissions` with status `"submitted"` fetched via
- *   `getAdminDealRoomQueue`. Each row links to the individual review page at
- *   `/admin/verification-queue/[applicationId]`. Shows creator handle, campaign
- *   title, brand name, and submission date.
- *
- * **Profile Changes tab** (`?tab=profile-changes`)
- *   Lists all pending `sponsor_age_restriction_requests` fetched via
- *   `getAgeRestrictionChangeQueue`. Each row shows the sponsor name, current
- *   age restriction setting, and the requested change. Links to
- *   `/admin/sponsor-profile-changes/[id]`.
- *
- * Tab counts are shown as badge pills next to each tab label.
- *
- * External services: Clerk (auth), Prisma (via server actions in `_actions.ts`
- * and `sponsor-profile-changes/_actions.ts`).
- */
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
@@ -44,17 +22,18 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
   ])
 
   return (
-    <div className="flex-1 p-6 overflow-auto">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-5">
-          <h1 className="text-xl font-semibold dash-text-bright mb-1">Review Queue</h1>
-          <p className="dash-text-muted text-sm">
+    <div className="flex-1 overflow-auto p-6 sm:p-8">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
+          <h1 className="mt-1 font-headline text-2xl font-semibold text-[#e8f4ff]">Review Queue</h1>
+          <p className="mt-1 text-sm text-[#c4cad6]">
             Review creator submissions and sponsor profile change requests.
           </p>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-5 border-b border-white/10">
+        <div className="mb-1 flex gap-1 border-b border-white/10">
           <Link
             href="/admin/verification-queue"
             className={`px-4 py-2 text-sm font-medium transition-colors relative ${
@@ -90,7 +69,7 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
         {/* Campaign Submissions tab */}
         {activeTab === 'submissions' && (
           submissionsQueue.length === 0 ? (
-            <div className="dash-panel p-8 text-center dash-text-muted">
+            <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-8 text-center text-[#c4cad6]">
               <p>No submissions pending review.</p>
             </div>
           ) : (
@@ -107,7 +86,7 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
                   <Link
                     key={sub.application_id}
                     href={`/admin/verification-queue/${sub.application_id}`}
-                    className="flex items-center justify-between gap-3 p-4 dash-panel hover:border-[rgba(0,200,255,0.25)] transition-colors"
+                    className="glass-panel interactive-panel flex items-center justify-between gap-3 rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-4 transition-colors hover:border-[#99f7ff]/35"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="text-sm dash-text-bright font-medium">{app.campaign.title}</p>
@@ -140,7 +119,7 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
         {/* Profile Changes tab */}
         {activeTab === 'profile-changes' && (
           profileChangesQueue.length === 0 ? (
-            <div className="dash-panel p-8 text-center dash-text-muted">
+            <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-8 text-center text-[#c4cad6]">
               <p>No pending age restriction change requests.</p>
             </div>
           ) : (
@@ -157,7 +136,7 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
                   <Link
                     key={req.id}
                     href={`/admin/sponsor-profile-changes/${req.id}`}
-                    className="flex items-center justify-between gap-3 p-4 dash-panel hover:border-[rgba(0,200,255,0.25)] transition-colors"
+                    className="glass-panel interactive-panel flex items-center justify-between gap-3 rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-4 transition-colors hover:border-[#99f7ff]/35"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="text-sm dash-text-bright font-medium">

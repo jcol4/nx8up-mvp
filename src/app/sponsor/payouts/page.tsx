@@ -1,39 +1,22 @@
-/**
- * Sponsor Payouts page — /sponsor/payouts
- *
- * Displays the sponsor's full payout ledger: every accepted creator application
- * with a deal submission, grouped by campaign.
- *
- * Summary cards show:
- * - Total creator count across all campaigns.
- * - Total campaign count.
- * - Total amount paid out (sum of `perCreator` for `paid` rows).
- * - Total amount pending (sum for non-paid rows).
- *
- * The ledger table columns: creator handle, platform, submission status, payout
- * amount, payout status pill, Stripe transfer ID (truncated), link clicks, last
- * updated date.
- *
- * `PayoutStatusPill` renders a colored badge for paid/processing/failed statuses,
- * or a neutral grey "Pending" pill when `payout_status` is null.
- *
- * `summarise` computes the summary card values in a single O(n) pass.
- *
- * "Export CSV" links to /api/sponsor/payouts/export which is a separate API route
- * (not in this file).
- *
- * External services: Clerk (auth), Prisma (via _data.ts).
- */
 import { redirect } from 'next/navigation'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-import SponsorHeader from '../SponsorHeader'
+import SponsorHeader from '../_components/dashboard/SponsorHeader'
 import { getPayoutLedger, type LedgerRow } from './_data'
 
 const PAYOUT_STATUS_STYLES: Record<string, { label: string; className: string }> = {
-  paid:          { label: 'Paid',           className: 'bg-[#22c55e]/20 text-[#22c55e]' },
-  processing:    { label: 'Processing',     className: 'bg-[#00c8ff]/20 text-[#00c8ff]' },
-  payout_failed: { label: 'Payout Failed',  className: 'bg-[#f87171]/20 text-[#f87171]' },
+  paid: {
+    label: 'Paid',
+    className: 'border border-[#22c55e]/30 bg-[#22c55e]/15 text-[#4ade80]',
+  },
+  processing: {
+    label: 'Processing',
+    className: 'border border-[#99f7ff]/30 bg-[#99f7ff]/10 text-[#99f7ff]',
+  },
+  payout_failed: {
+    label: 'Payout Failed',
+    className: 'border border-[#f87171]/30 bg-[#f87171]/15 text-[#f87171]',
+  },
 }
 
 const SUBMISSION_STATUS_LABELS: Record<string, string> = {
@@ -45,7 +28,6 @@ const SUBMISSION_STATUS_LABELS: Record<string, string> = {
   revision_requested: 'Revision Req.',
 }
 
-/** Renders a colored status badge for a payout status value. Null status shows a neutral "Pending" pill. */
 function PayoutStatusPill({ status }: { status: string | null }) {
   if (!status) {
     return (
@@ -69,10 +51,6 @@ function PayoutStatusPill({ status }: { status: string | null }) {
   )
 }
 
-/**
- * Computes summary statistics for the payout ledger in a single O(n) pass.
- * Returns total paid amount, total pending amount, and the respective creator counts.
- */
 function summarise(rows: LedgerRow[]) {
   let totalPaid = 0
   let totalPending = 0
@@ -121,20 +99,21 @@ export default async function SponsorPayoutsPage() {
   return (
     <>
       <SponsorHeader />
-      <div className="flex-1 p-6 overflow-auto">
-        <div className="max-w-5xl mx-auto">
+      <div className="flex-1 overflow-auto p-6 sm:p-8">
+        <div className="mx-auto max-w-5xl">
           {/* Page header */}
-          <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
-            <div>
-              <h1 className="text-xl font-semibold dash-text-bright mb-1">Payout Ledger</h1>
-              <p className="dash-text-muted text-sm">
+          <div className="mb-6 flex flex-wrap items-start justify-between gap-4 sm:mb-8">
+            <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+              <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Payouts</p>
+              <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Payout Ledger</h1>
+              <p className="mt-1 text-sm text-[#a9abb5]">
                 Creator payouts across all your campaigns.
               </p>
             </div>
             {rows.length > 0 && (
               <a
                 href="/api/sponsor/payouts/export"
-                className="inline-flex items-center gap-2 py-2 px-4 rounded-lg bg-white/5 border border-white/10 text-sm dash-text hover:border-[rgba(0,200,255,0.3)] hover:dash-text-bright transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-black/20 px-4 py-2 text-sm text-[#a9abb5] transition-colors hover:border-[#99f7ff]/35 hover:text-[#e8f4ff]"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -146,50 +125,50 @@ export default async function SponsorPayoutsPage() {
           </div>
 
           {rows.length === 0 ? (
-            <div className="dash-panel p-8 text-center dash-text-muted">
-              <p className="mb-2">No payout data yet.</p>
-              <p className="text-xs">
+            <div className="dash-panel dash-panel--nx-top rounded-xl p-8 text-center text-[#a9abb5]">
+              <p className="mb-2 text-[#e8f4ff]">No payout data yet.</p>
+              <p className="text-xs leading-relaxed">
                 Payouts appear here once creators submit content on your launched campaigns.
               </p>
             </div>
           ) : (
             <>
               {/* Summary cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-                <div className="dash-panel p-4">
-                  <p className="text-xs dash-text-muted mb-1">Total Creators</p>
-                  <p className="text-2xl font-bold dash-text-bright">{rows.length}</p>
+              <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="dash-panel dash-panel--nx-top rounded-xl p-4">
+                  <p className="mb-1 text-xs text-[#a9abb5]">Total Creators</p>
+                  <p className="text-2xl font-bold text-[#e8f4ff]">{rows.length}</p>
                 </div>
-                <div className="dash-panel p-4">
-                  <p className="text-xs dash-text-muted mb-1">Campaigns</p>
-                  <p className="text-2xl font-bold dash-text-bright">{Object.keys(grouped).length}</p>
+                <div className="dash-panel dash-panel--nx-top rounded-xl p-4">
+                  <p className="mb-1 text-xs text-[#a9abb5]">Campaigns</p>
+                  <p className="text-2xl font-bold text-[#e8f4ff]">{Object.keys(grouped).length}</p>
                 </div>
-                <div className="dash-panel p-4">
-                  <p className="text-xs dash-text-muted mb-1">Paid Out</p>
+                <div className="dash-panel dash-panel--nx-top rounded-xl p-4">
+                  <p className="mb-1 text-xs text-[#a9abb5]">Paid Out</p>
                   <p className="text-2xl font-bold text-[#22c55e]">${totalPaid.toLocaleString()}</p>
-                  <p className="text-xs dash-text-muted mt-0.5">{paidCount} creator{paidCount !== 1 ? 's' : ''}</p>
+                  <p className="mt-0.5 text-xs text-[#a9abb5]">{paidCount} creator{paidCount !== 1 ? 's' : ''}</p>
                 </div>
-                <div className="dash-panel p-4">
-                  <p className="text-xs dash-text-muted mb-1">Pending Payouts</p>
+                <div className="dash-panel dash-panel--nx-top rounded-xl p-4">
+                  <p className="mb-1 text-xs text-[#a9abb5]">Pending Payouts</p>
                   <p className="text-2xl font-bold text-[#eab308]">${totalPending.toLocaleString()}</p>
-                  <p className="text-xs dash-text-muted mt-0.5">{pendingCount} creator{pendingCount !== 1 ? 's' : ''}</p>
+                  <p className="mt-0.5 text-xs text-[#a9abb5]">{pendingCount} creator{pendingCount !== 1 ? 's' : ''}</p>
                 </div>
               </div>
 
               {/* Ledger table — one section per campaign */}
               <div className="space-y-6">
                 {Object.entries(grouped).map(([campaignId, group]) => (
-                  <div key={campaignId}>
-                    <h2 className="text-sm font-semibold dash-text-bright mb-2 flex items-center gap-2">
+                  <div key={campaignId} className="dash-panel dash-panel--nx-top rounded-xl p-4 sm:p-5">
+                    <h2 className="mb-3 flex items-center gap-2 font-headline text-base font-semibold text-[#e8f4ff]">
                       {group.title}
-                      <span className="text-xs font-normal dash-text-muted">
+                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-normal text-[#a9abb5]">
                         {group.rows.length} creator{group.rows.length !== 1 ? 's' : ''}
                       </span>
                     </h2>
-                    <div className="dash-panel overflow-x-auto">
+                    <div className="overflow-x-auto rounded-xl border border-white/10 bg-black/20">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="border-b border-white/10 text-xs dash-text-muted uppercase tracking-wide">
+                          <tr className="border-b border-white/10 bg-black/25 text-[11px] uppercase tracking-[0.15em] text-[#8f97ab]">
                             <th className="text-left px-4 py-3 font-medium">Creator</th>
                             <th className="text-left px-4 py-3 font-medium">Platform</th>
                             <th className="text-left px-4 py-3 font-medium">Submission</th>
@@ -204,16 +183,18 @@ export default async function SponsorPayoutsPage() {
                           {group.rows.map((row) => (
                             <tr
                               key={row.applicationId}
-                              className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
+                              className="border-b border-white/5 last:border-0 transition-colors hover:bg-white/[0.03]"
                             >
-                              <td className="px-4 py-3 dash-text-bright font-medium whitespace-nowrap">
+                              <td className="px-4 py-3 font-medium whitespace-nowrap text-[#e8f4ff]">
                                 {row.creatorHandle}
                               </td>
-                              <td className="px-4 py-3 dash-text-muted text-xs whitespace-nowrap">
-                                {row.platform}
+                              <td className="px-4 py-3 text-xs whitespace-nowrap">
+                                <span className="rounded border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-1.5 py-0.5 text-[#99f7ff]">
+                                  {row.platform}
+                                </span>
                               </td>
                               <td className="px-4 py-3 whitespace-nowrap">
-                                <span className="text-xs dash-text-muted">
+                                <span className="text-xs text-[#a9abb5]">
                                   {SUBMISSION_STATUS_LABELS[row.submissionStatus] ?? row.submissionStatus}
                                 </span>
                               </td>
@@ -223,13 +204,13 @@ export default async function SponsorPayoutsPage() {
                                     ${row.payoutAmount.toLocaleString()}
                                   </span>
                                 ) : (
-                                  <span className="dash-text-muted">—</span>
+                                  <span className="text-[#a9abb5]">—</span>
                                 )}
                               </td>
                               <td className="px-4 py-3 whitespace-nowrap">
                                 <PayoutStatusPill status={row.payoutStatus} />
                               </td>
-                              <td className="px-4 py-3 text-xs font-mono dash-text-muted whitespace-nowrap">
+                              <td className="px-4 py-3 text-xs font-mono whitespace-nowrap text-[#8f97ab]">
                                 {row.stripeTransferId ? (
                                   <span title={row.stripeTransferId}>
                                     {row.stripeTransferId.slice(0, 16)}…
@@ -238,10 +219,10 @@ export default async function SponsorPayoutsPage() {
                                   <span>—</span>
                                 )}
                               </td>
-                              <td className="px-4 py-3 text-right dash-text-muted whitespace-nowrap">
+                              <td className="px-4 py-3 text-right whitespace-nowrap text-[#a9abb5]">
                                 {row.linkClicks.toLocaleString()}
                               </td>
-                              <td className="px-4 py-3 text-xs dash-text-muted whitespace-nowrap">
+                              <td className="px-4 py-3 text-xs whitespace-nowrap text-[#a9abb5]">
                                 {row.updatedAt
                                   ? new Date(row.updatedAt).toLocaleDateString()
                                   : '—'}

@@ -1,26 +1,8 @@
-/**
- * New Campaign page — /sponsor/campaigns/new
- *
- * Server component that:
- * 1. Guards access (redirects unauthenticated users).
- * 2. Checks profile completeness via `getMissingSponsorProfileFields`; if any
- *    required fields are missing, renders a blocking gate UI that lists the
- *    missing fields and links to /sponsor/profile.
- * 3. Fetches up to 200 available creators for the direct-invite picker in Step 3.
- * 4. Pre-populates the campaign form draft (`profileDraft`) with values from the
- *    sponsor's profile: brand name, platforms, min requirements, preferred payment
- *    method, and a midpoint of their typical budget range.
- *
- * The `availableCreators` list is fetched without the role-guard check in the
- * layout, so this page has its own auth + redirect logic.
- *
- * External services: Clerk (auth), Prisma.
- */
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
-import SponsorHeader from '../../SponsorHeader'
+import SponsorHeader from '../../_components/dashboard/SponsorHeader'
 import NewCampaignForm from './NewCampaignForm'
 import { EMPTY_DRAFT, type CampaignDraft } from './_shared'
 import { getMissingSponsorProfileFields } from '@/lib/sponsor-profile'
@@ -69,31 +51,56 @@ export default async function NewCampaignPage() {
         <SponsorHeader />
         <div className="flex-1 p-6 sm:p-8 overflow-auto">
           <div className="max-w-xl mx-auto">
-            <div className="dash-panel p-6 space-y-4">
-              <div className="flex items-start gap-3">
-                <svg className="w-5 h-5 shrink-0 mt-0.5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                </svg>
-                <div>
-                  <h1 className="text-base font-semibold dash-text-bright mb-1">Complete your profile first</h1>
-                  <p className="text-sm dash-text-muted">
-                    You must fill out all required profile fields before posting a campaign.
-                  </p>
+            <div className="glass-panel interactive-panel overflow-hidden rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] neon-glow-teal">
+              <div className="relative px-6 pt-6 pb-5">
+                <div
+                  className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#99f7ff]/40 to-transparent"
+                  aria-hidden
+                />
+                <div className="flex gap-4">
+                  <div
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-amber-400/30 bg-amber-400/10 shadow-[0_0_20px_-4px_rgba(251,191,36,0.35)]"
+                    aria-hidden
+                  >
+                    <svg className="h-5 w-5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0 pt-0.5">
+                    <h1 className="text-lg font-semibold tracking-tight text-[#e8f4ff]">Complete your profile first</h1>
+                    <p className="mt-2 text-sm leading-relaxed text-[#a9abb5]">
+                      You must fill out all required profile fields before posting a campaign.
+                    </p>
+                  </div>
                 </div>
               </div>
-              <ul className="space-y-1.5 pl-2">
-                {missingFields.map(f => (
-                  <li key={f.label} className="text-xs dash-text-muted">
-                    · <span className="text-yellow-400/80 font-medium">{f.label}</span> — {f.description}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/sponsor/profile"
-                className="inline-block py-2.5 px-5 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 transition-opacity"
-              >
-                Go to profile
-              </Link>
+
+              <div className="border-t border-white/10 bg-black/15 px-3 py-3 sm:px-4">
+                <ul className="max-h-[min(22rem,50vh)] space-y-2 overflow-y-auto pr-1 [scrollbar-gutter:stable]">
+                  {missingFields.map((f) => (
+                    <li
+                      key={f.label}
+                      className="flex gap-3 rounded-lg border border-white/5 bg-black/25 px-3 py-2.5 transition-colors hover:border-[#99f7ff]/15"
+                    >
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400/90 shadow-[0_0_8px_rgba(251,191,36,0.45)]" aria-hidden />
+                      <p className="min-w-0 text-xs leading-relaxed text-[#a9abb5]">
+                        <span className="font-semibold text-amber-200/95">{f.label}</span>
+                        {' — '}
+                        {f.description}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="border-t border-white/10 px-6 py-5">
+                <Link
+                  href="/sponsor/profile"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#99f7ff] px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-[0_0_24px_-6px_rgba(153,247,255,0.55)] transition hover:opacity-95 sm:w-auto"
+                >
+                  Go to profile
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -125,9 +132,10 @@ export default async function NewCampaignPage() {
       <SponsorHeader />
       <div className="flex-1 p-6 sm:p-8 overflow-auto">
         <div className="max-w-3xl mx-auto">
-          <div className="mb-6">
-            <h1 className="text-xl font-semibold dash-text-bright">Post a Campaign</h1>
-            <p className="dash-text-muted text-sm mt-1">
+          <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
+            <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">New campaign</p>
+            <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Post a Campaign</h1>
+            <p className="text-[#a9abb5] text-sm mt-1">
               Walk through the setup steps to create a campaign creators can apply to.
             </p>
           </div>

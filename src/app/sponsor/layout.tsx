@@ -1,87 +1,26 @@
-/**
- * Sponsor section layout — wraps every page under /sponsor/*.
- *
- * Responsibilities:
- * - Auth guard: redirects unauthenticated users to /sign-in and non-sponsor/admin
- *   roles back to /.
- * - Fetches live campaign stats for the sidebar (active campaign count, total live
- *   budget, accepted-creator count) via `getSponsorStats`.
- * - Renders the shared DashboardSidebar with sponsor-specific nav items and an
- *   inline stats widget.
- * - Admins see cross-section nav (Creator / Sponsor / Admin), sponsors see only
- *   the Sponsor section.
- *
- * External services: Clerk (auth), Prisma (campaign stats).
- * Env vars: none directly — inherited from @clerk/nextjs and Prisma config.
- */
 import type { Metadata } from 'next'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
+import { Inter, Space_Grotesk } from 'next/font/google'
 import DashboardStyles from '@/components/dashboard/DashboardStyles'
-import { DashboardSidebar } from '@/components/dashboard'
-import { prisma } from '@/lib/prisma'
+import RoleLayoutShell from '@/components/nx-shell/RoleLayoutShell'
+import NxHudBackground from '@/components/nx-shell/NxHudBackground'
+import type { SidebarNavGroup, SidebarNavItem } from '@/components/nx-shell/RoleSidebar'
 
 export const metadata: Metadata = {
   title: 'Sponsor Hub | Nx8up',
   description: 'Post campaigns and reach creators',
 }
 
-const ALL_SECTION_NAV_ITEMS = [
-  { href: '/creator', label: 'Creator' },
-  { href: '/sponsor', label: 'Sponsor' },
-  { href: '/admin', label: 'Admin' },
-]
+const inter = Inter({
+  variable: '--font-body',
+  subsets: ['latin'],
+})
 
-const SPONSOR_ONLY_SECTION_NAV_ITEMS = [
-  { href: '/sponsor', label: 'Sponsor' },
-]
-
-const NAV_ITEMS = [
-  { href: '/sponsor', label: 'Dashboard' },
-  { href: '/sponsor/profile', label: 'Profile' },
-  { href: '/sponsor/campaigns', label: 'My Campaigns' },
-  { href: '/sponsor/deal-room', label: 'Deal Room' },
-  { href: '/sponsor/creators', label: 'Creators' },
-  { href: '/sponsor/steam-lookup', label: 'Steam Lookup' },
-  { href: '/sponsor/payouts', label: 'Payouts' },
-  { href: '/sponsor/settings/notifications', label: 'Notifications' },
-]
-
-/**
- * Fetches aggregate campaign stats for a sponsor user.
- *
- * Queries live campaigns for total budget and counts accepted applications
- * across all campaigns owned by the sponsor. Returns null if the user has
- * no sponsor record (e.g. incomplete onboarding).
- */
-async function getSponsorStats(userId: string) {
-  const sponsor = await prisma.sponsors.findUnique({
-    where: { clerk_user_id: userId },
-    select: { id: true },
-  })
-  if (!sponsor) return null
-
-  const [campaigns, acceptedApps] = await Promise.all([
-    prisma.campaigns.findMany({
-      where: { sponsor_id: sponsor.id, status: 'live' },
-      select: { budget: true },
-    }),
-    prisma.campaign_applications.count({
-      where: {
-        status: 'accepted',
-        campaign: { sponsor_id: sponsor.id },
-      },
-    }),
-  ])
-
-  const totalBudget = campaigns.reduce((sum, c) => sum + (c.budget ?? 0), 0)
-
-  return {
-    activeCampaigns: campaigns.length,
-    totalBudget: totalBudget > 0 ? `$${totalBudget.toLocaleString()}` : '$0',
-    creatorsReached: acceptedApps,
-  }
-}
+const spaceGrotesk = Space_Grotesk({
+  variable: '--font-headline',
+  subsets: ['latin'],
+})
 
 export default async function SponsorLayout({
   children,
@@ -90,49 +29,79 @@ export default async function SponsorLayout({
   const role = (sessionClaims?.metadata as { role?: string })?.role
   if (!userId) redirect('/sign-in')
   if (role !== 'sponsor' && role !== 'admin') redirect('/')
-
-  const stats = await getSponsorStats(userId)
-  const s = stats ?? { activeCampaigns: 0, totalBudget: '$0', creatorsReached: 0 }
-  const sectionNavItems = role === 'admin' ? ALL_SECTION_NAV_ITEMS : SPONSOR_ONLY_SECTION_NAV_ITEMS
-
-  const statsNode = (
-    <div className="px-4 pt-4 pb-4">
-      <p className="text-xs font-semibold dash-text-muted uppercase tracking-wider mb-3">
-        Campaign Stats
-      </p>
-      <div className="space-y-2 text-sm">
-        <div className="flex items-center justify-between">
-          <span className="dash-text-muted">Live campaigns</span>
-          <span className="font-bold" style={{ color: '#00c8ff', textShadow: '0 0 8px rgba(0,200,255,0.4)' }}>{s.activeCampaigns}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="dash-text-muted">Live budget</span>
-          <span className="font-bold" style={{ color: '#00e5a0', textShadow: '0 0 8px rgba(0,229,160,0.4)' }}>{s.totalBudget}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="dash-text-muted">Creators accepted</span>
-          <span className="font-bold" style={{ color: '#c084fc', textShadow: '0 0 8px rgba(192,132,252,0.4)' }}>{s.creatorsReached}</span>
-        </div>
-      </div>
-    </div>
-  )
+  const adminSectionGroup: SidebarNavGroup[] =
+    role === 'admin'
+      ? [
+        {
+          title: 'Sections',
+          items: [
+            { href: '/admin', label: 'Admin', icon: 'verification' },
+            { href: '/creator', label: 'Creator', icon: 'creators' },
+            { href: '/sponsor', label: 'Sponsor', icon: 'payouts', exact: true },
+          ] as SidebarNavItem[],
+        },
+      ]
+      : []
+  const navGroups: SidebarNavGroup[] = [
+    ...adminSectionGroup,
+    {
+      title: 'Sponsor',
+      items: [
+        { href: '/sponsor', label: 'Dashboard', icon: 'dashboard', exact: true },
+        { href: '/sponsor/profile', label: 'Profile', icon: 'profile' },
+        { href: '/sponsor/campaigns', label: 'My Campaigns', icon: 'campaigns' },
+        { href: '/sponsor/deal-room', label: 'Deal Room', icon: 'dealRoom' },
+        { href: '/sponsor/creators', label: 'Creators', icon: 'creators' },
+        { href: '/sponsor/steam-lookup', label: 'Steam Lookup', icon: 'creators' },
+        { href: '/sponsor/payouts', label: 'Payouts', icon: 'payouts' },
+      ] as SidebarNavItem[],
+    },
+    {
+      title: 'Notifications',
+      borderTop: true,
+      items: [
+        { href: '/sponsor/settings/notifications', label: 'Preferences', icon: 'notifications' },
+      ] as SidebarNavItem[],
+    },
+  ]
+  const adminCollapsedItems: SidebarNavItem[] =
+    role === 'admin'
+      ? [
+        { href: '/admin', label: 'Admin', icon: 'verification' },
+        { href: '/creator', label: 'Creator', icon: 'creators' },
+        { href: '/sponsor', label: 'Sponsor', icon: 'payouts', exact: true },
+      ] as SidebarNavItem[]
+      : []
+  const collapsedNavItems: SidebarNavItem[] = [
+    ...adminCollapsedItems,
+    { href: '/sponsor', label: 'Dashboard', icon: 'dashboard', exact: true },
+    { href: '/sponsor/profile', label: 'Profile', icon: 'profile' },
+    { href: '/sponsor/campaigns', label: 'Campaigns', icon: 'campaigns' },
+    { href: '/sponsor/deal-room', label: 'Deals', icon: 'dealRoom' },
+    { href: '/sponsor/creators', label: 'Creators', icon: 'creators' },
+    { href: '/sponsor/settings/notifications', label: 'Alerts', icon: 'notifications' },
+  ]
+  const statsRows = [
+    { label: 'Live campaigns', value: '—', valueClassName: 'font-bold text-[#00c8ff]' },
+    { label: 'Live budget', value: '—', valueClassName: 'font-bold text-[#00e5a0]' },
+    { label: 'Creators accepted', value: '—', valueClassName: 'font-bold text-[#c084fc]' },
+  ]
 
   return (
     <>
       <DashboardStyles />
-      <div className="dash-root">
-        <div className="relative z-10 flex min-h-screen">
-          <DashboardSidebar
-            logoHref="/sponsor"
-            sectionNavItems={sectionNavItems}
-            sectionTitle="Sponsor"
-            navItems={NAV_ITEMS}
-            statsNode={statsNode}
-          />
-          <main className="flex-1 flex flex-col min-w-0">
-            {children}
-          </main>
-        </div>
+      <div className={`creator-hud dash-root relative isolate ${inter.variable} ${spaceGrotesk.variable}`}>
+        <NxHudBackground />
+        <RoleLayoutShell
+          homeHref="/sponsor"
+          navGroups={navGroups}
+          collapsedNavItems={collapsedNavItems}
+          statsTitle="Campaign Stats"
+          statsRows={statsRows}
+          animateContentOffset={false}
+        >
+          {children}
+        </RoleLayoutShell>
       </div>
     </>
   )

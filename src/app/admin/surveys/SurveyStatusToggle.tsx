@@ -26,10 +26,10 @@ export default function SurveyStatusToggle({ id, status }: { id: string; status:
       type="button"
       onClick={toggle}
       disabled={loading}
-      className={`text-xs transition-colors ${
+      className={`rounded px-1.5 py-0.5 text-xs font-medium transition-colors ${
         status === 'active'
-          ? 'text-[#f87171]/70 hover:text-[#f87171]'
-          : 'text-[#22c55e]/70 hover:text-[#22c55e]'
+          ? 'text-[#fca5a5] hover:bg-[#f87171]/15 hover:text-[#f87171]'
+          : 'text-[#86efac] hover:bg-[#22c55e]/15 hover:text-[#22c55e]'
       }`}
     >
       {loading ? '…' : label}
