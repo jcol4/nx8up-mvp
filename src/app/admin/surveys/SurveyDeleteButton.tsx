@@ -21,14 +21,14 @@ export default function SurveyDeleteButton({ id }: { id: string }) {
           type="button"
           onClick={handleDelete}
           disabled={loading}
-          className="text-xs text-red-400 hover:text-red-300 transition-colors"
+          className="rounded px-1.5 py-0.5 text-xs font-medium text-red-300 transition-colors hover:bg-red-500/15 hover:text-red-200"
         >
           {loading ? '…' : 'Confirm'}
         </button>
         <button
           type="button"
           onClick={() => setConfirming(false)}
-          className="text-xs dash-text-muted hover:dash-text-bright transition-colors"
+          className="rounded px-1.5 py-0.5 text-xs text-[#a9abb5] transition-colors hover:bg-white/10 hover:text-[#e8f4ff]"
         >
           Cancel
         </button>
@@ -40,7 +40,7 @@ export default function SurveyDeleteButton({ id }: { id: string }) {
     <button
       type="button"
       onClick={() => setConfirming(true)}
-      className="text-xs text-red-400/70 hover:text-red-400 transition-colors"
+      className="rounded px-1.5 py-0.5 text-xs font-medium text-red-300/80 transition-colors hover:bg-red-500/15 hover:text-red-300"
     >
       Delete
     </button>

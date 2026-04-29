@@ -1,31 +1,6 @@
-/**
- * Data fetching for the sponsor payout ledger (/sponsor/payouts).
- *
- * `getPayoutLedger` queries all accepted campaign applications that have a
- * deal submission (submitted or beyond), computes the per-creator payout amount
- * from `calcFeeBreakdown`, and returns a flat mapped array (`LedgerRow[]`) ready
- * for the payouts page to render and summarise.
- *
- * The result is ordered by campaign title (asc) then submission date (desc) so
- * campaigns appear in alphabetical order and the most recently submitted creator
- * appears first within each campaign group.
- *
- * `LedgerRow` is inferred from the return type of `getPayoutLedger` for type safety
- * without duplicating the shape.
- *
- * External services: Prisma.
- */
 import { prisma } from '@/lib/prisma'
 import { calcFeeBreakdown } from '@/lib/constants'
 
-/**
- * Fetches payout ledger rows for a sponsor. Joins campaigns, creators, deal
- * submissions, and link click counts. Computes `payoutAmount` (per-creator share
- * after the nx8up fee) using `calcFeeBreakdown`.
- *
- * Only includes applications where `deal_submission` exists (isNot: null) — rows
- * without a submission are excluded from the ledger.
- */
 export async function getPayoutLedger(sponsorId: string) {
   const rows = await prisma.campaign_applications.findMany({
     where: {

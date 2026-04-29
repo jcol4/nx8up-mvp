@@ -83,11 +83,11 @@ export default async function DisputeDetailPage({
   const statusStyle = STATUS_STYLES[dispute.status] ?? 'bg-gray-500/20 text-gray-400'
 
   return (
-    <div className="flex-1 p-6 overflow-auto">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="flex-1 overflow-auto p-6 sm:p-8">
+      <div className="mx-auto max-w-6xl space-y-6">
         <Link
           href="/admin/disputes"
-          className="inline-flex items-center gap-1.5 text-xs dash-text-muted hover:text-[#c8dff0] transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-md border border-white/12 bg-black/20 px-2.5 py-1 text-[11px] text-[#a9abb5] transition-colors hover:border-[#99f7ff]/30 hover:text-[#99f7ff]"
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -96,7 +96,7 @@ export default async function DisputeDetailPage({
         </Link>
 
         {/* Cover / Header */}
-        <div className="dash-panel p-5">
+        <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -139,7 +139,7 @@ export default async function DisputeDetailPage({
           </div>
 
           {ev.executive_summary && (
-            <p className="mt-4 text-sm dash-text leading-relaxed border-t border-[#1e3a5f] pt-4">
+            <p className="mt-4 border-t border-white/10 pt-4 text-sm dash-text leading-relaxed">
               {ev.executive_summary}
             </p>
           )}
@@ -159,7 +159,7 @@ export default async function DisputeDetailPage({
 
         {/* Campaign Brief */}
         {ev.campaign_brief && (
-          <div className="dash-panel p-5">
+          <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-5">
             <h2 className="dash-panel-title mb-4">Campaign Brief</h2>
             <dl className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
               {ev.campaign_brief.brand_name && (
@@ -196,11 +196,11 @@ export default async function DisputeDetailPage({
 
         {/* Delivery Proof */}
         {ev.delivery_proof && ev.delivery_proof.length > 0 && (
-          <div className="dash-panel p-5">
+          <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-5">
             <h2 className="dash-panel-title mb-4">Delivery Proof</h2>
             <div className="space-y-5">
               {ev.delivery_proof.map((d, i) => (
-                <div key={i} className="border-t border-[#1e3a5f] pt-4 first:border-0 first:pt-0">
+                <div key={i} className="border-t border-white/10 pt-4 first:border-0 first:pt-0">
                   <p className="text-sm font-semibold dash-text-bright mb-2">{d.creator_handle}</p>
                   <dl className="space-y-2 text-sm">
                     {d.proof_urls && d.proof_urls.length > 0 && (
@@ -249,11 +249,11 @@ export default async function DisputeDetailPage({
 
         {/* Acceptance Proof */}
         {ev.acceptance_proof && ev.acceptance_proof.length > 0 && (
-          <div className="dash-panel p-5">
+          <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-5">
             <h2 className="dash-panel-title mb-4">Acceptance Proof</h2>
             <div className="space-y-3">
               {ev.acceptance_proof.map((a, i) => (
-                <dl key={i} className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm border-t border-[#1e3a5f] pt-3 first:border-0 first:pt-0">
+                <dl key={i} className="grid grid-cols-2 gap-3 border-t border-white/10 pt-3 text-sm first:border-0 first:pt-0 sm:grid-cols-3">
                   <div>
                     <dt className="text-xs dash-text-muted uppercase tracking-wide mb-0.5">Review status</dt>
                     <dd className="dash-text-bright capitalize">{a.status?.replace(/_/g, ' ')}</dd>
@@ -278,7 +278,7 @@ export default async function DisputeDetailPage({
 
         {/* Timeline */}
         {ev.timeline && ev.timeline.length > 0 && (
-          <div className="dash-panel p-5">
+          <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-5">
             <h2 className="dash-panel-title mb-4">Timeline</h2>
             <ol className="space-y-2">
               {ev.timeline.map((e, i) => (
@@ -303,7 +303,7 @@ export default async function DisputeDetailPage({
         )}
 
         {/* Admin Review + Submit */}
-        <div className="dash-panel p-5">
+        <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-5">
           <h2 className="dash-panel-title mb-4">Admin Decision</h2>
           <DisputeActions
             disputeId={dispute.id}

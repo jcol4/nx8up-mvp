@@ -1,20 +1,3 @@
-/**
- * Admin Sponsor Detail page (`/admin/users/sponsors/[id]`).
- *
- * Displays the full profile of a single `sponsors` record alongside all of
- * their campaigns.
- *
- * Data displayed:
- *  - Sponsor profile (company name, email, location, budget range, platforms,
- *    game categories, join date)
- *  - Campaign list with status badge, applicant count, end date, and link to
- *    the campaign detail page
- *
- * The `id` param is the Prisma `sponsors.id` UUID. Returns a 404
- * (`notFound()`) if the record does not exist.
- *
- * External services: Clerk (auth), Prisma (sponsors, campaigns).
- */
 import { auth } from '@clerk/nextjs/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'

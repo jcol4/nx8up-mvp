@@ -1,31 +1,8 @@
-/**
- * Server actions for the sponsor profile page (/sponsor/profile).
- *
- * Exports:
- * - `getSponsorProfile`      — loads the sponsor record and parses the location
- *                              string into discrete city/state/country fields.
- * - `updateSponsorProfile`   — upserts the sponsor row, enforces the BUDGET_MAX
- *                              constraint server-side, and revalidates related paths.
- * - `requestAgeRestrictionChange` — creates or updates a pending
- *                              `sponsor_age_restriction_requests` row; does NOT
- *                              apply the change immediately (requires admin approval).
- *
- * Key behaviors / gotchas:
- * - `updateSponsorProfile` calls Clerk's REST API to fetch the user's email
- *   address for the upsert `create` branch. This is an extra round-trip that
- *   only runs on first-ever profile creation.
- * - Age restriction changes are upserted: an existing pending request for the
- *   same sponsor is updated rather than creating duplicates.
- * - Budget values exceeding BUDGET_MAX (Stripe's ACH debit ceiling) are rejected
- *   with an explicit error message.
- *
- * External services: Clerk (auth + user lookup), Prisma, Stripe (limit constant).
- * Env vars: BUDGET_MAX via @/lib/constants.
- */
 'use server'
 
 import { auth } from '@clerk/nextjs/server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
+import { sponsorDashboardCacheTag } from '@/lib/sponsor-dashboard-cache'
 import { prisma } from '@/lib/prisma'
 import { parseLocation, formatLocation } from '@/lib/location-options'
 import { BUDGET_MAX } from '@/lib/constants'
@@ -48,16 +25,9 @@ export type SponsorProfile = {
   preferred_payment_method: string
   age_restricted: boolean
   age_restriction_type: string | null
-  /** True when there is a `pending` age_restriction_request row for this sponsor. */
   has_pending_age_restriction_request: boolean
 }
 
-/**
- * Returns the sponsor's profile for the currently authenticated user, or null if
- * the user is unauthenticated or has no sponsor record. Parses the stored location
- * string into separate city/state/country fields and checks for any pending age
- * restriction requests.
- */
 export async function getSponsorProfile(): Promise<SponsorProfile | null> {
   const { userId } = await auth()
   if (!userId) return null
@@ -97,14 +67,6 @@ export async function getSponsorProfile(): Promise<SponsorProfile | null> {
   }
 }
 
-/**
- * Upserts the sponsor's profile row (excluding age restriction fields, which
- * follow a separate approval workflow). Enforces the BUDGET_MAX ceiling
- * server-side for both `budget_min` and `budget_max`.
- *
- * On first creation, fetches the user's email from Clerk to populate the record.
- * Revalidates /sponsor and /sponsor/profile on success.
- */
 export async function updateSponsorProfile(
   data: Omit<SponsorProfile, 'age_restricted' | 'age_restriction_type' | 'has_pending_age_restriction_request'> & { preferred_payment_method: string }
 ): Promise<{ error?: string }> {
@@ -124,7 +86,7 @@ export async function updateSponsorProfile(
     const user = await client.users.getUser(userId)
     const email = user.emailAddresses[0]?.emailAddress ?? ''
 
-    await prisma.sponsors.upsert({
+    const sponsorRow = await prisma.sponsors.upsert({
       where: { clerk_user_id: userId },
       create: {
         clerk_user_id: userId,
@@ -157,28 +119,18 @@ export async function updateSponsorProfile(
         preferred_payment_method: data.preferred_payment_method,
         updated_at: new Date(),
       },
+      select: { id: true },
     })
 
     revalidatePath('/sponsor')
     revalidatePath('/sponsor/profile')
+    revalidateTag(sponsorDashboardCacheTag(sponsorRow.id), 'default')
     return {}
   } catch {
     return { error: 'Failed to update profile' }
   }
 }
 
-/**
- * Submits or updates an age-restriction change request for admin review.
- * If an existing `pending` request already exists for this sponsor, it is updated
- * in-place (upsert semantics). A new request is created otherwise.
- *
- * Validation:
- * - `sponsor_message` must not be blank.
- * - `requested_age_restriction_type` is required when enabling age restriction.
- *
- * The actual `age_restricted` / `age_restriction_type` fields on the `sponsors`
- * row are NOT updated here — that only happens when an admin approves the request.
- */
 export async function requestAgeRestrictionChange(data: {
   requested_age_restricted: boolean
   requested_age_restriction_type: string | null

@@ -1,21 +1,3 @@
-/**
- * Admin Campaign Detail page (`/admin/campaigns/[id]`).
- *
- * Displays comprehensive information about a single campaign, including:
- *  - Campaign metadata (budget, payment model, dates, deliverables)
- *  - Creator requirements (min followers, avg viewers, audience age, etc.)
- *  - Sponsor info panel with a link to the sponsor's profile
- *  - Application breakdown table grouped by status (accepted / pending / rejected)
- *    with creator details and a link to each creator's profile
- *
- * Returns a 404 (`notFound()`) if the campaign ID is not found.
- *
- * External services: Clerk (auth), Prisma (campaigns, sponsors, campaign_applications,
- * content_creators).
- *
- * The `followers` value shown per applicant is the maximum of Twitch and YouTube
- * subscriber counts to provide a single comparable metric.
- */
 import { auth } from '@clerk/nextjs/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -25,21 +7,18 @@ export const metadata = { title: 'Campaign Detail — nx8up Admin' }
 
 type Props = { params: Promise<{ id: string }> }
 
-/** Tailwind classes keyed by campaign status. Falls back to amber for unknown statuses. */
 const STATUS_STYLE: Record<string, string> = {
   live:      'bg-[#22c55e]/20 text-[#22c55e]',
   draft:     'bg-[#94a3b8]/20 text-[#94a3b8]',
   cancelled: 'bg-[#f87171]/20 text-[#f87171]',
 }
 
-/** Tailwind classes keyed by application status. */
 const APP_STATUS_STYLE: Record<string, string> = {
   accepted: 'bg-[#22c55e]/20 text-[#22c55e]',
   pending:  'bg-[#eab308]/20 text-[#eab308]',
   rejected: 'bg-[#f87171]/20 text-[#f87171]',
 }
 
-/** Reusable label/value pair for the campaign details grid. */
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>

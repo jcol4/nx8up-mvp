@@ -1,32 +1,3 @@
-/**
- * NewCampaignForm — multi-step campaign creation (and edit) wizard.
- *
- * Manages step state, draft data, and form submission for the 7-step campaign
- * creation flow:
- *   1. Basics    — name, brand, product, goal, platforms.
- *   2. Audience  — age range, gender, locations, interests.
- *   3. Creators  — open applications vs. direct invite; creator criteria.
- *   4. Budget    — amount, creator count, payment method, dates.
- *   5. Content   — campaign type, deliverables, guidelines, required elements.
- *   6. Tracking  — landing page URL, tracking type, conversion goal.
- *   7. Review    — summary + submit.
- *
- * Key behaviors:
- * - Validates required fields on each step before allowing progression.
- * - "Save Draft" at any step persists current data and redirects to /sponsor/campaigns.
- * - "Free navigation" (jump to any step) is unlocked once the user reaches the
- *   review step or when editing an existing draft (`editingId` is set).
- * - On final submit, redirects to the campaign pay page — campaigns do not go
- *   live until funds are held in escrow.
- * - Steps 1 and 4 use `overflow: visible` on their container to allow date pickers
- *   and dropdowns to escape the panel boundary.
- *
- * Props:
- * - `initialDraft`          — Pre-populated draft values (from profile or existing draft).
- * - `editingId`             — If set, the form operates in edit mode (starts on step 7).
- * - `sponsorAgeRestriction` — Passed to Step 2 to enforce age-targeting floor.
- * - `availableCreators`     — Creator list for the Step 3 direct-invite picker.
- */
 'use client'
 
 import { useState } from 'react'
@@ -50,11 +21,6 @@ type Props = {
   availableCreators?: AvailableCreator[]
 }
 
-/**
- * Validates the required fields for a given step of the campaign wizard.
- * Returns an error message string if validation fails, or an empty string if
- * the step is valid. Steps without required fields always return ''.
- */
 function validateStep(step: number, draft: CampaignDraft): string {
   switch (step) {
     case 1:
@@ -190,7 +156,7 @@ export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRes
   return (
     <div className="space-y-6">
       {/* Step progress bar */}
-      <div className="dash-panel p-4">
+      <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] p-4 neon-glow-teal">
         <div className="flex items-center justify-between">
           {STEP_LABELS.map((label, i) => {
             const n = i + 1
@@ -201,14 +167,14 @@ export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRes
             const circle = (
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                 isActive
-                  ? 'bg-[#00c8ff] text-black shadow-[0_0_12px_rgba(0,200,255,0.5)]'
+                  ? 'bg-[#99f7ff] text-slate-900 shadow-[0_0_12px_rgba(153,247,255,0.45)]'
                   : isDone
-                    ? 'bg-[rgba(0,200,255,0.2)] text-[#00c8ff] border border-[rgba(0,200,255,0.4)]'
-                    : 'bg-white/5 text-[#2a3f55] border border-white/10'
+                    ? 'bg-[#99f7ff]/20 text-[#99f7ff] border border-[#99f7ff]/40'
+                    : 'bg-white/5 text-[#6f7785] border border-white/10'
               }`}>
                 {isDone ? (
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M2 6l3 3 5-5" stroke="#00c8ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M2 6l3 3 5-5" stroke="#99f7ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 ) : n}
               </div>
@@ -228,14 +194,14 @@ export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRes
                     </button>
                   ) : circle}
                   <span className={`text-[10px] font-medium hidden sm:block ${
-                    isActive ? 'text-[#00c8ff]' : isDone ? 'text-[#3a5570]' : 'text-[#2a3f55]'
+                    isActive ? 'text-[#99f7ff]' : isDone ? 'text-[#a9abb5]' : 'text-[#6f7785]'
                   }`}>
                     {label}
                   </span>
                 </div>
                 {n < TOTAL_STEPS && (
                   <div className={`flex-1 h-px mx-1.5 mb-4 transition-all ${
-                    isDone ? 'bg-[rgba(0,200,255,0.35)]' : 'bg-white/5'
+                    isDone ? 'bg-[#99f7ff]/35' : 'bg-white/5'
                   }`} />
                 )}
               </div>
@@ -247,16 +213,16 @@ export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRes
       {/* Step title + save draft */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-semibold dash-text-bright">
+          <h2 className="text-base font-semibold text-[#e8f4ff]">
             Step {step} — {STEP_LABELS[step - 1]}
           </h2>
-          <p className="text-xs dash-text-muted mt-0.5">{step} of {TOTAL_STEPS}</p>
+          <p className="text-xs text-[#a9abb5] mt-0.5">{step} of {TOTAL_STEPS}</p>
         </div>
         <button
           type="button"
           onClick={handleSaveDraft}
           disabled={isSavingDraft || isSubmitting}
-          className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg border dash-border dash-text-muted text-xs font-medium hover:text-[#c8dff0] hover:border-[rgba(0,200,255,0.3)] transition-colors disabled:opacity-40"
+          className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg border border-white/10 text-[#a9abb5] text-xs font-medium hover:text-[#e8f4ff] hover:border-[#99f7ff]/30 transition-colors disabled:opacity-40"
         >
           {draftSaved ? (
             <>
@@ -279,7 +245,10 @@ export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRes
 
       {/* Step content */}
       {/* Steps 1 & 4 need overflow:visible so dropdowns/calendars can escape the panel */}
-      <div className="dash-panel p-6" style={step === 1 || step === 4 ? { overflow: 'visible' } : undefined}>
+      <div
+        className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] p-6 neon-glow-teal"
+        style={step === 1 || step === 4 ? { overflow: 'visible' } : undefined}
+      >
         {step === 1 && <Step1Basics {...stepProps} error={stepError} onNext={goNext} />}
         {step === 2 && <Step2Audience {...stepProps} onNext={goNext} onBack={goBack} sponsorAgeRestriction={sponsorAgeRestriction} />}
         {step === 3 && <Step3Creators {...stepProps} onNext={goNext} onBack={goBack} availableCreators={availableCreators} />}

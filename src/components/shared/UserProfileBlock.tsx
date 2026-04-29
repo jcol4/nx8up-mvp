@@ -1,7 +1,3 @@
-/**
- * UserProfileBlock — Clerk UserButton with role-aware profile links injected as menu items.
- * Admins see both creator and sponsor profile links; creators/sponsors see only their own.
- */
 'use client'
 
 import Link from "next/link";
@@ -32,6 +28,12 @@ type Props = {
   editProfileLink?: string;
   /** Role used to show only the relevant profile link (creator → Creator profile, sponsor → Sponsor profile, admin → both) */
   role?: string;
+  /** Hide the built-in left divider/padding when parent already handles spacing */
+  showDivider?: boolean;
+  /** Slightly tighter avatar/text spacing for compact header rows */
+  compact?: boolean;
+  /** Optional class override for the edit profile link */
+  editLinkClassName?: string;
 };
 
 export default function UserProfileBlock({
@@ -40,6 +42,9 @@ export default function UserProfileBlock({
   variant = "creator",
   editProfileLink,
   role,
+  showDivider = true,
+  compact = false,
+  editLinkClassName,
 }: Props) {
   const prefix = variant === "creator" ? "cr" : variant === "sponsor" ? "sp" : "dash";
   const name = displayName || username || (variant === "creator" ? "Creator" : variant === "sponsor" ? "Sponsor" : "Admin");
@@ -47,11 +52,15 @@ export default function UserProfileBlock({
   const showSponsorProfile = role === "sponsor" || role === "admin";
 
   return (
-    <div className="flex items-center gap-2 pl-3 border-l border-white/10">
+    <div
+      className={`flex items-center ${compact ? "gap-2" : "gap-2"} ${
+        showDivider ? "pl-3 border-l border-white/10" : ""
+      }`}
+    >
       <UserButton
         appearance={{
           elements: {
-            avatarBox: "w-9 h-9 ring-2 ring-[#00c8ff]",
+            avatarBox: compact ? "w-8 h-8 ring-2 ring-[#00c8ff]" : "w-9 h-9 ring-2 ring-[#00c8ff]",
           },
         }}
       >
@@ -75,7 +84,10 @@ export default function UserProfileBlock({
       {editProfileLink ? (
         <div className="hidden sm:block text-left">
           <p className="text-sm font-medium text-white">{name}</p>
-          <Link href={editProfileLink} className={`text-xs ${prefix}-accent hover:underline`}>
+          <Link
+            href={editProfileLink}
+            className={editLinkClassName ?? `text-xs ${prefix}-accent hover:underline`}
+          >
             Edit profile →
           </Link>
         </div>

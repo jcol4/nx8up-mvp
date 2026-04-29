@@ -1,35 +1,52 @@
 /**
  * GET /api/auth/steam
  *
- * Initiates the Steam OpenID 2.0 authentication flow.
- * Redirects the user to Steam's OpenID endpoint with our return-to URL.
+ * Initiates Steam OpenID 2.0 authentication.
+ * Generates a CSRF nonce, stores it in a short-lived HttpOnly cookie,
+ * then redirects the user to Steam's login page.
  *
- * Steam OpenID is stateless from our side: the only thing that comes back
- * is a SteamID. There are no tokens, scopes, or refresh logic — the user
- * simply proves to Steam that they own a given account, and Steam tells us.
- *
+ * Steam OpenID does not require an API key — it uses the OpenID 2.0 protocol.
  * Required env vars: NEXT_PUBLIC_APP_URL
- * On success: redirects to Steam's OpenID consent screen.
- * On failure: redirects to /sign-in or returns 500.
+ *
+ * On success: redirects to Steam login.
+ * On failure: redirects to /creator/profile?steam_error=<reason>
  */
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { getSteamLoginUrl } from '@/lib/steam'
+import { randomBytes } from 'crypto'
+import { cookies } from 'next/headers'
 
-/** Redirects authenticated users to Steam's OpenID consent screen. */
+const STEAM_OPENID_URL = 'https://steamcommunity.com/openid/login'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL!
+
 export async function GET() {
   const { userId } = await auth()
   if (!userId) {
-    return NextResponse.redirect(new URL('/sign-in', process.env.NEXT_PUBLIC_APP_URL!))
+    return NextResponse.redirect(`${APP_URL}/sign-in`)
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL
-  if (!appUrl) {
-    console.error('Missing NEXT_PUBLIC_APP_URL')
-    return NextResponse.json({ error: 'OAuth not configured' }, { status: 500 })
-  }
+  // Generate a nonce to prevent CSRF / replay attacks
+  const nonce = randomBytes(16).toString('hex')
 
-  const returnTo = new URL('/api/auth/steam/callback', appUrl).toString()
-  const loginUrl = getSteamLoginUrl(returnTo)
-  return NextResponse.redirect(loginUrl)
+  const cookieStore = await cookies()
+  cookieStore.set('steam_openid_nonce', nonce, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 10, // 10 minutes
+    path: '/',
+  })
+
+  const returnTo = `${APP_URL}/api/auth/steam/callback?nonce=${nonce}`
+
+  const params = new URLSearchParams({
+    'openid.ns': 'http://specs.openid.net/auth/2.0',
+    'openid.mode': 'checkid_setup',
+    'openid.return_to': returnTo,
+    'openid.realm': APP_URL,
+    'openid.identity': 'http://specs.openid.net/auth/2.0/identifier_select',
+    'openid.claimed_id': 'http://specs.openid.net/auth/2.0/identifier_select',
+  })
+
+  return NextResponse.redirect(`${STEAM_OPENID_URL}?${params.toString()}`)
 }

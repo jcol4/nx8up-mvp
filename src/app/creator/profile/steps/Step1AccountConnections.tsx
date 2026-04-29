@@ -70,16 +70,7 @@
 // }
 
 
-/**
- * Step 1 — Account Connections (profile wizard).
- *
- * Renders the Twitch, YouTube, and Steam OAuth connection widgets.
- *
- * OAuth linking is handled by dedicated routes:
- *  - Twitch: `/api/auth/twitch`
- *  - YouTube: `/api/auth/google`
- *  - Steam:  `/api/auth/steam` (OpenID 2.0, not OAuth)
- */
+
 'use client'
 
 import { Suspense } from 'react'
@@ -106,11 +97,11 @@ type YouTubeData = {
 
 type SteamData = {
   steam_id: string | null
-  username: string | null
-  profile_url: string | null
-  avatar_url: string | null
-  visibility: number | null
-  synced_at: Date | null
+  steam_username: string | null
+  steam_profile_url: string | null
+  steam_avatar_url: string | null
+  steam_profile_visibility: number | null
+  steam_synced_at: Date | null
 }
 
 type Props = {

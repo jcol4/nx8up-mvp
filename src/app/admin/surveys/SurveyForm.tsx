@@ -175,43 +175,48 @@ export default function SurveyForm({
   }
 
   return (
-    <div className="p-6 max-w-3xl space-y-8">
-      <div>
-        <h1 className="text-xl font-semibold dash-text-bright">
+    <div className="flex-1 overflow-auto p-6 sm:p-8">
+      <div className="mx-auto max-w-5xl space-y-6">
+      <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+        <p className="text-[11px] uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
+        <h1 className="mt-1 font-headline text-2xl font-semibold text-[#e8f4ff]">
           {isEdit ? 'Edit Survey' : 'New Survey'}
         </h1>
+        <p className="mt-1 text-sm text-[#c4cad6]">
+          Build clear survey questions and publish to creators and/or sponsors.
+        </p>
       </div>
 
       {error && (
-        <div className="px-4 py-3 rounded-lg bg-red-500/10 text-red-400 text-sm">{error}</div>
+        <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>
       )}
 
-      <div className="dash-panel p-5 space-y-4">
-        <h2 className="text-sm font-semibold dash-text-bright">Survey Details</h2>
+      <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-5 space-y-4">
+        <h2 className="text-sm font-semibold text-[#e8f4ff]">Survey Details</h2>
 
         <div className="space-y-1">
-          <label className="text-xs dash-text-muted font-medium">Title *</label>
+          <label className="text-xs font-medium text-[#b9c5d8]">Title *</label>
           <input
             value={title}
             onChange={e => setTitle(e.target.value)}
             placeholder="Enter survey title"
-            className="w-full px-3 py-2 rounded-lg text-sm dash-text-bright bg-white/5 border dash-border focus:border-[#00c8ff]/50 outline-none placeholder:dash-text-muted transition-colors"
+            className="w-full rounded-lg border border-white/12 bg-black/20 px-3 py-2 text-sm text-[#e8f4ff] outline-none transition-colors placeholder:text-[#8f97ab] focus:border-[#99f7ff]/55"
           />
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs dash-text-muted font-medium">Description</label>
+          <label className="text-xs font-medium text-[#b9c5d8]">Description</label>
           <textarea
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder="Optional description shown to users"
             rows={2}
-            className="w-full px-3 py-2 rounded-lg text-sm dash-text-bright bg-white/5 border dash-border focus:border-[#00c8ff]/50 outline-none placeholder:dash-text-muted transition-colors resize-none"
+            className="w-full resize-none rounded-lg border border-white/12 bg-black/20 px-3 py-2 text-sm text-[#e8f4ff] outline-none transition-colors placeholder:text-[#8f97ab] focus:border-[#99f7ff]/55"
           />
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs dash-text-muted font-medium">Target Roles *</label>
+          <label className="text-xs font-medium text-[#b9c5d8]">Target Roles *</label>
           <div className="flex gap-4">
             {['creator', 'sponsor'].map(r => (
               <label key={r} className="flex items-center gap-2 cursor-pointer select-none">
@@ -221,18 +226,18 @@ export default function SurveyForm({
                   onChange={() => toggleRole(r)}
                   className="accent-[#00c8ff]"
                 />
-                <span className="text-sm dash-text-bright capitalize">{r}</span>
+                <span className="text-sm capitalize text-[#e8f4ff]">{r}</span>
               </label>
             ))}
           </div>
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs dash-text-muted font-medium">Status</label>
+          <label className="text-xs font-medium text-[#b9c5d8]">Status</label>
           <select
             value={status}
             onChange={e => setStatus(e.target.value)}
-            className="px-3 py-2 rounded-lg text-sm dash-text-bright bg-[#0a1223] border dash-border focus:border-[#00c8ff]/50 outline-none transition-colors"
+            className="rounded-lg border border-white/12 bg-[#0a1223] px-3 py-2 text-sm text-[#e8f4ff] outline-none transition-colors focus:border-[#99f7ff]/55"
           >
             <option value="draft">Draft</option>
             <option value="active">Active</option>
@@ -241,13 +246,13 @@ export default function SurveyForm({
         </div>
       </div>
 
-      <div className="dash-panel p-5 space-y-4">
+      <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold dash-text-bright">Questions</h2>
+          <h2 className="text-sm font-semibold text-[#e8f4ff]">Questions</h2>
           <button
             type="button"
             onClick={addQuestion}
-            className="text-xs dash-accent hover:underline"
+            className="text-xs font-medium text-[#99f7ff] transition-colors hover:text-[#d7fbff]"
           >
             + Add question
           </button>
@@ -255,15 +260,15 @@ export default function SurveyForm({
 
         <div className="space-y-6">
           {questions.map((q, idx) => (
-            <div key={q.localId} className="border dash-border rounded-lg p-4 space-y-3">
+            <div key={q.localId} className="space-y-3 rounded-lg border border-white/12 bg-black/20 p-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs dash-text-muted font-medium">Question {idx + 1}</span>
+                <span className="text-xs font-medium text-[#b9c5d8]">Question {idx + 1}</span>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => moveQuestion(q.localId, -1)}
                     disabled={idx === 0}
-                    className="p-1 dash-text-muted hover:dash-text-bright disabled:opacity-30 transition-colors"
+                    className="p-1 text-[#a9abb5] transition-colors hover:text-[#e8f4ff] disabled:opacity-30"
                     aria-label="Move up"
                   >
                     ↑
@@ -272,7 +277,7 @@ export default function SurveyForm({
                     type="button"
                     onClick={() => moveQuestion(q.localId, 1)}
                     disabled={idx === questions.length - 1}
-                    className="p-1 dash-text-muted hover:dash-text-bright disabled:opacity-30 transition-colors"
+                    className="p-1 text-[#a9abb5] transition-colors hover:text-[#e8f4ff] disabled:opacity-30"
                     aria-label="Move down"
                   >
                     ↓
@@ -293,18 +298,18 @@ export default function SurveyForm({
                 value={q.text}
                 onChange={e => updateQuestion(q.localId, { text: e.target.value })}
                 placeholder="Question text"
-                className="w-full px-3 py-2 rounded-lg text-sm dash-text-bright bg-white/5 border dash-border focus:border-[#00c8ff]/50 outline-none placeholder:dash-text-muted transition-colors"
+                className="w-full rounded-lg border border-white/12 bg-black/20 px-3 py-2 text-sm text-[#e8f4ff] outline-none transition-colors placeholder:text-[#8f97ab] focus:border-[#99f7ff]/55"
               />
 
               <div className="space-y-2">
-                <p className="text-xs dash-text-muted">Options ({q.options.length}/6)</p>
+                <p className="text-xs text-[#b9c5d8]">Options ({q.options.length}/6)</p>
                 {q.options.map((opt, oi) => (
                   <div key={oi} className="flex gap-2">
                     <input
                       value={opt}
                       onChange={e => updateOption(q.localId, oi, e.target.value)}
                       placeholder={`Option ${oi + 1}`}
-                      className="flex-1 px-3 py-1.5 rounded-lg text-sm dash-text-bright bg-white/5 border dash-border focus:border-[#00c8ff]/50 outline-none placeholder:dash-text-muted transition-colors"
+                      className="flex-1 rounded-lg border border-white/12 bg-black/20 px-3 py-1.5 text-sm text-[#e8f4ff] outline-none transition-colors placeholder:text-[#8f97ab] focus:border-[#99f7ff]/55"
                     />
                     <button
                       type="button"
@@ -320,7 +325,7 @@ export default function SurveyForm({
                   <button
                     type="button"
                     onClick={() => addOption(q.localId)}
-                    className="text-xs dash-text-muted hover:dash-accent transition-colors"
+                    className="text-xs text-[#a9abb5] transition-colors hover:text-[#99f7ff]"
                   >
                     + Add option
                   </button>
@@ -336,7 +341,7 @@ export default function SurveyForm({
           type="button"
           onClick={() => handleSubmit()}
           disabled={saving}
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-white/10 dash-text-bright hover:bg-white/15 disabled:opacity-50 transition-colors"
+          className="rounded-lg border border-white/14 bg-white/10 px-4 py-2 text-sm font-medium text-[#e8f4ff] transition-colors hover:bg-white/15 disabled:opacity-50"
         >
           {saving ? 'Saving…' : 'Save as Draft'}
         </button>
@@ -344,7 +349,7 @@ export default function SurveyForm({
           type="button"
           onClick={() => handleSubmit('active')}
           disabled={saving}
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-[#00c8ff] text-black hover:bg-[#00b8ef] disabled:opacity-50 transition-colors"
+          className="rounded-lg border border-[#99f7ff]/45 bg-[#99f7ff]/15 px-4 py-2 text-sm font-semibold text-[#bffcff] transition hover:border-[#99f7ff]/70 hover:bg-[#99f7ff]/22 hover:text-[#e8f4ff] disabled:opacity-50"
         >
           {saving ? 'Saving…' : 'Publish'}
         </button>
@@ -356,6 +361,7 @@ export default function SurveyForm({
         >
           Cancel
         </button>
+      </div>
       </div>
     </div>
   )

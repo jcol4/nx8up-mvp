@@ -1,21 +1,3 @@
-/**
- * Admin submission review controls for the deal room detail page.
- *
- * Client component that renders:
- *  - A textarea for optional review notes (included in the creator notification
- *    and stored as `admin_notes` on the submission).
- *  - "Approve & Send to Sponsor" button — calls `adminReviewSubmission` with
- *    decision `"admin_verified"`.
- *  - "Reject" button — calls `adminReviewSubmission` with decision
- *    `"admin_rejected"`.
- *
- * Uses `useTransition` to show a pending state (`"…"`) on both buttons while
- * the server action is in flight. On success the page is refreshed via
- * `router.refresh()` so the parent server component re-renders with the updated
- * submission status (hiding the review form and showing the outcome banner).
- *
- * Errors returned by the server action are displayed as inline red text.
- */
 'use client'
 
 import { useState, useTransition } from 'react'
@@ -30,7 +12,6 @@ export default function AdminReviewButtons({ applicationId }: Props) {
   const [notes, setNotes] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  /** Invokes the server action inside a React transition to track pending state. */
   function act(decision: 'admin_verified' | 'admin_rejected') {
     startTransition(async () => {
       const result = await adminReviewSubmission(applicationId, decision, notes || undefined)
