@@ -117,9 +117,11 @@ export default function SignInPage() {
 
     try {
       const result = await signIn.create({ identifier: identifier.trim(), password })
+      console.log('[sign-in] result.status:', result.status)
 
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId })
+        console.log('[sign-in] clerk.user after setActive:', clerk.user, 'role:', clerk.user?.publicMetadata?.role)
         redirectByRole()
         return
       } else if (result.status === 'needs_second_factor') {
