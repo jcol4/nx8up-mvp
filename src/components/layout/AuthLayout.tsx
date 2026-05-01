@@ -45,10 +45,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         .nx-topbar {
           position: fixed;
           top: 0; left: 0; right: 0;
-          height: 56px;
-          background: rgba(6,13,24,0.9);
+          height: 64px;
+          background: rgba(6,13,24,1);
           border-bottom: 1px solid rgba(0,200,255,0.12);
-          backdrop-filter: blur(12px);
           display: flex;
           align-items: center;
           padding: 0 2rem;
