@@ -44,6 +44,7 @@ export default async function CreatorDashboardPage() {
       id: string
       title: string
       budget: number | null
+      start_date: Date | null
       end_date: Date | null
       sponsor: { company_name: string | null }
     }
@@ -98,6 +99,7 @@ export default async function CreatorDashboardPage() {
                 id: true,
                 title: true,
                 budget: true,
+                start_date: true,
                 end_date: true,
                 sponsor: { select: { company_name: true } },
               },

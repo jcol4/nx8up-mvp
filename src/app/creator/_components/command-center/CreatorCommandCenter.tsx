@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
@@ -38,6 +38,7 @@ type Application = {
     id: string
     title: string
     budget: number | null
+    start_date: Date | string | null
     end_date: Date | string | null
     sponsor: { company_name: string | null }
   }
@@ -74,6 +75,7 @@ type CalendarEvent = {
   label: string
   color: 'primary' | 'secondary' | 'neutral'
   strong?: boolean
+  past?: boolean
 }
 type CalendarGridCell = {
   date: Date
@@ -135,11 +137,26 @@ function withSameDayInMonth(baseDate: Date, targetYear: number, targetMonth: num
 
 const calendarDays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 
-const eventByMonthDay: Record<string, CalendarEvent[]> = {
-  '10-05': [{ label: 'NIKE DROP REEL', color: 'primary' }],
-  '10-07': [{ label: 'LIVE STREAM #12', color: 'secondary' }],
-  '10-08': [{ label: 'DEAL REVIEW', color: 'primary', strong: true }, { label: '14:00 SYNC', color: 'neutral' }],
-  '10-18': [{ label: 'BRAND REVIEW', color: 'secondary' }],
+function buildCampaignEventMap(applications: Application[]): Record<string, CalendarEvent[]> {
+  const map: Record<string, CalendarEvent[]> = {}
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const add = (dateVal: Date | string | null, event: CalendarEvent) => {
+    if (!dateVal) return
+    const d = new Date(dateVal)
+    if (isNaN(d.getTime())) return
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    const past = d < today
+    map[key] = [...(map[key] ?? []), { ...event, past }]
+  }
+  for (const app of applications) {
+    if (app.status !== 'accepted' && app.status !== 'pending') continue
+    const color: CalendarEvent['color'] = app.status === 'accepted' ? 'primary' : 'secondary'
+    const title = app.campaign.title.toUpperCase()
+    add(app.campaign.start_date, { label: `${title} START`, color })
+    add(app.campaign.end_date, { label: `${title} END`, color, strong: true })
+  }
+  return map
 }
 
 const MISSIONS = [
@@ -323,8 +340,6 @@ export default function CreatorCommandCenter({
 
   const selectedDateKey = toDateKey(selectedDate)
   const selectedDayNotes = calendarTasks[selectedDateKey] ?? []
-  const selectedMonthDayKey = `${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`
-  const selectedDayEvents = eventByMonthDay[selectedMonthDayKey]?.length ?? 0
 
   const monthLabel = viewDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase()
   const weekStart = startOfWeek(selectedDate)
@@ -385,9 +400,11 @@ export default function CreatorCommandCenter({
     return calendarTasks[toDateKey(date)]?.length ?? 0
   }
 
+  const campaignEventMap = useMemo(() => buildCampaignEventMap(applications), [applications])
+  const selectedDayEvents = (campaignEventMap[toDateKey(selectedDate)] ?? []).length
+
   const getEventsForDate = (date: Date): CalendarEvent[] => {
-    const key = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-    return eventByMonthDay[key] ?? []
+    return campaignEventMap[toDateKey(date)] ?? []
   }
 
   const handlePrevPeriod = () => {
@@ -688,6 +705,11 @@ export default function CreatorCommandCenter({
                         <span className="rounded-sm border border-[#d873ff]/40 bg-[#d873ff]/10 px-2 py-1 text-[9px] uppercase tracking-widest text-[#d873ff]">
                           {selectedDayNotes.length} Notes
                         </span>
+                        {selectedDayEvents > 0 && (
+                          <span className="rounded-sm border border-[#99f7ff]/40 bg-[#99f7ff]/10 px-2 py-1 text-[9px] uppercase tracking-widest text-[#99f7ff]">
+                            {selectedDayEvents} Campaign Event{selectedDayEvents !== 1 ? 's' : ''}
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -718,6 +740,20 @@ export default function CreatorCommandCenter({
                     </div>
 
                     <div className="calendar-notes-scroll max-h-[360px] space-y-2 overflow-y-auto rounded-lg border border-white/10 bg-slate-950/70 p-2 pr-1">
+                      {getEventsForDate(selectedDate).map((event) => (
+                        <div
+                          key={event.label}
+                          className={`rounded-lg border-l-2 p-3 text-[11px] font-semibold uppercase tracking-widest ${
+                            event.past
+                              ? 'border-white/15 bg-white/[0.03] text-slate-600 line-through'
+                              : event.color === 'primary'
+                                ? 'border-[#99f7ff] bg-[#99f7ff]/10 text-[#99f7ff]'
+                                : 'border-[#d873ff] bg-[#d873ff]/10 text-[#d873ff]'
+                          }`}
+                        >
+                          {event.label}
+                        </div>
+                      ))}
                       {selectedDayNotes.length > 0 ? (
                         selectedDayNotes.map((note, index) => (
                           <div key={note.id} className="group rounded-lg border border-white/10 bg-white/[0.03] p-3">
@@ -794,11 +830,11 @@ export default function CreatorCommandCenter({
                             </div>
                           </div>
                         ))
-                      ) : (
+                      ) : selectedDayEvents === 0 ? (
                         <div className="rounded-lg border border-dashed border-white/10 bg-black/20 p-3">
                           <p className="text-xs text-slate-500">No log entries for this day yet.</p>
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   </aside>
                 </div>
@@ -926,13 +962,14 @@ function CalendarGrid({
           {day}
         </div>
       ))}
-      {cells.map((cell, idx) => (
+      {cells.map((cell, idx) => {
+        const cellEvents = getEventsForDate(cell.date)
+        return (
         <button
           key={`${view}-${toDateKey(cell.date)}-${idx}`}
           type="button"
           onClick={() => !cell.muted && onSelectDate(cell.date)}
-          className={`${isWeek ? 'min-h-56 p-3' : 'min-h-24 p-2'} border-r border-b border-white/5 text-left transition-[background-color] duration-100 [will-change:background-color] ${getEventsForDate(cell.date).length > 0 ? 'bg-[#99f7ff]/5' : 'bg-black/50'
-            } ${isSelectedDate(cell.date) && !cell.muted ? 'ring-1 ring-[#99f7ff]/35' : ''} ${isTodayDate(cell.date) && !cell.muted ? 'ring-1 ring-[#d873ff]/45 shadow-[inset_0_0_0_1px_rgba(216,115,255,0.2)]' : ''
+          className={`${isWeek ? 'min-h-56 p-3' : 'min-h-24 p-2'} border-r border-b border-white/5 text-left transition-[background-color] duration-100 [will-change:background-color] bg-black/50 ${isSelectedDate(cell.date) && !cell.muted ? 'ring-1 ring-[#99f7ff]/35' : ''} ${isTodayDate(cell.date) && !cell.muted ? 'ring-1 ring-[#d873ff]/45 shadow-[inset_0_0_0_1px_rgba(216,115,255,0.2)]' : ''
             } ${cell.muted ? 'cursor-default' : 'hover:bg-white/[0.03]'}`}
         >
           <div className="flex items-start justify-between gap-2">
@@ -941,9 +978,7 @@ function CalendarGrid({
                 ? 'text-slate-700'
                 : isTodayDate(cell.date)
                   ? 'font-headline font-bold text-[#d873ff]'
-                  : getEventsForDate(cell.date).length > 0
-                    ? 'font-headline font-bold text-[#99f7ff]'
-                    : 'text-slate-100'
+                  : 'text-slate-100'
                 }`}
             >
               {cell.day}
@@ -959,11 +994,12 @@ function CalendarGrid({
               </span>
             ) : null}
           </div>
-          {(isWeek ? getEventsForDate(cell.date) : getEventsForDate(cell.date).slice(0, 1))?.map((event) => (
+          {(isWeek ? cellEvents : cellEvents.slice(0, 1)).map((event) => (
             <EventTag
               key={`${toDateKey(cell.date)}-${event.label}`}
               color={event.color}
               strong={event.strong}
+              past={event.past}
               label={event.label}
               compact={!isWeek}
             />
@@ -974,7 +1010,8 @@ function CalendarGrid({
             </div>
           ) : null}
         </button>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -984,21 +1021,24 @@ function EventTag({
   color,
   strong,
   compact,
+  past,
 }: {
   label: string
   color: CalendarEvent['color']
   strong?: boolean
   compact?: boolean
+  past?: boolean
 }) {
-  const styles =
-    color === 'primary'
+  const styles = past
+    ? 'bg-white/[0.03] text-slate-600 border-white/15 line-through'
+    : color === 'primary'
       ? 'bg-[#99f7ff]/20 text-[#99f7ff] border-[#99f7ff]'
       : color === 'secondary'
         ? 'bg-[#d873ff]/20 text-[#d873ff] border-[#d873ff]'
         : 'bg-white/5 text-slate-400 border-white/30'
 
   return (
-    <div className={`${compact ? 'mt-1 p-1 text-[7.5px]' : 'mt-2 p-1.5 text-[8px]'} rounded border-l-2 leading-tight ${strong ? 'font-bold' : ''} ${styles}`}>
+    <div className={`${compact ? 'mt-1 p-1 text-[7.5px]' : 'mt-2 p-1.5 text-[8px]'} rounded border-l-2 leading-tight ${strong && !past ? 'font-bold' : ''} ${styles}`}>
       {label}
     </div>
   )

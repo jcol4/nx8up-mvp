@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
   })
 
   if (!tokenRes.ok) {
-    console.error('Google token exchange failed:', await tokenRes.text())
+    console.error('Google token exchange failed:', tokenRes.status)
     return redirectWithError('Failed to exchange authorization code.')
   }
 
@@ -104,7 +104,7 @@ export async function GET(req: NextRequest) {
   )
 
   if (!channelRes.ok) {
-    console.error('YouTube channel fetch failed:', await channelRes.text())
+    console.error('YouTube channel fetch failed:', channelRes.status)
     return redirectWithError('Failed to fetch YouTube channel data.')
   }
 

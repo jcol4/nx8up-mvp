@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
   })
 
   if (!tokenRes.ok) {
-    console.error('Twitch token exchange failed:', await tokenRes.text())
+    console.error('Twitch token exchange failed:', tokenRes.status)
     return redirectWithError('Failed to exchange authorization code.')
   }
 
@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
   })
 
   if (!userRes.ok) {
-    console.error('Twitch user fetch failed:', await userRes.text())
+    console.error('Twitch user fetch failed:', userRes.status)
     return redirectWithError('Failed to fetch Twitch user data.')
   }
 
