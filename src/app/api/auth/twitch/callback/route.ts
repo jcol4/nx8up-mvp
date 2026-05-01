@@ -15,9 +15,9 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import { encryptToken } from '@/lib/token-encryption'
+import { validateCsrfCookie, triggerCtrRecomputeForUser } from '@/lib/oauth-callback-utils'
 
 const TWITCH_TOKEN_URL = 'https://id.twitch.tv/oauth2/token'
 const TWITCH_API_BASE = 'https://api.twitch.tv/helix'
@@ -47,12 +47,7 @@ export async function GET(req: NextRequest) {
     return redirectWithError('Invalid callback parameters.')
   }
 
-  // Validate state against cookie
-  const cookieStore = await cookies()
-  const savedState = cookieStore.get('twitch_oauth_state')?.value
-  cookieStore.delete('twitch_oauth_state')
-
-  if (!savedState || savedState !== state) {
+  if (!await validateCsrfCookie('twitch_oauth_state', state)) {
     return redirectWithError('State mismatch. Please try again.')
   }
 
@@ -223,15 +218,7 @@ export async function GET(req: NextRequest) {
     },
   })
 
-  // Refresh aggregate CTR from already-stored per-submission CTRs (DB-only, no extra API calls)
-  const { recomputeCreatorAggregateCtr } = await import('@/lib/ctr')
-  const creator = await prisma.content_creators.findUnique({
-    where: { clerk_user_id: userId },
-    select: { id: true },
-  })
-  if (creator) {
-    recomputeCreatorAggregateCtr(creator.id).catch(console.error)
-  }
+  triggerCtrRecomputeForUser(userId).catch(console.error)
 
   return NextResponse.redirect(`${APP_URL}/creator/profile?twitch_linked=1`)
 }

@@ -11,44 +11,7 @@
  */
 import { prisma } from './prisma'
 import { getAppToken } from './twitch'
-
-// ── URL parsers (mirrors verify-proof-url.ts — kept local to avoid coupling) ─
-
-/** Extracts a YouTube video ID from any supported URL format (watch, youtu.be, shorts, live, embed). */
-function extractYouTubeVideoId(rawUrl: string): string | null {
-  try {
-    const url = new URL(rawUrl)
-    const { hostname, pathname, searchParams } = url
-    if (hostname === 'youtu.be') return pathname.slice(1).split('/')[0] || null
-    if (hostname === 'youtube.com' || hostname === 'www.youtube.com') {
-      if (pathname.startsWith('/watch')) return searchParams.get('v')
-      const m = pathname.match(/^\/(shorts|live|embed)\/([^/?]+)/)
-      if (m) return m[2]
-    }
-  } catch {}
-  return null
-}
-
-/** Extracts a Twitch VOD or clip ID from any supported URL format (twitch.tv/videos, /clip/, clips.twitch.tv). */
-function extractTwitchVideoId(rawUrl: string): { type: 'vod' | 'clip'; id: string } | null {
-  try {
-    const url = new URL(rawUrl)
-    const { hostname, pathname } = url
-    if (hostname === 'twitch.tv' || hostname === 'www.twitch.tv') {
-      const vod = pathname.match(/^\/videos\/(\d+)/)
-      if (vod) return { type: 'vod', id: vod[1] }
-      const clip = pathname.match(/^\/[^/]+\/clip\/([^/?]+)/)
-      if (clip) return { type: 'clip', id: clip[1] }
-    }
-    if (hostname === 'clips.twitch.tv') {
-      const id = pathname.slice(1).split('/')[0]
-      if (id) return { type: 'clip', id }
-    }
-  } catch {}
-  return null
-}
-
-
+import { extractYouTubeVideoId, extractTwitchVideoId } from './url-parsers'
 
 // ── View count fetcher ───────────────────────────────────────────────────────
 
@@ -64,7 +27,7 @@ async function fetchViewsForUrl(rawUrl: string): Promise<number | null> {
     if (hostname === 'youtube.com' || hostname === 'www.youtube.com' || hostname === 'youtu.be') {
       const apiKey = process.env.YOUTUBE_API_KEY
       if (!apiKey) return null
-      const videoId = extractYouTubeVideoId(rawUrl)
+      const videoId = extractYouTubeVideoId(url)
       if (!videoId) return null
       const res = await fetch(
         `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${encodeURIComponent(videoId)}&key=${apiKey}`,
@@ -77,7 +40,7 @@ async function fetchViewsForUrl(rawUrl: string): Promise<number | null> {
     }
 
     if (hostname === 'twitch.tv' || hostname === 'www.twitch.tv' || hostname === 'clips.twitch.tv') {
-      const parsed = extractTwitchVideoId(rawUrl)
+      const parsed = extractTwitchVideoId(url)
       if (!parsed) return null
       const token = await getAppToken()
       const endpoint =

@@ -11,6 +11,7 @@
  */
 
 import { getAppToken } from './twitch'
+import { extractYouTubeVideoId, extractTwitchVideoId } from './url-parsers'
 
 /** Discriminated union returned by verifyProofUrl and its internal helpers. */
 export type VerifyResult =
@@ -22,36 +23,6 @@ export type VerifyResult =
 type CreatorIds = {
   twitch_id: string | null
   youtube_channel_id: string | null
-}
-
-// ── URL parsers ──────────────────────────────────────────────────────────────
-
-/** Extracts a YouTube video ID from a pre-parsed URL object. Supports watch, youtu.be, shorts, live, embed. */
-function extractYouTubeVideoId(url: URL): string | null {
-  const { hostname, pathname, searchParams } = url
-  if (hostname === 'youtu.be') return pathname.slice(1).split('/')[0] || null
-  if (hostname === 'youtube.com' || hostname === 'www.youtube.com') {
-    if (pathname.startsWith('/watch')) return searchParams.get('v')
-    const shortMatch = pathname.match(/^\/(shorts|live|embed)\/([^/?]+)/)
-    if (shortMatch) return shortMatch[2]
-  }
-  return null
-}
-
-/** Extracts a Twitch VOD or clip ID from a pre-parsed URL object. Supports /videos/, /clip/, and clips.twitch.tv. */
-function extractTwitchVideoId(url: URL): { type: 'vod'; id: string } | { type: 'clip'; id: string } | null {
-  const { hostname, pathname } = url
-  if (hostname === 'twitch.tv' || hostname === 'www.twitch.tv') {
-    const vodMatch = pathname.match(/^\/videos\/(\d+)/)
-    if (vodMatch) return { type: 'vod', id: vodMatch[1] }
-    const clipMatch = pathname.match(/^\/[^/]+\/clip\/([^/?]+)/)
-    if (clipMatch) return { type: 'clip', id: clipMatch[1] }
-  }
-  if (hostname === 'clips.twitch.tv') {
-    const clipId = pathname.slice(1).split('/')[0]
-    if (clipId) return { type: 'clip', id: clipId }
-  }
-  return null
 }
 
 // ── Platform verifiers ───────────────────────────────────────────────────────

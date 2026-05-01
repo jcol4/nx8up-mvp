@@ -17,8 +17,8 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
+import { validateCsrfCookie } from '@/lib/oauth-callback-utils'
 import { Prisma } from '@prisma/client'
 import { getPlayerSummary, getOwnedGames, getRecentlyPlayedGames } from '@/lib/steam'
 
@@ -64,13 +64,8 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = req.nextUrl
 
-  // Validate nonce cookie
   const nonce = searchParams.get('nonce')
-  const cookieStore = await cookies()
-  const savedNonce = cookieStore.get('steam_openid_nonce')?.value
-  cookieStore.delete('steam_openid_nonce')
-
-  if (!nonce || !savedNonce || nonce !== savedNonce) {
+  if (!await validateCsrfCookie('steam_openid_nonce', nonce)) {
     return redirectWithError('Invalid session. Please try again.')
   }
 
