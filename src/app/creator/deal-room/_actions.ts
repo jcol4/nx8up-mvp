@@ -181,12 +181,17 @@ export async function submitProof(
 
   const warning = warnings.length > 0 ? warnings[0] : undefined
 
+  const screenshotUrl = data.screenshot_url.trim()
+  if (screenshotUrl && !/^https:\/\//i.test(screenshotUrl)) {
+    return { error: 'Screenshot URL must begin with https://' }
+  }
+
   await prisma.deal_submissions.upsert({
     where: { application_id: applicationId },
     create: {
       application_id: applicationId,
       proof_urls: urls,
-      screenshot_url: data.screenshot_url.trim() || null,
+      screenshot_url: screenshotUrl || null,
       posted_at: new Date(data.posted_at),
       disclosure_confirmed: true,
       submitted_at: new Date(),
@@ -194,7 +199,7 @@ export async function submitProof(
     },
     update: {
       proof_urls: urls,
-      screenshot_url: data.screenshot_url.trim() || null,
+      screenshot_url: screenshotUrl || null,
       posted_at: new Date(data.posted_at),
       disclosure_confirmed: true,
       submitted_at: new Date(),

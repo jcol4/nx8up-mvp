@@ -368,37 +368,6 @@ export async function unlinkTwitchAccount() {
   }
 }
 
-export async function linkSteamAccount(data: {
-  steam_id: string
-  steam_username: string
-  steam_profile_url: string
-  steam_avatar_url: string
-  steam_profile_visibility: number
-}) {
-  const { userId } = await auth()
-  if (!userId) return { error: 'Not authenticated' }
-
-  try {
-    await prisma.content_creators.update({
-      where: { clerk_user_id: userId },
-      data: {
-        steam_id: data.steam_id,
-        steam_username: data.steam_username,
-        steam_profile_url: data.steam_profile_url,
-        steam_avatar_url: data.steam_avatar_url,
-        steam_profile_visibility: data.steam_profile_visibility,
-        steam_synced_at: new Date(),
-        updated_at: new Date(),
-      },
-    })
-    revalidatePath('/creator/profile')
-    return { success: true }
-  } catch (err: any) {
-    console.error('linkSteamAccount error:', err)
-    return { error: 'Failed to save Steam account.' }
-  }
-}
-
 export async function unlinkSteamAccount() {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
