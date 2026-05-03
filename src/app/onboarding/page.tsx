@@ -1,62 +1,50 @@
 /**
  * @file onboarding/page.tsx
  *
- * Client-side onboarding page. Shown to every newly-registered user before
- * they access any role-specific dashboard.
- *
- * The page collects two pieces of information in a single-step form:
- *   1. Date of birth – forwarded to the server action for age verification
- *      (must be 18+).
- *   2. Role – "creator" or "sponsor", used to create the appropriate DB
- *      record and set Clerk public metadata.
- *
- * Flow:
- *   Submit → `completeOnboarding` server action → on success, reload the
- *   Clerk user so updated public metadata is available client-side, then
- *   redirect to /creator or /sponsor based on the returned role.
- *
- * External services: Clerk (useUser / session reload)
- *
- * Gotcha: The XP-bar progress indicator is hard-coded to "Step 1 / 1" and
- * 50 % fill, which is visually misleading — it implies a multi-step flow
- * but there is only one step.
+ * Client-side onboarding: date of birth (18+) and role (creator | sponsor).
  */
 'use client'
 
 import * as React from 'react'
-import { useUser } from '@clerk/nextjs'
+import { useClerk, useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { completeOnboarding } from './_actions'
 import { AuthLayout } from '@/components/layout'
-import { NXDatePicker } from '@/components/ui'
-
+import { BirthdateSelect } from '@/components/ui'
 
 export default function OnboardingComponent() {
   const [error, setError] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
   const { user } = useUser()
+  const { signOut } = useClerk()
   const router = useRouter()
 
-  /**
-   * Form action handler passed directly to `<form action={...}>`.
-   *
-   * On success the Clerk session is reloaded so that updated public metadata
-   * (role, onboardingComplete) is immediately accessible to client-side
-   * hooks, then the user is routed to their role dashboard.
-   *
-   * On failure the returned error string is surfaced in the UI and the
-   * loading spinner is cleared. Note: if the server action succeeds but
-   * returns no role (unexpected), the user falls back to `/`.
-   */
+  const maxDob = React.useMemo(() => new Date().toISOString().split('T')[0], [])
+  const minDob = React.useMemo(() => {
+    const d = new Date()
+    d.setFullYear(d.getFullYear() - 120)
+    return d.toISOString().split('T')[0]
+  }, [])
   const handleSubmit = async (formData: FormData) => {
-    setIsLoading(true)
     setError('')
+    const dob = formData.get('userDateOfBirth') as string | null
+    const role = formData.get('role') as string | null
+    if (!dob?.trim()) {
+      setError('Select your date of birth.')
+      return
+    }
+    if (!role) {
+      setError('Choose Creator or Sponsor.')
+      return
+    }
+
+    setIsLoading(true)
     const res = await completeOnboarding(formData)
     if (res?.message) {
       await user?.reload()
-      const role = (res.message as any)?.role
-      if (role === 'creator') router.push('/creator')
-      else if (role === 'sponsor') router.push('/sponsor')
+      const roleFromRes = (res.message as { role?: string })?.role
+      if (roleFromRes === 'creator') router.push('/creator')
+      else if (roleFromRes === 'sponsor') router.push('/sponsor')
       else router.push('/')
     }
     if (res?.error) {
@@ -65,76 +53,108 @@ export default function OnboardingComponent() {
     }
   }
 
+  const roleCardClass =
+    'flex cursor-pointer items-start gap-3 rounded-lg border border-white/[0.12] bg-[rgb(0_0_0_/0.22)] px-3 py-3 transition-colors hover:border-[#99f7ff]/30 has-[:checked]:border-[#99f7ff]/50 has-[:checked]:bg-[#99f7ff]/[0.07]'
+
   return (
     <AuthLayout>
-      <div className="nx-badge">Age Verification</div>
-      <h1 className="nx-title">Access <span>Protocol</span></h1>
+      <h1 className="nx-title">
+        Account <span>setup</span>
+      </h1>
       <p className="nx-subtitle">
-        nx8up is restricted to users 18 and older. Confirm your date of birth to unlock your account and begin your missions.
+        Confirm your age and choose your account type to continue.
       </p>
 
       <div className="nx-divider" />
 
-      <form action={handleSubmit}>
+      <form noValidate action={handleSubmit}>
         <div className="nx-field">
-          <label className="nx-label" htmlFor="userDateOfBirth">Date of Birth</label>
-            <div className="nx-input-wrap">
-              <NXDatePicker
-                name="userDateOfBirth"
-                max={new Date().toISOString().split('T')[0]}
-                required
+          <span className="nx-label">Date of birth</span>
+          <BirthdateSelect name="userDateOfBirth" max={maxDob} min={minDob} />
+          <p className="mt-2 text-center text-[12px] leading-relaxed text-[#a9abb5]">
+            You must be 18 or older to use nx8up.
+          </p>
+        </div>
+
+        <div className="nx-field">
+          <span className="nx-label">How will you use nx8up?</span>
+          <div className="flex flex-col gap-2">
+            <label className={roleCardClass}>
+              <input
+                type="radio"
+                name="role"
+                value="creator"
+                className="mt-1 accent-[#99f7ff]"
+                aria-required="true"
               />
-            </div>
-          <p className="nx-hint">Must be 18 or older to access platform</p>
+              <span>
+                <span className="font-semibold text-[#e8f4ff]">Creator</span>
+                <span className="mt-0.5 block text-[13px] font-normal leading-snug text-[#a9abb5]">
+                  Work with sponsors on campaigns and deals.
+                </span>
+              </span>
+            </label>
+            <label className={roleCardClass}>
+              <input
+                type="radio"
+                name="role"
+                value="sponsor"
+                className="mt-1 accent-[#99f7ff]"
+                aria-required="true"
+              />
+              <span>
+                <span className="font-semibold text-[#e8f4ff]">Sponsor</span>
+                <span className="mt-0.5 block text-[13px] font-normal leading-snug text-[#a9abb5]">
+                  Run campaigns and hire creators.
+                </span>
+              </span>
+            </label>
+          </div>
         </div>
 
         {error && (
-          <div className="nx-error">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <circle cx="7" cy="7" r="6.5" stroke="#ff6b8a"/>
-              <path d="M7 4v3M7 9v.5" stroke="#ff6b8a" strokeWidth="1.2" strokeLinecap="round"/>
+          <div className="nx-error" role="alert">
+            <svg className="nx-error__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+              <circle cx="7" cy="7" r="6.5" stroke="currentColor" />
+              <path d="M7 4v3M7 9v.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
             </svg>
             {error}
           </div>
         )}
 
-        <div className="nx-xp-bar">
-          <div className="nx-xp-label">
-            <span>Onboarding Progress</span>
-            <strong>Step 1 / 1</strong>
-          </div>
-          <div className="nx-xp-track">
-            <div className="nx-xp-fill" style={{ width: '50%' }} />
-          </div>
-        </div>
-
-        <div className="nx-field">
-          <label className="nx-label">I am a</label>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#c8dff0' }}>
-              <input type="radio" name="role" value="creator" required /> Creator
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#c8dff0' }}>
-              <input type="radio" name="role" value="sponsor" required /> Sponsor
-            </label>
-          </div>
-        </div>
-
         <button className="nx-submit" type="submit" disabled={isLoading}>
           <span className="nx-submit-inner">
             {isLoading ? (
-              <><span className="nx-spinner" /> Verifying...</>
+              <>
+                <span className="nx-spinner" /> Saving…
+              </>
             ) : (
               <>
-                Confirm &amp; Enter
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                Continue
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+                  <path
+                    d="M3 7h8M7 3l4 4-4 4"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </>
             )}
           </span>
         </button>
       </form>
+
+      <div className="nx-footer">
+        <button
+          type="button"
+          className="nx-text-btn"
+          onClick={() => void signOut({ redirectUrl: '/sign-in' })}
+        >
+          Back to sign in
+        </button>
+      </div>
     </AuthLayout>
   )
 }
