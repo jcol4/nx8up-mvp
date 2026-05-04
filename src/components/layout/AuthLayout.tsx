@@ -515,6 +515,93 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           border-radius: 999px;
           box-shadow: 0 0 10px rgb(153 247 255 / 0.35);
         }
+
+        /* ── Soft ambient layer: organic blobs + horizon (no HUD rails/corners) ── */
+        .nx-auth-root .nx-auth-ambient {
+          position: fixed;
+          inset: 0;
+          z-index: 5;
+          pointer-events: none;
+          overflow: hidden;
+        }
+        @keyframes nx-ambient-drift {
+          0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+          40% { transform: translate(-3%, 4%) rotate(5deg) scale(1.04); }
+          70% { transform: translate(4%, -3%) rotate(-4deg) scale(0.96); }
+        }
+        .nx-auth-root .nx-auth-ambient-blob {
+          position: absolute;
+          filter: blur(72px);
+          opacity: 0.26;
+          border-radius: 42% 58% 65% 35% / 45% 38% 62% 55%;
+          animation: nx-ambient-drift 28s ease-in-out infinite;
+        }
+        .nx-auth-root .nx-auth-ambient-blob--a {
+          width: min(72vmin, 520px);
+          height: min(72vmin, 520px);
+          top: -28%;
+          right: -22%;
+          background: linear-gradient(
+            160deg,
+            rgb(153 247 255 / 0.85) 0%,
+            rgb(56 189 248 / 0.35) 45%,
+            transparent 75%
+          );
+        }
+        .nx-auth-root .nx-auth-ambient-blob--b {
+          width: min(65vmin, 480px);
+          height: min(65vmin, 480px);
+          bottom: -24%;
+          left: -26%;
+          background: linear-gradient(
+            25deg,
+            rgb(34 211 238 / 0.55) 0%,
+            rgb(14 116 144 / 0.25) 50%,
+            transparent 78%
+          );
+          animation-duration: 34s;
+          animation-delay: -12s;
+          opacity: 0.2;
+        }
+        .nx-auth-root .nx-auth-ambient-blob--c {
+          width: min(48vmin, 360px);
+          height: min(48vmin, 360px);
+          top: 38%;
+          left: -18%;
+          background: radial-gradient(
+            circle at 40% 40%,
+            rgb(191 252 255 / 0.35) 0%,
+            rgb(153 247 255 / 0.12) 42%,
+            transparent 70%
+          );
+          animation-duration: 22s;
+          animation-delay: -6s;
+          opacity: 0.18;
+        }
+        .nx-auth-root .nx-auth-ambient-horizon {
+          position: absolute;
+          left: -15%;
+          right: -15%;
+          bottom: -20%;
+          height: min(52vh, 420px);
+          background: radial-gradient(
+            ellipse 75% 55% at 50% 100%,
+            rgb(56 189 248 / 0.14) 0%,
+            rgb(153 247 255 / 0.06) 38%,
+            transparent 72%
+          );
+        }
+        .nx-auth-root .nx-auth-ambient-sheen {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            125deg,
+            transparent 0%,
+            rgb(255 255 255 / 0.02) 42%,
+            transparent 58%
+          );
+          opacity: 0.9;
+        }
       `}</style>
 
       {/* Soft atmosphere on top of HUD background */}
@@ -525,6 +612,15 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center" aria-hidden>
         <div className="nx-nebula-glow h-[500px] w-[500px] -translate-x-20 -translate-y-20 rounded-full bg-[#99f7ff]" />
         <div className="nx-nebula-glow h-[400px] w-[400px] translate-x-20 translate-y-20 rounded-full bg-[#22d3ee]" />
+      </div>
+
+      {/* Soft ambient: drifting color blobs + bottom horizon (not technical/HUD) */}
+      <div className="nx-auth-ambient" aria-hidden>
+        <div className="nx-auth-ambient-blob nx-auth-ambient-blob--a" />
+        <div className="nx-auth-ambient-blob nx-auth-ambient-blob--b" />
+        <div className="nx-auth-ambient-blob nx-auth-ambient-blob--c" />
+        <div className="nx-auth-ambient-horizon" />
+        <div className="nx-auth-ambient-sheen" />
       </div>
 
       <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-16">
