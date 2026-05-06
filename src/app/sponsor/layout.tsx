@@ -34,17 +34,17 @@ export default async function SponsorLayout({
   const sponsor = await prisma.sponsors.findUnique({ where: { clerk_user_id: userId } })
   const [liveCampaigns, acceptedCreators] = sponsor
     ? await Promise.all([
-        prisma.campaigns.findMany({
-          where: { sponsor_id: sponsor.id, status: 'active' },
-          select: { budget: true },
-        }),
-        prisma.campaign_applications.count({
-          where: {
-            campaign: { sponsor_id: sponsor.id },
-            status: 'accepted',
-          },
-        }),
-      ])
+      prisma.campaigns.findMany({
+        where: { sponsor_id: sponsor.id, status: 'active' },
+        select: { budget: true },
+      }),
+      prisma.campaign_applications.count({
+        where: {
+          campaign: { sponsor_id: sponsor.id },
+          status: 'accepted',
+        },
+      }),
+    ])
     : [[], 0]
 
   const liveBudget = liveCampaigns.reduce((sum, c) => sum + (c.budget ?? 0), 0)

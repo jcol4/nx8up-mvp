@@ -38,14 +38,17 @@
  *   - There is no rate-limiting or cooldown on "Resend code"; a user could
  *     spam the Clerk API by clicking the button repeatedly. Clerk applies
  *     its own server-side rate limits but no client-side feedback is shown.
+ *   - "Resend code" shows progress on the button and a short-lived success
+ *     banner; Clerk still applies server-side rate limits on repeated sends.
  */
 'use client'
 
 import * as React from 'react'
 import { useSignIn, useClerk } from '@clerk/nextjs'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { AuthLayout } from '@/components/layout'
+
+const emailLooksValid = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
 
 export default function ForgotPasswordPage() {
   const { isLoaded, signIn } = useSignIn()
@@ -57,8 +60,15 @@ export default function ForgotPasswordPage() {
   const [confirmPassword, setConfirmPassword] = React.useState('')
   const [error, setError] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
+  const [isResending, setIsResending] = React.useState(false)
+  const [resendNotice, setResendNotice] = React.useState<string | null>(null)
   const [showPassword, setShowPassword] = React.useState(false)
-  const router = useRouter()
+
+  React.useEffect(() => {
+    if (!resendNotice) return
+    const t = window.setTimeout(() => setResendNotice(null), 8000)
+    return () => window.clearTimeout(t)
+  }, [resendNotice])
 
   /**
    * Handles the email request form submission (stage: "request").
@@ -72,13 +82,24 @@ export default function ForgotPasswordPage() {
   const handleRequestSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isLoaded) return
-    setIsLoading(true)
     setError('')
+
+    const em = email.trim()
+    if (!em) {
+      setError('Enter your email address.')
+      return
+    }
+    if (!emailLooksValid(em)) {
+      setError('Enter a valid email address.')
+      return
+    }
+
+    setIsLoading(true)
 
     try {
       await signIn.create({
         strategy: 'reset_password_email_code',
-        identifier: email.trim(),
+        identifier: em,
       })
       setStage('reset')
     } catch (err: any) {
@@ -111,6 +132,19 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     if (!isLoaded) return
 
+    const digits = code.replace(/\D/g, '')
+    if (digits.length !== 6) {
+      setError('Enter the 6-digit code from your email.')
+      return
+    }
+    if (!password) {
+      setError('Enter a new password.')
+      return
+    }
+    if (!confirmPassword) {
+      setError('Confirm your new password.')
+      return
+    }
     if (password !== confirmPassword) {
       setError('Passwords do not match.')
       return
@@ -122,7 +156,7 @@ export default function ForgotPasswordPage() {
     try {
       const result = await signIn.attemptFirstFactor({
         strategy: 'reset_password_email_code',
-        code,
+        code: digits,
         password,
       })
 
@@ -160,16 +194,31 @@ export default function ForgotPasswordPage() {
    * same email. Does not reset other UI state.
    */
   const handleResend = async () => {
-    if (!isLoaded) return
+    if (!isLoaded || isResending) return
+    const em = email.trim()
+    if (!em) {
+      setError('Email is missing. Use a different email to start over.')
+      return
+    }
     setError('')
+    setResendNotice(null)
+    setIsResending(true)
     try {
       await signIn.create({
         strategy: 'reset_password_email_code',
-        identifier: email.trim(),
+        identifier: em,
       })
+      setResendNotice('A new code was sent. Check your inbox (and spam).')
     } catch (err: any) {
+      const errCode = err?.errors?.[0]?.code
       const message = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message
-      setError(message || 'Could not resend code. Please try again.')
+      if (errCode === 'form_identifier_not_found') {
+        setResendNotice('If that email is registered, a new code was sent.')
+      } else {
+        setError(message || 'Could not resend code. Please try again.')
+      }
+    } finally {
+      setIsResending(false)
     }
   }
 
@@ -185,12 +234,26 @@ export default function ForgotPasswordPage() {
 
         <div className="nx-divider" />
 
-        <form onSubmit={handleResetSubmit}>
+        <form noValidate onSubmit={handleResetSubmit}>
+          {resendNotice && (
+            <div className="nx-success" role="status" aria-live="polite">
+              <svg className="nx-success__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+                <path
+                  d="M11.5 4.5L5.8 10.2 2.5 6.9"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              {resendNotice}
+            </div>
+          )}
           {error && (
-            <div className="nx-error">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <circle cx="7" cy="7" r="6.5" stroke="#ff6b8a"/>
-                <path d="M7 4v3M7 9v.5" stroke="#ff6b8a" strokeWidth="1.2" strokeLinecap="round"/>
+            <div className="nx-error" role="alert">
+              <svg className="nx-error__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+                <circle cx="7" cy="7" r="6.5" stroke="currentColor" />
+                <path d="M7 4v3M7 9v.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
               </svg>
               {error}
             </div>
@@ -209,7 +272,7 @@ export default function ForgotPasswordPage() {
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
                 placeholder="000000"
-                required
+                aria-required="true"
                 autoFocus
               />
             </div>
@@ -225,8 +288,8 @@ export default function ForgotPasswordPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                required
                 autoComplete="new-password"
+                aria-required="true"
                 minLength={8}
               />
               <button
@@ -261,14 +324,14 @@ export default function ForgotPasswordPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                required
                 autoComplete="new-password"
+                aria-required="true"
                 minLength={8}
               />
             </div>
           </div>
 
-          <button className="nx-submit" type="submit" disabled={isLoading || !isLoaded || code.length < 6}>
+          <button className="nx-submit" type="submit" disabled={isLoading || !isLoaded || code.replace(/\D/g, '').length < 6}>
             <span className="nx-submit-inner">
               {isLoading ? (
                 <><span className="nx-spinner" /> Resetting...</>
@@ -288,9 +351,11 @@ export default function ForgotPasswordPage() {
           <button
             type="button"
             className="nx-text-btn"
-            onClick={handleResend}
+            onClick={() => void handleResend()}
+            disabled={isResending || !isLoaded}
+            aria-busy={isResending}
           >
-            Resend code
+            {isResending ? 'Sending…' : 'Resend code'}
           </button>
           {' · '}
           <button
@@ -302,6 +367,7 @@ export default function ForgotPasswordPage() {
               setPassword('')
               setConfirmPassword('')
               setError('')
+              setResendNotice(null)
             }}
           >
             Use a different email
@@ -322,12 +388,12 @@ export default function ForgotPasswordPage() {
 
       <div className="nx-divider" />
 
-      <form onSubmit={handleRequestSubmit}>
+      <form noValidate onSubmit={handleRequestSubmit}>
         {error && (
-          <div className="nx-error">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <circle cx="7" cy="7" r="6.5" stroke="#ff6b8a"/>
-              <path d="M7 4v3M7 9v.5" stroke="#ff6b8a" strokeWidth="1.2" strokeLinecap="round"/>
+          <div className="nx-error" role="alert">
+            <svg className="nx-error__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+              <circle cx="7" cy="7" r="6.5" stroke="currentColor" />
+              <path d="M7 4v3M7 9v.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
             </svg>
             {error}
           </div>
@@ -343,8 +409,8 @@ export default function ForgotPasswordPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              required
               autoComplete="email"
+              aria-required="true"
               autoCapitalize="none"
               spellCheck={false}
               autoFocus

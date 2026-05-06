@@ -14,8 +14,8 @@
  *      to `/onboarding` to complete age verification and role selection.
  *
  * Additional behaviors:
- *   - "Resend code" triggers a fresh `prepareEmailAddressVerification` call
- *     without resetting any other state.
+ *   - "Resend code" triggers `prepareEmailAddressVerification` again, with the
+ *     same UX as forgot-password (loading label, success banner, errors).
  *   - Clerk error codes are mapped to specific, actionable user messages.
  *   - Two reusable inner components (`ErrorBox`, `SubmitButton`) are defined
  *     inside the component to share the loading/loaded state via closure.
@@ -30,6 +30,8 @@
  *     outside (or memoised) to avoid unnecessary React reconciliation.
  *   - There is no rate-limiting or cooldown on "Resend code"; a user could
  *     spam the Clerk API by clicking the button repeatedly.
+ *   - "Resend code" matches forgot-password: button shows progress, success
+ *     banner, auto-dismiss; Clerk rate-limits on the server.
  *   - `form_identifier_exists` only catches duplicate emails; a duplicate
  *     username would fall through to the generic error message.
  */
@@ -50,8 +52,16 @@ export default function SignUpPage() {
   const [code, setCode] = React.useState('')
   const [error, setError] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
+  const [isResending, setIsResending] = React.useState(false)
+  const [resendNotice, setResendNotice] = React.useState<string | null>(null)
   const [showPassword, setShowPassword] = React.useState(false)
   const router = useRouter()
+
+  React.useEffect(() => {
+    if (!resendNotice) return
+    const t = window.setTimeout(() => setResendNotice(null), 8000)
+    return () => window.clearTimeout(t)
+  }, [resendNotice])
 
   /**
    * Handles the registration form submission (stage: "register").
@@ -61,14 +71,39 @@ export default function SignUpPage() {
    * the UI to the `"verify"` stage. Clerk error codes are translated to
    * descriptive messages before being surfaced to the user.
    */
+  const emailLooksValid = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isLoaded) return
-    setIsLoading(true)
     setError('')
 
+    const em = email.trim()
+    if (!em) {
+      setError('Enter your email address.')
+      return
+    }
+    if (!emailLooksValid(em)) {
+      setError('Enter a valid email address.')
+      return
+    }
+    if (!username.trim()) {
+      setError('Choose a username.')
+      return
+    }
+    if (!password) {
+      setError('Enter a password.')
+      return
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.')
+      return
+    }
+
+    setIsLoading(true)
+
     try {
-      await signUp.create({ emailAddress: email, username, password })
+      await signUp.create({ emailAddress: em, username: username.trim(), password })
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
       setStage('verify')
     } catch (err: any) {
@@ -100,11 +135,18 @@ export default function SignUpPage() {
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isLoaded) return
-    setIsLoading(true)
     setError('')
 
+    const digits = code.replace(/\D/g, '')
+    if (digits.length !== 6) {
+      setError('Enter the 6-digit code from your email.')
+      return
+    }
+
+    setIsLoading(true)
+
     try {
-      const result = await signUp.attemptEmailAddressVerification({ code })
+      const result = await signUp.attemptEmailAddressVerification({ code: digits })
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId })
         router.push('/onboarding')
@@ -133,21 +175,27 @@ export default function SignUpPage() {
    * previously typed value.
    */
   const handleResendCode = async () => {
-    if (!isLoaded) return
+    if (!isLoaded || isResending) return
     setError('')
+    setResendNotice(null)
+    setIsResending(true)
     try {
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
-    } catch {
-      setError('Failed to resend code. Please try again.')
+      setResendNotice('A new code was sent. Check your inbox (and spam).')
+    } catch (err: any) {
+      const message = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message
+      setError(message || 'Could not resend code. Please try again.')
+    } finally {
+      setIsResending(false)
     }
   }
 
   /** Renders a styled inline error banner with an SVG warning icon. */
   const ErrorBox = ({ message }: { message: string }) => (
-    <div className="nx-error">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-        <circle cx="7" cy="7" r="6.5" stroke="#ff6b8a"/>
-        <path d="M7 4v3M7 9v.5" stroke="#ff6b8a" strokeWidth="1.2" strokeLinecap="round"/>
+    <div className="nx-error" role="alert">
+      <svg className="nx-error__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+        <circle cx="7" cy="7" r="6.5" stroke="currentColor" />
+        <path d="M7 4v3M7 9v.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
       </svg>
       {message}
     </div>
@@ -196,7 +244,7 @@ export default function SignUpPage() {
 
           <div className="nx-divider" />
 
-          <form onSubmit={handleRegister}>
+          <form noValidate onSubmit={handleRegister}>
             {error && <ErrorBox message={error} />}
 
             <div className="nx-field">
@@ -209,8 +257,8 @@ export default function SignUpPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  required
                   autoComplete="email"
+                  aria-required="true"
                 />
               </div>
             </div>
@@ -225,8 +273,8 @@ export default function SignUpPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="your_gamertag"
-                  required
                   autoComplete="username"
+                  aria-required="true"
                   autoCapitalize="none"
                   spellCheck={false}
                 />
@@ -243,8 +291,8 @@ export default function SignUpPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Min. 8 characters"
-                  required
                   autoComplete="new-password"
+                  aria-required="true"
                 />
                 <button
                   type="button"
@@ -292,7 +340,21 @@ export default function SignUpPage() {
             Code sent to <strong style={{ color: '#c8dff0', marginLeft: 4 }}>{email}</strong>
           </div>
 
-          <form onSubmit={handleVerify}>
+          <form noValidate onSubmit={handleVerify}>
+            {resendNotice && (
+              <div className="nx-success" role="status" aria-live="polite">
+                <svg className="nx-success__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+                  <path
+                    d="M11.5 4.5L5.8 10.2 2.5 6.9"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                {resendNotice}
+              </div>
+            )}
             {error && <ErrorBox message={error} />}
 
             <div className="nx-field">
@@ -307,8 +369,8 @@ export default function SignUpPage() {
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
                   placeholder="000000"
-                  required
                   autoComplete="one-time-code"
+                  aria-required="true"
                   autoFocus
                 />
               </div>
@@ -319,9 +381,27 @@ export default function SignUpPage() {
 
           <div className="nx-footer">
             Didn&apos;t receive a code?{' '}
-            <button className="nx-text-btn" onClick={handleResendCode}>Resend</button>
+            <button
+              type="button"
+              className="nx-text-btn"
+              onClick={() => void handleResendCode()}
+              disabled={isResending || !isLoaded}
+              aria-busy={isResending}
+            >
+              {isResending ? 'Sending…' : 'Resend code'}
+            </button>
             {' · '}
-            <button className="nx-text-btn" onClick={() => { setStage('register'); setError('') }}>Go back</button>
+            <button
+              type="button"
+              className="nx-text-btn"
+              onClick={() => {
+                setStage('register')
+                setError('')
+                setResendNotice(null)
+              }}
+            >
+              Go back
+            </button>
           </div>
         </>
       )}

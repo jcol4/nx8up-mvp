@@ -109,7 +109,7 @@ export const completeOnboarding = async (formData: FormData) => {
           data: {
             clerk_user_id: userId,
             email,
-          }
+          },
         })
       }
     }

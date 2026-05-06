@@ -1,24 +1,61 @@
 /**
- * ConditionalHeader — public-facing header rendered on non-dashboard routes.
- * Returns null on /creator, /admin, and /sponsor routes (those dashboards have their own headers).
+ * ConditionalHeader — public-facing header on non-dashboard routes when signed in.
+ * Returns null on /creator, /admin, /sponsor (those dashboards have their own headers),
+ * on /onboarding and auth routes (full-screen flows), and until onboarding is complete
+ * (avoids a flash of the profile strip and a misleading default during sign-in redirects).
+ * No sign-in / sign-up buttons here; unauthenticated users see no header strip.
  */
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { SignInButton, SignUpButton, SignedIn, SignedOut } from '@clerk/nextjs'
+import { SignedIn } from '@clerk/nextjs'
 import UserProfileBlock from '@/components/shared/UserProfileBlock'
 
 type Props = {
+  signedIn: boolean
+  onboardingComplete?: boolean
   displayName?: string | null
   username?: string | null
   role?: string
 }
 
-export default function ConditionalHeader({ displayName, username, role }: Props) {
+export default function ConditionalHeader({
+  signedIn,
+  onboardingComplete,
+  displayName,
+  username,
+  role,
+}: Props) {
   const pathname = usePathname()
-  if (pathname?.startsWith('/creator') || pathname?.startsWith('/admin') || pathname?.startsWith('/sponsor')) return null
 
-  const variant = role === 'creator' ? 'creator' : role === 'sponsor' ? 'sponsor' : 'admin'
+  if (
+    signedIn &&
+    onboardingComplete !== true &&
+    role !== 'admin'
+  ) {
+    return null
+  }
+
+  if (
+    pathname?.startsWith('/creator') ||
+    pathname?.startsWith('/admin') ||
+    pathname?.startsWith('/sponsor') ||
+    pathname?.startsWith('/onboarding') ||
+    pathname?.startsWith('/sign-in') ||
+    pathname?.startsWith('/sign-up') ||
+    pathname?.startsWith('/forgot-password')
+  ) {
+    return null
+  }
+
+  const variant =
+    role === 'creator'
+      ? 'creator'
+      : role === 'sponsor'
+        ? 'sponsor'
+        : role === 'admin'
+          ? 'admin'
+          : 'creator'
   const editProfileLink =
     role === 'creator' || role === 'admin'
       ? '/creator/profile'
@@ -27,16 +64,8 @@ export default function ConditionalHeader({ displayName, username, role }: Props
         : undefined
 
   return (
-    <header className="flex justify-end items-center p-4 gap-4 h-16">
-      <SignedOut>
-        <SignInButton />
-        <SignUpButton>
-          <button className="bg-[#6c47ff] text-white rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer">
-            Sign Up
-          </button>
-        </SignUpButton>
-      </SignedOut>
-      <SignedIn>
+    <SignedIn>
+      <header className="flex h-16 items-center justify-end gap-4 p-4">
         <UserProfileBlock
           displayName={displayName ?? null}
           username={username ?? null}
@@ -44,7 +73,7 @@ export default function ConditionalHeader({ displayName, username, role }: Props
           editProfileLink={editProfileLink}
           role={role}
         />
-      </SignedIn>
-    </header>
+      </header>
+    </SignedIn>
   )
 }

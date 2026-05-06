@@ -72,7 +72,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const { userId, sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string } | undefined)?.role;
+  const metadata = sessionClaims?.metadata as
+    | { role?: string; onboardingComplete?: boolean }
+    | undefined;
+  const role = metadata?.role;
+  const onboardingComplete = metadata?.onboardingComplete;
   const displayInfo =
     userId != null ? await getUserDisplayInfo() : { displayName: null, username: null, imageUrl: null };
 
@@ -109,6 +113,8 @@ export default async function RootLayout({
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <ConditionalHeader
+            signedIn={userId != null}
+            onboardingComplete={onboardingComplete}
             displayName={displayInfo.displayName}
             username={displayInfo.username}
             role={role}

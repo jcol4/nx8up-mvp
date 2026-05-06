@@ -112,11 +112,22 @@ export default function SignInPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isLoaded) return
-    setIsLoading(true)
     setError('')
 
+    const id = identifier.trim()
+    if (!id) {
+      setError('Enter your email or username.')
+      return
+    }
+    if (!password) {
+      setError('Enter your password.')
+      return
+    }
+
+    setIsLoading(true)
+
     try {
-      const result = await signIn.create({ identifier: identifier.trim(), password })
+      const result = await signIn.create({ identifier: id, password })
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId })
         redirectByRole()
@@ -154,13 +165,20 @@ export default function SignInPage() {
   const handleEmailCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isLoaded) return
-    setIsLoading(true)
     setError('')
+
+    const digits = code.replace(/\D/g, '')
+    if (digits.length !== 6) {
+      setError('Enter the 6-digit code from your email.')
+      return
+    }
+
+    setIsLoading(true)
 
     try {
       const result = await signIn.attemptSecondFactor({
         strategy: 'email_code',
-        code,
+        code: digits,
       })
       if (result.status === 'complete') {
         await setActive({ session: result.createdSessionId })
@@ -221,12 +239,12 @@ export default function SignInPage() {
 
         <div className="nx-divider" />
 
-        <form onSubmit={handleEmailCodeSubmit}>
+        <form noValidate onSubmit={handleEmailCodeSubmit}>
           {error && (
-            <div className="nx-error">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <circle cx="7" cy="7" r="6.5" stroke="#ff6b8a"/>
-                <path d="M7 4v3M7 9v.5" stroke="#ff6b8a" strokeWidth="1.2" strokeLinecap="round"/>
+            <div className="nx-error" role="alert">
+              <svg className="nx-error__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+                <circle cx="7" cy="7" r="6.5" stroke="currentColor" />
+                <path d="M7 4v3M7 9v.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
               </svg>
               {error}
             </div>
@@ -245,7 +263,6 @@ export default function SignInPage() {
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
                 placeholder="000000"
-                required
                 autoFocus
               />
             </div>
@@ -285,16 +302,16 @@ export default function SignInPage() {
     <AuthLayout>
       <div className="nx-badge">Player Login</div>
       <h1 className="nx-title">Welcome <span>Back</span></h1>
-      <p className="nx-subtitle">Sign in to access your missions, deals, and dashboard.</p>
+      <p className="nx-subtitle">Sign in to access your campaigns, deals, and missions.</p>
 
       <div className="nx-divider" />
 
-      <form onSubmit={handleSubmit}>
+      <form noValidate onSubmit={handleSubmit}>
         {error && (
-          <div className="nx-error">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <circle cx="7" cy="7" r="6.5" stroke="#ff6b8a"/>
-              <path d="M7 4v3M7 9v.5" stroke="#ff6b8a" strokeWidth="1.2" strokeLinecap="round"/>
+          <div className="nx-error" role="alert">
+            <svg className="nx-error__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+              <circle cx="7" cy="7" r="6.5" stroke="currentColor" />
+              <path d="M7 4v3M7 9v.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
             </svg>
             {error}
           </div>
@@ -310,8 +327,8 @@ export default function SignInPage() {
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               placeholder="Email or username"
-              required
               autoComplete="username"
+              aria-required="true"
               autoCapitalize="none"
               spellCheck={false}
             />
@@ -328,8 +345,8 @@ export default function SignInPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              required
               autoComplete="current-password"
+              aria-required="true"
             />
             <button
               type="button"

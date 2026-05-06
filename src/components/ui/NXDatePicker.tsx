@@ -16,6 +16,10 @@ interface DatePickerProps {
   min?: string         // ISO date string — dates before this are disabled
   placeholder?: string // Custom placeholder text
   onChange?: (value: string) => void // Called with YYYY-MM-DD string when a date is picked
+  /** Initial calendar year when opening (e.g. birthdates: current year − 25). */
+  initialViewYear?: number
+  /** Initial calendar month 0–11 when opening. */
+  initialViewMonth?: number
 }
 
 const MONTHS = [
@@ -25,7 +29,16 @@ const MONTHS = [
 
 const DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 
-export default function NXDatePicker({ name, required, max, min, placeholder, onChange }: DatePickerProps) {
+export default function NXDatePicker({
+  name,
+  required,
+  max,
+  min,
+  placeholder,
+  onChange,
+  initialViewYear,
+  initialViewMonth,
+}: DatePickerProps) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const maxDate = max ? new Date(max) : new Date(2099, 11, 31)
@@ -33,8 +46,12 @@ export default function NXDatePicker({ name, required, max, min, placeholder, on
 
   const [isOpen, setIsOpen] = React.useState(false)
   const [selected, setSelected] = React.useState<Date | null>(null)
-  const [viewYear, setViewYear] = React.useState(today.getFullYear())
-  const [viewMonth, setViewMonth] = React.useState(today.getMonth())
+  const [viewYear, setViewYear] = React.useState(
+    () => initialViewYear ?? today.getFullYear(),
+  )
+  const [viewMonth, setViewMonth] = React.useState(
+    () => initialViewMonth ?? today.getMonth(),
+  )
   const [mode, setMode] = React.useState<'calendar' | 'month' | 'year'>('calendar')
   const ref = React.useRef<HTMLDivElement>(null)
 
@@ -171,14 +188,14 @@ export default function NXDatePicker({ name, required, max, min, placeholder, on
           top: calc(100% + 6px);
           left: 0;
           right: 0;
-          background: rgba(8,16,32,0.98);
-          border: 1px solid rgba(0,200,255,0.18);
+          background: rgb(12 18 30);
+          border: 1px solid rgba(0,200,255,0.22);
           border-radius: 10px;
-          z-index: 100;
+          z-index: 9999;
           overflow: hidden;
           box-shadow:
-            0 20px 60px rgba(0,0,0,0.6),
-            0 0 0 1px rgba(0,200,255,0.05),
+            0 24px 64px rgba(0,0,0,0.75),
+            0 0 0 1px rgba(0,200,255,0.08),
             inset 0 1px 0 rgba(0,200,255,0.08);
           animation: dpSlideIn 0.15s cubic-bezier(0.16,1,0.3,1) both;
         }
@@ -191,9 +208,9 @@ export default function NXDatePicker({ name, required, max, min, placeholder, on
         .nx-dp-popup::before {
           content: '';
           position: absolute;
-          top: 0; left: 20%; right: 20%;
+          top: 0; left: 15%; right: 15%;
           height: 1px;
-          background: linear-gradient(90deg, transparent, #00c8ff, #7b4fff, transparent);
+          background: linear-gradient(90deg, transparent, rgb(153 247 255 / 55%), transparent);
         }
 
         /* Header */
@@ -292,7 +309,7 @@ export default function NXDatePicker({ name, required, max, min, placeholder, on
           font-family: 'Exo 2', sans-serif;
           font-size: 0.8rem;
           font-weight: 400;
-          color: #4a6080;
+          color: #94a3b8;
           border-radius: 5px;
           cursor: pointer;
           transition: background 0.12s, color 0.12s;
