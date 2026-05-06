@@ -18,6 +18,8 @@ import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { encryptToken } from '@/lib/token-encryption'
 import { validateCsrfCookie, triggerCtrRecomputeForUser } from '@/lib/oauth-callback-utils'
+import { assignWeeklyMissions } from '@/lib/mission-assignment'
+import { resolveCreatorMissions } from '@/lib/mission-resolver'
 
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const YT_API_BASE = 'https://www.googleapis.com/youtube/v3'
@@ -273,6 +275,12 @@ export async function GET(req: NextRequest) {
   })
 
   triggerCtrRecomputeForUser(userId).catch(console.error)
+
+  const creator = await prisma.content_creators.findUnique({ where: { clerk_user_id: userId }, select: { id: true } })
+  if (creator) {
+    assignWeeklyMissions(creator.id).catch(console.error)
+    resolveCreatorMissions(creator.id).catch(console.error)
+  }
 
   return NextResponse.redirect(`${APP_URL}/creator/profile?youtube_linked=1`)
 }

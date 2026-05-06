@@ -46,6 +46,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { matchCreatorToCampaign } from '@/lib/matching'
 import { createNotification } from '@/lib/notifications'
+import { resolveCreatorMissions } from '@/lib/mission-resolver'
 import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 
 /**
@@ -366,6 +367,9 @@ export async function applyToCampaign(
 
   revalidatePath('/creator/campaigns')
   revalidatePath(`/creator/campaigns/${campaignId}`)
+
+  resolveCreatorMissions(creator.id).catch(console.error)
+
   return { success: true }
 }
 

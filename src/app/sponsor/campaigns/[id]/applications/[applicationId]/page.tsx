@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
@@ -7,6 +7,7 @@ import SponsorHeader from '../../../../_components/dashboard/SponsorHeader'
 import ApplicationDecisionButtons from '@/components/sponsor/ApplicationDecisionButtons'
 import { TIER_LABELS } from '@/lib/reputation'
 import type { ReputationTier } from '@/lib/reputation'
+import { getRankName } from '@/lib/creator-xp'
 
 type Props = {
   params: Promise<{ id?: string; applicationId?: string }>
@@ -53,6 +54,11 @@ export default async function ApplicationReviewPage({ params }: Props) {
   const prev = index > 0 ? applications[index - 1] : null
   const next = index < total - 1 ? applications[index + 1] : null
   const creator = current.creator
+
+  const clerkUser = await (await clerkClient()).users.getUser(creator.clerk_user_id).catch(() => null)
+  const creatorMeta = (clerkUser?.publicMetadata || {}) as Record<string, unknown>
+  const creatorLevel = Math.max(1, Number(creatorMeta.creatorLevel) || 1)
+  const creatorRankName = getRankName(creatorLevel)
 
   // Resolve audience data: prefer application-specific override, fall back to profile
   const audienceAgeMin = current.app_audience_age_min ?? creator.audience_age_min
@@ -137,6 +143,9 @@ export default async function ApplicationReviewPage({ params }: Props) {
                     })}
                   </span>
                 )}
+                <span className="text-xs px-2 py-0.5 rounded border bg-[#00c8ff]/10 border-[#00c8ff]/25 text-[#00c8ff]">
+                  Lv. {creatorLevel} · {creatorRankName}
+                </span>
                 {creator.reputation_tier && (
                   <span className={`text-xs px-2 py-0.5 rounded border ${
                     creator.reputation_tier === 'verified'

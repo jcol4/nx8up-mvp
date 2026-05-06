@@ -6,6 +6,8 @@ import type { CreatorProfile } from '@/lib/creator-profile'
 import { prisma } from '@/lib/prisma'
 import { parseLocation } from '@/lib/location-options'
 import { computeCreatorSize } from '@/lib/matching'
+import { resolveCreatorMissions } from '@/lib/mission-resolver'
+import { assignWeeklyMissions } from '@/lib/mission-assignment'
 import {
   getTwitchUserById,
   getTwitchFollowerCount,
@@ -194,6 +196,13 @@ export async function updateCreatorProfile(data: CreatorProfile): Promise<{ erro
     revalidatePath('/creator')
     revalidatePath('/creator/profile')
     revalidatePath('/admin')
+
+    const creator = await prisma.content_creators.findUnique({ where: { clerk_user_id: userId }, select: { id: true } })
+    if (creator) {
+      await assignWeeklyMissions(creator.id)
+      await resolveCreatorMissions(creator.id)
+    }
+
     return {}
   } catch {
     return { error: 'Failed to update profile' }
@@ -286,6 +295,13 @@ export async function updateCreatorProfileWizard(data: import('./_shared').Creat
     revalidatePath('/creator')
     revalidatePath('/creator/profile')
     revalidatePath('/admin')
+
+    const creator = await prisma.content_creators.findUnique({ where: { clerk_user_id: userId }, select: { id: true } })
+    if (creator) {
+      await assignWeeklyMissions(creator.id)
+      await resolveCreatorMissions(creator.id)
+    }
+
     return {}
   } catch {
     return { error: 'Failed to save profile' }

@@ -74,6 +74,7 @@ model content_creators {
   stripe_onboarding_complete Boolean                 @default(false)
   applications               campaign_applications[]
   opt_outs                   creator_opt_outs[]
+  missions                   creator_missions[]
 
   @@index([average_vod_views])
   @@index([content_type], type: Gin)
@@ -415,6 +416,22 @@ model creator_opt_outs {
 
   @@index([verdict])
   @@index([creator_id])
+}
+
+model creator_missions {
+  id           String           @id @default(cuid())
+  creator_id   String           @db.Uuid
+  mission_id   String
+  mission_type String
+  week_start   DateTime?        @db.Timestamptz(6)
+  completed    Boolean          @default(false)
+  completed_at DateTime?        @db.Timestamptz(6)
+  created_at   DateTime         @default(now()) @db.Timestamptz(6)
+  creator      content_creators @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+
+  @@unique([creator_id, mission_id, week_start])
+  @@index([creator_id, week_start])
+  @@index([creator_id, completed])
 }
 
 model sanctioned_launch_requests {

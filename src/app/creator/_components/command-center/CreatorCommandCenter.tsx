@@ -44,6 +44,15 @@ type Application = {
   }
 }
 
+type MissionItem = {
+  id: string
+  missionId: string
+  title: string
+  xp: number
+  type: string
+  completed: boolean
+}
+
 type Props = {
   displayName: string
   level: number
@@ -67,6 +76,7 @@ type Props = {
   statsUnavailable?: boolean
   isAdmin?: boolean
   calendarTasks: CalendarTasksMap
+  missions: MissionItem[]
 }
 
 type CalendarView = 'month' | 'week'
@@ -159,11 +169,6 @@ function buildCampaignEventMap(applications: Application[]): Record<string, Cale
   return map
 }
 
-const MISSIONS = [
-  { id: 'sync-content-queue', title: 'SYNC CONTENT QUEUE', xp: 250, progress: 0.8 },
-  { id: 'engage-top-comments', title: 'ENGAGE TOP 10 COMMENTS', xp: 150, progress: 0.33 },
-  { id: 'optimize-profile-seo', title: 'OPTIMIZE PROFILE SEO', xp: 400, progress: 0 },
-]
 
 function isHubActive(pathname: string, href: string): boolean {
   if (href === '/creator') return pathname === '/creator'
@@ -179,6 +184,7 @@ export default function CreatorCommandCenter({
   applications,
   openCampaigns,
   creatorStats,
+  missions,
   statsUnavailable = false,
   isAdmin = false,
   calendarTasks,
@@ -192,7 +198,6 @@ export default function CreatorCommandCenter({
   const [noteDraft, setNoteDraft] = useState('')
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
   const [editingNoteText, setEditingNoteText] = useState('')
-  const [claimingMissionId, setClaimingMissionId] = useState<string | null>(null)
 
   const accepted = applications.filter((a) => a.status === 'accepted').slice(0, 3)
   const open = openCampaigns.slice(0, 3)
@@ -345,14 +350,6 @@ export default function CreatorCommandCenter({
   const weekStart = startOfWeek(selectedDate)
   const weekLabel = `WEEK OF ${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()}`
 
-  const handleClaim = async (missionId: string, amount: number) => {
-    setClaimingMissionId(missionId)
-    const result = await addCreatorXp(amount)
-    setClaimingMissionId(null)
-    if (result.error) return
-    router.refresh()
-  }
-
   const addNoteForSelectedDay = async () => {
     const trimmed = noteDraft.trim()
     if (!trimmed) return
@@ -480,30 +477,31 @@ export default function CreatorCommandCenter({
                       <h2 className="shrink-0 font-headline text-base tracking-[0.24em] text-[#99f7ff] font-semibold">TODAY&apos;S MISSIONS</h2>
                       <div className="h-px flex-1 bg-gradient-to-r from-[#99f7ff]/55 to-transparent" />
                     </div>
-                    <span className="text-[10px] text-[#a9abb5]">{MISSIONS.length} ACTIVE</span>
+                    <span className="text-[10px] text-[#a9abb5]">{missions.filter((m) => !m.completed).length} ACTIVE</span>
                   </div>
                   <div className="space-y-4">
-                    {MISSIONS.map((mission) => (
-                      <div key={mission.id} className="space-y-2 transition-transform duration-200 hover:translate-x-1">
-                        <div className="flex items-center justify-between gap-3 text-[10px]">
-                          <div className="min-w-0">
-                            <p>{mission.title}</p>
-                            <p className="text-[#99f7ff]">{mission.xp} XP</p>
+                    {missions.length === 0 ? (
+                      <p className="text-[10px] text-slate-500 italic">No missions assigned yet.</p>
+                    ) : (
+                      missions.map((mission) => (
+                        <div key={mission.id} className="space-y-2 transition-transform duration-200 hover:translate-x-1">
+                          <div className="flex items-center justify-between gap-3 text-[10px]">
+                            <div className="min-w-0">
+                              <p className={`text-[#c8cad4] ${mission.completed ? 'line-through text-slate-500' : ''}`}>{mission.title}</p>
+                              <p className="text-[#99f7ff]">{mission.xp} XP</p>
+                            </div>
+                            {mission.completed ? (
+                              <span className="shrink-0 rounded border border-[#22c55e]/30 bg-[#22c55e]/10 px-2 py-1 text-[9px] uppercase tracking-widest text-[#22c55e]">Done</span>
+                            ) : (
+                              <span className="shrink-0 rounded border border-[#99f7ff]/20 px-2 py-1 text-[9px] uppercase tracking-widest text-slate-500">In Progress</span>
+                            )}
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => handleClaim(mission.id, mission.xp)}
-                            disabled={claimingMissionId === mission.id}
-                            className="shrink-0 rounded border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-2 py-1 text-[9px] uppercase tracking-widest text-[#99f7ff] transition hover:bg-[#99f7ff]/20 disabled:opacity-60"
-                          >
-                            {claimingMissionId === mission.id ? '...' : 'Complete'}
-                          </button>
+                          <div className="h-1 rounded-full bg-slate-800 overflow-hidden">
+                            <div className="h-full bg-[#a855f7]" style={{ width: mission.completed ? '100%' : '0%' }} />
+                          </div>
                         </div>
-                        <div className="h-1 rounded-full bg-slate-800 overflow-hidden">
-                          <div className="h-full bg-[#a855f7]" style={{ width: `${Math.round(mission.progress * 100)}%` }} />
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                   <div className="mt-6 border-t border-white/10 pt-4">
                     <div className="flex items-center justify-between">

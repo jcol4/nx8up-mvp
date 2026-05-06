@@ -28,6 +28,10 @@
 
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
+import { prisma } from '@/lib/prisma'
+import { MISSIONS } from '@/lib/missions'
+import { assignWeeklyMissions } from '@/lib/mission-assignment'
+import { resolveCreatorMissions } from '@/lib/mission-resolver'
 import {
   createInitialXpState,
   addXpToState,
@@ -66,6 +70,75 @@ export async function getCreatorXp(): Promise<CreatorXpState> {
   const user = await client.users.getUser(userId)
   const meta = (user.publicMetadata || {}) as Record<string, unknown>
   return parseXpState(meta)
+}
+
+export type CreatorMissionState = {
+  id: string
+  missionId: string
+  title: string
+  xp: number
+  type: string
+  completed: boolean
+}
+
+export async function getCreatorMissions(): Promise<CreatorMissionState[]> {
+  const { userId } = await auth()
+  if (!userId) return []
+
+  const creator = await prisma.content_creators.findUnique({
+    where: { clerk_user_id: userId },
+    select: { id: true },
+  })
+  if (!creator) return []
+
+  const weekStart = (() => {
+    const now = new Date()
+    const day = now.getUTCDay()
+    const daysToMonday = day === 0 ? 6 : day - 1
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - daysToMonday))
+  })()
+
+  let rows = await prisma.creator_missions.findMany({
+    where: {
+      creator_id: creator.id,
+      OR: [
+        { mission_type: { in: ['gate', 'field'] }, week_start: null },
+        { mission_type: 'weekly', week_start: weekStart },
+      ],
+    },
+  })
+
+  // First-time or new-week: assign missions on the spot so the UI is never empty
+  if (rows.length === 0) {
+    await assignWeeklyMissions(creator.id)
+    await resolveCreatorMissions(creator.id)
+    rows = await prisma.creator_missions.findMany({
+      where: {
+        creator_id: creator.id,
+        OR: [
+          { mission_type: { in: ['gate', 'field'] }, week_start: null },
+          { mission_type: 'weekly', week_start: weekStart },
+        ],
+      },
+    })
+  }
+
+  const activeRows = rows.filter((r) => {
+    if (r.mission_type === 'weekly') return r.week_start?.getTime() === weekStart.getTime()
+    return !r.completed
+  })
+
+  return activeRows.slice(0, 3).map((r) => {
+    const mission = MISSIONS.find((m) => m.id === r.mission_id)
+    return {
+      id: r.id,
+      missionId: r.mission_id,
+      title: mission?.title ?? r.mission_id,
+      xp: mission?.xp ?? 0,
+      type: r.mission_type,
+      completed: r.completed,
+    }
+  })
 }
 
 /**

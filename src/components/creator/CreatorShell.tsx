@@ -1,6 +1,7 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
+import { getRankName } from '@/lib/creator-xp'
 import CreatorRouteShell from './CreatorRouteShell'
 
 type Props = {
@@ -17,19 +18,25 @@ export default async function CreatorShell({ children }: Props) {
 
   if (userId) {
     try {
-      const creator = await prisma.content_creators.findUnique({
-        where: { clerk_user_id: userId },
-        select: {
-          subs_followers: true,
-          average_vod_views: true,
-          twitch_username: true,
-          youtube_channel_name: true,
-        },
-      })
+      const [creator, clerkUser] = await Promise.all([
+        prisma.content_creators.findUnique({
+          where: { clerk_user_id: userId },
+          select: {
+            average_vod_views: true,
+            twitch_username: true,
+            youtube_channel_name: true,
+          },
+        }),
+        (await clerkClient()).users.getUser(userId),
+      ])
+      const meta = (clerkUser.publicMetadata || {}) as Record<string, unknown>
+      const level = Math.max(1, Number(meta.creatorLevel) || 1)
+      const rankName = getRankName(level)
       statsRows = [
         {
-          label: 'Twitch Followers',
-          value: creator?.subs_followers != null ? creator.subs_followers.toLocaleString() : '—',
+          label: 'Level',
+          value: `Lv. ${level} · ${rankName}`,
+          valueClassName: 'font-medium text-[#00c8ff]',
         },
         {
           label: 'Avg VOD views',
@@ -49,7 +56,7 @@ export default async function CreatorShell({ children }: Props) {
     } catch {
       statsUnavailable = true
       statsRows = [
-        { label: 'Twitch Followers', value: '—' },
+        { label: 'Level', value: '—' },
         { label: 'Avg VOD views', value: '—' },
         { label: 'Twitch', value: 'Not linked' },
         { label: 'YouTube', value: 'Not linked' },

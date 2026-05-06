@@ -2,7 +2,7 @@
  * Creator XP and leveling system.
  *
  * XP threshold formula: BASE_XP + (level * XP_PER_LEVEL)
- *   Level 1 → 2 requires 400 XP, level 2 → 3 requires 500 XP, etc.
+ *   Level 1 → 2 requires 500 XP, level 2 → 3 requires 700 XP, etc.
  * Levels cap at 7 for rank name display but continue numerically beyond that.
  */
 
@@ -10,7 +10,7 @@
 export const BASE_XP = 300
 
 /** Additional XP required per level increment. */
-export const XP_PER_LEVEL = 100
+export const XP_PER_LEVEL = 200
 
 /** Returns XP required to advance from `level` to `level + 1`. */
 export function getXpForNextLevel(level: number): number {

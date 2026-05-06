@@ -16,7 +16,7 @@
  * Limit is hard-coded to 20 most-recent applications.
  */
 import { auth } from "@clerk/nextjs/server";
-import { getCreatorCalendarTasks, getCreatorXp } from "./_actions";
+import { getCreatorCalendarTasks, getCreatorXp, getCreatorMissions } from "./_actions";
 import { getUserDisplayInfo } from "@/lib/get-user-display-info";
 import { CreatorCommandCenter } from "./_components";
 import { prisma } from "@/lib/prisma";
@@ -26,12 +26,13 @@ import { prisma } from "@/lib/prisma";
  * campaigns, and academy panels — for the authenticated creator.
  */
 export default async function CreatorDashboardPage() {
-  const [authResult, displayInfo, xpState, calendarTasks] =
+  const [authResult, displayInfo, xpState, calendarTasks, missions] =
     await Promise.all([
       auth(),
       getUserDisplayInfo(),
       getCreatorXp(),
       getCreatorCalendarTasks(),
+      getCreatorMissions(),
     ]);
 
   const { userId } = authResult
@@ -151,6 +152,7 @@ export default async function CreatorDashboardPage() {
       statsUnavailable={statsUnavailable}
       isAdmin={role === 'admin'}
       calendarTasks={calendarTasks}
+      missions={missions}
     />
   );
 }

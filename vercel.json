@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/late-penalties",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/assign-missions",
+      "schedule": "0 0 * * 1"
     }
   ]
 }

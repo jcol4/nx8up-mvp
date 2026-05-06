@@ -18,6 +18,8 @@ import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { encryptToken } from '@/lib/token-encryption'
 import { validateCsrfCookie, triggerCtrRecomputeForUser } from '@/lib/oauth-callback-utils'
+import { assignWeeklyMissions } from '@/lib/mission-assignment'
+import { resolveCreatorMissions } from '@/lib/mission-resolver'
 
 const TWITCH_TOKEN_URL = 'https://id.twitch.tv/oauth2/token'
 const TWITCH_API_BASE = 'https://api.twitch.tv/helix'
@@ -219,6 +221,12 @@ export async function GET(req: NextRequest) {
   })
 
   triggerCtrRecomputeForUser(userId).catch(console.error)
+
+  const creator = await prisma.content_creators.findUnique({ where: { clerk_user_id: userId }, select: { id: true } })
+  if (creator) {
+    assignWeeklyMissions(creator.id).catch(console.error)
+    resolveCreatorMissions(creator.id).catch(console.error)
+  }
 
   return NextResponse.redirect(`${APP_URL}/creator/profile?twitch_linked=1`)
 }
