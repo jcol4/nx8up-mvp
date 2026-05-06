@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/recalculate-ctr",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/late-penalties",
+      "schedule": "0 2 * * *"
     }
   ]
 }

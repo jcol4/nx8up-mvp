@@ -24,6 +24,7 @@ import { prisma } from '@/lib/prisma'
 import { createNotification } from '@/lib/notifications'
 import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 import { onDisputeCreated } from '@/lib/disputes'
+import { adjustSponsorReputation, adjustCreatorReputation, COMPLETION_BONUS } from '@/lib/reputation'
 import type Stripe from 'stripe'
 
 /** Verifies webhook signature and dispatches to per-event handlers. */
@@ -74,6 +75,7 @@ export async function POST(request: Request) {
           data: {
             status: 'live',
             stripe_payment_intent_id: pi.id,
+            payment_confirmed_at: new Date(),
             ...(chargeId ? { stripe_charge_id: chargeId } : {}),
           },
         })
@@ -190,7 +192,7 @@ export async function POST(request: Request) {
             stripe_payment_intent_id: piId,
             status: { in: ['pending_payment', 'payment_in_progress'] },
           },
-          data: { status: 'live' },
+          data: { status: 'live', payment_confirmed_at: new Date() },
         })
 
         console.log(`[webhook] charge.succeeded — stored=${chargeStored.count} advanced=${chargeAdvanced.count}`)
@@ -219,7 +221,9 @@ export async function POST(request: Request) {
         const app = await prisma.campaign_applications.findUnique({
           where: { id: applicationId },
           select: {
-            campaign: { select: { title: true } },
+            campaign_id: true,
+            creator_id: true,
+            campaign: { select: { title: true, sponsor_id: true } },
             creator: { select: { clerk_user_id: true } },
           },
         })
@@ -233,6 +237,19 @@ export async function POST(request: Request) {
             link: '/creator/campaigns',
             dedupeKey: transfer.id,
           })
+
+          await adjustCreatorReputation(app.creator_id, COMPLETION_BONUS)
+
+          // Check if all creators for this campaign are now paid out → +3 reputation for sponsor
+          const unpaidCount = await prisma.deal_submissions.count({
+            where: {
+              payout_status: { not: 'paid' },
+              application: { campaign_id: app.campaign_id, status: 'accepted' },
+            },
+          })
+          if (unpaidCount === 0) {
+            await adjustSponsorReputation(app.campaign.sponsor_id, 3)
+          }
         }
         break
       }

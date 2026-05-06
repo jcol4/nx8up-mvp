@@ -23,9 +23,10 @@
  */
 import Link from 'next/link'
 import Image from 'next/image'
-import { getOpenCampaignsWithEligibility, getLaunchedCampaigns, getCreatorOAuthStatus, getMyInvitations } from './_actions'
+import { getOpenCampaignsWithEligibility, getActiveCampaigns, getCreatorOAuthStatus, getMyInvitations } from './_actions'
 import Panel from '@/components/shared/Panel'
 import InviteResponseButtons from '@/components/creator/InviteResponseButtons'
+import OptOutButton from '@/components/creator/OptOutButton'
 import { calcFeeBreakdown } from '@/lib/constants'
 import CreatorShell from '@/components/creator/CreatorShell'
 import { getClerkImageUrls } from '@/lib/get-clerk-images'
@@ -50,7 +51,7 @@ const CREATOR_CAMPAIGN_EMPTY_CLASS =
 export default async function CreatorCampaignsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; page?: string }>
+  searchParams: Promise<{ tab?: string; page?: string; filter?: string }>
 }) {
   const { verified, stripeReady } = await getCreatorOAuthStatus()
 
@@ -108,28 +109,29 @@ export default async function CreatorCampaignsPage({
     )
   }
 
-  const { tab, page } = await searchParams
-  const activeTab = tab === 'launched' ? 'launched' : tab === 'invites' ? 'invites' : 'open'
+  const { tab, page, filter } = await searchParams
+  const activeTab = tab === 'active' ? 'active' : tab === 'invites' ? 'invites' : 'open'
+  const showAll = filter === 'all'
   const pageNumber = Number(page)
   const currentPage = Number.isFinite(pageNumber) && pageNumber > 0 ? Math.floor(pageNumber) : 1
   const pageSize = 25
 
-  const [allEntries, launchedEntries, invitations] = await Promise.all([
+  const [allEntries, activeApps, invitations] = await Promise.all([
     activeTab === 'open' ? getOpenCampaignsWithEligibility(500) : Promise.resolve([]),
-    activeTab === 'launched' ? getLaunchedCampaigns(500) : Promise.resolve([]),
+    activeTab === 'active' ? getActiveCampaigns({ all: showAll }) : Promise.resolve([]),
     activeTab === 'invites' ? getMyInvitations() : Promise.resolve([]),
   ])
 
   const sponsorClerkIds = [
     ...allEntries.map((e) => e.campaign.sponsor.clerk_user_id),
-    ...launchedEntries.map((e) => e.campaign.sponsor.clerk_user_id),
+    ...activeApps.map((a) => a.campaign.sponsor.clerk_user_id),
     ...invitations.map((a) => a.campaign.sponsor.clerk_user_id),
   ].filter((id): id is string => !!id)
   const sponsorImages = await getClerkImageUrls(sponsorClerkIds)
 
   const openEntries = allEntries.filter((e) => e.eligible).sort((a, b) => b.score - a.score)
   const totalEntries =
-    activeTab === 'invites' ? invitations.length : activeTab === 'open' ? openEntries.length : launchedEntries.length
+    activeTab === 'invites' ? invitations.length : activeTab === 'open' ? openEntries.length : activeApps.length
   const totalPages = Math.max(1, Math.ceil(totalEntries / pageSize))
   const safePage = Math.min(currentPage, totalPages)
   const startIndex = (safePage - 1) * pageSize
@@ -138,15 +140,18 @@ export default async function CreatorCampaignsPage({
   const pageEndLabel = totalEntries === 0 ? 0 : Math.min(endIndex, totalEntries)
   const paginatedInvitations = invitations.slice(startIndex, endIndex)
   const paginatedOpenEntries = openEntries.slice(startIndex, endIndex)
-  const paginatedLaunchedEntries = launchedEntries.slice(startIndex, endIndex)
+  const paginatedActiveApps = activeApps.slice(startIndex, endIndex)
 
-  const buildCampaignsHref = (tabValue: 'open' | 'invites' | 'launched', nextPage: number) => {
+  const buildCampaignsHref = (tabValue: 'open' | 'invites' | 'active', nextPage: number, filterValue?: string) => {
     const params = new URLSearchParams()
     if (tabValue !== 'open') params.set('tab', tabValue)
     if (nextPage > 1) params.set('page', String(nextPage))
+    if (filterValue) params.set('filter', filterValue)
     const query = params.toString()
     return query ? `/creator/campaigns?${query}` : '/creator/campaigns'
   }
+
+  const now = new Date()
 
   const SponsorAvatar = ({ clerkUserId, name }: { clerkUserId: string | null; name: string }) => {
     const src = clerkUserId ? sponsorImages[clerkUserId] : undefined
@@ -195,14 +200,14 @@ export default async function CreatorCampaignsPage({
           Invites
         </Link>
         <Link
-          href="/creator/campaigns?tab=launched"
+          href="/creator/campaigns?tab=active"
           className={`px-4 py-2 text-sm font-medium transition-colors relative ${
-            activeTab === 'launched'
+            activeTab === 'active'
               ? 'text-[#a855f7] border-b-2 border-[#a855f7] -mb-px'
               : 'text-[#a9abb5] hover:text-[#e8f4ff]'
           }`}
         >
-          Launched
+          Active
         </Link>
       </div>
 
@@ -213,7 +218,7 @@ export default async function CreatorCampaignsPage({
           </p>
           <div className="flex items-center gap-2">
             <Link
-              href={buildCampaignsHref(activeTab, Math.max(1, safePage - 1))}
+              href={buildCampaignsHref(activeTab, Math.max(1, safePage - 1), showAll ? 'all' : undefined)}
               aria-disabled={safePage <= 1}
               className={`inline-flex h-8 w-8 items-center justify-center rounded-md border text-sm transition ${
                 safePage <= 1
@@ -224,7 +229,7 @@ export default async function CreatorCampaignsPage({
               &larr;
             </Link>
             <Link
-              href={buildCampaignsHref(activeTab, Math.min(totalPages, safePage + 1))}
+              href={buildCampaignsHref(activeTab, Math.min(totalPages, safePage + 1), showAll ? 'all' : undefined)}
               aria-disabled={safePage >= totalPages}
               className={`inline-flex h-8 w-8 items-center justify-center rounded-md border text-sm transition ${
                 safePage >= totalPages
@@ -366,68 +371,98 @@ export default async function CreatorCampaignsPage({
           </ul>
         )
       ) : (
-        launchedEntries.length === 0 ? (
-          <Panel variant="creator" className={CREATOR_CAMPAIGN_EMPTY_CLASS}>
-            <p className="py-8 text-center text-sm text-[#a9abb5]">No launched campaigns yet.</p>
-          </Panel>
-        ) : (
-          <ul className="space-y-3.5">
-            {paginatedLaunchedEntries.map(({ campaign: c, myApplication }) => (
-              <li key={c.id}>
-                <Link
-                  href={`/creator/campaigns/${c.id}`}
-                  className={`group block ${CREATOR_CAMPAIGN_CARD_CLASS} hover:border-[#a855f7]/45`}
-                  style={{ borderTopWidth: '2px', borderTopColor: '#bffcff' }}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <SponsorAvatar clerkUserId={c.sponsor.clerk_user_id} name={c.sponsor.company_name ?? 'Sponsor'} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                          <span className="text-sm font-semibold text-[#e8f4ff] group-hover:text-[#f4fdff]">{c.title}</span>
-                          <span className="rounded border border-[#a855f7]/35 bg-[#a855f7]/20 px-2 py-0.5 text-xs text-[#d8b4fe]">Launched</span>
-                          {myApplication && (
-                            <span className={`text-xs px-2 py-0.5 rounded ${APPLICATION_STATUS_STYLES[myApplication.status] ?? ''}`}>
-                              {APPLICATION_STATUS_LABELS[myApplication.status] ?? myApplication.status}
-                            </span>
-                          )}
+        <>
+          {/* Filter toggle */}
+          <div className="mb-4 flex items-center gap-2">
+            <Link
+              href={buildCampaignsHref('active', 1)}
+              className={`rounded-full px-3 py-1 text-xs font-medium border transition-colors ${
+                !showAll
+                  ? 'border-[#a855f7]/50 bg-[#a855f7]/20 text-[#d8b4fe]'
+                  : 'border-white/15 text-[#a9abb5] hover:text-[#e8f4ff]'
+              }`}
+            >
+              Launched only
+            </Link>
+            <Link
+              href={buildCampaignsHref('active', 1, 'all')}
+              className={`rounded-full px-3 py-1 text-xs font-medium border transition-colors ${
+                showAll
+                  ? 'border-[#a855f7]/50 bg-[#a855f7]/20 text-[#d8b4fe]'
+                  : 'border-white/15 text-[#a9abb5] hover:text-[#e8f4ff]'
+              }`}
+            >
+              All accepted
+            </Link>
+          </div>
+
+          {activeApps.length === 0 ? (
+            <Panel variant="creator" className={CREATOR_CAMPAIGN_EMPTY_CLASS}>
+              <p className="py-8 text-center text-sm text-[#a9abb5]">
+                {showAll ? 'No active campaigns yet.' : 'No launched campaigns. Switch to "All accepted" to see campaigns not yet launched.'}
+              </p>
+            </Panel>
+          ) : (
+            <ul className="space-y-3.5">
+              {paginatedActiveApps.map((app) => {
+                const c = app.campaign
+                const { perCreator, creatorPool } = c.budget != null
+                  ? calcFeeBreakdown(c.budget, c.creator_count)
+                  : { perCreator: null, creatorPool: null }
+                const href = c.status === 'launched' ? `/creator/deal-room/${app.id}` : `/creator/campaigns/${c.id}`
+                const canOptOut = !app.opt_out && c.start_date && new Date(c.start_date) > now
+
+                return (
+                  <li key={app.id}>
+                    <div
+                      className={`${CREATOR_CAMPAIGN_CARD_CLASS}`}
+                      style={{ borderTopWidth: '2px', borderTopColor: '#bffcff' }}
+                    >
+                      <Link href={href} className="group block">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-3 flex-1 min-w-0">
+                            <SponsorAvatar clerkUserId={c.sponsor.clerk_user_id} name={c.sponsor.company_name ?? 'Sponsor'} />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                                <span className="text-sm font-semibold text-[#e8f4ff] group-hover:text-[#f4fdff]">{c.title}</span>
+                                <span className="rounded border border-[#22c55e]/30 bg-[#22c55e]/12 px-2 py-0.5 text-xs text-[#4ade80]">Accepted</span>
+                                {c.status === 'launched' && (
+                                  <span className="rounded border border-[#a855f7]/35 bg-[#a855f7]/20 px-2 py-0.5 text-xs text-[#d8b4fe]">Launched</span>
+                                )}
+                                {app.opt_out && (
+                                  <span className="rounded border border-yellow-500/30 bg-yellow-500/10 px-2 py-0.5 text-xs text-yellow-400">
+                                    Opt-out {app.opt_out.verdict === 'pending' ? 'pending review' : app.opt_out.verdict}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="mt-0.5 text-xs text-[#a9abb5]">
+                                {c.sponsor.company_name ?? 'Sponsor'}
+                                {c.end_date ? ` · Deadline ${new Date(c.end_date).toLocaleDateString()}` : ''}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            {c.budget != null && creatorPool != null && (
+                              <>
+                                <span className="text-sm font-bold cr-success">${(perCreator ?? creatorPool).toLocaleString()}</span>
+                                <p className="text-[10px] text-[#a9abb5]">{perCreator ? 'your payout' : 'creator pool'}</p>
+                              </>
+                            )}
+                          </div>
                         </div>
-                        <p className="mt-0.5 text-xs text-[#a9abb5]">
-                          {c.sponsor.company_name ?? 'Sponsor'} ·{' '}
-                          {c.platform.join(', ')}
-                          {c.end_date ? ` · Ends: ${new Date(c.end_date).toLocaleDateString()}` : ''}
-                        </p>
-                        {c.description && (
-                          <p className="mt-1 line-clamp-2 text-xs text-[#e8f4ff]">{c.description}</p>
-                        )}
-                        <div className="flex flex-wrap gap-1.5 mt-2">
-                          {c.game_category.slice(0, 3).map((g: string) => (
-                            <span key={g} className="rounded border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2 py-0.5 text-xs text-[#99f7ff]">{g}</span>
-                          ))}
-                          {c.content_type.slice(0, 2).map((t: string) => (
-                            <span key={t} className="rounded border border-[#c084fc]/30 bg-[#c084fc]/10 px-2 py-0.5 text-xs text-[#d8b4fe]">{t}</span>
-                          ))}
+                      </Link>
+                      {canOptOut && (
+                        <div className="mt-2">
+                          <OptOutButton applicationId={app.id} campaignTitle={c.title} />
                         </div>
-                      </div>
+                      )}
                     </div>
-                    <div className="text-right shrink-0">
-                      {c.budget != null && (() => {
-                        const { creatorPool } = calcFeeBreakdown(c.budget, c.creator_count)
-                        return (
-                          <>
-                            <span className="text-sm font-bold cr-success">${creatorPool.toLocaleString()}</span>
-                            <p className="text-[10px] text-[#a9abb5]">creator pool</p>
-                          </>
-                        )
-                      })()}
-                      <p className="mt-0.5 text-xs text-[#a9abb5]">{c._count.applications} creators</p>
-                    </div>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </>
       )}
 
     </main>

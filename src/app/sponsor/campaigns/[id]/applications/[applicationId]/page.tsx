@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma'
 import { BackLink } from '@/components/shared'
 import SponsorHeader from '../../../../_components/dashboard/SponsorHeader'
 import ApplicationDecisionButtons from '@/components/sponsor/ApplicationDecisionButtons'
+import { TIER_LABELS } from '@/lib/reputation'
+import type { ReputationTier } from '@/lib/reputation'
 
 type Props = {
   params: Promise<{ id?: string; applicationId?: string }>
@@ -133,6 +135,21 @@ export default async function ApplicationReviewPage({ params }: Props) {
                       dateStyle: 'medium',
                       timeStyle: 'short',
                     })}
+                  </span>
+                )}
+                {creator.reputation_tier && (
+                  <span className={`text-xs px-2 py-0.5 rounded border ${
+                    creator.reputation_tier === 'verified'
+                      ? 'bg-[#22c55e]/15 border-[#22c55e]/30 text-[#4ade80]'
+                      : creator.reputation_tier === 'trusted'
+                        ? 'bg-[#00c8ff]/15 border-[#00c8ff]/30 text-[#00c8ff]'
+                        : creator.reputation_tier === 'restricted'
+                          ? 'bg-orange-500/15 border-orange-500/30 text-orange-400'
+                          : creator.reputation_tier === 'sanctioned'
+                            ? 'bg-red-500/15 border-red-500/30 text-red-400'
+                            : 'bg-white/10 border-white/20 text-[#a9abb5]'
+                  }`}>
+                    {TIER_LABELS[creator.reputation_tier as ReputationTier] ?? creator.reputation_tier}
                   </span>
                 )}
               </div>

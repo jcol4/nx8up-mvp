@@ -25,6 +25,7 @@ export default async function NewCampaignPage() {
       min_engagement_rate: true,
       age_restriction_type: true,
       preferred_payment_method: true,
+      reputation_tier: true,
     },
   })
 
@@ -142,6 +143,7 @@ export default async function NewCampaignPage() {
           <NewCampaignForm
             initialDraft={profileDraft}
             sponsorAgeRestriction={sponsor?.age_restriction_type ?? null}
+            sponsorReputationTier={sponsor?.reputation_tier ?? 'neutral'}
             availableCreators={availableCreators}
           />
         </div>

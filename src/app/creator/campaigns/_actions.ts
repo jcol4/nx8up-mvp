@@ -190,6 +190,44 @@ export async function getLaunchedCampaigns(limit = 50) {
   }))
 }
 
+export async function getActiveCampaigns({ all = false }: { all?: boolean } = {}) {
+  const { userId } = await auth()
+  if (!userId) return []
+
+  const creator = await prisma.content_creators.findUnique({
+    where: { clerk_user_id: userId },
+    select: { id: true },
+  })
+  if (!creator) return []
+
+  const apps = await prisma.campaign_applications.findMany({
+    where: {
+      creator_id: creator.id,
+      status: 'accepted',
+      ...(all ? {} : { campaign: { status: 'launched' } }),
+    },
+    orderBy: { submitted_at: 'desc' },
+    include: {
+      opt_out: { select: { id: true, verdict: true } },
+      campaign: {
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          start_date: true,
+          end_date: true,
+          budget: true,
+          creator_count: true,
+          brand_name: true,
+          sponsor: { select: { company_name: true, clerk_user_id: true } },
+        },
+      },
+    },
+  })
+
+  return apps
+}
+
 export async function getCampaignById(id: string) {
   return prisma.campaigns.findUnique({
     where: { id },
@@ -420,5 +458,60 @@ export async function respondToInvitation(
 
   revalidatePath('/creator/campaigns')
   revalidatePath(`/creator/campaigns/${application.campaign_id}`)
+  return { success: true }
+}
+
+export async function requestOptOut(applicationId: string, reason: string) {
+  const { userId } = await auth()
+  if (!userId) return { error: 'Unauthorized' }
+
+  if (!reason.trim()) return { error: 'Reason is required.' }
+
+  const creator = await prisma.content_creators.findUnique({
+    where: { clerk_user_id: userId },
+    select: { id: true },
+  })
+  if (!creator) return { error: 'Creator not found.' }
+
+  const application = await prisma.campaign_applications.findUnique({
+    where: { id: applicationId },
+    select: {
+      id: true,
+      creator_id: true,
+      status: true,
+      opt_out: { select: { id: true } },
+      campaign: { select: { id: true, title: true, start_date: true } },
+      creator: { select: { id: true, clerk_user_id: true } },
+    },
+  })
+
+  if (!application || application.creator.clerk_user_id !== userId) {
+    return { error: 'Application not found.' }
+  }
+
+  if (application.opt_out) {
+    return { error: 'An opt-out request already exists for this campaign.' }
+  }
+
+  const now = new Date()
+  if (application.campaign.start_date && application.campaign.start_date <= now) {
+    return { error: 'Cannot opt out after the campaign has already started.' }
+  }
+
+  await prisma.creator_opt_outs.create({
+    data: {
+      application_id: applicationId,
+      creator_id: creator.id,
+      reason: reason.trim(),
+      verdict: 'pending',
+    },
+  })
+
+  await prisma.campaign_applications.update({
+    where: { id: applicationId },
+    data: { status: 'opted_out' },
+  })
+
+  revalidatePath('/creator/campaigns/active')
   return { success: true }
 }

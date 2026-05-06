@@ -7,6 +7,9 @@ import DeleteCampaignButton from '@/components/sponsor/DeleteCampaignButton'
 import PublishCampaignButton from '@/components/sponsor/PublishCampaignButton'
 import LaunchCampaignButton from '@/components/sponsor/LaunchCampaignButton'
 import { getMissingSponsorProfileFields } from '@/lib/sponsor-profile'
+import RequestRefundButton from '@/components/sponsor/RequestRefundButton'
+import { TIER_COOLDOWN_DAYS, TIER_LABELS } from '@/lib/reputation'
+import type { ReputationTier } from '@/lib/reputation'
 
 const STATUS_STYLES: Record<string, string> = {
   draft: 'bg-white/10 text-[#a9abb5] border border-white/10',
@@ -57,10 +60,32 @@ export default async function SponsorCampaignsPage({
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  const sponsor = await prisma.sponsors.findUnique({ where: { clerk_user_id: userId } })
+  const sponsor = await prisma.sponsors.findUnique({
+    where: { clerk_user_id: userId },
+    select: {
+      id: true,
+      reputation_tier: true,
+      reputation_score: true,
+      company_name: true,
+      location: true,
+      language: true,
+      budget_min: true,
+      budget_max: true,
+      min_avg_viewers: true,
+      min_subs_followers: true,
+      min_engagement_rate: true,
+      platform: true,
+      content_type: true,
+      game_category: true,
+      age_restricted: true,
+      age_restriction_type: true,
+      preferred_payment_method: true,
+      stripe_customer_id: true,
+    },
+  })
   if (!sponsor) redirect('/')
 
-  const missingFields = getMissingSponsorProfileFields(sponsor)
+  const missingFields = getMissingSponsorProfileFields(sponsor as Parameters<typeof getMissingSponsorProfileFields>[0])
   const profileComplete = missingFields.length === 0
 
   const { tab, payment } = await searchParams
@@ -161,6 +186,37 @@ export default async function SponsorCampaignsPage({
               </div>
             </div>
           )}
+
+          {/* Start date cooldown notice */}
+          {(() => {
+            const tier = (sponsor.reputation_tier ?? 'neutral') as ReputationTier
+            const cooldown = TIER_COOLDOWN_DAYS[tier]
+            if (cooldown === null) {
+              return (
+                <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-red-500/25 bg-red-500/10 p-3">
+                  <svg className="mt-0.5 h-4 w-4 shrink-0 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
+                  <p className="text-xs text-red-300">
+                    Your account is <span className="font-semibold">Sanctioned</span>. All campaign launches require admin approval before going live.
+                  </p>
+                </div>
+              )
+            }
+            if (cooldown > 0) {
+              return (
+                <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-[#99f7ff]/20 bg-[#99f7ff]/5 p-3">
+                  <svg className="mt-0.5 h-4 w-4 shrink-0 text-[#99f7ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-xs text-[#99f7ff]/80">
+                    As a <span className="font-semibold text-[#99f7ff]">{TIER_LABELS[tier]}</span> sponsor, your campaign start date must be at least {cooldown} day{cooldown !== 1 ? 's' : ''} after payment confirmation.
+                  </p>
+                </div>
+              )
+            }
+            return null
+          })()}
 
           {/* Tabs */}
           <div className="mb-5 flex gap-0.5 border-b border-white/10 sm:mb-6">
@@ -313,7 +369,15 @@ export default async function SponsorCampaignsPage({
                         ) : (
                           <span className="text-sm text-[#6b7280]">No applicants</span>
                         )}
-                        <DeleteCampaignButton id={c.id} />
+                        {c.status === 'live' ? (
+                          <RequestRefundButton
+                            campaignId={c.id}
+                            campaignTitle={c.title}
+                            hasAcceptedCreators={hasAcceptedCreator}
+                          />
+                        ) : (
+                          <DeleteCampaignButton id={c.id} />
+                        )}
                       </div>
                     </div>
                   </div>

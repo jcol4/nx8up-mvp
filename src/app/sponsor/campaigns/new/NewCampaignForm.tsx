@@ -18,6 +18,7 @@ type Props = {
   initialDraft?: CampaignDraft
   editingId?: string
   sponsorAgeRestriction?: string | null
+  sponsorReputationTier?: string
   availableCreators?: AvailableCreator[]
 }
 
@@ -47,7 +48,7 @@ function validateStep(step: number, draft: CampaignDraft): string {
   }
 }
 
-export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRestriction, availableCreators = [] }: Props) {
+export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRestriction, sponsorReputationTier = 'neutral', availableCreators = [] }: Props) {
   const router = useRouter()
   const [step, setStep] = useState(editingId ? TOTAL_STEPS : 1)
   const [draft, setDraft] = useState<CampaignDraft>(initialDraft ?? EMPTY_DRAFT)
@@ -252,7 +253,7 @@ export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRes
         {step === 1 && <Step1Basics {...stepProps} error={stepError} onNext={goNext} />}
         {step === 2 && <Step2Audience {...stepProps} onNext={goNext} onBack={goBack} sponsorAgeRestriction={sponsorAgeRestriction} />}
         {step === 3 && <Step3Creators {...stepProps} onNext={goNext} onBack={goBack} availableCreators={availableCreators} />}
-        {step === 4 && <Step4Budget {...stepProps} error={stepError} onNext={goNext} onBack={goBack} />}
+        {step === 4 && <Step4Budget {...stepProps} error={stepError} onNext={goNext} onBack={goBack} reputationTier={sponsorReputationTier} />}
         {step === 5 && <Step5Content {...stepProps} error={stepError} onNext={goNext} onBack={goBack} />}
         {step === 6 && <Step6Tracking {...stepProps} onNext={goNext} onBack={goBack} />}
         {step === 7 && (

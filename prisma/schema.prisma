@@ -13,6 +13,8 @@ model content_creators {
   id                         String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   clerk_user_id              String                  @unique
   email                      String                  @unique
+  reputation_tier            String                  @default("neutral")
+  reputation_score           Int                     @default(0)
   age                        Int?
   location                   String?
   language                   String[]
@@ -71,6 +73,7 @@ model content_creators {
   stripe_connect_id          String?
   stripe_onboarding_complete Boolean                 @default(false)
   applications               campaign_applications[]
+  opt_outs                   creator_opt_outs[]
 
   @@index([average_vod_views])
   @@index([content_type], type: Gin)
@@ -109,8 +112,12 @@ model sponsors {
   age_restriction_type     String?
   preferred_payment_method String?                            @default("card")
   stripe_customer_id       String?
+  reputation_score         Int                                @default(0)
+  reputation_tier          String                             @default("neutral")
   campaigns                campaigns[]
   age_restriction_requests sponsor_age_restriction_requests[]
+  refund_requests          refund_requests[]
+  sanctioned_launch_reqs   sanctioned_launch_requests[]
 
   @@index([budget_max])
   @@index([budget_min])
@@ -186,9 +193,12 @@ model campaigns {
   stripe_payment_intent_id    String?
   stripe_charge_id            String?
   preferred_payment_method    String?                 @default("card")
+  payment_confirmed_at        DateTime?               @db.Timestamptz(6)
   applications                campaign_applications[]
   sponsor                     sponsors                @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
   disputes                    disputes[]
+  refund_requests             refund_requests[]
+  sanctioned_launch_reqs      sanctioned_launch_requests[]
 
   @@index([status])
   @@index([sponsor_id])
@@ -212,10 +222,12 @@ model campaign_applications {
   app_location           String?
   app_media_types        String[]
   tracking_short_code    String?           @unique
+  late_penalty_applied   Int               @default(0)
   campaign               campaigns         @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
   creator                content_creators  @relation(fields: [creator_id], references: [id], onDelete: Cascade)
   deal_submission        deal_submissions?
   link_clicks            link_clicks[]
+  opt_out                creator_opt_outs?
 
   @@unique([campaign_id, creator_id])
   @@index([campaign_id])
@@ -368,4 +380,54 @@ model SurveyResponse {
 
   @@unique([surveyId, userId])
   @@index([surveyId])
+}
+
+model refund_requests {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaign_id              String    @db.Uuid
+  sponsor_id               String    @db.Uuid
+  reason_category          String
+  reason_detail            String?
+  had_accepted_applications Boolean  @default(false)
+  verdict                  String    @default("pending")
+  admin_notes              String?
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
+  campaign                 campaigns @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+  sponsor                  sponsors  @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
+
+  @@index([verdict])
+  @@index([sponsor_id])
+  @@index([campaign_id])
+}
+
+model creator_opt_outs {
+  id             String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  application_id String                @unique @db.Uuid
+  creator_id     String                @db.Uuid
+  reason         String
+  verdict        String                @default("pending")
+  admin_notes    String?
+  created_at     DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime              @updatedAt @db.Timestamptz(6)
+  application    campaign_applications @relation(fields: [application_id], references: [id], onDelete: Cascade)
+  creator        content_creators      @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+
+  @@index([verdict])
+  @@index([creator_id])
+}
+
+model sanctioned_launch_requests {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaign_id String    @unique @db.Uuid
+  sponsor_id  String    @db.Uuid
+  verdict     String    @default("pending")
+  admin_notes String?
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime  @updatedAt @db.Timestamptz(6)
+  campaign    campaigns @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+  sponsor     sponsors  @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
+
+  @@index([verdict])
+  @@index([sponsor_id])
 }

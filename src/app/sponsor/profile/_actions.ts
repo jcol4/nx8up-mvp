@@ -26,6 +26,7 @@ export type SponsorProfile = {
   age_restricted: boolean
   age_restriction_type: string | null
   has_pending_age_restriction_request: boolean
+  reputation_tier: string
 }
 
 export async function getSponsorProfile(): Promise<SponsorProfile | null> {
@@ -64,11 +65,12 @@ export async function getSponsorProfile(): Promise<SponsorProfile | null> {
     age_restricted: sponsor.age_restricted,
     age_restriction_type: sponsor.age_restriction_type ?? null,
     has_pending_age_restriction_request: sponsor.age_restriction_requests.length > 0,
+    reputation_tier: sponsor.reputation_tier ?? 'neutral',
   }
 }
 
 export async function updateSponsorProfile(
-  data: Omit<SponsorProfile, 'age_restricted' | 'age_restriction_type' | 'has_pending_age_restriction_request'> & { preferred_payment_method: string }
+  data: Omit<SponsorProfile, 'age_restricted' | 'age_restriction_type' | 'has_pending_age_restriction_request' | 'reputation_tier'> & { preferred_payment_method: string }
 ): Promise<{ error?: string }> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }

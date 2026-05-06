@@ -5,6 +5,8 @@ import NXDatePicker from '@/components/ui/NXDatePicker'
 import type { CampaignDraft } from '../_shared'
 import { labelClass, sectionClass, sectionTitle } from '../_shared'
 import { NX_FEE_RATE, calcFeeBreakdown, BUDGET_MAX } from '@/lib/constants'
+import { TIER_COOLDOWN_DAYS, TIER_LABELS } from '@/lib/reputation'
+import type { ReputationTier } from '@/lib/reputation'
 
 const BUDGET_STEP = 500
 const COUNT_STEP  = 1
@@ -31,9 +33,10 @@ type Props = {
   error: string
   onNext: () => void
   onBack: () => void
+  reputationTier?: string
 }
 
-export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: Props) {
+export default function Step4Budget({ draft, setDraft, error, onNext, onBack, reputationTier = 'neutral' }: Props) {
   const set = <K extends keyof CampaignDraft>(k: K, v: CampaignDraft[K]) =>
     setDraft(prev => ({ ...prev, [k]: v }))
 
@@ -213,6 +216,17 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack }: 
               placeholder="Select start date"
               onChange={val => set('start_date', val)}
             />
+            {(() => {
+              const tier = reputationTier as ReputationTier
+              const cooldown = TIER_COOLDOWN_DAYS[tier]
+              if (cooldown === null) {
+                return <p className="mt-1 text-xs text-red-400">Sanctioned accounts require admin approval to launch — your start date may be delayed.</p>
+              }
+              if (cooldown > 0) {
+                return <p className="mt-1 text-xs text-[#a9abb5]">As a <span className="text-[#99f7ff]">{TIER_LABELS[tier]}</span> sponsor, your start date must be at least {cooldown} day{cooldown !== 1 ? 's' : ''} after payment confirmation.</p>
+              }
+              return null
+            })()}
           </div>
           <div>
             <label className={labelClass}>End date <span className="text-[#99f7ff]">*</span></label>

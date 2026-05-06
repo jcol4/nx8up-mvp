@@ -6,6 +6,8 @@ import type Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { calcFeeBreakdown } from '@/lib/constants'
+import { TIER_COOLDOWN_DAYS, TIER_LABELS } from '@/lib/reputation'
+import type { ReputationTier } from '@/lib/reputation'
 import SponsorHeader from '../../../_components/dashboard/SponsorHeader'
 import PaymentForm from './PaymentForm'
 
@@ -108,7 +110,7 @@ export default async function CampaignPayPage({
 
   const sponsor = await prisma.sponsors.findUnique({
     where: { clerk_user_id: userId },
-    select: { id: true, email: true },
+    select: { id: true, email: true, reputation_tier: true },
   })
   if (!sponsor) redirect('/')
 
@@ -151,6 +153,7 @@ export default async function CampaignPayPage({
           data: {
             status: 'live',
             stripe_payment_intent_id: piId,
+            payment_confirmed_at: new Date(),
             ...(chargeId ? { stripe_charge_id: chargeId } : {}),
           },
         })
@@ -231,6 +234,47 @@ export default async function CampaignPayPage({
                 ≈ <span className="text-[#22c55e] font-medium">${perCreator.toLocaleString()}</span> per creator ({campaign.creator_count} creators)
               </p>
             )}
+          </div>
+
+          {/* Start date cooldown notice */}
+          {(() => {
+            const tier = ((sponsor.reputation_tier ?? 'neutral') as ReputationTier)
+            const cooldown = TIER_COOLDOWN_DAYS[tier]
+            if (cooldown === null) {
+              return (
+                <div className="flex items-start gap-2.5 rounded-lg border border-red-500/25 bg-red-500/10 p-3">
+                  <svg className="mt-0.5 h-4 w-4 shrink-0 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
+                  <p className="text-xs text-red-300">
+                    Your account is <span className="font-semibold">Sanctioned</span>. After payment, launching this campaign will require admin approval.
+                  </p>
+                </div>
+              )
+            }
+            if (cooldown > 0) {
+              return (
+                <div className="flex items-start gap-2.5 rounded-lg border border-[#99f7ff]/20 bg-[#99f7ff]/5 p-3">
+                  <svg className="mt-0.5 h-4 w-4 shrink-0 text-[#99f7ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-xs text-[#99f7ff]/80">
+                    As a <span className="font-semibold text-[#99f7ff]">{TIER_LABELS[tier]}</span> sponsor, your campaign start date must be at least {cooldown} day{cooldown !== 1 ? 's' : ''} after payment confirmation.
+                  </p>
+                </div>
+              )
+            }
+            return null
+          })()}
+
+          {/* Launch-is-irreversible warning */}
+          <div className="flex items-start gap-2.5 rounded-lg border border-[#eab308]/25 bg-[#eab308]/8 p-3">
+            <svg className="mt-0.5 h-4 w-4 shrink-0 text-[#eab308]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+            <p className="text-xs text-[#eab308]/90">
+              Once you launch your campaign, refunds are no longer available. You may request a refund any time before launching.
+            </p>
           </div>
 
           <PaymentForm

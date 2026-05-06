@@ -7,6 +7,8 @@ import { randomBytes } from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { createNotification } from '@/lib/notifications'
 import { NOTIFICATION_TYPES } from '@/lib/notification-types'
+import { TIER_COOLDOWN_DAYS, earliestStartDate } from '@/lib/reputation'
+import type { ReputationTier } from '@/lib/reputation'
 
 function generateShortCode(): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
@@ -38,7 +40,7 @@ export async function publishCampaign(id: string): Promise<{ error?: string; suc
   return { success: true }
 }
 
-export async function launchCampaign(id: string): Promise<{ error?: string; success?: boolean }> {
+export async function launchCampaign(id: string): Promise<{ error?: string; success?: boolean; pendingApproval?: boolean }> {
   const { userId } = await auth()
   if (!userId) return { error: 'Not authenticated' }
 
@@ -68,6 +70,34 @@ export async function launchCampaign(id: string): Promise<{ error?: string; succ
   }
   if (campaign.applications.length === 0) {
     return { error: 'You must accept at least one creator before launching.' }
+  }
+
+  const tier = sponsor.reputation_tier as ReputationTier
+
+  // Sanctioned sponsors require admin approval before launching
+  if (tier === 'sanctioned') {
+    const existing = await prisma.sanctioned_launch_requests.findUnique({
+      where: { campaign_id: id },
+    })
+    if (existing) {
+      if (existing.verdict === 'pending') return { error: 'Your launch request is awaiting admin approval.' }
+      if (existing.verdict === 'denied') return { error: 'Your launch request was denied by an admin.' }
+    } else {
+      await prisma.sanctioned_launch_requests.create({
+        data: { campaign_id: id, sponsor_id: sponsor.id },
+      })
+    }
+    return { success: true, pendingApproval: true }
+  }
+
+  // Cooldown: start date must be at least N days after payment confirmation
+  const cooldownDays = TIER_COOLDOWN_DAYS[tier] ?? 7
+  if (cooldownDays > 0 && campaign.payment_confirmed_at && campaign.start_date) {
+    const earliest = earliestStartDate(tier, campaign.payment_confirmed_at)
+    if (earliest && campaign.start_date < earliest) {
+      const fmt = earliest.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      return { error: `Your reputation tier requires a ${cooldownDays}-day gap between payment and campaign start. Earliest allowed start date is ${fmt}.` }
+    }
   }
 
   await prisma.campaigns.update({ where: { id }, data: { status: 'launched' } })

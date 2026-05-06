@@ -26,6 +26,13 @@ export const NOTIFICATION_TYPES = {
   PAYMENT_SUCCESS:        'payment_success',
   PAYMENT_FAILED:         'payment_failed',
   CREATOR_APPLIED:        'creator_applied',
+  CAMPAIGN_CANCELLED:     'campaign_cancelled',
+  REFUND_VERDICT:         'refund_verdict',
+  LAUNCH_APPROVED:        'launch_approved',
+  LAUNCH_DENIED:          'launch_denied',
+  // Creator
+  CAMPAIGN_CANCELLED_CREATOR: 'campaign_cancelled_creator',
+  OPT_OUT_VERDICT:        'opt_out_verdict',
   // Admin
   ADMIN_QUEUE:            'admin_queue',
   DISPUTE_CREATED:        'dispute_created',
@@ -35,24 +42,30 @@ export type NotificationType = typeof NOTIFICATION_TYPES[keyof typeof NOTIFICATI
 
 /** Short category label for each notification type, shown as a badge in the notifications list. */
 export const NOTIFICATION_LABELS: Record<NotificationType, string> = {
-  campaign_launched:     'Campaign',
-  direct_invite:         'Direct Invite',
-  application_accepted:  'Application',
-  application_rejected:  'Application',
-  submission_approved:   'Submission',
-  submission_revision:   'Submission',
-  admin_verified:        'Verification',
-  admin_rejected:        'Verification',
-  payout_sent:           'Payout',
-  payout_failed:         'Payout',
-  level_up:              'Level Up',
-  mission_complete:      'Mission',
-  system:                'System',
-  payment_success:       'Payment',
-  payment_failed:        'Payment',
-  creator_applied:       'Application',
-  admin_queue:           'Queue',
-  dispute_created:       'Dispute',
+  campaign_launched:          'Campaign',
+  direct_invite:              'Direct Invite',
+  application_accepted:       'Application',
+  application_rejected:       'Application',
+  submission_approved:        'Submission',
+  submission_revision:        'Submission',
+  admin_verified:             'Verification',
+  admin_rejected:             'Verification',
+  payout_sent:                'Payout',
+  payout_failed:              'Payout',
+  level_up:                   'Level Up',
+  mission_complete:           'Mission',
+  system:                     'System',
+  payment_success:            'Payment',
+  payment_failed:             'Payment',
+  creator_applied:            'Application',
+  campaign_cancelled:         'Campaign',
+  refund_verdict:             'Refund',
+  launch_approved:            'Campaign',
+  launch_denied:              'Campaign',
+  campaign_cancelled_creator: 'Campaign',
+  opt_out_verdict:            'Opt-Out',
+  admin_queue:                'Queue',
+  dispute_created:            'Dispute',
 }
 
 export type NotificationRole = 'creator' | 'sponsor' | 'admin'
@@ -70,6 +83,8 @@ export const CREATOR_NOTIFICATION_TYPES: NotificationType[] = [
   'payout_sent',
   'payout_failed',
   'level_up',
+  'campaign_cancelled_creator',
+  'opt_out_verdict',
   'system',
 ]
 
@@ -78,6 +93,10 @@ export const SPONSOR_NOTIFICATION_TYPES: NotificationType[] = [
   'payment_success',
   'payment_failed',
   'creator_applied',
+  'campaign_cancelled',
+  'refund_verdict',
+  'launch_approved',
+  'launch_denied',
   'system',
 ]
 
