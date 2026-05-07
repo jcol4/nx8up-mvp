@@ -272,9 +272,9 @@ export default function CreatorStatsPanel({ creator }: Props) {
       {hasSteam && (
         <div className="dash-panel dash-panel--nx-top overflow-hidden rounded-xl border border-[#66c0f4]/35 border-t-2 border-t-[#bffcff] bg-[radial-gradient(130%_170%_at_8%_0%,rgba(102,192,244,0.2)_0%,rgba(102,192,244,0.08)_36%,rgba(10,12,22,0.84)_76%)] shadow-[0_16px_48px_rgba(32,72,120,0.2)]">
           <div className="flex items-center gap-2 border-b border-[#66c0f4]/25 bg-black/20 px-4 py-2.5">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="#66c0f4">
-              <path d="M12 0C5.373 0 0 5.373 0 12c0 5.083 3.166 9.426 7.626 11.166l-.082-.041 3.547-1.452a3.375 3.375 0 1 0 4.064-4.86l3.6-2.594.139.001a4.5 4.5 0 1 0-4.5-4.5v.054l-2.586 3.745a3.376 3.376 0 0 0-2.748.92L0 12c.001 6.627 5.373 12 12 12s12-5.373 12-12S18.627 0 12 0zm-2.18 17.85l-1.13.464a2.531 2.531 0 1 0 1.466-3.34l1.166-.484c1.288.504 1.913 1.967 1.387 3.275-.523 1.288-1.967 1.913-3.275 1.387l.386-.302zm9.105-7.34a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
-            </svg>
+          <svg width="13" height="13" viewBox="0 0 32 32" fill="#66c0f4">
+            <path fillRule="evenodd" clipRule="evenodd" d="M16 0C7.5 0 0.6 6.6 0 14.9l8.6 3.6c0.7-0.5 1.6-0.8 2.6-0.8 0.1 0 0.2 0 0.3 0l3.8-5.5c0-2.6 2.1-4.7 4.7-4.7 2.6 0 4.7 2.1 4.7 4.7 0 2.6-2.1 4.7-4.7 4.7-0.1 0-0.1 0-0.2 0l-5.4 3.9c0 0.1 0 0.2 0 0.3 0 2.5-2 4.5-4.5 4.5-2.2 0-4-1.5-4.4-3.6L0.4 19.5C2.3 26.6 8.5 32 16 32c8.8 0 16-7.2 16-16C32 7.2 24.8 0 16 0zM10 24.3l-1.9-0.8c0.3 0.7 0.9 1.3 1.7 1.6 1.7 0.7 3.6-0.1 4.3-1.8 0.3-0.8 0.3-1.7 0-2.5-0.3-0.8-1-1.4-1.7-1.7-0.8-0.3-1.6-0.3-2.3 0l2 0.8c1.2 0.5 1.8 1.9 1.3 3.1S11.2 24.8 10 24.3zM23.1 14.9c1.7 0 3.1-1.4 3.1-3.1 0-1.7-1.4-3.1-3.1-3.1-1.7 0-3.1 1.4-3.1 3.1C20 13.5 21.4 14.9 23.1 14.9zM23.1 9.4c1.3 0 2.4 1.1 2.4 2.4 0 1.3-1.1 2.4-2.4 2.4-1.3 0-2.4-1.1-2.4-2.4C20.7 10.5 21.8 9.4 23.1 9.4z"/>
+          </svg>
             <span className="text-xs font-bold tracking-widest uppercase text-[#bcdcf2]">Steam</span>
             {creator.steam_profile_visibility != null && (
               <span className="ml-auto rounded-full border border-[#66c0f4]/35 bg-[#66c0f4]/10 px-2 py-0.5 text-[10px] text-[#bcdcf2]">
