@@ -67,6 +67,7 @@ model content_creators {
   preferred_product_types    String[]
   primary_platform           String?
   is_available               Boolean                 @default(true)
+  is_deleted                 Boolean                 @default(false)
   max_campaigns_per_month    Int?
   audience_gender            String[]                @default([])
   creator_size               String?
@@ -112,6 +113,7 @@ model sponsors {
   age_restricted           Boolean                            @default(false)
   age_restriction_type     String?
   preferred_payment_method String?                            @default("card")
+  is_deleted               Boolean                            @default(false)
   stripe_customer_id       String?
   reputation_score         Int                                @default(0)
   reputation_tier          String                             @default("neutral")

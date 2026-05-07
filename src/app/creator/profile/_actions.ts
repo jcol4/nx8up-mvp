@@ -652,3 +652,23 @@ export async function refreshYouTubeDataIfStale(userId: string) {
     console.error('refreshYouTubeDataIfStale error:', err)
   }
 }
+
+export async function deleteCreatorAccount(): Promise<{ error?: string; success?: boolean }> {
+  const { userId } = await auth()
+  if (!userId) return { error: 'Not authenticated' }
+
+  await prisma.content_creators.updateMany({
+    where: { clerk_user_id: userId },
+    data: { is_deleted: true },
+  })
+
+  try {
+    const client = await clerkClient()
+    await client.users.deleteUser(userId)
+  } catch (err) {
+    console.error('Clerk deleteUser failed after DB soft-delete:', err)
+    return { error: 'Account marked for deletion but Clerk removal failed. Please contact support.' }
+  }
+
+  return { success: true }
+}

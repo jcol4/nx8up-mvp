@@ -33,6 +33,7 @@ import { parseLocation } from '@/lib/location-options'
 import type { CreatorProfileDraft } from './_shared'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import CreatorShell from '@/components/creator/CreatorShell'
+import DeleteAccountSection from './DeleteAccountSection'
 
 /**
  * Returns true if the creator has completed enough of the profile wizard to
@@ -189,6 +190,7 @@ export default async function CreatorProfilePage() {
             steam_synced_at: creator?.steam_synced_at ?? null,
           }}
         />
+        <DeleteAccountSection />
       </main>
     </CreatorShell>
   )

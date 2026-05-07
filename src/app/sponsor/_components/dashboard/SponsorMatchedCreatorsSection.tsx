@@ -71,7 +71,7 @@ export default async function SponsorMatchedCreatorsSection() {
   }
 
   const creators = await prisma.content_creators.findMany({
-    where: { is_available: true },
+    where: { is_available: true, is_deleted: false },
     select: {
       id: true,
       twitch_username: true,

@@ -18,6 +18,7 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
   const creators = await prisma.content_creators.findMany({
     where: {
       is_available: true,
+      is_deleted: false,
       ...(normalizedPlatform
         ? {
             OR: [
