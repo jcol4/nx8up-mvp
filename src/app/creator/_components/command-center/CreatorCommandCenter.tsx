@@ -304,8 +304,9 @@ export default function CreatorCommandCenter({
     : []
   const statsRows = [
     {
-      label: 'Twitch Followers',
-      value: creatorStats.twitchFollowers != null ? creatorStats.twitchFollowers.toLocaleString() : '—',
+      label: 'Level',
+      value: `Lv. ${level} · ${rankName}`,
+      valueClassName: 'font-medium text-[#00c8ff]',
     },
     {
       label: 'Avg VOD views',
