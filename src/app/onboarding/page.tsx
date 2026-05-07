@@ -153,6 +153,11 @@ export default function OnboardingComponent() {
         Confirm your age and choose your account type to continue.
       </p>
 
+      <div className="mt-4 rounded-lg border border-[#99f7ff]/20 bg-[#99f7ff]/[0.06] px-4 py-3 text-[13px] leading-relaxed text-[#a9abb5]">
+        <span className="font-semibold text-[#99f7ff]">Beta notice: </span>
+        nx8up is currently in a testing phase and is free to use. Pricing may be introduced once we officially launch.
+      </div>
+
       <div className="nx-divider" />
 
       <form ref={formRef} noValidate onSubmit={onFormSubmit}>
