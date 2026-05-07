@@ -18,6 +18,7 @@ import {
   Trash2,
   User,
 } from 'lucide-react'
+import { LESSONS } from '@/lib/academy-lessons'
 import RoleLayoutShell from '@/components/nx-shell/RoleLayoutShell'
 import { type SidebarNavGroup, type SidebarNavItem } from '@/components/nx-shell/RoleSidebar'
 import NxHudHeader from '@/components/nx-shell/NxHudHeader'
@@ -198,6 +199,7 @@ export default function CreatorCommandCenter({
   const [noteDraft, setNoteDraft] = useState('')
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
   const [editingNoteText, setEditingNoteText] = useState('')
+  const [featuredLesson] = useState(() => LESSONS[Math.floor(Math.random() * LESSONS.length)])
 
   const accepted = applications.filter((a) => a.status === 'accepted').slice(0, 3)
   const open = openCampaigns.slice(0, 3)
@@ -302,8 +304,9 @@ export default function CreatorCommandCenter({
     : []
   const statsRows = [
     {
-      label: 'Twitch Followers',
-      value: creatorStats.twitchFollowers != null ? creatorStats.twitchFollowers.toLocaleString() : '—',
+      label: 'Level',
+      value: `Lv. ${level} · ${rankName}`,
+      valueClassName: 'font-medium text-[#00c8ff]',
     },
     {
       label: 'Avg VOD views',
@@ -848,8 +851,8 @@ export default function CreatorCommandCenter({
                   <div className="relative mx-auto w-full max-w-[680px] aspect-[16/9]">
                     <iframe
                       className="absolute inset-0 h-full w-full"
-                      src="https://www.youtube-nocookie.com/embed/K5qh58o5A-M?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0"
-                      title="Mr. Fruit academy video preview"
+                      src={`${featuredLesson.videoUrl}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0`}
+                      title={featuredLesson.title}
                       allow="autoplay; encrypted-media"
                       referrerPolicy="strict-origin-when-cross-origin"
                     />
@@ -861,12 +864,12 @@ export default function CreatorCommandCenter({
                   </div>
                 </div>
                 <div className="mt-4 space-y-1">
-                  <p className="font-headline text-lg font-bold">Mr. Fruit Feature Lesson</p>
-                  <p className="text-[10px] text-slate-400">Gaming / Creator</p>
-                  <p className="text-[10px] text-slate-400">0/12 min</p>
+                  <p className="font-headline text-lg font-bold">{featuredLesson.title}</p>
+                  <p className="text-[10px] text-slate-400">{featuredLesson.category}</p>
+                  <p className="text-[10px] text-slate-400">{featuredLesson.duration}</p>
                 </div>
                 <Link
-                  href="/creator/academy"
+                  href={`/creator/academy/${featuredLesson.id}`}
                   className="mt-4 inline-block h-12 w-full rounded-lg bg-[#99f7ff] text-black text-[14px] font-bold tracking-tight hover:brightness-110 transition text-center leading-[3rem]"
                 >
                   Begin Module
