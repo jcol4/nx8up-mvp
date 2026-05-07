@@ -46,6 +46,7 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
       content_type: true,
       audience_locations: true,
       location: true,
+      steam_id: true,
     },
     orderBy: { subs_followers: 'desc' },
     take: 100,
@@ -95,47 +96,40 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
   }
 
   const filterClass = (active: boolean) =>
-    `rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
+    `rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
       active
-        ? 'border-[#99f7ff]/40 bg-[#99f7ff] text-slate-900'
-        : 'border-white/10 bg-black/20 text-[#a9abb5] hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]'
+        ? 'border border-[#99f7ff]/45 bg-[#99f7ff]/12 text-[#bffcff]'
+        : 'border border-white/10 bg-black/20 text-[#a9abb5] hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]'
     }`
 
   return (
     <>
       <SponsorHeader />
-      <div className="flex-1 overflow-auto p-6 sm:p-8">
+      <div className="flex-1 overflow-auto p-6">
         <div className="mx-auto max-w-5xl space-y-6">
 
           {/* Header */}
-          <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-            <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Creators</p>
-            <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Top Creators</h1>
+          <div>
+            <h1 className="text-xl font-semibold text-[#e8f4ff]">Top Creators</h1>
             <p className="mt-1 text-sm text-[#a9abb5]">
               {ranked.length} available creator{ranked.length !== 1 ? 's' : ''}, ranked by total reach
             </p>
           </div>
 
           {/* Filters */}
-          <div className="dash-panel dash-panel--nx-top rounded-xl p-4 sm:p-5">
-            <div className="mb-4 flex flex-wrap gap-4">
-              <div className="flex flex-wrap gap-1.5">
-                <a href={buildUrl({ platform: '' })} className={filterClass(!platform)}>All platforms</a>
-                <a href={buildUrl({ platform: 'twitch' })} className={filterClass(normalizedPlatform === 'twitch')}>Twitch</a>
-                <a href={buildUrl({ platform: 'youtube' })} className={filterClass(normalizedPlatform === 'youtube')}>YouTube</a>
-              </div>
-              <div
-                className="hidden h-9 w-px self-center rounded-full bg-[#99f7ff]/28 sm:block"
-                aria-hidden
-              />
-              <div className="flex flex-wrap gap-1.5">
-                <a href={buildUrl({ size: '' })} className={filterClass(!size)}>All sizes</a>
-                {['large', 'mid', 'micro', 'nano'].map(s => (
-                  <a key={s} href={buildUrl({ size: s })} className={filterClass(size === s)}>
-                    {SIZE_LABEL[s]}
-                  </a>
-                ))}
-              </div>
+          <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-1.5">
+              <a href={buildUrl({ platform: '' })} className={filterClass(!normalizedPlatform)}>All platforms</a>
+              <a href={buildUrl({ platform: 'twitch' })} className={filterClass(normalizedPlatform === 'twitch')}>Twitch</a>
+              <a href={buildUrl({ platform: 'youtube' })} className={filterClass(normalizedPlatform === 'youtube')}>YouTube</a>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              <a href={buildUrl({ size: '' })} className={filterClass(!size)}>All sizes</a>
+              {['large', 'mid', 'micro', 'nano'].map(s => (
+                <a key={s} href={buildUrl({ size: s })} className={filterClass(size === s)}>
+                  {SIZE_LABEL[s]}
+                </a>
+              ))}
             </div>
           </div>
 
@@ -148,27 +142,27 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
             <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-white/10 bg-black/25">
-                    <th className="w-6 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">#</th>
-                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Creator</th>
-                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Platforms</th>
-                    <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Followers</th>
-                    <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Avg views</th>
-                    <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">CTR</th>
-                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Content</th>
-                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Size</th>
+                  <tr className="border-b border-white/10">
+                    <th className="w-6 px-4 py-3 text-left font-medium text-[#8f97ab]">#</th>
+                    <th className="px-4 py-3 text-left font-medium text-[#8f97ab]">Creator</th>
+                    <th className="px-4 py-3 text-left font-medium text-[#8f97ab]">Platforms</th>
+                    <th className="px-4 py-3 text-right font-medium text-[#8f97ab]">Followers</th>
+                    <th className="px-4 py-3 text-right font-medium text-[#8f97ab]">Avg views</th>
+                    <th className="px-4 py-3 text-right font-medium text-[#8f97ab]">CTR</th>
+                    <th className="px-4 py-3 text-left font-medium text-[#8f97ab]">Content</th>
+                    <th className="px-4 py-3 text-left font-medium text-[#8f97ab]">Size</th>
                   </tr>
                 </thead>
                 <tbody>
                   {ranked.map((c, i) => (
                     <tr
                       key={c.id}
-                      className={`border-b border-white/5 hover:bg-white/[0.02] transition-colors ${
+                      className={`border-b border-white/5 transition-colors hover:bg-white/[0.02] ${
                         i === ranked.length - 1 ? 'border-b-0' : ''
                       }`}
                     >
                       {/* Rank */}
-                      <td className="px-4 py-3 text-xs tabular-nums text-[#6b7280]">
+                      <td className="px-4 py-3 text-xs tabular-nums text-[#8f97ab]">
                         {i + 1}
                       </td>
 
@@ -176,7 +170,7 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
                       <td className="px-4 py-3">
                         <Link
                           href={`/sponsor/creators/${c.id}`}
-                          className="inline-block font-medium text-[#e8f4ff] transition-colors hover:text-[#99f7ff]"
+                          className="font-medium text-[#e8f4ff] hover:text-[#99f7ff]"
                         >
                           {c.handle ?? <span className="italic text-[#6b7280]">No handle</span>}
                         </Link>
@@ -208,6 +202,11 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
                               {p}
                             </span>
                           ))}
+                          {c.steam_id && (
+                            <span className="rounded border border-[#66c0f4]/35 bg-[#66c0f4]/10 px-1.5 py-0.5 text-[11px] text-[#bcdcf2]">
+                              Steam
+                            </span>
+                          )}
                         </div>
                       </td>
 
@@ -232,13 +231,13 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
                       <td className="px-4 py-3 text-right">
                         {c.engagement_rate != null ? (
                           <span className={`text-xs font-medium tabular-nums ${
-                            Number(c.engagement_rate) >= 5 ? 'text-[#22c55e]' :
-                            Number(c.engagement_rate) >= 2 ? 'text-[#eab308]' : 'text-[#a9abb5]'
+                            Number(c.engagement_rate) >= 5 ? 'text-[#4ade80]' :
+                            Number(c.engagement_rate) >= 2 ? 'text-[#facc15]' : 'text-[#8f97ab]'
                           }`}>
                             {Number(c.engagement_rate).toFixed(1)}%
                           </span>
                         ) : (
-                          <span className="text-[#a9abb5]">—</span>
+                          <span className="text-[#8f97ab]">—</span>
                         )}
                       </td>
 
@@ -246,7 +245,7 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1">
                           {c.content_type.slice(0, 2).map(t => (
-                            <span key={t} className="rounded border border-white/10 bg-black/20 px-1.5 py-0.5 text-[11px] text-[#a9abb5]">{t}</span>
+                            <span key={t} className="rounded border border-white/12 bg-white/5 px-1.5 py-0.5 text-[11px] text-[#a9abb5]">{t}</span>
                           ))}
                           {c.content_type.length > 2 && (
                             <span className="text-[11px] text-[#6b7280]">+{c.content_type.length - 2}</span>
@@ -257,11 +256,11 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
                       {/* Size */}
                       <td className="px-4 py-3">
                         {c.creator_size ? (
-                          <span className={`rounded px-2 py-0.5 text-[11px] capitalize ${SIZE_COLOR[c.creator_size] ?? 'border border-white/10 bg-white/5 text-[#a9abb5]'}`}>
+                          <span className={`rounded px-2 py-0.5 text-[11px] capitalize ${SIZE_COLOR[c.creator_size] ?? 'border border-white/12 bg-white/5 text-[#a9abb5]'}`}>
                             {SIZE_LABEL[c.creator_size] ?? c.creator_size}
                           </span>
                         ) : (
-                          <span className="text-xs text-[#a9abb5]">—</span>
+                          <span className="text-xs text-[#8f97ab]">—</span>
                         )}
                       </td>
                     </tr>
