@@ -5,7 +5,7 @@ import Link from 'next/link'
 import type Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
-import { calcFeeBreakdown } from '@/lib/constants'
+import { calcFeeBreakdown, NX_FEE_RATE } from '@/lib/constants'
 import { TIER_COOLDOWN_DAYS, TIER_LABELS } from '@/lib/reputation'
 import type { ReputationTier } from '@/lib/reputation'
 import SponsorHeader from '../../../_components/dashboard/SponsorHeader'
@@ -222,7 +222,7 @@ export default async function CampaignPayPage({
               <span className="text-[#22c55e] font-semibold">${creatorPool.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
-              <span className="dash-text-muted">nx8up platform fee (10%)</span>
+              <span className="dash-text-muted">nx8up platform fee ({Math.round(NX_FEE_RATE * 100)}%)</span>
               <span className="text-red-400/70">${fee.toLocaleString()}</span>
             </div>
             <div className="flex justify-between font-semibold border-t border-white/10 pt-2">

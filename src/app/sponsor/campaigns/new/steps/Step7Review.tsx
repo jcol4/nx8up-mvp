@@ -134,7 +134,7 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
           {budgetNum > 0 && (
             <>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-[#a9abb5]">nx8up Fee (10%)</span>
+                <span className="text-sm text-[#a9abb5]">nx8up Fee ({Math.round(NX_FEE_RATE * 100)}%)</span>
                 <span className="text-sm text-red-400">−${fee.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center pt-2 border-t border-white/10">

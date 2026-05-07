@@ -3,8 +3,8 @@
  * All monetary values are in USD cents unless noted otherwise.
  */
 
-/** Platform fee taken from each campaign budget before paying creators (10%). */
-export const NX_FEE_RATE = 0.1
+/** Platform fee rate derived from NEXT_PUBLIC_PLATFORM_FEE_PERCENT (defaults to 15). */
+export const NX_FEE_RATE = Number(process.env.NEXT_PUBLIC_PLATFORM_FEE_PERCENT ?? 15) / 100
 
 /** Maximum allowed campaign budget in USD. Matches Stripe's ACH debit transaction limit. */
 export const BUDGET_MAX = 999_999

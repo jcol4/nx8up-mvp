@@ -108,12 +108,12 @@ export async function POST(request: Request) {
               select: { budget: true, creator_count: true },
             })
             if (campaign?.budget) {
-              const { calcFeeBreakdown } = await import('@/lib/constants')
+              const { calcFeeBreakdown, NX_FEE_RATE } = await import('@/lib/constants')
               const { fee, creatorPool } = calcFeeBreakdown(campaign.budget, campaign.creator_count)
               const customerId = typeof pi.customer === 'string' ? pi.customer : pi.customer.id
 
               await stripe.invoiceItems.create({ customer: customerId, amount: creatorPool * 100, currency: 'usd', description: `Creator payout pool — ${campaignTitle}` })
-              await stripe.invoiceItems.create({ customer: customerId, amount: fee * 100, currency: 'usd', description: `nx8up platform fee (10%) — ${campaignTitle}` })
+              await stripe.invoiceItems.create({ customer: customerId, amount: fee * 100, currency: 'usd', description: `nx8up platform fee (${Math.round(NX_FEE_RATE * 100)}%) — ${campaignTitle}` })
 
               const invoice = await stripe.invoices.create({
                 customer: customerId,
