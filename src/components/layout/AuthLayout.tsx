@@ -136,6 +136,17 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           -webkit-text-fill-color: transparent;
         }
 
+        .nx-auth-root .nx-title-signin-plain {
+          color: #ffffff;
+        }
+        .nx-auth-root .nx-title-signin-plain span {
+          background: none;
+          -webkit-background-clip: unset;
+          background-clip: unset;
+          -webkit-text-fill-color: unset;
+          color: #ffffff;
+        }
+
         .nx-auth-root .nx-subtitle {
           font-size: 0.875rem;
           color: var(--nx-muted);
