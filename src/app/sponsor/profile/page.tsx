@@ -4,6 +4,7 @@ import Link from 'next/link'
 import SponsorHeader from '../_components/dashboard/SponsorHeader'
 import { getSponsorProfile } from './_actions'
 import SponsorProfileForm from './SponsorProfileForm'
+import DeleteAccountSection from './DeleteAccountSection'
 import { TIER_LABELS, TIER_DESCRIPTIONS } from '@/lib/reputation'
 import type { ReputationTier } from '@/lib/reputation'
 
@@ -62,6 +63,7 @@ export default async function SponsorProfilePage() {
           })()}
 
           <SponsorProfileForm profile={profile} />
+          <DeleteAccountSection />
         </div>
       </div>
     </>

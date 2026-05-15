@@ -116,7 +116,7 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_..."
 STRIPE_SECRET_KEY="sk_..."
 STRIPE_WEBHOOK_SECRET="whsec_..."
-PLATFORM_FEE_PERCENT=15                 # Platform takes 15% of each campaign budget
+NEXT_PUBLIC_PLATFORM_FEE_PERCENT=15     # Platform takes 15% of each campaign budget
 
 # ── YouTube / Google OAuth ────────────────────────────────────────────────────
 YOUTUBE_API_KEY="AIza..."
@@ -385,7 +385,7 @@ pending → paid | failed
 
 The payment model is a two-step transfer:
 
-1. **Sponsor → Platform:** Sponsor pays the full campaign budget via Stripe (card or ACH). The platform retains `PLATFORM_FEE_PERCENT` (default 15%).
+1. **Sponsor → Platform:** Sponsor pays the full campaign budget via Stripe (card or ACH). The platform retains `NEXT_PUBLIC_PLATFORM_FEE_PERCENT` (default 15%).
 2. **Platform → Creator:** After a submission is approved, the platform initiates a Stripe Connect transfer to the creator's connected account for their share of the budget.
 
 ### Stripe Webhook Events

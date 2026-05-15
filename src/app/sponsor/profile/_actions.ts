@@ -1,6 +1,7 @@
 'use server'
 
 import { auth } from '@clerk/nextjs/server'
+import { clerkClient } from '@clerk/nextjs/server'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { sponsorDashboardCacheTag } from '@/lib/sponsor-dashboard-cache'
 import { prisma } from '@/lib/prisma'
@@ -83,7 +84,6 @@ export async function updateSponsorProfile(
   try {
     const locationStr = formatLocation(data.city, data.state, data.country)
 
-    const { clerkClient } = await import('@clerk/nextjs/server')
     const client = await clerkClient()
     const user = await client.users.getUser(userId)
     const email = user.emailAddresses[0]?.emailAddress ?? ''
@@ -187,4 +187,24 @@ export async function requestAgeRestrictionChange(data: {
   } catch {
     return { error: 'Failed to submit change request.' }
   }
+}
+
+export async function deleteSponsorAccount(): Promise<{ error?: string; success?: boolean }> {
+  const { userId } = await auth()
+  if (!userId) return { error: 'Not authenticated' }
+
+  await prisma.sponsors.updateMany({
+    where: { clerk_user_id: userId },
+    data: { is_deleted: true },
+  })
+
+  try {
+    const client = await clerkClient()
+    await client.users.deleteUser(userId)
+  } catch (err) {
+    console.error('Clerk deleteUser failed after DB soft-delete:', err)
+    return { error: 'Account marked for deletion but Clerk removal failed. Please contact support.' }
+  }
+
+  return { success: true }
 }
