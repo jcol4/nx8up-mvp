@@ -349,16 +349,11 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 {creatorProfile && (
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-[#3a5570]">Your match</span>
-                    <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium border ${
-                      score >= 75
-                        ? 'bg-[#22c55e]/10 text-[#22c55e] border-[#22c55e]/20'
-                        : score >= 45
-                          ? 'bg-[#eab308]/10 text-[#eab308] border-[#eab308]/20'
-                          : 'bg-red-500/10 text-red-400 border-red-500/20'
-                    }`}>
-                      {score}%
-                    </span>
-                    {!eligible && (
+                    {eligible ? (
+                      <span className="text-[11px] px-2 py-0.5 rounded-full font-medium border bg-[#22c55e]/10 text-[#22c55e] border-[#22c55e]/20">
+                        Eligible
+                      </span>
+                    ) : (
                       <span className="text-[11px] px-2 py-0.5 rounded-full font-medium border bg-red-500/10 text-red-400 border-red-500/20">
                         Ineligible
                       </span>

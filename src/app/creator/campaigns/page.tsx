@@ -358,11 +358,9 @@ export default async function CreatorCampaignsPage({
                         )
                       })()}
                       <p className="mt-0.5 text-xs text-[#a9abb5]">{c._count.applications} applied</p>
-                      <p className={`text-xs font-medium mt-1 ${
-                        score >= 75 ? 'text-green-400' : score >= 45 ? 'text-yellow-400' : 'text-red-400'
-                      }`}>
-                        {score}% match
-                      </p>
+                      <span className="mt-1 inline-block rounded-full border border-[#22c55e]/25 bg-[#22c55e]/10 px-2 py-0.5 text-[10px] font-medium text-[#22c55e]">
+                        Eligible
+                      </span>
                     </div>
                   </div>
                 </Link>

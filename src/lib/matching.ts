@@ -388,7 +388,8 @@ export function matchCreatorToCampaign(
     }
   }
 
-  const score = totalWeight > 0 ? Math.round((earnedScore / totalWeight) * 100) : 100
+  const rawScore = totalWeight > 0 ? Math.round((earnedScore / totalWeight) * 100) : 100
+  const score = Number.isFinite(rawScore) ? rawScore : 0
   const eligible = reasons.length === 0
 
   return { eligible, score, reasons, notes }
