@@ -60,6 +60,7 @@ export default function CreatorRouteShell({
         { href: '/creator/campaigns', label: 'Campaigns', icon: 'campaigns' },
         { href: '/creator/deal-room', label: 'Deal Room', icon: 'dealRoom' },
         { href: '/creator/academy', label: 'Academy', icon: 'academy' },
+        { href: '/creator/guide', label: 'Guide', icon: 'reports' },
         { href: '/creator/steam-lookup', label: 'Steam Lookup', icon: 'creators' },
       ] as SidebarNavItem[],
     },

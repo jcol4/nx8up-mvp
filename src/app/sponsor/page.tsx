@@ -5,6 +5,7 @@ import {
   SponsorPostCampaignSection,
   SponsorMyCampaignsSection,
   SponsorMatchedCreatorsSection,
+  SponsorGettingStartedCard,
 } from './_components'
 
 function SectionSkeleton({ className }: { className?: string }) {
@@ -17,6 +18,9 @@ export default function SponsorDashboardPage() {
       <SponsorHeader />
       <div className="flex-1 p-6 overflow-auto">
         <div className="max-w-7xl mx-auto space-y-6">
+          <Suspense fallback={<SectionSkeleton className="h-40" />}>
+            <SponsorGettingStartedCard />
+          </Suspense>
           <Suspense fallback={<SectionSkeleton className="h-32" />}>
             <SponsorKpiRow />
           </Suspense>

@@ -62,6 +62,7 @@ export default async function CreatorDashboardPage() {
     average_vod_views: number | null
     twitch_username: string | null
     youtube_channel_name: string | null
+    platform: string[]
   } | null = null
   let statsUnavailable = false
 
@@ -76,6 +77,7 @@ export default async function CreatorDashboardPage() {
           average_vod_views: true,
           twitch_username: true,
           youtube_channel_name: true,
+          platform: true,
         },
       })
 
@@ -85,6 +87,7 @@ export default async function CreatorDashboardPage() {
           average_vod_views: creator.average_vod_views,
           twitch_username: creator.twitch_username,
           youtube_channel_name: creator.youtube_channel_name,
+          platform: creator.platform,
         }
         : null
 
@@ -153,6 +156,12 @@ export default async function CreatorDashboardPage() {
       isAdmin={role === 'admin'}
       calendarTasks={calendarTasks}
       missions={missions}
+      checklist={{
+        profileComplete: (creatorStats?.platform.length ?? 0) > 0,
+        platformConnected: !!(creatorStats?.twitch_username || creatorStats?.youtube_channel_name),
+        appliedToCampaign: campaignApplications.length > 0,
+        academyStarted: xpState.xp > 0,
+      }}
     />
   );
 }

@@ -73,6 +73,7 @@ export default async function SponsorLayout({
         { href: '/sponsor/creators', label: 'Creators', icon: 'creators' },
         { href: '/sponsor/steam-lookup', label: 'Steam Lookup', icon: 'creators' },
         { href: '/sponsor/payouts', label: 'Payouts', icon: 'payouts' },
+        { href: '/sponsor/guide', label: 'Guide', icon: 'reports' },
       ] as SidebarNavItem[],
     },
     {

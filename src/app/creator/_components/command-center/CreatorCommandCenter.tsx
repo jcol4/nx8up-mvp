@@ -19,6 +19,7 @@ import {
   User,
 } from 'lucide-react'
 import { LESSONS } from '@/lib/academy-lessons'
+import GettingStartedCard from './GettingStartedCard'
 import RoleLayoutShell from '@/components/nx-shell/RoleLayoutShell'
 import { type SidebarNavGroup, type SidebarNavItem } from '@/components/nx-shell/RoleSidebar'
 import NxHudHeader from '@/components/nx-shell/NxHudHeader'
@@ -78,6 +79,12 @@ type Props = {
   isAdmin?: boolean
   calendarTasks: CalendarTasksMap
   missions: MissionItem[]
+  checklist: {
+    profileComplete: boolean
+    platformConnected: boolean
+    appliedToCampaign: boolean
+    academyStarted: boolean
+  }
 }
 
 type CalendarView = 'month' | 'week'
@@ -189,6 +196,7 @@ export default function CreatorCommandCenter({
   statsUnavailable = false,
   isAdmin = false,
   calendarTasks,
+  checklist,
 }: Props) {
   const pathname = usePathname()
   const router = useRouter()
@@ -284,6 +292,7 @@ export default function CreatorCommandCenter({
         { href: '/creator/campaigns', label: 'Campaigns', icon: 'campaigns' },
         { href: '/creator/deal-room', label: 'Deal Room', icon: 'dealRoom' },
         { href: '/creator/academy', label: 'Academy', icon: 'academy' },
+        { href: '/creator/guide', label: 'Guide', icon: 'reports' },
         { href: '/creator/steam-lookup', label: 'Steam Lookup', icon: 'creators' },
       ],
     },
@@ -473,6 +482,14 @@ export default function CreatorCommandCenter({
             />
 
             <main className="space-y-6 p-6 pt-24">
+              {checklist && (
+                <GettingStartedCard
+                  profileComplete={checklist.profileComplete}
+                  platformConnected={checklist.platformConnected}
+                  appliedToCampaign={checklist.appliedToCampaign}
+                  academyStarted={checklist.academyStarted}
+                />
+              )}
               <div data-reveal className="reveal-item grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <section className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] p-5 neon-glow-teal">
                   <div className="mb-5 flex items-center justify-between">
