@@ -104,7 +104,7 @@ export default async function SponsorPayoutsPage() {
           {/* Page header */}
           <div className="mb-6 flex flex-wrap items-start justify-between gap-4 sm:mb-8">
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-              <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Payouts</p>
+              <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Payouts</p>
               <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Payout Ledger</h1>
               <p className="mt-1 text-sm text-[#a9abb5]">
                 Creator payouts across all your campaigns.
@@ -168,7 +168,7 @@ export default async function SponsorPayoutsPage() {
                     <div className="overflow-x-auto rounded-xl border border-white/10 bg-black/20">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="border-b border-white/10 bg-black/25 text-[11px] uppercase tracking-[0.15em] text-[#8f97ab]">
+                          <tr className="border-b border-white/10 bg-black/25 text-nx-11 uppercase tracking-[0.15em] text-[#8f97ab]">
                             <th className="text-left px-4 py-3 font-medium">Creator</th>
                             <th className="text-left px-4 py-3 font-medium">Platform</th>
                             <th className="text-left px-4 py-3 font-medium">Submission</th>

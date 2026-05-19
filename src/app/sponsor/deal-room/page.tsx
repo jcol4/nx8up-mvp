@@ -55,7 +55,7 @@ export default async function SponsorDealRoomPage() {
       <div className="flex-1 overflow-auto p-6 sm:p-8">
         <div className="mx-auto max-w-4xl">
           <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
-            <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Deals</p>
+            <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Deals</p>
             <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Deal Room</h1>
             <p className="mt-1 text-sm text-[#a9abb5]">
               Review content submissions from your accepted creators.

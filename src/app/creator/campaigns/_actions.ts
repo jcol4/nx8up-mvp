@@ -516,6 +516,6 @@ export async function requestOptOut(applicationId: string, reason: string) {
     data: { status: 'opted_out' },
   })
 
-  revalidatePath('/creator/campaigns/active')
+  revalidatePath('/creator/campaigns')
   return { success: true }
 }

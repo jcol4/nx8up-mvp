@@ -7,6 +7,7 @@ import AdminHeader from './_components/AdminHeader'
 import RoleLayoutShell from '@/components/nx-shell/RoleLayoutShell'
 import NxHudBackground from '@/components/nx-shell/NxHudBackground'
 import type { SidebarNavGroup, SidebarNavItem } from '@/components/nx-shell/RoleSidebar'
+import { getAdminPlatformOverviewCached } from '@/lib/admin-dashboard-cache'
 
 export const metadata: Metadata = {
   title: 'Admin Hub | nx8up',
@@ -31,6 +32,10 @@ export default async function AdminLayout({
   const { sessionClaims } = await auth()
   const role = (sessionClaims?.metadata as { role?: string })?.role
   if (role !== 'admin') redirect('/')
+
+  const { creators, sponsors, liveCampaigns } = await getAdminPlatformOverviewCached()
+  const totalUsers = creators + sponsors
+
   const navGroups: SidebarNavGroup[] = [
     {
       title: 'Sections',
@@ -78,10 +83,14 @@ export default async function AdminLayout({
     { href: '/admin/settings/notifications', label: 'Alerts', icon: 'notifications' },
   ]
   const statsRows = [
-    { label: 'Total users', value: '—' },
-    { label: 'Creators', value: '—', valueClassName: 'font-semibold text-[#7b4fff]' },
-    { label: 'Sponsors', value: '—', valueClassName: 'font-semibold text-[#00c8ff]' },
-    { label: 'Active campaigns', value: '—' },
+    { label: 'Total users', value: totalUsers.toLocaleString() },
+    { label: 'Creators', value: creators.toLocaleString(), valueClassName: 'font-semibold text-[#7b4fff]' },
+    { label: 'Sponsors', value: sponsors.toLocaleString(), valueClassName: 'font-semibold text-[#00c8ff]' },
+    {
+      label: 'Active campaigns',
+      value: liveCampaigns.toLocaleString(),
+      valueClassName: 'font-semibold text-[#86efac]',
+    },
   ]
 
   return (

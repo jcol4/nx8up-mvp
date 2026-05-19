@@ -149,7 +149,7 @@ export default function CreatorStatsPanel({ creator }: Props) {
               <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
             </svg>
             <span className="text-xs font-bold tracking-widest uppercase text-[#d8b4fe]">Twitch</span>
-            <span className="ml-auto rounded-full border border-[#a970ff]/35 bg-[#a970ff]/10 px-2 py-0.5 text-[10px] text-[#d8b4fe]">
+            <span className="ml-auto rounded-full border border-[#a970ff]/35 bg-[#a970ff]/10 px-2 py-0.5 text-nx-10 text-[#d8b4fe]">
               {creator.twitch_broadcaster_type
                 ? BROADCASTER_LABELS[creator.twitch_broadcaster_type] ?? creator.twitch_broadcaster_type
                 : ''}
@@ -168,7 +168,7 @@ export default function CreatorStatsPanel({ creator }: Props) {
               value={
                 creator.twitch_subscriber_count != null
                   ? fmt(creator.twitch_subscriber_count)
-                  : <span className="italic font-normal text-[#a48fbf] text-[11px]">-</span>
+                  : <span className="italic font-normal text-[#a48fbf] text-nx-11">-</span>
               }
               highlight={creator.twitch_subscriber_count != null}
               tone="twitch"
@@ -233,7 +233,7 @@ export default function CreatorStatsPanel({ creator }: Props) {
               value={
                 creator.youtube_watch_time_hours != null
                   ? creator.youtube_watch_time_hours.toLocaleString()
-                  : <span className="italic font-normal text-[#b79696] text-[11px]">-</span>
+                  : <span className="italic font-normal text-[#b79696] text-nx-11">-</span>
               }
               highlight={creator.youtube_watch_time_hours != null}
               tone="youtube"
@@ -243,7 +243,7 @@ export default function CreatorStatsPanel({ creator }: Props) {
               value={
                 creator.youtube_member_count != null
                   ? fmt(creator.youtube_member_count)
-                  : <span className="italic font-normal text-[#b79696] text-[11px]">-</span>
+                  : <span className="italic font-normal text-[#b79696] text-nx-11">-</span>
               }
               highlight={creator.youtube_member_count != null}
               tone="youtube"
@@ -277,7 +277,7 @@ export default function CreatorStatsPanel({ creator }: Props) {
           </svg>
             <span className="text-xs font-bold tracking-widest uppercase text-[#bcdcf2]">Steam</span>
             {creator.steam_profile_visibility != null && (
-              <span className="ml-auto rounded-full border border-[#66c0f4]/35 bg-[#66c0f4]/10 px-2 py-0.5 text-[10px] text-[#bcdcf2]">
+              <span className="ml-auto rounded-full border border-[#66c0f4]/35 bg-[#66c0f4]/10 px-2 py-0.5 text-nx-10 text-[#bcdcf2]">
                 {STEAM_VISIBILITY_LABELS[creator.steam_profile_visibility] ?? '—'}
               </span>
             )}
@@ -287,7 +287,7 @@ export default function CreatorStatsPanel({ creator }: Props) {
             <StatRow
               label="SteamID"
               value={
-                <span className="font-mono text-[11px]">{creator.steam_id}</span>
+                <span className="font-mono text-nx-11">{creator.steam_id}</span>
               }
               tone="steam"
             />
@@ -299,7 +299,7 @@ export default function CreatorStatsPanel({ creator }: Props) {
                   {topGames.slice(0, 5).map((g) => {
                     const hours = g.hoursTotal ?? (g.playtimeMinutes != null ? Math.round(g.playtimeMinutes / 60 * 10) / 10 : null)
                     return (
-                      <li key={g.appId} className="flex items-center justify-between text-[11px]">
+                      <li key={g.appId} className="flex items-center justify-between text-nx-11">
                         <span className="text-[#e8f4ff] truncate pr-2">{g.name}</span>
                         <span className="text-[#bcdcf2] font-semibold whitespace-nowrap">
                           {hours != null ? `${hours.toLocaleString()} hrs` : '—'}
@@ -318,7 +318,7 @@ export default function CreatorStatsPanel({ creator }: Props) {
                   {recentGames.slice(0, 5).map((g) => {
                     const hours = g.hoursRecent ?? (g.playtime2WeeksMinutes != null ? Math.round(g.playtime2WeeksMinutes / 60 * 10) / 10 : null)
                     return (
-                      <li key={g.appId} className="flex items-center justify-between text-[11px]">
+                      <li key={g.appId} className="flex items-center justify-between text-nx-11">
                         <span className="text-[#e8f4ff] truncate pr-2">{g.name}</span>
                         <span className="text-[#bcdcf2] font-semibold whitespace-nowrap">
                           {hours != null ? `${hours.toLocaleString()} hrs` : '—'}
@@ -359,7 +359,7 @@ export default function CreatorStatsPanel({ creator }: Props) {
               highlight
             />
             <div className="py-2">
-              <p className="text-[10px] leading-relaxed text-[#8f97ab]">
+              <p className="text-nx-10 leading-relaxed text-[#8f97ab]">
                 Computed from actual link clicks across your sponsored campaigns — updated after each click.
               </p>
             </div>

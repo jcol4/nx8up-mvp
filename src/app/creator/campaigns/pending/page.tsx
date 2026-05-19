@@ -22,7 +22,7 @@ export default async function CreatorPendingCampaignsPage() {
       <CreatorShell>
         <main className="mx-auto max-w-5xl space-y-6 p-6 sm:p-8">
           <div className="rounded-xl border border-white/10 bg-black/20 p-5">
-            <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
+            <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
             <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Pending Campaigns</h1>
             <p className="mt-2 text-sm text-[#a9abb5]">We could not load your creator profile.</p>
           </div>
@@ -52,7 +52,7 @@ export default async function CreatorPendingCampaignsPage() {
     <CreatorShell>
       <main className="mx-auto max-w-5xl space-y-6 p-6 sm:p-8">
         <div className="rounded-xl border border-white/10 bg-black/20 p-5">
-          <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
+          <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
           <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Pending Campaigns</h1>
           <p className="mt-1 text-sm text-[#a9abb5]">Campaigns awaiting an acceptance or rejection decision.</p>
         </div>
@@ -75,7 +75,7 @@ export default async function CreatorPendingCampaignsPage() {
                         <span className="text-sm font-semibold text-[#e8f4ff] group-hover:text-[#f4fdff]">
                           {app.campaign.title}
                         </span>
-                        <span className="rounded border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-2 py-0.5 text-[11px] text-[#99f7ff]">
+                        <span className="rounded border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-2 py-0.5 text-nx-11 text-[#99f7ff]">
                           Pending Review
                         </span>
                       </div>
@@ -88,7 +88,7 @@ export default async function CreatorPendingCampaignsPage() {
                       <p className="text-sm font-semibold text-[#99f7ff]">
                         {app.campaign.budget != null ? `$${app.campaign.budget.toLocaleString()}` : '—'}
                       </p>
-                      <p className="text-[10px] text-[#a9abb5]">campaign budget</p>
+                      <p className="text-nx-10 text-[#a9abb5]">campaign budget</p>
                     </div>
                   </div>
                 </Link>

@@ -2,6 +2,7 @@
 
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
+import { revalidateCreatorSidebarCache } from '@/lib/creator-sidebar-cache'
 import type { CreatorProfile } from '@/lib/creator-profile'
 import { prisma } from '@/lib/prisma'
 import { parseLocation } from '@/lib/location-options'
@@ -196,6 +197,7 @@ export async function updateCreatorProfile(data: CreatorProfile): Promise<{ erro
     revalidatePath('/creator')
     revalidatePath('/creator/profile')
     revalidatePath('/admin')
+    revalidateCreatorSidebarCache(userId)
 
     const creator = await prisma.content_creators.findUnique({ where: { clerk_user_id: userId }, select: { id: true } })
     if (creator) {
@@ -295,6 +297,7 @@ export async function updateCreatorProfileWizard(data: import('./_shared').Creat
     revalidatePath('/creator')
     revalidatePath('/creator/profile')
     revalidatePath('/admin')
+    revalidateCreatorSidebarCache(userId)
 
     const creator = await prisma.content_creators.findUnique({ where: { clerk_user_id: userId }, select: { id: true } })
     if (creator) {
@@ -348,6 +351,7 @@ export async function deleteCreatorProfile(): Promise<{ error?: string }> {
     revalidatePath('/creator')
     revalidatePath('/creator/profile')
     revalidatePath('/admin')
+    revalidateCreatorSidebarCache(userId)
     return {}
   } catch {
     return { error: 'Failed to delete profile' }
@@ -377,6 +381,7 @@ export async function unlinkTwitchAccount() {
       },
     })
 
+    revalidateCreatorSidebarCache(userId)
     return { success: true }
   } catch (err: any) {
     console.error('unlinkTwitchAccount error:', err)
@@ -402,6 +407,7 @@ export async function unlinkSteamAccount() {
       },
     })
     revalidatePath('/creator/profile')
+    revalidateCreatorSidebarCache(userId)
     return { success: true }
   } catch (err: any) {
     console.error('unlinkSteamAccount error:', err)
@@ -464,6 +470,7 @@ export async function refreshTwitchDataIfStale(userId: string) {
     })
 
     triggerCtrRecomputeForUser(userId).catch(console.error)
+    revalidateCreatorSidebarCache(userId)
   } catch (err) {
     console.error('refreshTwitchDataIfStale error:', err)
   }
@@ -491,6 +498,7 @@ export async function unlinkYouTubeAccount() {
       },
     })
 
+    revalidateCreatorSidebarCache(userId)
     return { success: true }
   } catch (err: any) {
     console.error('unlinkYouTubeAccount error:', err)
@@ -648,6 +656,7 @@ export async function refreshYouTubeDataIfStale(userId: string) {
     })
 
     triggerCtrRecomputeForUser(userId).catch(console.error)
+    revalidateCreatorSidebarCache(userId)
   } catch (err) {
     console.error('refreshYouTubeDataIfStale error:', err)
   }

@@ -65,11 +65,11 @@ export default async function SponsorCreatorDetailPage({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="mb-1 flex items-center gap-2">
-              <span className="rounded border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-2 py-0.5 text-[11px] text-[#99f7ff]">
+              <span className="rounded border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-2 py-0.5 text-nx-11 text-[#99f7ff]">
                 {creator.is_available ? 'Available' : 'Unavailable'}
               </span>
               {creator.creator_size && (
-                <span className="rounded border border-white/12 bg-white/5 px-2 py-0.5 text-[11px] capitalize text-[#a9abb5]">
+                <span className="rounded border border-white/12 bg-white/5 px-2 py-0.5 text-nx-11 capitalize text-[#a9abb5]">
                   {creator.creator_size}
                 </span>
               )}
@@ -79,7 +79,7 @@ export default async function SponsorCreatorDetailPage({
           </div>
           <div className="text-right">
             <p className="text-sm font-semibold text-[#99f7ff]">{formatNum(totalFollowers)}</p>
-            <p className="text-[11px] text-[#a9abb5]">total followers</p>
+            <p className="text-nx-11 text-[#a9abb5]">total followers</p>
           </div>
         </div>
       </NxHudCard>
@@ -140,7 +140,7 @@ export default async function SponsorCreatorDetailPage({
                         </svg>
                         {creator.steam_username ?? 'Connected'}
                       </span>
-                      <span className="font-mono text-[11px] text-[#a9abb5]">{creator.steam_id}</span>
+                      <span className="font-mono text-nx-11 text-[#a9abb5]">{creator.steam_id}</span>
                     </div>
                   ) : (
                     <span className="text-xs text-[#a9abb5]">— Not connected</span>

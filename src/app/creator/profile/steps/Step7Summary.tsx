@@ -78,6 +78,7 @@ type Props = {
   steamInitial: SteamData
   creatorStats: CreatorStats
   onEditStep: (step: number) => void
+  onBack: () => void
   onFinish: () => void
 }
 
@@ -97,8 +98,8 @@ function Row({ label, value }: { label: string; value?: string | null }) {
 function Pills({ label, values, color = 'cyan' }: { label: string; values: string[]; color?: 'cyan' | 'purple' }) {
   if (!values.length) return null
   const chip = color === 'purple'
-    ? 'rounded border border-[#c084fc]/35 bg-[#c084fc]/15 px-1.5 py-0.5 text-[10px] text-[#d8b4fe]'
-    : 'rounded border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-1.5 py-0.5 text-[10px] text-[#99f7ff]'
+    ? 'rounded border border-[#c084fc]/35 bg-[#c084fc]/15 px-1.5 py-0.5 text-nx-10 text-[#d8b4fe]'
+    : 'rounded border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-1.5 py-0.5 text-nx-10 text-[#99f7ff]'
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 border-b border-white/18 py-2.5 last:border-0">
       <span className="shrink-0 text-xs text-[#8f97ab]">{label}</span>
@@ -112,7 +113,7 @@ function Pills({ label, values, color = 'cyan' }: { label: string; values: strin
 function SectionHeader({ title, step, onEdit }: { title: string; step: number; onEdit: (s: number) => void }) {
   return (
     <div className="mb-2 flex items-center justify-between">
-      <p className="font-headline text-[11px] font-semibold uppercase tracking-[0.2em] text-[#99f7ff]">{title}</p>
+      <p className="font-headline text-nx-11 font-semibold uppercase tracking-[0.2em] text-[#99f7ff]">{title}</p>
       <button
         type="button"
         onClick={() => onEdit(step)}
@@ -131,7 +132,16 @@ function fmt(n: number | null | undefined): string | undefined {
   return n.toString()
 }
 
-export default function Step7Summary({ draft, twitchInitial, youtubeInitial, steamInitial, creatorStats, onEditStep, onFinish }: Props) {
+export default function Step7Summary({
+  draft,
+  twitchInitial,
+  youtubeInitial,
+  steamInitial,
+  creatorStats,
+  onEditStep,
+  onBack,
+  onFinish,
+}: Props) {
   const creatorTypeLabels = CREATOR_TYPE_OPTIONS
     .filter(o => draft.creator_types.includes(o.value))
     .map(o => o.label)
@@ -166,14 +176,14 @@ export default function Step7Summary({ draft, twitchInitial, youtubeInitial, ste
                 <div className="flex-1 min-w-0">
                   <span className="text-xs text-[#e8f4ff] truncate block">{twitchInitial.username}</span>
                   {twitchInitial.broadcaster_type && (
-                    <span className="text-[10px] text-[#8f97ab] capitalize">{twitchInitial.broadcaster_type || 'Standard'}</span>
+                    <span className="text-nx-10 text-[#8f97ab] capitalize">{twitchInitial.broadcaster_type || 'Standard'}</span>
                   )}
                 </div>
               ) : (
                 <span className="text-xs text-[#8f97ab] italic">Not connected</span>
               )}
               {twitchInitial.username && (
-                <span className="shrink-0 rounded border border-[#a970ff]/35 bg-[#a970ff]/12 px-1.5 py-0.5 text-[10px] text-[#d8b4fe]">Connected</span>
+                <span className="shrink-0 rounded border border-[#a970ff]/35 bg-[#a970ff]/12 px-1.5 py-0.5 text-nx-10 text-[#d8b4fe]">Connected</span>
               )}
             </div>
             <div className="border-t border-white/18" />
@@ -184,14 +194,14 @@ export default function Step7Summary({ draft, twitchInitial, youtubeInitial, ste
                 <div className="flex-1 min-w-0">
                   <span className="text-xs text-[#e8f4ff] truncate block">{youtubeInitial.channel_name || youtubeInitial.handle}</span>
                   {youtubeInitial.handle && youtubeInitial.channel_name && (
-                    <span className="text-[10px] text-[#8f97ab]">{youtubeInitial.handle}</span>
+                    <span className="text-nx-10 text-[#8f97ab]">{youtubeInitial.handle}</span>
                   )}
                 </div>
               ) : (
                 <span className="text-xs text-[#8f97ab] italic">Not connected</span>
               )}
               {(youtubeInitial.channel_name || youtubeInitial.handle) && (
-                <span className="shrink-0 rounded border border-red-500/35 bg-red-500/10 px-1.5 py-0.5 text-[10px] text-red-300">Connected</span>
+                <span className="shrink-0 rounded border border-red-500/35 bg-red-500/10 px-1.5 py-0.5 text-nx-10 text-red-300">Connected</span>
               )}
             </div>
             <div className="border-t border-white/18" />
@@ -201,13 +211,13 @@ export default function Step7Summary({ draft, twitchInitial, youtubeInitial, ste
               {steamInitial.steam_id ? (
                 <div className="flex-1 min-w-0">
                   <span className="text-xs text-[#e8f4ff] truncate block">{steamInitial.steam_username ?? 'Steam User'}</span>
-                  <span className="text-[10px] text-[#8f97ab] font-mono">{steamInitial.steam_id}</span>
+                  <span className="text-nx-10 text-[#8f97ab] font-mono">{steamInitial.steam_id}</span>
                 </div>
               ) : (
                 <span className="text-xs text-[#8f97ab] italic">Not connected</span>
               )}
               {steamInitial.steam_id && (
-                <span className="shrink-0 rounded border border-[#66c0f4]/35 bg-[#66c0f4]/10 px-1.5 py-0.5 text-[10px] text-[#bcdcf2]">Connected</span>
+                <span className="shrink-0 rounded border border-[#66c0f4]/35 bg-[#66c0f4]/10 px-1.5 py-0.5 text-nx-10 text-[#bcdcf2]">Connected</span>
               )}
             </div>
           </div>
@@ -219,7 +229,7 @@ export default function Step7Summary({ draft, twitchInitial, youtubeInitial, ste
           <div className="rounded-lg border border-white/16 bg-black/25 p-3">
             {creatorStats.twitch_username && (
               <>
-                <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-[#8f97ab]">Twitch</p>
+                <p className="mb-1.5 text-nx-10 font-semibold uppercase tracking-widest text-[#8f97ab]">Twitch</p>
                 <Row label="Followers" value={fmt(creatorStats.subs_followers)} />
                 <Row label="Subscribers" value={fmt(creatorStats.twitch_subscriber_count)} />
                 <Row label="Avg VOD views" value={fmt(creatorStats.average_vod_views)} />
@@ -231,7 +241,7 @@ export default function Step7Summary({ draft, twitchInitial, youtubeInitial, ste
             {creatorStats.youtube_channel_name && (
               <>
                 {creatorStats.twitch_username && <div className="my-2 border-t border-white/18" />}
-                <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-[#8f97ab]">YouTube</p>
+                <p className="mb-1.5 text-nx-10 font-semibold uppercase tracking-widest text-[#8f97ab]">YouTube</p>
                 <Row label="Subscribers" value={fmt(creatorStats.youtube_subscribers)} />
                 <Row label="Avg views" value={fmt(creatorStats.youtube_avg_views)} />
                 {creatorStats.youtube_watch_time_hours != null && (
@@ -311,7 +321,14 @@ export default function Step7Summary({ draft, twitchInitial, youtubeInitial, ste
         </div>
       </div>
 
-      <div className="flex justify-end border-t border-white/10 pt-2">
+      <div className="flex items-center justify-between border-t border-white/10 pt-2">
+        <button
+          type="button"
+          onClick={onBack}
+          className="rounded-lg border border-white/10 px-5 py-2.5 text-sm font-medium text-[#a9abb5] transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]"
+        >
+          Back
+        </button>
         <button
           type="button"
           onClick={onFinish}

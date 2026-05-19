@@ -31,9 +31,9 @@ export default async function AdminDisputesPage() {
         <div className="rounded-xl border border-white/10 bg-black/20 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
+              <p className="text-nx-11 uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
               <h1 className="mt-1 font-headline text-2xl font-semibold text-[#e8f4ff]">Disputes</h1>
-              <p className="mt-1 text-sm text-[#c4cad6]">
+              <p className="mt-1 text-sm font-medium text-white/90">
                 Auto-generated evidence packages for Stripe chargebacks
               </p>
             </div>
@@ -41,7 +41,7 @@ export default async function AdminDisputesPage() {
               <span className="rounded px-2 py-1 text-xs bg-yellow-500/10 text-yellow-400">
               {disputes.filter(d => d.status === 'draft').length} draft
               </span>
-              <span className="rounded px-2 py-1 text-xs bg-[#00c8ff]/10 text-[#00c8ff]">
+              <span className="rounded border border-[#99f7ff]/30 bg-[#99f7ff]/12 px-2 py-1 text-xs font-medium text-[#bffcff]">
               {disputes.filter(d => d.status === 'submitted').length} submitted
               </span>
             </div>
@@ -50,7 +50,7 @@ export default async function AdminDisputesPage() {
 
         {disputes.length === 0 ? (
           <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-10 text-center">
-            <p className="text-sm text-[#c4cad6]">No disputes on record. Stripe will push new ones here automatically.</p>
+            <p className="text-sm font-medium text-white/90">No disputes on record. Stripe will push new ones here automatically.</p>
           </div>
         ) : (
           <div className="glass-panel interactive-panel overflow-hidden rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20">
@@ -58,13 +58,13 @@ export default async function AdminDisputesPage() {
             <table className="w-full min-w-[980px] text-sm">
               <thead>
                 <tr className="border-b border-white/10 bg-black/25">
-                  <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Dispute ID</th>
-                  <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Campaign</th>
-                  <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Amount</th>
-                  <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Reason</th>
-                  <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Status</th>
-                  <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Due</th>
-                  <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Received</th>
+                  <th className="px-5 py-3 text-left text-nx-11 font-bold uppercase tracking-[0.15em] text-white/90">Dispute ID</th>
+                  <th className="px-5 py-3 text-left text-nx-11 font-bold uppercase tracking-[0.15em] text-white/90">Campaign</th>
+                  <th className="px-5 py-3 text-left text-nx-11 font-bold uppercase tracking-[0.15em] text-white/90">Amount</th>
+                  <th className="px-5 py-3 text-left text-nx-11 font-bold uppercase tracking-[0.15em] text-white/90">Reason</th>
+                  <th className="px-5 py-3 text-left text-nx-11 font-bold uppercase tracking-[0.15em] text-white/90">Status</th>
+                  <th className="px-5 py-3 text-left text-nx-11 font-bold uppercase tracking-[0.15em] text-white/90">Due</th>
+                  <th className="px-5 py-3 text-left text-nx-11 font-bold uppercase tracking-[0.15em] text-white/90">Received</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -77,13 +77,13 @@ export default async function AdminDisputesPage() {
                           {d.stripe_dispute_id}
                         </Link>
                       </td>
-                      <td className="px-5 py-3 text-[#e8f4ff]">
-                        {d.campaign?.title ?? <span className="italic text-[#a9abb5]">No campaign</span>}
+                      <td className="px-5 py-3 font-medium text-white">
+                        {d.campaign?.title ?? <span className="italic text-white/75">No campaign</span>}
                       </td>
-                      <td className="px-5 py-3 font-medium text-[#e8f4ff]">
+                      <td className="px-5 py-3 font-semibold tabular-nums text-white">
                         ${(d.amount / 100).toFixed(2)}
                       </td>
-                      <td className="px-5 py-3 capitalize text-[#c4cad6]">
+                      <td className="px-5 py-3 font-medium capitalize text-white/90">
                         {d.reason.replace(/_/g, ' ')}
                       </td>
                       <td className="px-5 py-3">
@@ -93,14 +93,14 @@ export default async function AdminDisputesPage() {
                       </td>
                       <td className="px-5 py-3">
                         {due ? (
-                          <span className={`text-xs font-medium ${due.urgent ? 'text-red-400' : 'text-[#c4cad6]'}`}>
+                          <span className={`text-xs font-medium ${due.urgent ? 'text-red-400' : 'text-white/90'}`}>
                             {due.text}
                           </span>
                         ) : (
-                          <span className="text-xs text-[#a9abb5]">—</span>
+                          <span className="text-xs font-medium text-white/75">—</span>
                         )}
                       </td>
-                      <td className="px-5 py-3 text-xs text-[#a9abb5]">
+                      <td className="px-5 py-3 text-xs font-medium tabular-nums text-white/90">
                         {new Date(d.created_at).toLocaleDateString()}
                       </td>
                     </tr>

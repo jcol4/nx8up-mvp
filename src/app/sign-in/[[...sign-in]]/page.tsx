@@ -369,7 +369,7 @@ export default function SignInPage() {
             </button>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-            <Link href="/forgot-password" className="nx-text-btn" style={{ fontSize: '0.85rem' }}>
+            <Link href="/forgot-password" className="nx-text-btn nx-text-btn--sm">
               Forgot password?
             </Link>
           </div>

@@ -127,7 +127,7 @@ export default async function CreatorProfilePage() {
     <CreatorShell>
       <main className="w-full max-w-3xl mx-auto p-6 sm:p-8">
         <div className="dash-panel dash-panel--nx-top mb-6 rounded-xl border border-white/16 border-t-2 border-t-[#bffcff] bg-black/20 p-4">
-          <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Creator</p>
+          <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Creator</p>
           <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Creator Profile</h1>
           <p className="mt-1 text-sm text-[#a9abb5]">
             Complete your profile to get discovered by sponsors.

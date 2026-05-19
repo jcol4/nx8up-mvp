@@ -60,7 +60,7 @@ export default async function CreatorCampaignsPage({
       <CreatorShell>
       <main className="max-w-4xl mx-auto p-6 sm:p-8">
         <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
-          <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
+          <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
           <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Open Campaigns</h1>
         </div>
         <Panel variant="creator" className="dash-panel dash-panel--nx-top rounded-xl p-0">
@@ -87,7 +87,7 @@ export default async function CreatorCampaignsPage({
       <CreatorShell>
       <main className="max-w-4xl mx-auto p-6 sm:p-8">
         <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
-          <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
+          <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
           <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Open Campaigns</h1>
         </div>
         <Panel variant="creator" className="dash-panel dash-panel--nx-top rounded-xl p-0">
@@ -172,7 +172,7 @@ export default async function CreatorCampaignsPage({
     <CreatorShell>
     <main className="max-w-4xl mx-auto p-6 sm:p-8">
       <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
-        <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
+        <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
         <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Campaigns</h1>
         <p className="mt-1 text-sm text-[#a9abb5]">Browse and apply to sponsor campaigns.</p>
       </div>
@@ -298,7 +298,7 @@ export default async function CreatorCampaignsPage({
                         return (
                           <div className="text-right">
                             <span className="text-sm font-bold cr-success">${creatorPool.toLocaleString()}</span>
-                            <p className="text-[10px] text-[#a9abb5]">creator pool</p>
+                            <p className="text-nx-10 text-[#a9abb5]">creator pool</p>
                           </div>
                         )
                       })()}
@@ -353,7 +353,7 @@ export default async function CreatorCampaignsPage({
                         return (
                           <>
                             <span className="text-sm font-bold cr-success">${creatorPool.toLocaleString()}</span>
-                            <p className="text-[10px] text-[#a9abb5]">creator pool</p>
+                            <p className="text-nx-10 text-[#a9abb5]">creator pool</p>
                           </>
                         )
                       })()}
@@ -443,7 +443,7 @@ export default async function CreatorCampaignsPage({
                             {c.budget != null && creatorPool != null && (
                               <>
                                 <span className="text-sm font-bold cr-success">${(perCreator ?? creatorPool).toLocaleString()}</span>
-                                <p className="text-[10px] text-[#a9abb5]">{perCreator ? 'your payout' : 'creator pool'}</p>
+                                <p className="text-nx-10 text-[#a9abb5]">{perCreator ? 'your payout' : 'creator pool'}</p>
                               </>
                             )}
                           </div>

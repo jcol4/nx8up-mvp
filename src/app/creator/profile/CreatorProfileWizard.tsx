@@ -16,9 +16,8 @@
  * `updateCreatorProfileWizard` before advancing, so partial saves are
  * idempotent (each step overwrites the full draft).
  *
- * "Return to summary" mode: when the creator clicks "Edit" on the summary
- * page, `returnToSummary` is set to true. Saving on any step then returns
- * directly to step 7 instead of advancing linearly.
+ * "Return to summary" mode tracks whether the user started on summary / jumped
+ * from summary, but saves still advance linearly through subsequent steps.
  *
  * Steps 1 and 2 are read-only / OAuth-driven and do not call the save action.
  *
@@ -130,29 +129,18 @@ export default function CreatorProfileWizard({
 
   const goBack = () => {
     setStepError('')
-    if (returnToSummary) {
-      setStep(SUMMARY_STEP)
-    } else {
-      setStep(s => Math.max(s - 1, 1))
-    }
+    setStep(s => Math.max(s - 1, 1))
     scrollTop()
   }
 
-  /**
-   * Saves the current draft then advances to the next step (or returns to
-   * summary when `returnToSummary` is true). Used by steps 3–5.
-   */
+  /** Saves the current draft then advances to the next step. Used by steps 3–5. */
   const saveAndContinue = async () => {
     setStepError('')
     setIsSaving(true)
     const res = await updateCreatorProfileWizard(draft)
     setIsSaving(false)
     if (res.error) { setStepError(res.error); return }
-    if (returnToSummary) {
-      setStep(SUMMARY_STEP)
-    } else {
-      setStep(s => Math.min(s + 1, TOTAL_STEPS))
-    }
+    setStep(s => Math.min(s + 1, TOTAL_STEPS))
     scrollTop()
   }
 
@@ -235,7 +223,7 @@ export default function CreatorProfileWizard({
                       {circle}
                     </button>
                   ) : circle}
-                  <span className={`text-[10px] font-medium hidden sm:block ${
+                  <span className={`text-nx-10 font-medium hidden sm:block ${
                     isActive ? 'text-[#99f7ff]' : isDone ? 'text-[#8f97ab]' : 'text-[#4b5563]'
                   }`}>
                     {label}
@@ -321,6 +309,7 @@ export default function CreatorProfileWizard({
             steamInitial={steamInitial}
             creatorStats={creatorStats}
             onEditStep={editStep}
+            onBack={goBack}
             onFinish={finish}
           />
         )}

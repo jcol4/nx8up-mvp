@@ -23,7 +23,7 @@ export default async function SponsorProfilePage() {
         <div className="mx-auto max-w-5xl space-y-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-              <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Sponsor</p>
+              <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Sponsor</p>
               <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Sponsor Profile</h1>
               <p className="mt-1 text-sm leading-relaxed text-[#a9abb5]">
                 Manage your company info, campaign preferences, and creator requirements.

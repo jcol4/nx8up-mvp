@@ -34,7 +34,7 @@ export default function Step6Eligibility({ draft, setDraft, error, isSaving, onS
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-        <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Eligibility</p>
+        <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Eligibility</p>
         <h2 className="mt-1 font-headline text-lg font-semibold text-[#e8f4ff]">Availability & Limits</h2>
         <p className="mt-1 text-sm text-[#a9abb5]">
           Set your availability and monthly campaign capacity so sponsors can plan accurately.

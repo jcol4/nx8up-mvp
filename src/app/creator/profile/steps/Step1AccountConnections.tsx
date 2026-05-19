@@ -116,7 +116,7 @@ export default function Step1AccountConnections({ twitchInitial, youtubeInitial,
   return (
     <div className="space-y-4">
       <div className="dash-panel dash-panel--nx-top rounded-xl border border-white/16 border-t-2 border-t-[#bffcff] bg-black/20 p-4">
-        <p className="mb-3 font-headline text-[11px] font-semibold uppercase tracking-[0.2em] text-[#99f7ff]">Profile Picture</p>
+        <p className="mb-3 font-headline text-nx-11 font-semibold uppercase tracking-[0.2em] text-[#99f7ff]">Profile Picture</p>
         <ProfilePictureUpload />
       </div>
 

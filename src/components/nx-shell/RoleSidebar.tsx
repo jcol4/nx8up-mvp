@@ -21,6 +21,7 @@ import {
   User,
   Users,
 } from 'lucide-react'
+import SocialTemplateLinks from '@/components/nx-shell/SocialTemplateLinks'
 
 export type SidebarIconName =
   | 'dashboard'
@@ -54,6 +55,7 @@ export type SidebarStatRow = {
   label: string
   value: string
   valueClassName?: string
+  valueHref?: string
 }
 
 type Props = {
@@ -108,13 +110,11 @@ function SidebarItem({
       href={item.href}
       prefetch={prefetch}
       title={collapsed ? item.label : undefined}
-      className={`flex w-full items-center rounded-xl text-left text-[9px] uppercase tracking-[0.14em] transition duration-200 ${
-        collapsed ? 'justify-center px-2 py-3' : 'gap-2 px-4 py-2'
-      } ${
-        active
+      className={`flex w-full items-center rounded-xl text-left text-nx-9 uppercase tracking-[0.14em] transition duration-200 ${collapsed ? 'justify-center px-2 py-3' : 'gap-2 px-4 py-2'
+        } ${active
           ? 'bg-[#99f7ff]/10 text-[#99f7ff] shadow-[inset_3px_0_0_rgba(153,247,255,0.85)]'
-          : 'text-slate-500 hover:bg-white/5 hover:text-slate-300'
-      }`}
+          : 'text-white/90 hover:bg-white/5 hover:text-white'
+        }`}
     >
       {Icon ? <Icon className="h-3.5 w-3.5 shrink-0" /> : null}
       {!collapsed ? <span>{item.label}</span> : <span className="sr-only">{item.label}</span>}
@@ -134,29 +134,32 @@ export default function RoleSidebar({
 }: Props) {
   return (
     <aside
-      className={`fixed left-0 top-0 z-40 hidden h-screen flex-col overflow-hidden border-r border-white/5 bg-slate-950/80 pt-10 transition-[width] duration-300 ease-in-out md:flex ${
-        collapsed ? 'w-20' : 'w-64'
-      }`}
+      className={`fixed left-0 top-0 z-40 hidden h-screen flex-col overflow-hidden border-r border-white/5 bg-slate-950/80 pt-10 transition-[width] duration-300 ease-in-out md:flex ${collapsed ? 'w-20' : 'w-64'
+        }`}
     >
-      <div className="mb-3 flex shrink-0 items-center px-3">
+      <div
+        className={`mb-3 flex shrink-0 items-center ${collapsed ? 'flex-col gap-2 px-2' : 'flex-row px-3'}`}
+      >
         <Link
           href={homeHref}
-          className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-[#99f7ff]/35 bg-[#99f7ff]/10 shadow-[0_0_16px_-4px_rgba(153,247,255,0.55)]"
+          className={`flex shrink-0 items-center justify-center overflow-hidden rounded-md border border-[#99f7ff]/35 bg-[#99f7ff]/10 shadow-[0_0_16px_-4px_rgba(153,247,255,0.55)] ${
+            collapsed ? 'h-12 w-12' : 'ml-2 h-16 w-16'
+          }`}
           aria-label="Dashboard home"
         >
           <Image
             src="/nx8up_logo_transparent.png"
             alt="Nx8up logo"
-            width={28}
-            height={28}
-            className="h-7 w-7 object-contain"
+            width={collapsed ? 40 : 56}
+            height={collapsed ? 40 : 56}
+            className={`object-contain ${collapsed ? 'h-10 w-10' : 'h-14 w-14'}`}
             priority
           />
         </Link>
         <button
           type="button"
           onClick={onToggleCollapsed}
-          className={`${collapsed ? 'ml-2' : 'ml-auto'} h-9 w-9 rounded-md border border-[#99f7ff]/35 bg-[#99f7ff]/10 text-[#99f7ff] shadow-[0_0_16px_-4px_rgba(153,247,255,0.55)] hover:bg-[#99f7ff]/15`}
+          className={`h-9 w-9 shrink-0 rounded-md border border-[#99f7ff]/35 bg-[#99f7ff]/10 text-[#99f7ff] shadow-[0_0_16px_-4px_rgba(153,247,255,0.55)] hover:bg-[#99f7ff]/15 ${collapsed ? '' : 'ml-auto'}`}
           aria-label="Toggle sidebar"
         >
           {collapsed ? <PanelLeftOpen className="mx-auto h-4 w-4" /> : <PanelLeftClose className="mx-auto h-4 w-4" />}
@@ -175,23 +178,31 @@ export default function RoleSidebar({
         )}
 
         <div
-          className={`px-4 pb-2 transition-all duration-300 ${
-            collapsed ? 'max-h-0 -translate-x-2 overflow-hidden opacity-0 pointer-events-none' : 'max-h-none translate-x-0 opacity-100'
-          }`}
+          className={`px-4 pb-2 transition-all duration-300 ${collapsed ? 'max-h-0 -translate-x-2 overflow-hidden opacity-0 pointer-events-none' : 'max-h-none translate-x-0 opacity-100'
+            }`}
         >
           {statsRows.length > 0 && (
             <div className="mt-2 border-b border-white/8 pb-5">
               <div className="mb-3 flex items-center justify-between gap-3">
-                <p className="font-headline text-[10px] uppercase tracking-[0.16em] text-slate-400">{statsTitle}</p>
+                <p className="font-headline text-nx-10 uppercase tracking-[0.16em] text-white/85">{statsTitle}</p>
                 {statsUnavailable ? (
-                  <span className="text-[9px] uppercase tracking-[0.14em] text-amber-400/90">Stats unavailable</span>
+                  <span className="text-nx-9 uppercase tracking-[0.14em] text-amber-400/90">Stats unavailable</span>
                 ) : null}
               </div>
-              <div className="space-y-2.5 text-[10px]">
+              <div className="space-y-2.5 text-nx-10">
                 {statsRows.map((row) => (
-                  <div key={row.label} className="flex items-center justify-between gap-3 text-slate-400">
-                    <span className="text-[10px] text-slate-400">{row.label}</span>
-                    <span className={`text-[10px] ${row.valueClassName ?? 'text-slate-300'}`}>{row.value}</span>
+                  <div key={row.label} className="flex items-center justify-between gap-3">
+                    <span className="text-nx-10 text-white/90">{row.label}</span>
+                    {row.valueHref ? (
+                      <Link
+                        href={row.valueHref}
+                        className={`text-nx-10 underline-offset-2 transition hover:underline ${row.valueClassName ?? 'text-white/95'}`}
+                      >
+                        {row.value}
+                      </Link>
+                    ) : (
+                      <span className={`text-nx-10 ${row.valueClassName ?? 'text-white/95'}`}>{row.value}</span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -200,7 +211,7 @@ export default function RoleSidebar({
 
           {navGroups.map((group) => (
             <div key={group.title} className={`${group.borderTop ? 'border-t border-white/8' : ''} py-4`}>
-              <p className="mb-2 font-headline text-[9px] uppercase tracking-[0.16em] text-slate-400">{group.title}</p>
+              <p className="mb-2 font-headline text-nx-9 uppercase tracking-[0.16em] text-white/85">{group.title}</p>
               <div className="space-y-1">
                 {group.items.map((item) => (
                   <SidebarItem key={item.href} item={item} />
@@ -212,16 +223,16 @@ export default function RoleSidebar({
       </div>
 
       <div className="mt-auto flex flex-col gap-1.5 px-4 pb-4">
+        <SocialTemplateLinks variant="sidebar" />
         <SignOutButton signOutOptions={{ redirectUrl: '/' }}>
           <button
             type="button"
-            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[10px] uppercase tracking-widest text-slate-500 transition hover:bg-white/5 hover:text-slate-300"
+            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-nx-10 uppercase tracking-widest text-white/90 transition hover:bg-white/5 hover:text-white"
           >
             <LogOut className="h-4 w-4 shrink-0" />
             <span
-              className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
-                collapsed ? 'max-w-0 -translate-x-1 opacity-0' : 'max-w-20 translate-x-0 opacity-100'
-              }`}
+              className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${collapsed ? 'max-w-0 -translate-x-1 opacity-0' : 'max-w-20 translate-x-0 opacity-100'
+                }`}
             >
               Sign Out
             </span>

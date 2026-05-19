@@ -22,7 +22,7 @@ export default function SponsorNotificationPreferencesPage() {
       <main className="flex-1 overflow-auto p-6 sm:p-8">
         <div className="mx-auto max-w-2xl">
           <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
-            <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Notifications</p>
+            <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Notifications</p>
             <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Notification Preferences</h1>
             <p className="mt-1 text-sm text-[#a9abb5]">Choose how you want to be notified for each event type.</p>
           </div>

@@ -55,10 +55,10 @@ export default async function CreatorNotificationPreferencesPage() {
     <CreatorShell>
       <main className="mx-auto max-w-4xl p-6 sm:p-8">
         <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
-          <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Settings</p>
+          <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Settings</p>
           <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Notification Preferences</h1>
           <p className="mt-1 text-sm text-[#a9abb5]">Choose how you want to be notified for each event type.</p>
-          <div className="mt-3 inline-flex items-center rounded-full border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2.5 py-1 text-[11px] text-[#99f7ff]">
+          <div className="mt-3 inline-flex items-center rounded-full border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2.5 py-1 text-nx-11 text-[#99f7ff]">
             {ENTRIES.length} notification types
           </div>
         </div>

@@ -4,7 +4,7 @@ export default function AdminQuickInsights() {
   return (
     <DashboardPanel title="Quick Insights" href="/admin/reports" linkLabel="View all">
       <div className="mb-3 rounded-lg border border-white/10 bg-black/20 p-3">
-        <p className="text-[11px] uppercase tracking-[0.16em] text-[#a9abb5]">System Health</p>
+        <p className="text-nx-11 uppercase tracking-[0.16em] text-[#a9abb5]">System Health</p>
         <p className="mt-1 text-sm dash-text-bright">Moderation throughput is healthy this week.</p>
       </div>
       <div className="space-y-0">

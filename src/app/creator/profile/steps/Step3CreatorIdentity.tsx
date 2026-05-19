@@ -73,7 +73,7 @@ export default function Step3CreatorIdentity({ draft, setDraft, error, onNext, o
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-        <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Identity</p>
+        <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Identity</p>
         <h2 className="mt-1 font-headline text-lg font-semibold text-[#e8f4ff]">Creator Identity</h2>
         <p className="mt-1 text-sm text-[#a9abb5]">
           Add your public profile details so sponsors can quickly understand who you are.

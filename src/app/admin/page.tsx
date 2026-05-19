@@ -14,7 +14,7 @@ export default function AdminDashboardPage() {
     <div className="flex-1 p-6 overflow-auto">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
+          <p className="text-nx-11 uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
           <h1 className="mt-1 font-headline text-2xl font-semibold text-[#e8f4ff]">Platform Operations Overview</h1>
         </div>
 

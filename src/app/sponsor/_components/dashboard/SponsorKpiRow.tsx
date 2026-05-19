@@ -13,18 +13,25 @@ function KpiCard({
   delta: string
   tone?: 'cyan' | 'green' | 'purple' | 'amber'
 }) {
-  const toneMap: Record<string, string> = {
-    cyan: 'text-[#99f7ff] border-[#99f7ff]/25 bg-[#99f7ff]/8',
-    green: 'text-[#86efac] border-[#86efac]/25 bg-[#86efac]/8',
-    purple: 'text-[#c4b5fd] border-[#c4b5fd]/25 bg-[#c4b5fd]/8',
-    amber: 'text-[#fcd34d] border-[#fcd34d]/25 bg-[#fcd34d]/8',
+  /** Insight chip — moderate tint + visible glow (between flat and neon). */
+  const chipGlow: Record<string, string> = {
+    cyan:
+      'border border-[#99f7ff]/55 bg-[#99f7ff]/18 text-white shadow-[0_0_20px_-5px_rgba(153,247,255,0.32),inset_0_1px_0_rgba(255,255,255,0.1)]',
+    green:
+      'border border-emerald-400/55 bg-emerald-500/18 text-white shadow-[0_0_20px_-5px_rgba(52,211,153,0.28),inset_0_1px_0_rgba(255,255,255,0.1)]',
+    purple:
+      'border border-violet-400/55 bg-violet-500/18 text-white shadow-[0_0_20px_-5px_rgba(167,139,250,0.28),inset_0_1px_0_rgba(255,255,255,0.1)]',
+    amber:
+      'border border-amber-400/58 bg-amber-500/18 text-white shadow-[0_0_20px_-5px_rgba(251,191,36,0.28),inset_0_1px_0_rgba(255,255,255,0.1)]',
   }
 
   return (
     <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] p-4 neon-glow-teal">
-      <p className="text-[11px] uppercase tracking-[0.18em] text-[#a9abb5]">{label}</p>
+      <p className="text-nx-11 font-medium uppercase tracking-[0.18em] text-white/90">{label}</p>
       <p className="mt-2 font-headline text-2xl font-semibold text-[#e8f4ff]">{value}</p>
-      <span className={`mt-3 inline-flex rounded-md border px-2 py-0.5 text-[11px] font-medium ${toneMap[tone]}`}>
+      <span
+        className={`mt-3 block w-full rounded-lg px-2.5 py-1.5 text-nx-11 font-semibold leading-snug ${chipGlow[tone]}`}
+      >
         {delta}
       </span>
     </div>
@@ -41,14 +48,37 @@ export default async function SponsorKpiRow() {
   })
   if (!sponsor) return null
 
-  const { liveCampaigns, totalBudget, acceptedApps, acceptanceRate } = await getSponsorKpiCached(sponsor.id)
+  const { liveCampaigns, campaignCount, totalBudget, acceptedApps, totalApps, acceptanceRate } =
+    await getSponsorKpiCached(sponsor.id)
+
+  const liveDelta =
+    liveCampaigns === 0
+      ? 'No live campaigns — publish one to collect applications'
+      : `${liveCampaigns} live · ${totalApps} application${totalApps === 1 ? '' : 's'} in your pipeline`
+
+  const budgetDelta =
+    campaignCount === 0
+      ? 'Adds the budget from every campaign in your portfolio — start with your first one'
+      : `Summed budget across ${campaignCount} campaign${campaignCount === 1 ? '' : 's'}`
+
+  const acceptedDelta =
+    totalApps === 0
+      ? 'No submissions yet'
+      : `${acceptedApps} accepted of ${totalApps} submission${totalApps === 1 ? '' : 's'}`
+
+  const rateDelta =
+    totalApps === 0
+      ? 'No data until creators apply'
+      : acceptanceRate >= 20
+        ? 'At or above a healthy 20% benchmark'
+        : 'Below 20% — consider clearer briefs or faster review'
 
   return (
     <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <KpiCard label="Live Campaigns" value={String(liveCampaigns)} delta="+2 this week" tone="cyan" />
-      <KpiCard label="Total Budget" value={`$${totalBudget.toLocaleString()}`} delta="Spend is on track" tone="green" />
-      <KpiCard label="Accepted Creators" value={String(acceptedApps)} delta={`${Math.max(0, acceptedApps - 2)} new this week`} tone="purple" />
-      <KpiCard label="Acceptance Rate" value={`${acceptanceRate}%`} delta={acceptanceRate >= 20 ? 'Healthy pipeline' : 'Needs attention'} tone="amber" />
+      <KpiCard label="Live Campaigns" value={String(liveCampaigns)} delta={liveDelta} tone="cyan" />
+      <KpiCard label="Total Budget" value={`$${totalBudget.toLocaleString()}`} delta={budgetDelta} tone="green" />
+      <KpiCard label="Accepted Creators" value={String(acceptedApps)} delta={acceptedDelta} tone="purple" />
+      <KpiCard label="Acceptance Rate" value={`${acceptanceRate}%`} delta={rateDelta} tone="amber" />
     </section>
   )
 }

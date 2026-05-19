@@ -63,7 +63,7 @@ export default function DashboardStyles() {
 
       .dash-panel-title {
         font-family: 'Rajdhani', sans-serif;
-        font-size: 13px;
+        font-size: 0.8125rem;
         font-weight: 600;
         letter-spacing: 0.1em;
         text-transform: uppercase;
@@ -90,7 +90,7 @@ export default function DashboardStyles() {
 
       .dash-stat-label {
         font-family: 'Rajdhani', sans-serif;
-        font-size: 10px;
+        font-size: 0.625rem;
         font-weight: 600;
         letter-spacing: 0.12em;
         text-transform: uppercase;

@@ -7,6 +7,8 @@ type NxHudCardProps = {
   headerRight?: React.ReactNode
   children: React.ReactNode
   className?: string
+  /** Optional; e.g. larger hero title on sponsor “Post Campaign” card */
+  titleClassName?: string
   as?: 'section' | 'div'
 }
 
@@ -17,6 +19,7 @@ export default function NxHudCard({
   headerRight,
   children,
   className = '',
+  titleClassName = 'text-base tracking-[0.24em]',
   as: Component = 'section',
 }: NxHudCardProps) {
   return (
@@ -26,7 +29,9 @@ export default function NxHudCard({
       {title != null && (
         <div className="mb-4 flex items-center justify-between">
           <div className="mr-4 flex min-w-0 flex-1 items-center gap-3">
-            <h2 className="shrink-0 font-headline text-base tracking-[0.24em] text-[#99f7ff] font-semibold">
+            <h2
+              className={`shrink-0 font-headline font-semibold text-[#99f7ff] ${titleClassName}`}
+            >
               {title}
             </h2>
             <div className="h-px flex-1 bg-gradient-to-r from-[#99f7ff]/55 to-transparent" />

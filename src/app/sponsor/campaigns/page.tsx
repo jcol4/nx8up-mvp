@@ -134,7 +134,7 @@ export default async function SponsorCampaignsPage({
           )}
           <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 rounded-xl border border-white/10 bg-black/20 p-4">
-              <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
+              <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
               <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">My Campaigns</h1>
               <p className="mt-1 text-sm leading-relaxed text-[#a9abb5]">
                 Manage your posted campaigns and view applicants.
@@ -283,7 +283,7 @@ export default async function SponsorCampaignsPage({
               {campaigns.map((c) => {
                 const hasAcceptedCreator = c.applications.length > 0
                 const chipBase =
-                  'inline-flex items-center rounded-md border border-white/10 bg-black/25 px-2 py-1 text-[11px] text-[#c8dff0]'
+                  'inline-flex items-center rounded-md border border-white/10 bg-black/25 px-2 py-1 text-nx-11 text-[#c8dff0]'
                 return (
                   <div
                     key={c.id}
@@ -323,7 +323,7 @@ export default async function SponsorCampaignsPage({
                             <span className={chipBase}>{PAYMENT_MODEL_LABELS[c.payment_model] ?? c.payment_model}</span>
                           )}
                           {c.budget != null && (
-                            <span className="inline-flex items-center rounded-md border border-[#99f7ff]/30 bg-[#99f7ff]/[0.08] px-2 py-1 text-[11px] font-semibold text-[#99f7ff]">
+                            <span className="inline-flex items-center rounded-md border border-[#99f7ff]/30 bg-[#99f7ff]/[0.08] px-2 py-1 text-nx-11 font-semibold text-[#99f7ff]">
                               ${c.budget.toLocaleString()}
                             </span>
                           )}

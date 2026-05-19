@@ -92,7 +92,7 @@ export default async function SponsorDealRoomDetailPage({
                   return (
                     <>
                       <p className="text-lg font-bold" style={{ color: '#00e5a0' }}>${c.budget.toLocaleString()}</p>
-                      <p className="text-[10px] dash-text-muted">total · ${creatorPool.toLocaleString()} creator pool · −${fee.toLocaleString()} fee</p>
+                      <p className="text-nx-10 dash-text-muted">total · ${creatorPool.toLocaleString()} creator pool · −${fee.toLocaleString()} fee</p>
                     </>
                   )
                 })()}
@@ -352,7 +352,7 @@ export default async function SponsorDealRoomDetailPage({
                       </div>
                     )}
                     {avgVideoViews !== null && (
-                      <div className="flex justify-between gap-2 text-[11px]">
+                      <div className="flex justify-between gap-2 text-nx-11">
                         <dt className="dash-text-muted">Avg video views</dt>
                         <dd className="dash-text-muted">{avgVideoViews.toLocaleString()}</dd>
                       </div>
@@ -378,16 +378,16 @@ export default async function SponsorDealRoomDetailPage({
                           <dt className="dash-text-muted">Total Budget</dt>
                           <dd className="font-bold" style={{ color: '#00e5a0' }}>${c.budget.toLocaleString()}</dd>
                         </div>
-                        <div className="flex justify-between gap-2 text-[11px]">
+                        <div className="flex justify-between gap-2 text-nx-11">
                           <dt className="dash-text-muted">nx8up Fee ({Math.round(NX_FEE_RATE * 100)}%)</dt>
                           <dd className="text-red-400/70">−${fee.toLocaleString()}</dd>
                         </div>
-                        <div className="flex justify-between gap-2 text-[11px] pb-1 border-b border-white/5">
+                        <div className="flex justify-between gap-2 text-nx-11 pb-1 border-b border-white/5">
                           <dt className="dash-text-muted">Creator Pool</dt>
                           <dd className="text-[#22c55e] font-semibold">${creatorPool.toLocaleString()}</dd>
                         </div>
                         {perCreator && (
-                          <div className="flex justify-between gap-2 text-[11px]">
+                          <div className="flex justify-between gap-2 text-nx-11">
                             <dt className="dash-text-muted">Per Creator</dt>
                             <dd className="text-[#22c55e]">≈ ${perCreator.toLocaleString()}</dd>
                           </div>

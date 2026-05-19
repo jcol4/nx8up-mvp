@@ -35,9 +35,9 @@ export default async function AdminSurveysPage() {
       <div className="rounded-xl border border-white/10 bg-black/20 p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
+          <p className="text-nx-11 uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
           <h1 className="mt-1 font-headline text-2xl font-semibold text-[#e8f4ff]">Surveys</h1>
-          <p className="mt-1 text-sm text-[#c4cad6]">
+          <p className="mt-1 text-sm font-medium text-white/90">
             {surveys.length} total · {active} active · {draft} draft · {closed} closed
           </p>
         </div>
@@ -52,8 +52,8 @@ export default async function AdminSurveysPage() {
 
       {surveys.length === 0 ? (
         <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-8 text-center">
-          <p className="text-[#c4cad6]">No surveys yet.</p>
-          <Link href="/admin/surveys/new" className="mt-3 inline-block text-sm dash-accent hover:underline">
+          <p className="font-medium text-white/90">No surveys yet.</p>
+          <Link href="/admin/surveys/new" className="mt-3 inline-block text-sm font-semibold text-[#99f7ff] hover:text-[#bffcff] hover:underline">
             Create your first survey
           </Link>
         </div>
@@ -63,21 +63,21 @@ export default async function AdminSurveysPage() {
           <table className="w-full min-w-[860px] text-sm">
             <thead>
               <tr className="border-b border-white/10 bg-black/25">
-                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Title</th>
-                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Status</th>
-                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Target</th>
-                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Responses</th>
-                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Created</th>
-                <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8f97ab]">Actions</th>
+                <th className="px-4 py-3 text-left text-nx-11 font-bold uppercase tracking-[0.15em] text-white/90">Title</th>
+                <th className="px-4 py-3 text-left text-nx-11 font-bold uppercase tracking-[0.15em] text-white/90">Status</th>
+                <th className="px-4 py-3 text-left text-nx-11 font-bold uppercase tracking-[0.15em] text-white/90">Target</th>
+                <th className="px-4 py-3 text-left text-nx-11 font-bold uppercase tracking-[0.15em] text-white/90">Responses</th>
+                <th className="px-4 py-3 text-left text-nx-11 font-bold uppercase tracking-[0.15em] text-white/90">Created</th>
+                <th className="px-4 py-3 text-right text-nx-11 font-bold uppercase tracking-[0.15em] text-white/90">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {surveys.map(survey => (
                 <tr key={survey.id} className="transition-colors hover:bg-white/[0.03]">
                   <td className="px-4 py-3">
-                    <span className="font-medium text-[#e8f4ff]">{survey.title}</span>
+                    <span className="font-semibold text-white">{survey.title}</span>
                     {survey.description && (
-                      <p className="mt-0.5 line-clamp-1 text-xs text-[#a9abb5]">{survey.description}</p>
+                      <p className="mt-0.5 line-clamp-1 text-xs font-medium text-white/85">{survey.description}</p>
                     )}
                   </td>
                   <td className="px-4 py-3">
@@ -86,12 +86,12 @@ export default async function AdminSurveysPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="capitalize text-[#c4cad6]">
+                    <span className="font-medium capitalize text-white/90">
                       {survey.targetRoles.join(', ')}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-[#c4cad6]">{survey._count.responses}</td>
-                  <td className="px-4 py-3 text-xs text-[#a9abb5]">
+                  <td className="px-4 py-3 font-medium tabular-nums text-white/90">{survey._count.responses}</td>
+                  <td className="px-4 py-3 text-xs font-medium tabular-nums text-white/90">
                     {new Date(survey.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">
@@ -105,7 +105,7 @@ export default async function AdminSurveysPage() {
                       <SurveyStatusToggle id={survey.id} status={survey.status} />
                       <Link
                         href={`/admin/surveys/${survey.id}/results`}
-                        className="text-xs font-medium text-[#a9abb5] transition-colors hover:text-[#e8f4ff]"
+                        className="text-xs font-semibold text-[#99f7ff] transition-colors hover:text-[#bffcff]"
                       >
                         Results
                       </Link>

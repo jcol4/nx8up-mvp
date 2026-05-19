@@ -128,7 +128,7 @@ export default async function HomePage() {
           padding: 3px 10px;
           border-radius: 4px;
           font-family: 'Rajdhani', sans-serif;
-          font-size: 11px;
+          font-size: 0.6875rem;
           font-weight: 600;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -137,7 +137,7 @@ export default async function HomePage() {
 
         .home-sign-out {
           font-family: 'Rajdhani', sans-serif;
-          font-size: 11px;
+          font-size: 0.6875rem;
           font-weight: 600;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -160,7 +160,7 @@ export default async function HomePage() {
 
         .home-greeting {
           font-family: 'Rajdhani', sans-serif;
-          font-size: 11px;
+          font-size: 0.6875rem;
           font-weight: 600;
           letter-spacing: 0.15em;
           text-transform: uppercase;
@@ -264,7 +264,7 @@ export default async function HomePage() {
         }
 
         .home-btn-label {
-          font-size: 11px;
+          font-size: 0.6875rem;
           color: #3a5570;
           font-family: 'Rajdhani', sans-serif;
           letter-spacing: 0.08em;
@@ -274,7 +274,7 @@ export default async function HomePage() {
         /* Quick links grid */
         .home-section-label {
           font-family: 'Rajdhani', sans-serif;
-          font-size: 11px;
+          font-size: 0.6875rem;
           font-weight: 600;
           letter-spacing: 0.12em;
           text-transform: uppercase;

@@ -48,7 +48,7 @@ const PLATFORMS = ['Twitch', 'YouTube', 'TikTok', 'Instagram', 'Other'] as const
 const labelClass = 'mb-1.5 block text-sm font-medium text-[#a9abb5]'
 const sectionClass =
   'dash-panel dash-panel--nx-top space-y-4 rounded-xl border border-white/16 border-t-2 border-t-[#bffcff] bg-black/20 p-4 sm:p-5'
-const sectionTitle = 'font-headline text-[11px] font-semibold uppercase tracking-[0.2em] text-[#99f7ff]'
+const sectionTitle = 'font-headline text-nx-11 font-semibold uppercase tracking-[0.2em] text-[#99f7ff]'
 
 /**
  * Returns the list of state/province options for the given country.
@@ -205,7 +205,7 @@ export default function SponsorProfileForm({ profile }: Props) {
               </svg>
             </div>
             <div className="min-w-0 flex-1 text-left">
-              <p className="font-headline text-[15px] font-semibold leading-snug text-[#e8f4ff] sm:text-base">
+              <p className="font-headline text-nx-15 font-semibold leading-snug text-[#e8f4ff] sm:text-base">
                 Profile saved
               </p>
               <p className="mt-0.5 text-xs leading-relaxed text-[#a9abb5] sm:text-sm">

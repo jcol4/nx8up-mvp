@@ -29,7 +29,7 @@ function Pills({ label, values }: { label: string; values: string[] }) {
       <span className="text-xs text-[#a9abb5] shrink-0">{label}</span>
       <div className="flex flex-wrap gap-1 justify-end">
         {values.map(v => (
-          <span key={v} className="text-[10px] px-1.5 py-0.5 rounded bg-[rgba(153,247,255,0.1)] text-[#99f7ff] border border-[rgba(153,247,255,0.22)]">{v}</span>
+          <span key={v} className="text-nx-10 px-1.5 py-0.5 rounded bg-[rgba(153,247,255,0.1)] text-[#99f7ff] border border-[rgba(153,247,255,0.22)]">{v}</span>
         ))}
       </div>
     </div>
@@ -57,7 +57,7 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Column 1 */}
         <div>
-          <p className="font-headline text-[10px] font-semibold uppercase tracking-[0.18em] text-[#99f7ff] mb-2">Campaign</p>
+          <p className="font-headline text-nx-10 font-semibold uppercase tracking-[0.18em] text-[#99f7ff] mb-2">Campaign</p>
           <div className="rounded-lg border border-white/10 bg-black/25 p-3">
             <Row label="Name" value={draft.title || '—'} />
             <Row label="Brand" value={draft.brand_name || '—'} />
@@ -70,7 +70,7 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
 
         {/* Column 2 */}
         <div>
-          <p className="font-headline text-[10px] font-semibold uppercase tracking-[0.18em] text-[#99f7ff] mb-2">Audience</p>
+          <p className="font-headline text-nx-10 font-semibold uppercase tracking-[0.18em] text-[#99f7ff] mb-2">Audience</p>
           <div className="rounded-lg border border-white/10 bg-black/25 p-3">
             {(draft.audience_age_min || draft.audience_age_max) && (
               <Row
@@ -87,7 +87,7 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
 
         {/* Column 3 */}
         <div>
-          <p className="font-headline text-[10px] font-semibold uppercase tracking-[0.18em] text-[#99f7ff] mb-2">Creators</p>
+          <p className="font-headline text-nx-10 font-semibold uppercase tracking-[0.18em] text-[#99f7ff] mb-2">Creators</p>
           <div className="rounded-lg border border-white/10 bg-black/25 p-3">
             <Pills label="Type" values={creatorTypeLabels} />
             <Pills label="Size" values={creatorSizeLabels} />
@@ -98,7 +98,7 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
 
         {/* Column 4 */}
         <div>
-          <p className="font-headline text-[10px] font-semibold uppercase tracking-[0.18em] text-[#99f7ff] mb-2">Deliverables</p>
+          <p className="font-headline text-nx-10 font-semibold uppercase tracking-[0.18em] text-[#99f7ff] mb-2">Deliverables</p>
           <div className="rounded-lg border border-white/10 bg-black/25 p-3">
             <Row label="Mission type" value={missionType?.label} />
             {draft.num_videos && <Row label="YT videos" value={draft.num_videos} />}
@@ -123,7 +123,7 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
 
       {/* Budget breakdown */}
       <div className="rounded-lg border border-white/10 bg-black/25 p-4">
-        <p className="font-headline text-[10px] font-semibold uppercase tracking-[0.18em] text-[#99f7ff] mb-4">Budget Breakdown</p>
+        <p className="font-headline text-nx-10 font-semibold uppercase tracking-[0.18em] text-[#99f7ff] mb-4">Budget Breakdown</p>
         <div className="space-y-2.5">
           <div className="flex justify-between items-center">
             <span className="text-sm text-[#a9abb5]">Total Campaign Budget</span>

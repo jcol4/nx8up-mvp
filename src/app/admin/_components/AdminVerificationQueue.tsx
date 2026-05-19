@@ -34,7 +34,7 @@ export default async function AdminVerificationQueue() {
     >
       <div className="rounded-lg overflow-hidden dash-border border dash-bg-inner">
         {pending.length === 0 ? (
-          <p className="text-sm dash-text-muted text-center py-6">No submissions pending review.</p>
+          <p className="py-6 text-center text-sm text-white/90">No submissions pending review.</p>
         ) : (
           <div className="divide-y divide-white/10">
             {pending.map((sub) => {
@@ -53,7 +53,7 @@ export default async function AdminVerificationQueue() {
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium dash-text-bright truncate">{handle}</p>
-                    <p className="text-xs dash-text-muted truncate">{sub.application.campaign.title}</p>
+                    <p className="truncate text-xs text-white/80">{sub.application.campaign.title}</p>
                   </div>
                   <span className="text-xs px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-400 shrink-0">
                     Review

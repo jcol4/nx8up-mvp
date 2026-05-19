@@ -102,7 +102,7 @@ export const EMPTY_DRAFT: CampaignDraft = {
 export const labelClass = 'block text-sm font-medium text-[#a9abb5] mb-1.5'
 export const sectionClass = 'space-y-4 pb-6 border-b border-white/10'
 export const sectionTitle =
-  'font-headline text-[11px] font-semibold uppercase tracking-[0.2em] text-[#99f7ff] mb-3'
+  'font-headline text-nx-11 font-semibold uppercase tracking-[0.2em] text-[#99f7ff] mb-3'
 
 export const toggleBtn = (active: boolean) =>
   `px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 border ${

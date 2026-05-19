@@ -97,7 +97,7 @@ export default function DealsAndCampaignsSection({ applications }: Props) {
 
                 <div className="flex items-center justify-between mt-2">
                   <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                    className={`text-nx-10 px-1.5 py-0.5 rounded font-medium ${
                       app.status === 'accepted'
                         ? 'bg-[#22c55e]/15 text-[#22c55e]'
                         : app.status === 'pending'
@@ -108,7 +108,7 @@ export default function DealsAndCampaignsSection({ applications }: Props) {
                     {app.status === 'accepted' ? 'Accepted' : 'Pending review'}
                   </span>
                   {app.campaign.end_date && (
-                    <span className="text-[10px] cr-text-muted">
+                    <span className="text-nx-10 cr-text-muted">
                       Due {new Date(app.campaign.end_date!).toLocaleDateString(undefined, {
                         month: 'short',
                         day: 'numeric',

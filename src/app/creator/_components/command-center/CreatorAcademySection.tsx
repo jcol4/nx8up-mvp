@@ -65,7 +65,7 @@ export default function CreatorAcademySection() {
         href={`/creator/academy/${featured.id}`}
         className="mt-4 inline-block py-2 px-5 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 transition-opacity"
       >
-        Begin Module
+        Explore Academy
       </Link>
     </Panel>
   )

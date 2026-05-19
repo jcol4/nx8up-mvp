@@ -194,7 +194,7 @@ export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRes
                       {circle}
                     </button>
                   ) : circle}
-                  <span className={`text-[10px] font-medium hidden sm:block ${
+                  <span className={`text-nx-10 font-medium hidden sm:block ${
                     isActive ? 'text-[#99f7ff]' : isDone ? 'text-[#a9abb5]' : 'text-[#6f7785]'
                   }`}>
                     {label}

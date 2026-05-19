@@ -85,7 +85,7 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack, re
           )}
           {budgetNum > 0 && (
             <div className="mt-3 p-3 rounded-lg border border-[rgba(153,247,255,0.15)] bg-[rgba(153,247,255,0.04)] space-y-1.5">
-              <p className="text-[10px] font-semibold uppercase tracking-widest dash-text-muted">Budget Breakdown</p>
+              <p className="text-nx-10 font-semibold uppercase tracking-widest dash-text-muted">Budget Breakdown</p>
               <div className="flex justify-between text-xs">
                 <span className="dash-text-muted">Total Budget</span>
                 <span className="dash-text-bright">${budgetNum.toLocaleString()}</span>
@@ -99,7 +99,7 @@ export default function Step4Budget({ draft, setDraft, error, onNext, onBack, re
                 <span className="text-[#22c55e]">${creatorPool.toLocaleString()}</span>
               </div>
               {perCreator && (
-                <p className="text-[11px] dash-text-muted">≈ <span className="text-[#c8dff0] font-medium">${perCreator.toLocaleString()}</span> per creator</p>
+                <p className="text-nx-11 dash-text-muted">≈ <span className="text-[#c8dff0] font-medium">${perCreator.toLocaleString()}</span> per creator</p>
               )}
             </div>
           )}

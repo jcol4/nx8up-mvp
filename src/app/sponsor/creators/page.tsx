@@ -180,10 +180,10 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
                         {c.game_category.length > 0 && (
                           <div className="mt-1 flex flex-wrap gap-1">
                             {c.game_category.slice(0, 2).map(g => (
-                              <span key={g} className="rounded border border-[#c084fc]/30 bg-[#c084fc]/10 px-1.5 py-0.5 text-[11px] text-[#d8b4fe]">{g}</span>
+                              <span key={g} className="rounded border border-[#c084fc]/30 bg-[#c084fc]/10 px-1.5 py-0.5 text-nx-11 text-[#d8b4fe]">{g}</span>
                             ))}
                             {c.game_category.length > 2 && (
-                              <span className="text-[11px] text-[#6b7280]">+{c.game_category.length - 2}</span>
+                              <span className="text-nx-11 text-[#6b7280]">+{c.game_category.length - 2}</span>
                             )}
                           </div>
                         )}
@@ -195,7 +195,7 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
                           {c.platform.map(p => (
                             <span
                               key={p}
-                              className={`rounded px-1.5 py-0.5 text-[11px] ${
+                              className={`rounded px-1.5 py-0.5 text-nx-11 ${
                                 PLATFORM_COLOR[p.toLowerCase()] ?? 'border border-white/10 bg-white/5 text-[#a9abb5]'
                               }`}
                             >
@@ -203,7 +203,7 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
                             </span>
                           ))}
                           {c.steam_id && (
-                            <span className="rounded border border-[#66c0f4]/35 bg-[#66c0f4]/10 px-1.5 py-0.5 text-[11px] text-[#bcdcf2]">
+                            <span className="rounded border border-[#66c0f4]/35 bg-[#66c0f4]/10 px-1.5 py-0.5 text-nx-11 text-[#bcdcf2]">
                               Steam
                             </span>
                           )}
@@ -216,7 +216,7 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
                           {c.totalFollowers > 0 ? c.totalFollowers.toLocaleString() : '—'}
                         </p>
                         {c.subs_followers != null && c.youtube_subscribers != null && (
-                          <p className="mt-0.5 text-[11px] tabular-nums text-[#8f97ab]">
+                          <p className="mt-0.5 text-nx-11 tabular-nums text-[#8f97ab]">
                             {c.subs_followers.toLocaleString()} / {c.youtube_subscribers.toLocaleString()}
                           </p>
                         )}
@@ -245,10 +245,10 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1">
                           {c.content_type.slice(0, 2).map(t => (
-                            <span key={t} className="rounded border border-white/12 bg-white/5 px-1.5 py-0.5 text-[11px] text-[#a9abb5]">{t}</span>
+                            <span key={t} className="rounded border border-white/12 bg-white/5 px-1.5 py-0.5 text-nx-11 text-[#a9abb5]">{t}</span>
                           ))}
                           {c.content_type.length > 2 && (
-                            <span className="text-[11px] text-[#6b7280]">+{c.content_type.length - 2}</span>
+                            <span className="text-nx-11 text-[#6b7280]">+{c.content_type.length - 2}</span>
                           )}
                         </div>
                       </td>
@@ -256,7 +256,7 @@ export default async function SponsorCreatorsPage({ searchParams }: Props) {
                       {/* Size */}
                       <td className="px-4 py-3">
                         {c.creator_size ? (
-                          <span className={`rounded px-2 py-0.5 text-[11px] capitalize ${SIZE_COLOR[c.creator_size] ?? 'border border-white/12 bg-white/5 text-[#a9abb5]'}`}>
+                          <span className={`rounded px-2 py-0.5 text-nx-11 capitalize ${SIZE_COLOR[c.creator_size] ?? 'border border-white/12 bg-white/5 text-[#a9abb5]'}`}>
                             {SIZE_LABEL[c.creator_size] ?? c.creator_size}
                           </span>
                         ) : (

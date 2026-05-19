@@ -91,7 +91,7 @@ export default function Step1Basics({ draft, setDraft, error, onNext }: Props) {
             Campaign Goal <span className="text-[#99f7ff]">*</span>
           </p>
           <div className="group relative">
-            <span className="w-4 h-4 rounded-full border border-[rgba(153,247,255,0.35)] text-[#3a5570] text-[10px] flex items-center justify-center cursor-default select-none">?</span>
+            <span className="w-4 h-4 rounded-full border border-[rgba(153,247,255,0.35)] text-[#3a5570] text-nx-10 flex items-center justify-center cursor-default select-none">?</span>
             <div className="absolute left-6 top-0 w-52 bg-[rgba(8,16,32,0.98)] border border-[rgba(153,247,255,0.2)] rounded-lg p-3 text-xs dash-text-muted leading-relaxed z-20 hidden group-hover:block shadow-xl">
               This determines how your campaign is structured and the type of creators matched to it.
             </div>

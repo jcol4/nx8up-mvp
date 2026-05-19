@@ -145,7 +145,7 @@ export default function CreatorCalendar({ selectedDate, onSelectDate }: Props) {
         .cr-cal-day-label {
           text-align: center;
           font-family: 'Rajdhani', sans-serif;
-          font-size: 10px;
+          font-size: 0.625rem;
           font-weight: 600;
           letter-spacing: 0.1em;
           color: #2a3f55;

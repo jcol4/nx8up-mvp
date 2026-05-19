@@ -15,7 +15,7 @@ import { BirthdateSelect } from '@/components/ui'
 
 function OnboardingTermsContent() {
   return (
-    <div className="space-y-4 text-left text-[13px] leading-relaxed text-[#a9abb5]">
+    <div className="space-y-4 text-left text-nx-13 leading-relaxed text-[#a9abb5]">
       <p className="text-[#e8f4ff]">
         These terms summarize how we expect you to use nx8up. They are not a substitute for
         professional legal advice; your counsel should review them before you rely on them in
@@ -153,7 +153,7 @@ export default function OnboardingComponent() {
         Confirm your age and choose your account type to continue.
       </p>
 
-      <div className="mt-4 rounded-lg border border-[#99f7ff]/20 bg-[#99f7ff]/[0.06] px-4 py-3 text-[13px] leading-relaxed text-[#a9abb5]">
+      <div className="mt-4 rounded-lg border border-[#99f7ff]/20 bg-[#99f7ff]/[0.06] px-4 py-3 text-nx-13 leading-relaxed text-[#a9abb5]">
         <span className="font-semibold text-[#99f7ff]">Beta notice: </span>
         nx8up is currently in a testing phase and is free to use. Pricing may be introduced once we officially launch.
       </div>
@@ -164,7 +164,7 @@ export default function OnboardingComponent() {
         <div className="nx-field">
           <span className="nx-label">Date of birth</span>
           <BirthdateSelect name="userDateOfBirth" max={maxDob} min={minDob} />
-          <p className="mt-2 text-center text-[12px] leading-relaxed text-[#a9abb5]">
+          <p className="mt-2 text-center text-nx-12 leading-relaxed text-[#a9abb5]">
             You must be 18 or older to use nx8up.
           </p>
         </div>
@@ -182,7 +182,7 @@ export default function OnboardingComponent() {
               />
               <span>
                 <span className="font-semibold text-[#e8f4ff]">Creator</span>
-                <span className="mt-0.5 block text-[13px] font-normal leading-snug text-[#a9abb5]">
+                <span className="mt-0.5 block text-nx-13 font-normal leading-snug text-[#a9abb5]">
                   Work with sponsors on campaigns and deals.
                 </span>
               </span>
@@ -197,7 +197,7 @@ export default function OnboardingComponent() {
               />
               <span>
                 <span className="font-semibold text-[#e8f4ff]">Sponsor</span>
-                <span className="mt-0.5 block text-[13px] font-normal leading-snug text-[#a9abb5]">
+                <span className="mt-0.5 block text-nx-13 font-normal leading-snug text-[#a9abb5]">
                   Run campaigns and hire creators.
                 </span>
               </span>
@@ -261,7 +261,7 @@ export default function OnboardingComponent() {
               <h2 id="onboarding-terms-title" className="text-lg font-semibold text-[#e8f4ff]">
                 Terms and conditions
               </h2>
-              <p className="mt-1 text-[12px] text-[#a9abb5]">
+              <p className="mt-1 text-nx-12 text-[#a9abb5]">
                 Please read before finishing account setup.
               </p>
             </div>
@@ -269,7 +269,7 @@ export default function OnboardingComponent() {
               <OnboardingTermsContent />
             </div>
             <div className="border-t border-white/[0.08] px-5 py-4">
-              <label className="flex cursor-pointer items-start gap-3 text-left text-[13px] text-[#e8f4ff]">
+              <label className="flex cursor-pointer items-start gap-3 text-left text-nx-13 text-[#e8f4ff]">
                 <input
                   type="checkbox"
                   className="mt-0.5 size-4 shrink-0 rounded border border-white/20 bg-black/30 accent-[#99f7ff]"

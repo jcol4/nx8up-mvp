@@ -24,7 +24,7 @@ export default async function SponsorMyCampaignsSection() {
   return (
     <DashboardPanel title="My Campaigns" href="/sponsor/campaigns" linkLabel="View all">
       {campaigns.length === 0 ? (
-        <div className="dash-bg-inner dash-border border rounded-lg p-4 text-sm dash-text-muted">
+        <div className="dash-bg-inner dash-border border rounded-lg p-4 text-sm text-white/90">
           <p className="mb-2">You haven&apos;t launched any campaigns yet.</p>
           <Link href="/sponsor/campaigns/new" className="dash-accent hover:underline">
             Post a campaign to start reaching creators.
@@ -56,7 +56,7 @@ export default async function SponsorMyCampaignsSection() {
                   {c.status === 'pending_approval' ? 'Pending Approval' : c.status.charAt(0).toUpperCase() + c.status.slice(1)}
                 </span>
               </div>
-              <p className="text-xs dash-text-muted mt-0.5">
+              <p className="mt-0.5 text-xs text-white/80">
                 {(c.game_category?.length ? c.game_category.join(' · ') : 'Gaming')}{' '}
                 {c.budget != null && `· $${c.budget.toLocaleString()}`}
               </p>

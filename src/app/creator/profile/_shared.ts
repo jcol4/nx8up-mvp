@@ -167,7 +167,7 @@ export const COMMON_LANGUAGES = [
 
 export const labelClass = 'block text-sm font-medium text-[#a9abb5] mb-1.5'
 export const sectionTitle =
-  'font-headline text-[11px] font-semibold uppercase tracking-[0.2em] text-[#99f7ff] mb-3'
+  'font-headline text-nx-11 font-semibold uppercase tracking-[0.2em] text-[#99f7ff] mb-3'
 
 /**
  * Returns the Tailwind class string for a toggle button, switching between

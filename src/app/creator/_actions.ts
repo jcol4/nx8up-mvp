@@ -28,6 +28,7 @@
 
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
+import { revalidateCreatorSidebarCache } from '@/lib/creator-sidebar-cache'
 import { prisma } from '@/lib/prisma'
 import { MISSIONS } from '@/lib/missions'
 import { assignWeeklyMissions } from '@/lib/mission-assignment'
@@ -182,6 +183,7 @@ export async function addCreatorXp(amount: number): Promise<{ error?: string }> 
     }
 
     revalidatePath('/creator')
+    revalidateCreatorSidebarCache(userId)
     return {}
   } catch {
     return { error: 'Failed to add XP' }
@@ -244,6 +246,7 @@ async function updateCalendarTasks(
     })
 
     revalidatePath('/creator')
+    revalidateCreatorSidebarCache(userId)
     return {}
   } catch {
     return { error: 'Failed to update tasks' }
@@ -362,6 +365,7 @@ export async function updateContentPlannerNotes(notes: ContentPlannerNotes): Pro
     })
 
     revalidatePath('/creator')
+    revalidateCreatorSidebarCache(userId)
     return {}
   } catch {
     return { error: 'Failed to save notes' }

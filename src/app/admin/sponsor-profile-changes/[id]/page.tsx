@@ -60,7 +60,7 @@ export default async function SponsorProfileChangeDetailPage({
 
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 pt-2 border-t border-white/10">
             <div>
-              <dt className="text-[11px] dash-text-muted uppercase tracking-wide mb-0.5">Sponsor</dt>
+              <dt className="text-nx-11 dash-text-muted uppercase tracking-wide mb-0.5">Sponsor</dt>
               <dd className="text-sm dash-text-bright font-medium">
                 {request.sponsor.company_name ?? request.sponsor.email}
               </dd>
@@ -70,12 +70,12 @@ export default async function SponsorProfileChangeDetailPage({
             </div>
 
             <div>
-              <dt className="text-[11px] dash-text-muted uppercase tracking-wide mb-0.5">Current Setting</dt>
+              <dt className="text-nx-11 dash-text-muted uppercase tracking-wide mb-0.5">Current Setting</dt>
               <dd className="text-sm dash-text">{currentLabel}</dd>
             </div>
 
             <div>
-              <dt className="text-[11px] dash-text-muted uppercase tracking-wide mb-0.5">Requested Change</dt>
+              <dt className="text-nx-11 dash-text-muted uppercase tracking-wide mb-0.5">Requested Change</dt>
               <dd className={`text-sm font-semibold ${request.requested_age_restricted ? 'text-orange-400' : 'text-[#22c55e]'}`}>
                 {requestedLabel}
               </dd>

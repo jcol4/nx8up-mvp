@@ -67,7 +67,7 @@ export default function OptOutVerdictButtons({ optOutId }: Props) {
           type="button"
           onClick={() => setExpanded(false)}
           disabled={isPending}
-          className="text-xs text-[#6b7280] hover:text-[#a9abb5]"
+          className="rounded-lg border border-white/15 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-white/85 transition-colors hover:border-[#99f7ff]/40 hover:bg-[#99f7ff]/10 hover:text-[#bffcff] disabled:opacity-50"
         >
           Cancel
         </button>

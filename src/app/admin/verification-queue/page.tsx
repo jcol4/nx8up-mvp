@@ -68,9 +68,9 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
     <div className="flex-1 overflow-auto p-6 sm:p-8">
       <div className="mx-auto max-w-6xl space-y-6">
         <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
+          <p className="text-nx-11 uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
           <h1 className="mt-1 font-headline text-2xl font-semibold text-[#e8f4ff]">Review Queue</h1>
-          <p className="mt-1 text-sm text-[#c4cad6]">
+          <p className="mt-1 text-sm font-medium text-white/90">
             Review creator submissions, sponsor profile changes, sanctioned launch requests, refund requests, and creator opt-outs.
           </p>
         </div>
@@ -81,13 +81,13 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
             href="/admin/verification-queue"
             className={`px-4 py-2 text-sm font-medium transition-colors relative whitespace-nowrap ${
               activeTab === 'submissions'
-                ? 'dash-text-bright border-b-2 border-[#00c8ff] -mb-px'
-                : 'dash-text-muted hover:dash-text-bright'
+                ? 'border-b-2 border-[#99f7ff] -mb-px font-semibold text-white'
+                : 'font-medium text-white/75 hover:text-white'
             }`}
           >
             Campaign Submissions
             {submissionsQueue.length > 0 && (
-              <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded-full bg-[#00c8ff]/20 text-[#00c8ff]">
+              <span className="ml-1.5 rounded-full border border-[#99f7ff]/30 bg-[#99f7ff]/15 px-1.5 py-0.5 text-xs text-[#bffcff]">
                 {submissionsQueue.length}
               </span>
             )}
@@ -96,8 +96,8 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
             href="/admin/verification-queue?tab=profile-changes"
             className={`px-4 py-2 text-sm font-medium transition-colors relative whitespace-nowrap ${
               activeTab === 'profile-changes'
-                ? 'dash-text-bright border-b-2 border-[#00c8ff] -mb-px'
-                : 'dash-text-muted hover:dash-text-bright'
+                ? 'border-b-2 border-[#99f7ff] -mb-px font-semibold text-white'
+                : 'font-medium text-white/75 hover:text-white'
             }`}
           >
             Profile Changes
@@ -111,8 +111,8 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
             href="/admin/verification-queue?tab=launches"
             className={`px-4 py-2 text-sm font-medium transition-colors relative whitespace-nowrap ${
               activeTab === 'launches'
-                ? 'dash-text-bright border-b-2 border-[#00c8ff] -mb-px'
-                : 'dash-text-muted hover:dash-text-bright'
+                ? 'border-b-2 border-[#99f7ff] -mb-px font-semibold text-white'
+                : 'font-medium text-white/75 hover:text-white'
             }`}
           >
             Launch Approvals
@@ -126,8 +126,8 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
             href="/admin/verification-queue?tab=refunds"
             className={`px-4 py-2 text-sm font-medium transition-colors relative whitespace-nowrap ${
               activeTab === 'refunds'
-                ? 'dash-text-bright border-b-2 border-[#00c8ff] -mb-px'
-                : 'dash-text-muted hover:dash-text-bright'
+                ? 'border-b-2 border-[#99f7ff] -mb-px font-semibold text-white'
+                : 'font-medium text-white/75 hover:text-white'
             }`}
           >
             Refund Requests
@@ -141,8 +141,8 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
             href="/admin/verification-queue?tab=opt-outs"
             className={`px-4 py-2 text-sm font-medium transition-colors relative whitespace-nowrap ${
               activeTab === 'opt-outs'
-                ? 'dash-text-bright border-b-2 border-[#00c8ff] -mb-px'
-                : 'dash-text-muted hover:dash-text-bright'
+                ? 'border-b-2 border-[#99f7ff] -mb-px font-semibold text-white'
+                : 'font-medium text-white/75 hover:text-white'
             }`}
           >
             Opt Outs
@@ -157,7 +157,7 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
         {/* Campaign Submissions tab */}
         {activeTab === 'submissions' && (
           submissionsQueue.length === 0 ? (
-            <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-8 text-center text-[#c4cad6]">
+            <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-8 text-center font-medium text-white/90">
               <p>No submissions pending review.</p>
             </div>
           ) : (
@@ -177,8 +177,8 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
                     className="glass-panel interactive-panel flex items-center justify-between gap-3 rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-4 transition-colors hover:border-[#99f7ff]/35"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm dash-text-bright font-medium">{app.campaign.title}</p>
-                      <p className="text-xs dash-text-muted mt-0.5">
+                      <p className="text-sm font-semibold text-white">{app.campaign.title}</p>
+                      <p className="mt-0.5 text-xs font-medium text-white/85">
                         {handle}
                         {app.campaign.brand_name ? ` · ${app.campaign.brand_name}` : ''}
                         {app.campaign.end_date
@@ -191,11 +191,11 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
                         Awaiting review
                       </span>
                       {sub.submitted_at && (
-                        <span className="text-xs dash-text-muted">
+                        <span className="text-xs font-medium text-white/80">
                           {new Date(sub.submitted_at).toLocaleDateString()}
                         </span>
                       )}
-                      <span className="text-xs dash-text-muted">Review →</span>
+                      <span className="text-xs font-semibold text-[#99f7ff]">Review →</span>
                     </div>
                   </Link>
                 )
@@ -207,7 +207,7 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
         {/* Profile Changes tab */}
         {activeTab === 'profile-changes' && (
           profileChangesQueue.length === 0 ? (
-            <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-8 text-center text-[#c4cad6]">
+            <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-8 text-center font-medium text-white/90">
               <p>No pending age restriction change requests.</p>
             </div>
           ) : (
@@ -227,11 +227,11 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
                     className="glass-panel interactive-panel flex items-center justify-between gap-3 rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-4 transition-colors hover:border-[#99f7ff]/35"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm dash-text-bright font-medium">
+                      <p className="text-sm font-semibold text-white">
                         {req.sponsor.company_name ?? req.sponsor.email}
                       </p>
-                      <p className="text-xs dash-text-muted mt-0.5">
-                        Age restriction: <span className="dash-text">{currentLabel}</span>
+                      <p className="mt-0.5 text-xs font-medium text-white/85">
+                        Age restriction: <span className="font-semibold text-[#99f7ff]">{currentLabel}</span>
                         {' → '}
                         <span className={req.requested_age_restricted ? 'text-orange-400' : 'text-[#22c55e]'}>
                           {requestedLabel}
@@ -242,10 +242,10 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
                       <span className="text-xs px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-400">
                         Pending review
                       </span>
-                      <span className="text-xs dash-text-muted">
+                      <span className="text-xs font-medium text-white/80">
                         {new Date(req.created_at).toLocaleDateString()}
                       </span>
-                      <span className="text-xs dash-text-muted">Review →</span>
+                      <span className="text-xs font-semibold text-[#99f7ff]">Review →</span>
                     </div>
                   </Link>
                 )
@@ -257,7 +257,7 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
         {/* Launch Approvals tab */}
         {activeTab === 'launches' && (
           launchQueue.length === 0 ? (
-            <div className="rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-8 text-center text-[#c4cad6]">
+            <div className="rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-8 text-center font-medium text-white/90">
               <p>No pending launch approval requests.</p>
             </div>
           ) : (
@@ -270,16 +270,16 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0 flex-1 space-y-1">
                       <p className="text-sm font-semibold text-[#e8f4ff]">{req.campaign.title}</p>
-                      <p className="text-xs text-[#a9abb5]">
+                      <p className="text-xs font-medium text-white/85">
                         {req.sponsor.company_name ?? req.sponsor.email}
                         {req.campaign.brand_name ? ` · ${req.campaign.brand_name}` : ''}
                       </p>
                       {req.campaign.start_date && (
-                        <p className="text-xs text-[#a9abb5]">
+                        <p className="text-xs font-medium text-white/85">
                           Start date: <span className="text-[#c8dff0]">{new Date(req.campaign.start_date).toLocaleDateString()}</span>
                         </p>
                       )}
-                      <p className="text-xs text-[#6b7280]">
+                      <p className="text-xs font-medium text-white/70">
                         Requested {new Date(req.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </p>
                     </div>
@@ -298,7 +298,7 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
         {activeTab === 'refunds' && (
           <>
             {pendingRefunds.length === 0 && reviewedRefunds.length === 0 && (
-              <div className="rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-8 text-center text-[#c4cad6]">
+              <div className="rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-8 text-center font-medium text-white/90">
                 <p>No refund requests yet.</p>
               </div>
             )}
@@ -318,14 +318,14 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0 flex-1 space-y-1">
                         <p className="text-sm font-semibold text-[#e8f4ff]">{req.campaign.title}</p>
-                        <p className="text-xs text-[#a9abb5]">
+                        <p className="text-xs font-medium text-white/85">
                           {req.sponsor.company_name ?? req.sponsor.email}
                           {' · '}
                           <span className="text-[#c8dff0]">{TIER_LABELS[req.sponsor.reputation_tier as ReputationTier]}</span>
                           {' · score: '}
                           <span className="text-[#c8dff0]">{req.sponsor.reputation_score}</span>
                         </p>
-                        <p className="text-xs text-[#a9abb5]">
+                        <p className="text-xs font-medium text-white/85">
                           Budget: <span className="text-[#99f7ff] font-medium">${req.campaign.budget?.toLocaleString() ?? '—'}</span>
                           {' · '}
                           {req.had_accepted_applications ? (
@@ -338,9 +338,9 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
                           Reason: <span className="font-medium">{REASON_LABELS[req.reason_category] ?? req.reason_category}</span>
                         </p>
                         {req.reason_detail && (
-                          <p className="text-xs text-[#a9abb5] italic">&ldquo;{req.reason_detail}&rdquo;</p>
+                          <p className="text-xs font-medium text-white/85 italic">&ldquo;{req.reason_detail}&rdquo;</p>
                         )}
-                        <p className="text-xs text-[#6b7280]">
+                        <p className="text-xs font-medium text-white/70">
                           {new Date(req.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </p>
                       </div>
@@ -355,7 +355,7 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
             )}
             {reviewedRefunds.length > 0 && (
               <div className="space-y-3">
-                <h2 className="text-sm font-semibold text-[#a9abb5]">Reviewed</h2>
+                <h2 className="text-sm font-semibold text-white/90">Reviewed</h2>
                 {reviewedRefunds.map((req) => (
                   <div
                     key={req.id}
@@ -364,16 +364,16 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0 flex-1 space-y-1">
                         <p className="text-sm font-medium text-[#c8dff0]">{req.campaign.title}</p>
-                        <p className="text-xs text-[#a9abb5]">
+                        <p className="text-xs font-medium text-white/85">
                           {req.sponsor.company_name ?? req.sponsor.email}
                           {' · '}
                           Reason: <span className="text-[#c8dff0]">{REASON_LABELS[req.reason_category] ?? req.reason_category}</span>
                         </p>
                         {req.reason_detail && (
-                          <p className="text-xs text-[#a9abb5] italic">&ldquo;{req.reason_detail}&rdquo;</p>
+                          <p className="text-xs font-medium text-white/85 italic">&ldquo;{req.reason_detail}&rdquo;</p>
                         )}
                         {req.admin_notes && (
-                          <p className="text-xs text-[#a9abb5]">Notes: {req.admin_notes}</p>
+                          <p className="text-xs font-medium text-white/85">Notes: {req.admin_notes}</p>
                         )}
                       </div>
                       <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${VERDICT_STYLES[req.verdict] ?? VERDICT_STYLES.pending}`}>
@@ -390,7 +390,7 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
         {/* Opt Outs tab */}
         {activeTab === 'opt-outs' && (
           optOutQueue.length === 0 ? (
-            <div className="rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-8 text-center text-[#c4cad6]">
+            <div className="rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-8 text-center font-medium text-white/90">
               <p>No pending opt-out requests.</p>
             </div>
           ) : (
@@ -409,7 +409,7 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0 flex-1 space-y-1">
                         <p className="text-sm font-semibold text-[#e8f4ff]">{optOut.application.campaign.title}</p>
-                        <p className="text-xs text-[#a9abb5]">
+                        <p className="text-xs font-medium text-white/85">
                           {handle}
                           {' · '}
                           <span className="text-[#c8dff0]">{TIER_LABELS[optOut.creator.reputation_tier as ReputationTier]}</span>
@@ -419,7 +419,7 @@ export default async function AdminVerificationQueuePage({ searchParams }: Props
                         <p className="text-xs text-[#c8dff0]">
                           Reason: <span className="font-medium italic">&ldquo;{optOut.reason}&rdquo;</span>
                         </p>
-                        <p className="text-xs text-[#6b7280]">
+                        <p className="text-xs font-medium text-white/70">
                           {new Date(optOut.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </p>
                       </div>

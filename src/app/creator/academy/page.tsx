@@ -37,12 +37,12 @@ async function AcademyPageInner() {
     <CreatorShell>
       <main className="mx-auto max-w-5xl p-6 sm:p-8">
         <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
-          <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Academy</p>
+          <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Academy</p>
           <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Creator Academy</h1>
           <p className="mt-1 text-sm text-[#a9abb5]">
             Structured modules to sharpen your content strategy, partnerships, and creator business.
           </p>
-          <div className="mt-3 inline-flex items-center rounded-full border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2.5 py-1 text-[11px] text-[#99f7ff]">
+          <div className="mt-3 inline-flex items-center rounded-full border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2.5 py-1 text-nx-11 text-[#99f7ff]">
             {LESSONS.length} lessons
           </div>
         </div>
@@ -66,10 +66,10 @@ async function AcademyPageInner() {
 
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex items-center gap-2">
-                    <span className="rounded border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-2 py-0.5 text-[10px] font-medium text-[#99f7ff]">
+                    <span className="rounded border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-2 py-0.5 text-nx-10 font-medium text-[#99f7ff]">
                       Lesson {i + 1}
                     </span>
-                    <span className="rounded border border-[#c084fc]/30 bg-[#c084fc]/10 px-2 py-0.5 text-[10px] text-[#d8b4fe]">
+                    <span className="rounded border border-[#c084fc]/30 bg-[#c084fc]/10 px-2 py-0.5 text-nx-10 text-[#d8b4fe]">
                       {lesson.category}
                     </span>
                   </div>

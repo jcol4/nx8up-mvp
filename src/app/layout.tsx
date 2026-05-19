@@ -91,6 +91,7 @@ export default async function RootLayout({
           colorText: '#c8dff0',
           colorTextSecondary: '#4a6080',
           borderRadius: '10px',
+          fontSize: '1rem',
         },
         layout: {
           unsafe_disableDevelopmentModeWarnings: true,

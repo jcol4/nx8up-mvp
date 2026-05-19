@@ -33,7 +33,7 @@ export default async function AdminRefundRequestsPage() {
     <div className="flex-1 overflow-auto p-6 sm:p-8">
       <div className="mx-auto max-w-5xl space-y-6">
         <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
+          <p className="text-nx-11 uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
           <h1 className="mt-1 font-headline text-2xl font-semibold text-[#e8f4ff]">Refund Requests</h1>
           <p className="mt-1 text-sm text-[#c4cad6]">
             Review sponsor refund reasons and record your verdict. The Stripe refund has already been issued — your verdict adjusts the sponsor&apos;s reputation score.

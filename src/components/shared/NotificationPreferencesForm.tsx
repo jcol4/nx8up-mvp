@@ -107,9 +107,9 @@ export default function NotificationPreferencesForm({ entries }: Props) {
     <div className="space-y-4">
       <div className="dash-panel dash-panel--nx-top overflow-hidden rounded-xl border border-white/16 border-t-2 border-t-[#bffcff] bg-black/20">
         <div className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-white/12 bg-black/30 px-4 py-2.5">
-          <span className="font-headline text-[11px] font-semibold uppercase tracking-[0.18em] text-[#99f7ff]">Notification</span>
-          <span className="w-16 text-center font-headline text-[11px] font-semibold uppercase tracking-[0.18em] text-[#99f7ff]">In-App</span>
-          <span className="w-16 text-center font-headline text-[11px] font-semibold uppercase tracking-[0.18em] text-[#99f7ff]">Email</span>
+          <span className="font-headline text-nx-11 font-semibold uppercase tracking-[0.18em] text-[#99f7ff]">Notification</span>
+          <span className="w-16 text-center font-headline text-nx-11 font-semibold uppercase tracking-[0.18em] text-[#99f7ff]">In-App</span>
+          <span className="w-16 text-center font-headline text-nx-11 font-semibold uppercase tracking-[0.18em] text-[#99f7ff]">Email</span>
         </div>
         {entries.map((entry, i) => (
           <div

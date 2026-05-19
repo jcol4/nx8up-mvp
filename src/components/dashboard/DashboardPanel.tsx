@@ -6,11 +6,12 @@ type Props = {
   linkLabel?: string
   children: React.ReactNode
   className?: string
+  titleClassName?: string
 }
 
-export default function DashboardPanel({ title, href, linkLabel, children, className = '' }: Props) {
+export default function DashboardPanel({ title, href, linkLabel, children, className = '', titleClassName }: Props) {
   return (
-    <NxHudCard title={title} href={href} linkLabel={linkLabel} className={className}>
+    <NxHudCard title={title} href={href} linkLabel={linkLabel} className={className} titleClassName={titleClassName}>
       {children}
     </NxHudCard>
   )

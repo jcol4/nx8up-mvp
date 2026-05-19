@@ -6,6 +6,8 @@
 import Link from 'next/link'
 import { Lexend, Space_Grotesk } from 'next/font/google'
 import NxHudBackground from '@/components/nx-shell/NxHudBackground'
+import { NX8UP_LOGO_SRC } from '@/lib/nx8up-logo'
+import SocialTemplateLinks from '@/components/nx-shell/SocialTemplateLinks'
 
 const fontDisplay = Space_Grotesk({
   subsets: ['latin'],
@@ -99,7 +101,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           border-radius: 0.25rem;
           padding: 4px 10px;
           font-family: var(--font-auth-body), sans-serif;
-          font-size: 10px;
+          font-size: 0.625rem;
           font-weight: 600;
           color: var(--nx-a);
           letter-spacing: 0.12em;
@@ -173,7 +175,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         .nx-auth-root .nx-label {
           display: block;
           font-family: var(--font-auth-body), sans-serif;
-          font-size: 10px;
+          font-size: 0.625rem;
           font-weight: 600;
           letter-spacing: 0.15em;
           text-transform: uppercase;
@@ -430,6 +432,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           font-family: inherit;
           padding: 0;
         }
+        .nx-auth-root .nx-text-btn--sm {
+          font-size: 0.85rem;
+        }
         .nx-auth-root .nx-text-btn:disabled {
           opacity: 0.5;
           cursor: not-allowed;
@@ -450,7 +455,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           align-items: center;
           gap: 6px;
           font-family: var(--font-auth-body), sans-serif;
-          font-size: 11px;
+          font-size: 0.6875rem;
           font-weight: 600;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -503,14 +508,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         }
         .nx-auth-root .nx-xp-label span {
           font-family: var(--font-auth-body), sans-serif;
-          font-size: 11px;
+          font-size: 0.6875rem;
           letter-spacing: 0.1em;
           text-transform: uppercase;
           color: var(--nx-muted);
         }
         .nx-auth-root .nx-xp-label strong {
           font-family: var(--font-auth-display), sans-serif;
-          font-size: 13px;
+          font-size: 0.8125rem;
           font-weight: 600;
           color: var(--nx-a);
         }
@@ -634,10 +639,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="nx-auth-ambient-sheen" />
       </div>
 
-      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-16">
+      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-md flex-col justify-start px-6 pt-4 pb-12 sm:pt-7 sm:pb-16">
         {/* Branding */}
-        <div className="mb-10 flex flex-col items-center text-center">
-          <div className="relative mb-4">
+        <div className="mb-6 flex flex-col items-center text-center sm:mb-8">
+          <div className="relative mt-3 mb-0 sm:mt-4">
             <div className="absolute inset-0 blur-xl opacity-25 bg-[#99f7ff]" aria-hidden />
             <span className="relative nx-animate-float inline-flex text-[#99f7ff]" aria-hidden>
               <svg
@@ -660,10 +665,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               </svg>
             </span>
           </div>
-          <h1 className="nx-gradient-text font-[family-name:var(--font-auth-display)] text-4xl font-bold tracking-tight sm:text-5xl">
-            NX8UP
-          </h1>
-          <p className="mt-2 font-[family-name:var(--font-auth-body)] text-[11px] font-semibold uppercase tracking-[0.28em] text-[#99f7ff]">
+          <img
+            src={NX8UP_LOGO_SRC}
+            alt="nx8up"
+            className="-mt-1 h-16 w-auto shrink-0 object-contain sm:h-20 md:h-24"
+            decoding="async"
+          />
+          <p className="mt-2 font-[family-name:var(--font-auth-body)] text-nx-11 font-semibold uppercase tracking-[0.28em] text-[#99f7ff]">
             CREATE. CONTRACT. COLLECT.
           </p>
         </div>
@@ -672,28 +680,29 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="nx-card mx-auto w-full">{children}</div>
 
         {/* System footer */}
-        <footer className="mt-12 flex flex-col items-center gap-4 text-[#a9abb5]/50">
+        <footer className="mt-8 flex flex-col items-center gap-4 text-[#a9abb5]/50 sm:mt-10">
+          <SocialTemplateLinks variant="auth" />
           <div className="flex gap-8">
             <Link
               href="/"
-              className="font-[family-name:var(--font-auth-body)] text-[10px] font-semibold uppercase tracking-widest transition-colors hover:text-[#99f7ff]"
+              className="font-[family-name:var(--font-auth-body)] text-nx-10 font-semibold uppercase tracking-widest transition-colors hover:text-[#99f7ff]"
             >
               Home
             </Link>
             <a
               href="#"
-              className="font-[family-name:var(--font-auth-body)] text-[10px] font-semibold uppercase tracking-widest transition-colors hover:text-[#99f7ff]"
+              className="font-[family-name:var(--font-auth-body)] text-nx-10 font-semibold uppercase tracking-widest transition-colors hover:text-[#99f7ff]"
             >
               Privacy
             </a>
             <a
               href="#"
-              className="font-[family-name:var(--font-auth-body)] text-[10px] font-semibold uppercase tracking-widest transition-colors hover:text-[#99f7ff]"
+              className="font-[family-name:var(--font-auth-body)] text-nx-10 font-semibold uppercase tracking-widest transition-colors hover:text-[#99f7ff]"
             >
               Support
             </a>
           </div>
-          <p className="font-[family-name:var(--font-auth-body)] text-[9px] uppercase tracking-widest text-[#a9abb5]/45">
+          <p className="font-[family-name:var(--font-auth-body)] text-nx-9 uppercase tracking-widest text-[#a9abb5]/45">
             © 2025 NX8UP — Ascend your content
           </p>
         </footer>

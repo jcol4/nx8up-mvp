@@ -49,7 +49,7 @@ function GameCard({ game, showRecent }: { game: SteamGame; showRecent?: boolean 
         <p className="truncate text-sm text-[#e8f4ff]" title={game.name}>
           {game.name}
         </p>
-        <p className="mt-0.5 text-[11px] text-[#a9abb5]">
+        <p className="mt-0.5 text-nx-11 font-medium text-white/85">
           {showRecent
             ? `${minutesToHoursLabel(game.playtime2WeeksMinutes)} recent · ${minutesToHoursLabel(game.playtimeMinutes)} total`
             : minutesToHoursLabel(game.playtimeMinutes)}
@@ -106,9 +106,9 @@ export default function SteamLookupUI() {
 
         {/* Page header */}
         <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
-          <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Tools</p>
+          <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Tools</p>
           <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Steam Profile Lookup</h1>
-          <p className="mt-1 text-sm text-[#a9abb5]">
+          <p className="mt-1 text-sm font-medium text-white/90">
             Search any public Steam profile by SteamID, vanity name, or full profile URL.
           </p>
         </div>
@@ -123,12 +123,12 @@ export default function SteamLookupUI() {
             autoFocus
             spellCheck={false}
             autoCapitalize="none"
-            className="flex-1 rounded-lg border border-white/12 bg-black/30 px-4 py-2.5 text-sm text-[#e8f4ff] placeholder-[#4a6080] outline-none transition-colors focus:border-[#99f7ff]/40 focus:ring-1 focus:ring-[#99f7ff]/20"
+            className="flex-1 rounded-lg border border-white/12 bg-black/30 px-4 py-2.5 text-sm text-[#e8f4ff] placeholder:text-white/35 outline-none transition-colors focus:border-[#99f7ff]/40 focus:ring-1 focus:ring-[#99f7ff]/20"
           />
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
-            className="shrink-0 rounded-lg bg-[#00c8ff] px-5 py-2.5 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="shrink-0 rounded-lg border border-[#99f7ff]/45 bg-[#99f7ff]/12 px-5 py-2.5 text-sm font-semibold text-[#bffcff] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-colors hover:border-[#99f7ff]/65 hover:bg-[#99f7ff]/22 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isLoading ? 'Searching…' : 'Search'}
           </button>
@@ -161,9 +161,9 @@ export default function SteamLookupUI() {
                 <h2 className="font-headline text-lg font-semibold text-[#e8f4ff]">
                   {result.profile.personaName}
                 </h2>
-                <p className="mt-0.5 text-xs text-[#a9abb5]">
+                <p className="mt-0.5 text-xs font-medium text-white/90">
                   SteamID:{' '}
-                  <code className="font-mono text-[#c8dff0]">{result.profile.steamId}</code>
+                  <code className="font-mono text-[#bffcff]">{result.profile.steamId}</code>
                 </p>
                 <a
                   href={result.profile.profileUrl}
@@ -175,7 +175,7 @@ export default function SteamLookupUI() {
                 </a>
               </div>
               <span
-                className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+                className={`shrink-0 rounded-full border px-2.5 py-1 text-nx-11 font-medium ${
                   result.profile.communityVisibilityState === 3
                     ? 'border-[#22c55e]/30 bg-[#22c55e]/10 text-[#4ade80]'
                     : 'border-yellow-500/30 bg-yellow-500/10 text-yellow-300'
@@ -195,7 +195,7 @@ export default function SteamLookupUI() {
 
             {/* No games */}
             {hasNoGames && (
-              <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-[#a9abb5]">
+              <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm font-medium text-white/90">
                 This profile is public but has no games in their library.
               </div>
             )}
@@ -209,7 +209,7 @@ export default function SteamLookupUI() {
                       <h3 className="font-headline text-sm font-semibold uppercase tracking-[0.12em] text-[#99f7ff]">
                         Recently Played
                       </h3>
-                      <span className="rounded-full border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2 py-0.5 text-[11px] text-[#99f7ff]">
+                      <span className="rounded-full border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2 py-0.5 text-nx-11 text-[#99f7ff]">
                         last 2 weeks
                       </span>
                     </div>
@@ -223,7 +223,7 @@ export default function SteamLookupUI() {
                     <h3 className="font-headline text-sm font-semibold uppercase tracking-[0.12em] text-[#e8f4ff]">
                       All Games
                     </h3>
-                    <span className="rounded-full border border-white/15 bg-white/8 px-2 py-0.5 text-[11px] text-[#a9abb5]">
+                    <span className="rounded-full border border-white/15 bg-white/[0.06] px-2 py-0.5 text-nx-11 font-medium text-white/85">
                       {result.allGames.length} · sorted by total hours
                     </span>
                   </div>

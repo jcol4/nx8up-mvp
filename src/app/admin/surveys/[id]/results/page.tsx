@@ -59,7 +59,7 @@ export default async function SurveyResultsPage({ params }: Props) {
                 ← Back to surveys
               </Link>
               <h1 className="mt-1 text-xl font-semibold text-[#e8f4ff]">{survey.title}</h1>
-              <p className="mt-0.5 text-sm text-[#c4cad6]">
+              <p className="mt-0.5 text-sm font-medium text-white/90">
                 {survey.responses.length} total responses
                 {dateFrom && dateTo && (
                   <> · {dateFrom.toLocaleDateString()} – {dateTo.toLocaleDateString()}</>
@@ -78,7 +78,7 @@ export default async function SurveyResultsPage({ params }: Props) {
 
         {survey.responses.length === 0 ? (
           <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-8 text-center">
-            <p className="text-[#c4cad6]">No responses yet.</p>
+            <p className="font-medium text-white/90">No responses yet.</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -90,7 +90,7 @@ export default async function SurveyResultsPage({ params }: Props) {
 
               return (
                 <div key={q.id} className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-5 space-y-4">
-                  <p className="text-sm font-medium text-[#e8f4ff]">{q.text}</p>
+                  <p className="text-sm font-semibold text-white">{q.text}</p>
 
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     {(['creator', 'sponsor'] as const).map(r => {
@@ -110,7 +110,7 @@ export default async function SurveyResultsPage({ params }: Props) {
                               return (
                                 <div key={opt}>
                                   <div className="mb-1 flex items-center justify-between text-xs">
-                                    <span className="text-[#c4cad6]">{opt}</span>
+                                    <span className="font-medium text-white/90">{opt}</span>
                                     <span className="font-medium text-[#e8f4ff]">{count} ({pct}%)</span>
                                   </div>
                                   <div className="h-2 rounded-full bg-white/5">
@@ -132,20 +132,20 @@ export default async function SurveyResultsPage({ params }: Props) {
             })}
 
             <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-5">
-              <h2 className="mb-3 text-sm font-semibold text-[#e8f4ff]">Response Summary</h2>
+              <h2 className="mb-3 text-sm font-semibold text-white">Response Summary</h2>
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-white/10">
-                    <th className="pb-2 text-left text-xs font-medium text-[#8f97ab]">Role</th>
-                    <th className="pb-2 text-right text-xs font-medium text-[#8f97ab]">Responses</th>
-                    <th className="pb-2 text-right text-xs font-medium text-[#8f97ab]">% of total</th>
+                    <th className="pb-2 text-left text-xs font-bold uppercase tracking-wide text-white/90">Role</th>
+                    <th className="pb-2 text-right text-xs font-bold uppercase tracking-wide text-white/90">Responses</th>
+                    <th className="pb-2 text-right text-xs font-bold uppercase tracking-wide text-white/90">% of total</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   <tr>
                     <td className="py-2 text-[#7b4fff]">Creators</td>
-                    <td className="py-2 text-right text-[#e8f4ff]">{creatorResponses.length}</td>
-                    <td className="py-2 text-right text-[#c4cad6]">
+                    <td className="py-2 text-right font-semibold text-white">{creatorResponses.length}</td>
+                    <td className="py-2 text-right font-medium tabular-nums text-white/90">
                       {survey.responses.length > 0
                         ? `${Math.round((creatorResponses.length / survey.responses.length) * 100)}%`
                         : '—'}
@@ -153,17 +153,17 @@ export default async function SurveyResultsPage({ params }: Props) {
                   </tr>
                   <tr>
                     <td className="py-2 text-[#00c8ff]">Sponsors</td>
-                    <td className="py-2 text-right text-[#e8f4ff]">{sponsorResponses.length}</td>
-                    <td className="py-2 text-right text-[#c4cad6]">
+                    <td className="py-2 text-right font-semibold text-white">{sponsorResponses.length}</td>
+                    <td className="py-2 text-right font-medium tabular-nums text-white/90">
                       {survey.responses.length > 0
                         ? `${Math.round((sponsorResponses.length / survey.responses.length) * 100)}%`
                         : '—'}
                     </td>
                   </tr>
                   <tr className="font-semibold">
-                    <td className="py-2 text-[#e8f4ff]">Total</td>
-                    <td className="py-2 text-right text-[#e8f4ff]">{survey.responses.length}</td>
-                    <td className="py-2 text-right text-[#c4cad6]">100%</td>
+                    <td className="py-2 text-white">Total</td>
+                    <td className="py-2 text-right text-white">{survey.responses.length}</td>
+                    <td className="py-2 text-right font-medium tabular-nums text-white/90">100%</td>
                   </tr>
                 </tbody>
               </table>

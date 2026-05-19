@@ -16,7 +16,7 @@ type Props = {
 function StatCell({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
-      <p className="uppercase tracking-wide text-[10px] mb-1 dash-text-muted">{label}</p>
+      <p className="uppercase tracking-wide text-nx-10 mb-1 dash-text-muted">{label}</p>
       <p className="text-sm dash-text-bright">{value ?? <span className="dash-text-muted italic">Not specified</span>}</p>
     </div>
   )
@@ -167,14 +167,14 @@ export default async function ApplicationReviewPage({ params }: Props) {
             {/* Application pitch */}
             {current.message && (
               <div className="border-t dash-border pt-4">
-                <p className="uppercase tracking-wide text-[10px] mb-2 dash-text-muted">Why they think they're a great fit</p>
+                <p className="uppercase tracking-wide text-nx-10 mb-2 dash-text-muted">Why they think they're a great fit</p>
                 <p className="text-sm dash-text leading-relaxed">{current.message}</p>
               </div>
             )}
 
             {/* Audience info */}
             <div className="border-t dash-border pt-4">
-              <p className="uppercase tracking-wide text-[10px] mb-3 dash-text-muted">Audience</p>
+              <p className="uppercase tracking-wide text-nx-10 mb-3 dash-text-muted">Audience</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <StatCell label="Age Range" value={ageRangeStr} />
                 <StatCell
@@ -191,7 +191,7 @@ export default async function ApplicationReviewPage({ params }: Props) {
 
             {/* General stats */}
             <div className="border-t dash-border pt-4">
-              <p className="uppercase tracking-wide text-[10px] mb-3 dash-text-muted">General</p>
+              <p className="uppercase tracking-wide text-nx-10 mb-3 dash-text-muted">General</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <StatCell
                   label="Platforms"
@@ -215,7 +215,7 @@ export default async function ApplicationReviewPage({ params }: Props) {
             {/* Twitch stats */}
             {creator.twitch_username && (
               <div className="border-t dash-border pt-4">
-                <p className="uppercase tracking-wide text-[10px] mb-3 text-[#9b6fff]">Twitch</p>
+                <p className="uppercase tracking-wide text-nx-10 mb-3 text-[#9b6fff]">Twitch</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <StatCell label="Username" value={`@${creator.twitch_username}`} />
                   <StatCell
@@ -260,7 +260,7 @@ export default async function ApplicationReviewPage({ params }: Props) {
             {/* YouTube stats */}
             {creator.youtube_channel_id && (
               <div className="border-t dash-border pt-4">
-                <p className="uppercase tracking-wide text-[10px] mb-3 text-[#ff5555]">YouTube</p>
+                <p className="uppercase tracking-wide text-nx-10 mb-3 text-[#ff5555]">YouTube</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <StatCell
                     label="Channel"

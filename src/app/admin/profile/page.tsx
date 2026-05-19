@@ -36,7 +36,7 @@ export default async function AdminProfilePage() {
     <div className="flex-1 overflow-auto p-6 sm:p-8">
       <div className="mx-auto max-w-7xl space-y-6">
         <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
+          <p className="text-nx-11 uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
           <h1 className="mt-1 font-headline text-2xl font-semibold text-[#e8f4ff]">Admin Profile</h1>
           <p className="mt-1 text-sm text-[#c4cad6]">Your account and platform overview.</p>
         </div>

@@ -167,7 +167,7 @@ export default function Step3Creators({ draft, setDraft, onNext, onBack, availab
                       </p>
                     </div>
                     {c.creator_size && (
-                      <span className="text-[11px] px-2 py-0.5 rounded bg-white/5 dash-text-muted shrink-0 ml-3">
+                      <span className="text-nx-11 px-2 py-0.5 rounded bg-white/5 dash-text-muted shrink-0 ml-3">
                         {SIZE_LABEL[c.creator_size] ?? c.creator_size}
                       </span>
                     )}

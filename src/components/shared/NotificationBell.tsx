@@ -205,7 +205,7 @@ export default function NotificationBell() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
         </svg>
         {displayedUnread > 0 && (
-          <span className="absolute top-1 right-1 min-w-[18px] h-[18px] rounded-full bg-[#00c8ff] text-[10px] font-bold text-black flex items-center justify-center px-1 pointer-events-none">
+          <span className="absolute top-1 right-1 min-w-[18px] h-[18px] rounded-full bg-[#00c8ff] text-nx-10 font-bold text-black flex items-center justify-center px-1 pointer-events-none">
             {displayedUnread > 99 ? '99+' : displayedUnread}
           </span>
         )}
@@ -346,7 +346,7 @@ export default function NotificationBell() {
                 <>
                   {todayItems.length > 0 && (
                     <div>
-                      <p className="px-3 pt-2 pb-1 text-[10px] font-semibold dash-text-muted uppercase tracking-wider">Today</p>
+                      <p className="px-3 pt-2 pb-1 text-nx-10 font-semibold dash-text-muted uppercase tracking-wider">Today</p>
                       <NotificationList
                         items={todayItems}
                         onDelete={handleDelete}
@@ -356,7 +356,7 @@ export default function NotificationBell() {
                   )}
                   {earlierItems.length > 0 && (
                     <div>
-                      <p className="px-3 pt-2 pb-1 text-[10px] font-semibold dash-text-muted uppercase tracking-wider">Earlier</p>
+                      <p className="px-3 pt-2 pb-1 text-nx-10 font-semibold dash-text-muted uppercase tracking-wider">Earlier</p>
                       <NotificationList
                         items={earlierItems}
                         onDelete={handleDelete}
@@ -403,7 +403,7 @@ function NotificationList({
                     <p className="text-sm dash-text-bright font-medium mt-0.5">{n.title}</p>
                     <p className="text-xs dash-text-muted mt-0.5 line-clamp-2">{n.message}</p>
                   </div>
-                  <span className="text-[10px] dash-text-muted shrink-0 mt-0.5">
+                  <span className="text-nx-10 dash-text-muted shrink-0 mt-0.5">
                     {formatRelativeTime(n.createdAt)}
                   </span>
                 </div>

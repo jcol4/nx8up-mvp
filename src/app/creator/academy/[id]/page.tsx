@@ -1,24 +1,16 @@
 /**
  * Academy lesson detail page (`/creator/academy/[id]`).
  *
- * Server component that renders an individual academy lesson, including:
- *  - An embedded YouTube (or other) video via an `<iframe>`.
- *  - A numbered step-by-step guide with optional tip bullets.
- *  - A dot-row progress indicator in the panel header, where each dot is a
- *    clickable link to that lesson; the current lesson's dot is highlighted.
- *
- * Calls `notFound()` when the `id` param does not match any lesson in
- * `LESSONS`. No XP is awarded here — that requires a separate "complete"
- * action (not yet implemented on this page).
- *
- * `params` is a `Promise<{ id: string }>` as required by the Next.js 15
- * App Router dynamic params API.
+ * Server component: embedded video, numbered steps, module jump links.
+ * Uses `CreatorShell` (sidebar + HUD header) to match the rest of the creator app.
  */
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getLesson, LESSONS } from '@/lib/academy-lessons'
-import CreatorTopBar from '@/components/creator/CreatorTopBar'
-import Panel from '@/components/shared/Panel'
+import CreatorShell from '@/components/creator/CreatorShell'
+
+const CARD =
+  'dash-panel dash-panel--nx-top rounded-xl border border-white/16 border-t-2 border-t-[#bffcff] bg-black/20 shadow-[0_18px_48px_rgba(0,0,0,0.35)]'
 
 type Props = {
   params: Promise<{ id: string }>
@@ -33,72 +25,99 @@ export default async function AcademyLessonPage({ params }: Props) {
   const playerVideoUrl =
     lesson.id === 'media-kit' ? 'https://www.youtube.com/embed/K5qh58o5A-M' : lesson.videoUrl
 
+  const prev = currentIndex > 0 ? LESSONS[currentIndex - 1] : null
+  const next = currentIndex < LESSONS.length - 1 ? LESSONS[currentIndex + 1] : null
+
   return (
-    <>
-      <CreatorTopBar
-        rightContent={
+    <CreatorShell>
+      <main className="mx-auto max-w-4xl px-4 pb-12 pt-6 sm:px-6 sm:pt-8 md:px-8">
+        <nav className="mb-3 text-nx-11 font-medium uppercase tracking-[0.18em] text-white/90" aria-label="Breadcrumb">
           <Link
-            href="/creator"
-            className="text-sm cr-text-muted hover:text-[#c8dff0] transition-colors"
+            href="/creator/academy"
+            className="text-[#99f7ff] transition-colors hover:text-[#bffcff]"
           >
-            ← Dashboard
+            ← Academy
           </Link>
-        }
-      />
+          <span className="mx-2 text-white/35" aria-hidden>
+            /
+          </span>
+          <span className="text-white">Lesson</span>
+        </nav>
 
-      <main className="max-w-3xl mx-auto p-6 sm:p-8">
-        <Panel
-          variant="creator"
-          as="div"
-          title={lesson.title}
-          titleLevel={1}
-          headerRight={
-            <div className="flex gap-1.5" aria-label="Lesson progress">
-              {LESSONS.map((_, i) => (
-                <Link
-                  key={LESSONS[i].id}
-                  href={`/creator/academy/${LESSONS[i].id}`}
-                  className={`block w-2.5 h-2.5 rounded-full transition-colors ${
-                    i === currentIndex ? 'bg-[#00c8ff] ring-2 ring-[#00c8ff]/50' : 'bg-white/20 hover:bg-white/40'
-                  }`}
-                  aria-current={i === currentIndex ? 'true' : undefined}
-                />
-              ))}
+        <article className={`${CARD} overflow-hidden`} aria-label="Lesson overview and video">
+          <header className="border-b border-white/10 bg-black/30 p-4 sm:p-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
+              <div className="min-w-0 flex-1">
+                <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-white">
+                  Lesson {currentIndex + 1} of {LESSONS.length}
+                </p>
+                <h1 className="mt-1 font-headline text-xl font-semibold leading-tight text-[#e8f4ff] sm:text-2xl">
+                  {lesson.title}
+                </h1>
+                <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                  <span className="rounded border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-2 py-0.5 text-nx-10 font-medium text-[#99f7ff]">
+                    {lesson.category}
+                  </span>
+                  <span className="rounded border border-white/25 bg-white/[0.08] px-2 py-0.5 text-nx-10 font-medium text-white">
+                    {lesson.duration}
+                  </span>
+                </div>
+              </div>
+              <div className="shrink-0 rounded-lg border border-white/10 bg-black/40 px-3 py-2.5">
+                <p className="mb-2 text-center font-headline text-nx-9 uppercase tracking-[0.16em] text-white lg:text-right">
+                  Jump to module
+                </p>
+                <div className="flex flex-wrap justify-center gap-1.5 lg:justify-end" aria-label="Lesson progress">
+                  {LESSONS.map((l, i) => (
+                    <Link
+                      key={l.id}
+                      href={`/creator/academy/${l.id}`}
+                      title={l.title}
+                      className={`flex h-8 min-w-8 items-center justify-center rounded-md border text-nx-11 font-semibold transition-all ${
+                        i === currentIndex
+                          ? 'border-[#99f7ff]/50 bg-[#99f7ff]/15 text-[#bffcff] shadow-[0_0_16px_-4px_rgba(153,247,255,0.45)]'
+                          : 'border-white/15 bg-white/[0.06] text-white hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/10 hover:text-white'
+                      }`}
+                      aria-current={i === currentIndex ? 'page' : undefined}
+                    >
+                      {i + 1}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </div>
-          }
-        >
-          <p className="text-xs cr-accent mb-4">+ {lesson.category} · {lesson.xpReward} XP</p>
+          </header>
 
-          {/* Video */}
-          <div className="rounded-lg cr-border border cr-bg-inner overflow-hidden mb-8 aspect-video">
+          <div className="aspect-video w-full bg-black">
             <iframe
               src={playerVideoUrl}
               title={lesson.title}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              className="w-full h-full"
+              className="h-full w-full border-0"
             />
           </div>
+        </article>
 
-          {/* Step-by-step */}
-          <h2 className="text-sm font-semibold cr-text-bright uppercase tracking-wider mb-4">
-            Steps
-          </h2>
-          <ol className="space-y-6">
+        <section className={`${CARD} mt-6 p-5 sm:p-6`}>
+          <h2 className="font-headline text-nx-11 uppercase tracking-[0.2em] text-white">Steps</h2>
+          <ol className="mt-5 space-y-6">
             {lesson.steps.map((step, i) => (
               <li key={i} className="flex gap-4">
-                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#00c8ff]/20 border border-[#00c8ff]/50 flex items-center justify-center text-sm font-bold cr-accent">
+                <span
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#99f7ff]/40 bg-[#99f7ff]/10 font-headline text-sm font-bold text-[#bffcff] shadow-[0_0_12px_-6px_rgba(153,247,255,0.5)]"
+                  aria-hidden
+                >
                   {i + 1}
                 </span>
-                <div>
-                  <h3 className="text-sm font-semibold cr-text-bright mb-1">{step.title}</h3>
-                  <p className="text-sm cr-text-muted">{step.description}</p>
+                <div className="min-w-0 pt-0.5">
+                  <h3 className="font-headline text-sm font-semibold text-[#e8f4ff]">{step.title}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-white/90">{step.description}</p>
                   {step.tips && step.tips.length > 0 && (
-                    <ul className="mt-2 space-y-1">
+                    <ul className="mt-2 space-y-1.5 border-l border-[#99f7ff]/20 pl-3">
                       {step.tips.map((tip, j) => (
-                        <li key={j} className="text-xs cr-text-muted flex items-start gap-2">
-                          <span className="cr-accent mt-0.5">•</span>
-                          <span>{tip}</span>
+                        <li key={j} className="text-xs leading-relaxed text-white/85">
+                          {tip}
                         </li>
                       ))}
                     </ul>
@@ -107,17 +126,43 @@ export default async function AcademyLessonPage({ params }: Props) {
               </li>
             ))}
           </ol>
+        </section>
 
-          <div className="mt-8 pt-6 border-t cr-border">
+        <footer className="mt-8 flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap gap-2">
+            {prev ? (
+              <Link
+                href={`/creator/academy/${prev.id}`}
+                className="inline-flex items-center justify-center rounded-lg border border-white/12 bg-white/[0.04] px-4 py-2.5 text-xs font-semibold uppercase tracking-widest text-[#e8f4ff] transition hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/10 hover:text-[#bffcff]"
+              >
+                ← Previous
+              </Link>
+            ) : null}
+            {next ? (
+              <Link
+                href={`/creator/academy/${next.id}`}
+                className="inline-flex items-center justify-center rounded-lg border border-[#99f7ff]/35 bg-[#99f7ff]/12 px-4 py-2.5 text-xs font-semibold uppercase tracking-widest text-[#bffcff] transition hover:bg-[#99f7ff]/20"
+              >
+                Next →
+              </Link>
+            ) : null}
+          </div>
+          <div className="flex flex-wrap gap-3 sm:justify-end">
+            <Link
+              href="/creator/academy"
+              className="inline-flex items-center justify-center rounded-lg border border-white/12 px-4 py-2.5 text-xs font-semibold uppercase tracking-widest text-[#99f7ff] transition hover:border-[#99f7ff]/40 hover:bg-[#99f7ff]/10"
+            >
+              All lessons
+            </Link>
             <Link
               href="/creator"
-              className="inline-block py-2 px-5 rounded-lg bg-[#00c8ff] text-black text-sm font-semibold hover:opacity-90 transition-opacity"
+              className="inline-flex items-center justify-center rounded-lg bg-[#99f7ff] px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-[#0f172a] transition hover:brightness-110"
             >
-              Back to Dashboard
+              Dashboard
             </Link>
           </div>
-        </Panel>
+        </footer>
       </main>
-    </>
+    </CreatorShell>
   )
 }

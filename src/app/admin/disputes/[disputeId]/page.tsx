@@ -87,7 +87,7 @@ export default async function DisputeDetailPage({
       <div className="mx-auto max-w-6xl space-y-6">
         <Link
           href="/admin/disputes"
-          className="inline-flex items-center gap-1.5 rounded-md border border-white/12 bg-black/20 px-2.5 py-1 text-[11px] text-[#a9abb5] transition-colors hover:border-[#99f7ff]/30 hover:text-[#99f7ff]"
+          className="inline-flex items-center gap-1.5 rounded-md border border-white/12 bg-black/20 px-2.5 py-1 text-nx-11 text-[#a9abb5] transition-colors hover:border-[#99f7ff]/30 hover:text-[#99f7ff]"
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

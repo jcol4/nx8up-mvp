@@ -10,6 +10,7 @@ import {
   ChevronRight,
   GraduationCap,
   Handshake,
+  Info,
   LayoutDashboard,
   Megaphone,
   Play,
@@ -24,7 +25,6 @@ import RoleLayoutShell from '@/components/nx-shell/RoleLayoutShell'
 import { type SidebarNavGroup, type SidebarNavItem } from '@/components/nx-shell/RoleSidebar'
 import NxHudHeader from '@/components/nx-shell/NxHudHeader'
 import {
-  addCreatorXp,
   addCreatorDayTask,
   deleteCreatorDayTask,
   toggleCreatorDayTask,
@@ -208,6 +208,7 @@ export default function CreatorCommandCenter({
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
   const [editingNoteText, setEditingNoteText] = useState('')
   const [featuredLesson] = useState(() => LESSONS[Math.floor(Math.random() * LESSONS.length)])
+  const displayedMissions = missions
 
   const accepted = applications.filter((a) => a.status === 'accepted').slice(0, 3)
   const open = openCampaigns.slice(0, 3)
@@ -324,12 +325,14 @@ export default function CreatorCommandCenter({
     {
       label: 'Twitch',
       value: creatorStats.twitchUsername ? `@${creatorStats.twitchUsername}` : 'Not linked',
-      valueClassName: creatorStats.twitchUsername ? 'font-medium text-[#7b4fff]' : 'italic text-slate-500',
+      valueClassName: creatorStats.twitchUsername ? 'font-medium text-[#7b4fff]' : 'italic text-white/75',
+      valueHref: creatorStats.twitchUsername ? undefined : '/creator/profile',
     },
     {
       label: 'YouTube',
       value: creatorStats.youtubeChannelName ? `@${creatorStats.youtubeChannelName}` : 'Not linked',
-      valueClassName: creatorStats.youtubeChannelName ? 'font-medium text-[#ff4444]' : 'italic text-slate-500',
+      valueClassName: creatorStats.youtubeChannelName ? 'font-medium text-[#ff4444]' : 'italic text-white/75',
+      valueHref: creatorStats.youtubeChannelName ? undefined : '/creator/profile',
     },
   ]
 
@@ -495,47 +498,58 @@ export default function CreatorCommandCenter({
                   <div className="mb-5 flex items-center justify-between">
                     <div className="mr-4 flex min-w-0 flex-1 items-center gap-3">
                       <h2 className="shrink-0 font-headline text-base tracking-[0.24em] text-[#99f7ff] font-semibold">TODAY&apos;S MISSIONS</h2>
+                      <div className="group relative shrink-0">
+                        <button
+                          type="button"
+                          aria-label="About today's missions"
+                          className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#99f7ff]/30 text-[#99f7ff]/80 transition hover:border-[#99f7ff]/55 hover:text-[#99f7ff] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#99f7ff]/50"
+                        >
+                          <Info className="h-3.5 w-3.5" />
+                        </button>
+                        <div className="pointer-events-none absolute left-1/2 top-[calc(100%+8px)] z-30 w-64 -translate-x-1/2 rounded-md border border-[#99f7ff]/20 bg-[#0b1120]/95 px-3 py-2 text-nx-10 leading-relaxed text-white/90 opacity-0 shadow-[0_8px_24px_rgba(0,0,0,0.45)] transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                          Missions are prioritized tasks designed to guide setup, profile completion, and weekly growth. Completing missions awards XP and helps unlock higher creator ranks.
+                        </div>
+                      </div>
                       <div className="h-px flex-1 bg-gradient-to-r from-[#99f7ff]/55 to-transparent" />
                     </div>
-                    <span className="text-[10px] text-[#a9abb5]">{missions.filter((m) => !m.completed).length} ACTIVE</span>
+                    <span className="text-nx-10 font-medium uppercase tracking-widest text-white/90">{displayedMissions.filter((m) => !m.completed).length} ACTIVE</span>
                   </div>
                   <div className="space-y-4">
-                    {missions.length === 0 ? (
-                      <p className="text-[10px] text-slate-500 italic">No missions assigned yet.</p>
-                    ) : (
-                      missions.map((mission) => (
+                    {displayedMissions.map((mission) => (
                         <div key={mission.id} className="space-y-2 transition-transform duration-200 hover:translate-x-1">
-                          <div className="flex items-center justify-between gap-3 text-[10px]">
+                          <div className="flex items-center justify-between gap-3 text-nx-10">
                             <div className="min-w-0">
-                              <p className={`text-[#c8cad4] ${mission.completed ? 'line-through text-slate-500' : ''}`}>{mission.title}</p>
+                              <p className={`font-medium text-white/95 ${mission.completed ? 'line-through text-white/45' : ''}`}>{mission.title}</p>
                               <p className="text-[#99f7ff]">{mission.xp} XP</p>
                             </div>
                             {mission.completed ? (
-                              <span className="shrink-0 rounded border border-[#22c55e]/30 bg-[#22c55e]/10 px-2 py-1 text-[9px] uppercase tracking-widest text-[#22c55e]">Done</span>
+                              <span className="shrink-0 rounded border border-[#22c55e]/30 bg-[#22c55e]/10 px-2 py-1 text-nx-9 uppercase tracking-widest text-[#22c55e]">Done</span>
                             ) : (
-                              <span className="shrink-0 rounded border border-[#99f7ff]/20 px-2 py-1 text-[9px] uppercase tracking-widest text-slate-500">In Progress</span>
+                              <span className="shrink-0 rounded border border-white/25 bg-white/[0.04] px-2 py-1 text-nx-9 font-medium uppercase tracking-widest text-white/90">In Progress</span>
                             )}
                           </div>
                           <div className="h-1 rounded-full bg-slate-800 overflow-hidden">
                             <div className="h-full bg-[#a855f7]" style={{ width: mission.completed ? '100%' : '0%' }} />
                           </div>
                         </div>
-                      ))
-                    )}
+                      ))}
                   </div>
                   <div className="mt-6 border-t border-white/10 pt-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-[10px] text-slate-400">LEVEL {level}</p>
-                        <p className="font-headline text-sm font-bold tracking-widest">{rankName.toUpperCase()}</p>
-                        <p className="mt-1 text-[10px] text-slate-500">{xp.toLocaleString()} / {xpForNext.toLocaleString()} XP</p>
+                        <p className="text-nx-10 font-medium uppercase tracking-widest text-white/90">LEVEL {level}</p>
+                        <p className="font-headline text-sm font-bold tracking-widest text-white">{rankName.toUpperCase()}</p>
+                        <p className="mt-1 text-nx-10 font-medium text-white/90">{xp.toLocaleString()} / {xpForNext.toLocaleString()} XP</p>
                       </div>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#99f7ff]/30 text-[10px] font-bold text-[#99f7ff]">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#99f7ff]/30 text-nx-10 font-bold text-[#99f7ff]">
                         {progress}%
                       </div>
                     </div>
                     <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-800">
-                      <div className="h-full bg-gradient-to-r from-[#86ef4a] to-[#22c55e]" style={{ width: `${progress}%` }} />
+                      <div
+                        className="h-full bg-gradient-to-r from-[#86ef4a] to-[#22c55e] transition-[width] duration-700 ease-out motion-reduce:transition-none"
+                        style={{ width: `${progress}%` }}
+                      />
                     </div>
                   </div>
                 </section>
@@ -544,6 +558,18 @@ export default function CreatorCommandCenter({
                   <div className="mb-5 flex items-center justify-between">
                     <div className="mr-4 flex min-w-0 flex-1 items-center gap-3">
                       <h2 className="shrink-0 font-headline text-base tracking-[0.24em] text-[#99f7ff] font-semibold">CAMPAIGNS</h2>
+                      <div className="group relative shrink-0">
+                        <button
+                          type="button"
+                          aria-label="About campaigns"
+                          className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#99f7ff]/30 text-[#99f7ff]/80 transition hover:border-[#99f7ff]/55 hover:text-[#99f7ff] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#99f7ff]/50"
+                        >
+                          <Info className="h-3.5 w-3.5" />
+                        </button>
+                        <div className="pointer-events-none absolute left-1/2 top-[calc(100%+8px)] z-30 w-64 -translate-x-1/2 rounded-md border border-[#99f7ff]/20 bg-[#0b1120]/95 px-3 py-2 text-nx-10 leading-relaxed text-white/90 opacity-0 shadow-[0_8px_24px_rgba(0,0,0,0.45)] transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                          Track your campaign funnel in one place: discover new campaigns, monitor accepted and pending applications, and follow payout-related items through completion.
+                        </div>
+                      </div>
                       <div className="h-px flex-1 bg-gradient-to-r from-[#99f7ff]/45 to-transparent" />
                     </div>
                   </div>
@@ -552,9 +578,9 @@ export default function CreatorCommandCenter({
                     <button
                       type="button"
                       onClick={() => setCampaignTab('open')}
-                      className={`h-9 rounded-lg px-3 text-[10px] uppercase tracking-widest transition ${campaignTab === 'open'
+                      className={`h-9 rounded-lg px-3 text-nx-10 uppercase tracking-widest transition ${campaignTab === 'open'
                         ? 'border border-[#99f7ff]/40 bg-[#99f7ff]/10 text-[#99f7ff]'
-                        : 'border border-white/10 text-slate-500 hover:text-slate-300'
+                        : 'border border-white/10 text-white/90 hover:border-white/20 hover:text-white'
                         }`}
                     >
                       Open
@@ -562,9 +588,9 @@ export default function CreatorCommandCenter({
                     <button
                       type="button"
                       onClick={() => setCampaignTab('active')}
-                      className={`h-9 rounded-lg px-4 text-[10px] font-bold uppercase tracking-widest transition ${campaignTab === 'active'
+                      className={`h-9 rounded-lg px-4 text-nx-10 font-bold uppercase tracking-widest transition ${campaignTab === 'active'
                         ? 'border border-[#99f7ff]/40 bg-[#99f7ff]/10 text-[#99f7ff]'
-                        : 'border border-white/10 text-slate-500 hover:text-slate-300'
+                        : 'border border-white/10 text-white/90 hover:border-white/20 hover:text-white'
                         }`}
                     >
                       Active
@@ -572,9 +598,9 @@ export default function CreatorCommandCenter({
                     <button
                       type="button"
                       onClick={() => setCampaignTab('pending')}
-                      className={`h-9 rounded-lg px-3 text-[10px] uppercase tracking-widest transition ${campaignTab === 'pending'
+                      className={`h-9 rounded-lg px-3 text-nx-10 uppercase tracking-widest transition ${campaignTab === 'pending'
                         ? 'border border-[#99f7ff]/40 bg-[#99f7ff]/10 text-[#99f7ff]'
-                        : 'border border-white/10 text-slate-500 hover:text-slate-300'
+                        : 'border border-white/10 text-white/90 hover:border-white/20 hover:text-white'
                         }`}
                     >
                       Pending
@@ -582,20 +608,20 @@ export default function CreatorCommandCenter({
                     <button
                       type="button"
                       onClick={() => setCampaignTab('payout')}
-                      className={`h-9 rounded-lg px-3 text-[10px] uppercase tracking-widest transition ${campaignTab === 'payout'
+                      className={`h-9 rounded-lg px-3 text-nx-10 uppercase tracking-widest transition ${campaignTab === 'payout'
                         ? 'border border-[#99f7ff]/40 bg-[#99f7ff]/10 text-[#99f7ff]'
-                        : 'border border-white/10 text-slate-500 hover:text-slate-300'
+                        : 'border border-white/10 text-white/90 hover:border-white/20 hover:text-white'
                         }`}
                     >
                       Payout due
                     </button>
                   </div>
-                  <p className="mb-4 text-xs text-[#a9abb5]">{tabDescription}</p>
+                  <p className="mb-4 text-xs font-medium text-white/90">{tabDescription}</p>
 
                   {displayedCampaigns.length === 0 ? (
                     <div className="flex min-h-56 items-center justify-center rounded-lg border border-white/10 bg-black/20 text-center">
                       <div className="space-y-2">
-                        <p className="text-base font-medium text-slate-400">No {tabLabel} yet.</p>
+                        <p className="text-base font-medium text-white/90">No {tabLabel} yet.</p>
                         <Link href="/creator/campaigns" className="text-sm font-medium text-cyan-300 transition hover:text-cyan-200">
                           View available campaigns
                         </Link>
@@ -611,8 +637,8 @@ export default function CreatorCommandCenter({
                         >
                           <div className="flex items-center justify-between gap-3">
                             <div>
-                              <p className="text-sm font-medium text-slate-100">{app.title}</p>
-                              <p className="text-xs text-slate-400">{app.sponsorName}</p>
+                              <p className="text-sm font-semibold tracking-tight text-[#99f7ff]">{app.title}</p>
+                              <p className="mt-0.5 text-xs font-medium text-white">{app.sponsorName}</p>
                             </div>
                             <div className="text-right">
                               <p className="text-sm font-semibold text-[#99f7ff]">
@@ -620,7 +646,7 @@ export default function CreatorCommandCenter({
                                   ? `$${app.budget.toLocaleString()}`
                                   : '—'}
                               </p>
-                              <p className="text-[10px] text-slate-400">
+                              <p className="mt-0.5 text-nx-10 font-medium uppercase tracking-wide text-white">
                                 {app.endDate
                                   ? new Date(app.endDate).toLocaleDateString()
                                   : 'No due date'}
@@ -635,12 +661,12 @@ export default function CreatorCommandCenter({
                   <Link
                     href={
                       campaignTab === 'active'
-                        ? '/creator/campaigns/active'
+                        ? '/creator/campaigns?tab=active'
                         : campaignTab === 'pending'
                           ? '/creator/campaigns/pending'
                           : '/creator/campaigns'
                     }
-                    className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-xl border border-[#99f7ff]/20 bg-transparent text-sm font-medium text-slate-500 transition hover:bg-[#99f7ff]/5 hover:text-slate-300"
+                    className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-xl border border-white/25 bg-white/[0.03] text-sm font-semibold text-white/90 transition hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/10 hover:text-white"
                   >
                     View all campaigns
                   </Link>
@@ -652,7 +678,7 @@ export default function CreatorCommandCenter({
                 <div className={`${calendarView === 'month' ? 'mb-6' : 'mb-8'} flex flex-col items-start justify-between gap-4 md:flex-row md:items-center`}>
                   <div className="w-full md:flex-1">
                     <div className="mb-1 flex w-full items-center gap-3">
-                      <h2 className="shrink-0 font-headline text-2xl font-bold tracking-tight text-[#99f7ff]">CALENDAR</h2>
+                      <h2 className="shrink-0 font-headline text-2xl font-bold tracking-tight text-[#99f7ff]">EVENT CALENDAR</h2>
                       <div className="h-px flex-1 bg-gradient-to-r from-[#99f7ff]/40 to-transparent" />
                     </div>
                   </div>
@@ -663,14 +689,14 @@ export default function CreatorCommandCenter({
                         setCalendarView('month')
                         setViewDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1))
                       }}
-                      className={`rounded border px-3 py-1 text-[10px] tracking-widest transition-colors ${calendarView === 'month' ? 'border-[#99f7ff]/40 bg-[#99f7ff]/10 text-[#99f7ff]' : 'border-white/10 text-slate-400 hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/10 hover:text-[#99f7ff]'}`}
+                      className={`rounded border px-3 py-1 text-nx-10 tracking-widest transition-colors ${calendarView === 'month' ? 'border-[#99f7ff]/40 bg-[#99f7ff]/10 text-[#99f7ff]' : 'border-white/10 text-white hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/10 hover:text-[#99f7ff]'}`}
                     >
                       MONTH
                     </button>
                     <button
                       type="button"
                       onClick={() => setCalendarView('week')}
-                      className={`rounded border px-3 py-1 text-[10px] tracking-widest transition-colors ${calendarView === 'week' ? 'border-[#99f7ff]/40 bg-[#99f7ff]/10 text-[#99f7ff]' : 'border-white/10 text-slate-400 hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/10 hover:text-[#99f7ff]'}`}
+                      className={`rounded border px-3 py-1 text-nx-10 tracking-widest transition-colors ${calendarView === 'week' ? 'border-[#99f7ff]/40 bg-[#99f7ff]/10 text-[#99f7ff]' : 'border-white/10 text-white hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/10 hover:text-[#99f7ff]'}`}
                     >
                       WEEK
                     </button>
@@ -682,7 +708,7 @@ export default function CreatorCommandCenter({
                     >
                       <ChevronLeft className="h-3.5 w-3.5" />
                     </button>
-                    <span className="mx-1 text-[10px] font-bold tracking-widest">
+                    <span className="mx-1 text-nx-10 font-bold tracking-widest">
                       {calendarView === 'month' ? monthLabel : weekLabel}
                     </span>
                     <button
@@ -715,16 +741,16 @@ export default function CreatorCommandCenter({
                               ? `${selectedDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}_${String(selectedDate.getDate()).padStart(2, '0')}_${selectedDate.getFullYear()}`
                               : `DAY_${String(selectedDate.getDate()).padStart(2, '0')}`}
                           </p>
-                          <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-[#a9abb5]">DAY_DETAIL_LOG</p>
+                          <p className="mt-1 text-nx-10 uppercase tracking-[0.2em] text-white">DAY_DETAIL_LOG</p>
                         </div>
                         <Calendar className="h-4 w-4 text-[#99f7ff]" />
                       </div>
                       <div className="mt-3 flex flex-wrap gap-2">
-                        <span className="rounded-sm border border-[#d873ff]/40 bg-[#d873ff]/10 px-2 py-1 text-[9px] uppercase tracking-widest text-[#d873ff]">
+                        <span className="rounded-sm border border-[#d873ff]/40 bg-[#d873ff]/10 px-2 py-1 text-nx-9 uppercase tracking-widest text-[#d873ff]">
                           {selectedDayNotes.length} Notes
                         </span>
                         {selectedDayEvents > 0 && (
-                          <span className="rounded-sm border border-[#99f7ff]/40 bg-[#99f7ff]/10 px-2 py-1 text-[9px] uppercase tracking-widest text-[#99f7ff]">
+                          <span className="rounded-sm border border-[#99f7ff]/40 bg-[#99f7ff]/10 px-2 py-1 text-nx-9 uppercase tracking-widest text-[#99f7ff]">
                             {selectedDayEvents} Campaign Event{selectedDayEvents !== 1 ? 's' : ''}
                           </span>
                         )}
@@ -732,7 +758,7 @@ export default function CreatorCommandCenter({
                     </div>
 
                     <div className="rounded-lg border border-white/10 bg-black/25 p-3">
-                      <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#a9abb5]">Add Task</p>
+                      <p className="mb-2 text-nx-10 font-medium uppercase tracking-[0.18em] text-white">Add Task</p>
                       <textarea
                         value={noteDraft}
                         onChange={(event) => setNoteDraft(event.target.value)}
@@ -743,13 +769,13 @@ export default function CreatorCommandCenter({
                           }
                         }}
                         placeholder="What needs to get done?"
-                        className="min-h-20 w-full resize-none rounded-lg border border-white/10 bg-slate-950/70 px-3 py-3 text-sm text-slate-100 outline-none transition focus:border-[#99f7ff]/35 focus:ring-2 focus:ring-[#99f7ff]/15"
+                        className="min-h-20 w-full resize-none rounded-lg border border-white/10 bg-slate-950/70 px-3 py-3 text-sm text-white outline-none transition placeholder:text-white/55 focus:border-[#99f7ff]/35 focus:ring-2 focus:ring-[#99f7ff]/15"
                       />
                       <div className="mt-2 flex justify-end">
                         <button
                           type="button"
                           onClick={addNoteForSelectedDay}
-                          className="inline-flex h-8 items-center rounded-md border border-[#99f7ff]/35 bg-[#99f7ff]/15 px-3 text-[10px] uppercase tracking-widest text-[#99f7ff] transition hover:bg-[#99f7ff]/25"
+                          className="inline-flex h-8 items-center rounded-md border border-[#99f7ff]/35 bg-[#99f7ff]/15 px-3 text-nx-10 uppercase tracking-widest text-[#99f7ff] transition hover:bg-[#99f7ff]/25"
                         >
                           <PlusCircle className="mr-1.5 h-3.5 w-3.5" />
                           Add Note
@@ -761,7 +787,7 @@ export default function CreatorCommandCenter({
                       {getEventsForDate(selectedDate).map((event) => (
                         <div
                           key={event.label}
-                          className={`rounded-lg border-l-2 p-3 text-[11px] font-semibold uppercase tracking-widest ${
+                          className={`rounded-lg border-l-2 p-3 text-nx-11 font-semibold uppercase tracking-widest ${
                             event.past
                               ? 'border-white/15 bg-white/[0.03] text-slate-600 line-through'
                               : event.color === 'primary'
@@ -776,7 +802,7 @@ export default function CreatorCommandCenter({
                         selectedDayNotes.map((note, index) => (
                           <div key={note.id} className="group rounded-lg border border-white/10 bg-white/[0.03] p-3">
                             <div className="mb-2 flex items-center justify-between gap-2">
-                              <p className="text-[9px] uppercase tracking-[0.16em] text-[#a9abb5]">{`TASK_${String(index + 1).padStart(2, '0')}`}</p>
+                              <p className="text-nx-9 uppercase tracking-[0.16em] text-[#a9abb5]">{`TASK_${String(index + 1).padStart(2, '0')}`}</p>
                               <button
                                 type="button"
                                 onClick={() => removeNoteForSelectedDay(note.id)}
@@ -821,14 +847,14 @@ export default function CreatorCommandCenter({
                                       <button
                                         type="button"
                                         onClick={cancelEditNote}
-                                        className="rounded border border-white/10 px-2 py-1 text-[10px] uppercase tracking-widest text-slate-400 hover:bg-white/5"
+                                        className="rounded border border-white/10 px-2 py-1 text-nx-10 uppercase tracking-widest text-slate-400 hover:bg-white/5"
                                       >
                                         Cancel
                                       </button>
                                       <button
                                         type="button"
                                         onClick={saveEditNote}
-                                        className="rounded border border-[#99f7ff]/35 bg-[#99f7ff]/15 px-2 py-1 text-[10px] uppercase tracking-widest text-[#99f7ff] hover:bg-[#99f7ff]/25"
+                                        className="rounded border border-[#99f7ff]/35 bg-[#99f7ff]/15 px-2 py-1 text-nx-10 uppercase tracking-widest text-[#99f7ff] hover:bg-[#99f7ff]/25"
                                       >
                                         Save
                                       </button>
@@ -862,7 +888,7 @@ export default function CreatorCommandCenter({
                 <div className="mb-5 flex items-center gap-3">
                   <h2 className="shrink-0 font-headline text-sm tracking-[0.22em] text-[#99f7ff] font-semibold">ACADEMY</h2>
                   <div className="h-px flex-1 bg-gradient-to-r from-[#99f7ff]/45 to-transparent" />
-                  <Link href="/creator/academy" className="shrink-0 text-[10px] text-[#a9abb5] hover:text-[#99f7ff]">View all</Link>
+                  <Link href="/creator/academy" className="shrink-0 text-nx-10 text-[#a9abb5] hover:text-[#99f7ff]">View all</Link>
                 </div>
                 <div className="relative overflow-hidden rounded-lg border border-white/10 bg-slate-950/40">
                   <div className="relative mx-auto w-full max-w-[680px] aspect-[16/9]">
@@ -882,14 +908,14 @@ export default function CreatorCommandCenter({
                 </div>
                 <div className="mt-4 space-y-1">
                   <p className="font-headline text-lg font-bold">{featuredLesson.title}</p>
-                  <p className="text-[10px] text-slate-400">{featuredLesson.category}</p>
-                  <p className="text-[10px] text-slate-400">{featuredLesson.duration}</p>
+                  <p className="text-nx-10 text-slate-400">{featuredLesson.category}</p>
+                  <p className="text-nx-10 text-slate-400">{featuredLesson.duration}</p>
                 </div>
                 <Link
                   href={`/creator/academy/${featuredLesson.id}`}
-                  className="mt-4 inline-block h-12 w-full rounded-lg bg-[#99f7ff] text-black text-[14px] font-bold tracking-tight hover:brightness-110 transition text-center leading-[3rem]"
+                  className="mt-4 inline-block h-12 w-full rounded-lg bg-[#99f7ff] text-black text-nx-14 font-bold tracking-tight hover:brightness-110 transition text-center leading-[3rem]"
                 >
-                  Begin Module
+                  Explore Academy
                 </Link>
               </section>
             </main>
@@ -937,7 +963,7 @@ function MobileItem({
       className={`flex flex-col items-center gap-1 transition duration-200 active:scale-95 ${active ? 'text-[#99f7ff]' : 'text-slate-400'}`}
     >
       <Icon className="h-4 w-4" />
-      <span className="text-[8px] uppercase tracking-widest">{label}</span>
+      <span className="text-nx-8 uppercase tracking-widest">{label}</span>
     </Link>
   )
 }
@@ -974,7 +1000,7 @@ function CalendarGrid({
       {calendarDays.map((day) => (
         <div
           key={day}
-          className={`bg-[#1b2029] text-center text-[8px] ${isWeek ? 'p-2' : 'flex min-h-10 items-center justify-center p-1.5'} ${day === 'SAT' || day === 'SUN' ? 'text-[#d873ff]' : 'text-slate-400'
+          className={`bg-[#1b2029] text-center text-nx-8 ${isWeek ? 'p-2' : 'flex min-h-10 items-center justify-center p-1.5'} ${day === 'SAT' || day === 'SUN' ? 'text-[#d873ff]' : 'text-white'
             }`}
         >
           {day}
@@ -992,7 +1018,7 @@ function CalendarGrid({
         >
           <div className="flex items-start justify-between gap-2">
             <p
-              className={`text-[10px] ${cell.muted
+              className={`text-nx-10 ${cell.muted
                 ? 'text-slate-700'
                 : isTodayDate(cell.date)
                   ? 'font-headline font-bold text-[#d873ff]'
@@ -1002,12 +1028,12 @@ function CalendarGrid({
               {cell.day}
             </p>
             {isTodayDate(cell.date) && !cell.muted ? (
-              <span className="rounded-full border border-[#d873ff]/30 bg-[#d873ff]/10 px-1.5 py-0.5 text-[8px] uppercase tracking-widest text-[#d873ff]">
+              <span className="rounded-full border border-[#d873ff]/30 bg-[#d873ff]/10 px-1.5 py-0.5 text-nx-8 uppercase tracking-widest text-[#d873ff]">
                 Today
               </span>
             ) : null}
             {getTaskCountForDate(cell.date, cell.muted) > 0 ? (
-              <span className="rounded-full border border-[#99f7ff]/20 bg-[#99f7ff]/10 px-1.5 py-0.5 text-[8px] uppercase tracking-widest text-[#99f7ff]">
+              <span className="rounded-full border border-[#99f7ff]/20 bg-[#99f7ff]/10 px-1.5 py-0.5 text-nx-8 uppercase tracking-widest text-[#99f7ff]">
                 Note
               </span>
             ) : null}
@@ -1023,7 +1049,7 @@ function CalendarGrid({
             />
           ))}
           {isWeek && !cell.muted && getTaskCountForDate(cell.date, cell.muted) > 0 ? (
-            <div className="mt-2 rounded border border-white/8 bg-white/[0.03] px-2 py-1 text-[9px] leading-relaxed text-slate-300">
+            <div className="mt-2 rounded border border-white/8 bg-white/[0.03] px-2 py-1 text-nx-9 leading-relaxed text-slate-300">
               {`${getTaskCountForDate(cell.date, cell.muted)} task(s) scheduled`}
             </div>
           ) : null}
@@ -1056,7 +1082,7 @@ function EventTag({
         : 'bg-white/5 text-slate-400 border-white/30'
 
   return (
-    <div className={`${compact ? 'mt-1 p-1 text-[7.5px]' : 'mt-2 p-1.5 text-[8px]'} rounded border-l-2 leading-tight ${strong && !past ? 'font-bold' : ''} ${styles}`}>
+    <div className={`${compact ? 'mt-1 p-1 text-nx-7_5' : 'mt-2 p-1.5 text-nx-8'} rounded border-l-2 leading-tight ${strong && !past ? 'font-bold' : ''} ${styles}`}>
       {label}
     </div>
   )
