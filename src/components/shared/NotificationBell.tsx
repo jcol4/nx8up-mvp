@@ -197,7 +197,7 @@ export default function NotificationBell() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="relative p-2 rounded-lg dash-text-muted hover:text-[#c8dff0] hover:bg-white/5 transition-colors"
+        className="relative rounded-lg p-2 text-[#b8c6d6] transition-colors hover:bg-white/5 hover:text-[#e8f4ff]"
         aria-label="Notifications"
         aria-expanded={open}
       >
@@ -212,16 +212,9 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div
-          className="absolute right-0 top-full mt-2 w-80 max-h-[480px] rounded-xl shadow-xl z-50 flex flex-col"
-          style={{
-            background: 'rgba(10,18,35,0.97)',
-            border: '1px solid rgba(0,200,255,0.15)',
-            overflow: 'hidden',
-          }}
-        >
-          <div className="flex items-center justify-between p-3 border-b dash-border flex-shrink-0">
-            <span className="text-sm font-semibold dash-text-bright">
+        <div className="nx-notif-panel absolute right-0 top-full z-50 mt-2 flex max-h-[480px] w-80 flex-col overflow-hidden rounded-xl">
+          <div className="nx-notif-header flex flex-shrink-0 items-center justify-between border-b p-3">
+            <span className="nx-notif-title text-sm font-semibold">
               {surveyView ? 'Survey' : 'Notifications'}
             </span>
             <div className="flex items-center gap-3">
@@ -229,7 +222,7 @@ export default function NotificationBell() {
                 <button
                   type="button"
                   onClick={handleClearRead}
-                  className="text-xs dash-text-muted hover:text-red-400 transition-colors"
+                  className="nx-notif-action nx-notif-action--danger"
                 >
                   Clear read
                 </button>
@@ -238,7 +231,7 @@ export default function NotificationBell() {
                 <button
                   type="button"
                   onClick={handleMarkAllRead}
-                  className="text-xs dash-accent hover:underline"
+                  className="nx-notif-action font-semibold text-[#99f7ff] hover:text-[#bffcff]"
                 >
                   Mark all read
                 </button>
@@ -249,16 +242,16 @@ export default function NotificationBell() {
           {surveyView && activeSurvey ? (
             <div className="overflow-y-auto flex-1 p-4 space-y-4">
               <div>
-                <p className="text-sm font-medium dash-text-bright">{activeSurvey.title}</p>
+                <p className="nx-notif-item-title text-sm font-medium">{activeSurvey.title}</p>
                 {activeSurvey.description && (
-                  <p className="text-xs dash-text-muted mt-1">{activeSurvey.description}</p>
+                  <p className="nx-notif-body mt-1">{activeSurvey.description}</p>
                 )}
               </div>
 
               <div className="space-y-4">
                 {activeSurvey.questions.map((q, idx) => (
                   <div key={q.id} className="space-y-2">
-                    <p className="text-xs font-medium dash-text-bright">
+                    <p className="nx-notif-item-title text-xs font-medium">
                       {idx + 1}. {q.text}
                     </p>
                     <div className="space-y-1.5">
@@ -267,10 +260,10 @@ export default function NotificationBell() {
                           key={opt}
                           type="button"
                           onClick={() => handleSurveyAnswer(q.id, opt)}
-                          className={`w-full text-left px-3 py-2 rounded-lg text-xs border transition-colors ${
+                          className={`w-full rounded-lg border px-3 py-2 text-left text-xs transition-colors ${
                             surveyAnswers[q.id] === opt
-                              ? 'border-[#00c8ff]/60 bg-[#00c8ff]/10 text-[#00c8ff]'
-                              : 'dash-border bg-white/5 dash-text-muted hover:bg-white/10 hover:dash-text-bright'
+                              ? 'border-[#99f7ff]/60 bg-[#99f7ff]/12 text-[#bffcff]'
+                              : 'border-white/12 bg-white/5 text-[#c8d4e4] hover:bg-white/10 hover:text-[#e8f4ff]'
                           }`}
                         >
                           {opt}
@@ -297,7 +290,7 @@ export default function NotificationBell() {
                 <button
                   type="button"
                   onClick={() => { setSurveyView(false); setSurveyAnswers({}); setSubmitError('') }}
-                  className="px-3 py-2 rounded-lg text-xs dash-text-muted hover:dash-text-bright bg-white/5 hover:bg-white/10 transition-colors"
+                  className="nx-notif-action rounded-lg bg-white/5 px-3 py-2 text-xs hover:bg-white/10"
                 >
                   Back
                 </button>
@@ -306,10 +299,7 @@ export default function NotificationBell() {
           ) : (
             <div className="overflow-y-auto flex-1">
               {activeSurvey && (
-                <div
-                  className="p-3 border-b"
-                  style={{ borderColor: 'rgba(0,200,255,0.2)', background: 'rgba(0,200,255,0.05)' }}
-                >
+                <div className="nx-notif-survey-banner border-b p-3">
                   <div className="flex items-start gap-2">
                     <div className="w-6 h-6 rounded-full bg-[#00c8ff]/20 flex items-center justify-center shrink-0 mt-0.5">
                       <svg className="w-3 h-3 text-[#00c8ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,10 +307,10 @@ export default function NotificationBell() {
                       </svg>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs dash-accent font-medium">Survey</p>
-                      <p className="text-sm dash-text-bright font-medium mt-0.5">{activeSurvey.title}</p>
+                      <p className="nx-notif-type-label">Survey</p>
+                      <p className="nx-notif-item-title mt-0.5 text-sm font-medium">{activeSurvey.title}</p>
                       {activeSurvey.description && (
-                        <p className="text-xs dash-text-muted mt-0.5 line-clamp-2">{activeSurvey.description}</p>
+                        <p className="nx-notif-body mt-1 line-clamp-2">{activeSurvey.description}</p>
                       )}
                       <button
                         type="button"
@@ -336,17 +326,17 @@ export default function NotificationBell() {
 
               {notifications.length === 0 && !activeSurvey ? (
                 <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                  <svg className="w-10 h-10 dash-text-muted mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="mb-3 h-10 w-10 text-[#7a8ea4] opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
-                  <p className="text-sm dash-text-muted">You&apos;re all caught up</p>
-                  <p className="text-xs dash-text-muted opacity-60 mt-1">No notifications yet</p>
+                  <p className="nx-notif-empty text-sm">You&apos;re all caught up</p>
+                  <p className="nx-notif-empty-sub mt-1 text-xs">No notifications yet</p>
                 </div>
               ) : notifications.length === 0 && activeSurvey ? null : (
                 <>
                   {todayItems.length > 0 && (
                     <div>
-                      <p className="px-3 pt-2 pb-1 text-nx-10 font-semibold dash-text-muted uppercase tracking-wider">Today</p>
+                      <p className="nx-notif-section-label px-3 pt-2 pb-1">Today</p>
                       <NotificationList
                         items={todayItems}
                         onDelete={handleDelete}
@@ -356,7 +346,7 @@ export default function NotificationBell() {
                   )}
                   {earlierItems.length > 0 && (
                     <div>
-                      <p className="px-3 pt-2 pb-1 text-nx-10 font-semibold dash-text-muted uppercase tracking-wider">Earlier</p>
+                      <p className="nx-notif-section-label px-3 pt-2 pb-1">Earlier</p>
                       <NotificationList
                         items={earlierItems}
                         onDelete={handleDelete}
@@ -384,13 +374,13 @@ function NotificationList({
   onNotificationClick: (n: Notification) => void
 }) {
   return (
-    <ul className="divide-y dash-border divide-opacity-50">
+    <ul className="nx-notif-divider divide-y">
       {items.map((n) => {
         const label = NOTIFICATION_LABELS[n.type as NotificationType] ?? 'Notification'
         return (
           <li key={n.id}>
             <div
-              className={`flex items-start gap-2 p-3 hover:bg-white/5 transition-colors ${!n.read ? 'bg-[#00c8ff]/5' : ''}`}
+              className={`nx-notif-row flex items-start gap-2 p-3 transition-colors ${!n.read ? 'nx-notif-row--unread' : ''}`}
             >
               <button
                 type="button"
@@ -399,11 +389,11 @@ function NotificationList({
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs dash-accent font-medium">{label}</p>
-                    <p className="text-sm dash-text-bright font-medium mt-0.5">{n.title}</p>
-                    <p className="text-xs dash-text-muted mt-0.5 line-clamp-2">{n.message}</p>
+                    <p className="nx-notif-type-label">{label}</p>
+                    <p className="nx-notif-item-title mt-0.5 text-sm font-medium">{n.title}</p>
+                    <p className="nx-notif-body mt-1 line-clamp-2">{n.message}</p>
                   </div>
-                  <span className="text-nx-10 dash-text-muted shrink-0 mt-0.5">
+                  <span className="nx-notif-meta mt-0.5 shrink-0">
                     {formatRelativeTime(n.createdAt)}
                   </span>
                 </div>
@@ -411,7 +401,7 @@ function NotificationList({
               <button
                 type="button"
                 onClick={(e) => onDelete(e, n.id)}
-                className="p-1.5 rounded dash-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0"
+                className="shrink-0 rounded p-1.5 text-[#a8b8cc] transition-colors hover:bg-red-500/10 hover:text-red-400"
                 aria-label="Delete notification"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -83,6 +83,388 @@
   color: var(--creator-muted);
 }
 
+.creator-hud .cr-text-muted-subtle {
+  color: var(--creator-muted-subtle, var(--creator-muted));
+}
+
+/* Profile, campaigns, deal room, academy & guide: higher-contrast secondary text on dark panels */
+.creator-hud .creator-profile,
+.creator-hud .creator-campaigns,
+.creator-hud .creator-deal-room,
+.creator-hud .creator-academy,
+.creator-hud .creator-guide,
+.creator-hud .sponsor-guide,
+.creator-hud .creator-settings,
+.creator-hud .admin-settings,
+.creator-hud .admin-users,
+.creator-hud .admin-campaigns,
+.creator-hud .admin-verification-queue,
+.creator-hud .admin-disputes,
+.creator-hud .admin-surveys,
+.creator-hud .sponsor-settings,
+.creator-hud .sponsor-profile,
+.creator-hud .sponsor-applications,
+.creator-hud .sponsor-deal-room,
+.creator-hud .sponsor-creators,
+.creator-hud .sponsor-payouts {
+  --creator-muted: #c8d0dc;
+  --creator-muted-subtle: #b4beca;
+}
+
+/* Detail pages: labels + meta tuned for readability on glass panels */
+.creator-hud .creator-campaign-detail,
+.creator-hud .creator-deal-room-detail,
+.creator-hud .creator-academy-detail,
+.creator-hud .creator-guide-detail,
+.creator-hud .sponsor-guide-detail,
+.creator-hud .creator-settings-detail,
+.creator-hud .admin-settings-detail,
+.creator-hud .admin-users-detail,
+.creator-hud .admin-campaigns-detail,
+.creator-hud .admin-verification-queue-detail,
+.creator-hud .admin-disputes-detail,
+.creator-hud .admin-surveys-detail,
+.creator-hud .sponsor-settings-detail,
+.creator-hud .sponsor-profile-detail,
+.creator-hud .sponsor-applications-detail,
+.creator-hud .sponsor-deal-room-detail,
+.creator-hud .sponsor-creators-detail,
+.creator-hud .sponsor-payouts-detail {
+  --creator-muted: #d6dce6;
+  --creator-muted-subtle: #c4ccd8;
+}
+
+.creator-hud .creator-campaign-detail .cr-panel-title,
+.creator-hud .creator-deal-room-detail .cr-panel-title,
+.creator-hud .creator-academy-detail .cr-panel-title,
+.creator-hud .creator-guide-detail .cr-panel-title,
+.creator-hud .sponsor-guide-detail .cr-panel-title,
+.creator-hud .creator-settings-detail .cr-panel-title,
+.creator-hud .admin-settings-detail .cr-panel-title,
+.creator-hud .admin-users-detail .cr-panel-title,
+.creator-hud .admin-campaigns-detail .cr-panel-title,
+.creator-hud .admin-verification-queue-detail .cr-panel-title,
+.creator-hud .admin-disputes-detail .cr-panel-title,
+.creator-hud .admin-surveys-detail .cr-panel-title,
+.creator-hud .sponsor-settings-detail .cr-panel-title,
+.creator-hud .sponsor-profile-detail .cr-panel-title,
+.creator-hud .sponsor-applications-detail .cr-panel-title,
+.creator-hud .sponsor-deal-room-detail .cr-panel-title,
+.creator-hud .sponsor-creators-detail .cr-panel-title,
+.creator-hud .sponsor-payouts-detail .cr-panel-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: #99f7ff;
+}
+
+.creator-hud .creator-campaign-detail .cr-field-label,
+.creator-hud .creator-deal-room-detail .cr-field-label,
+.creator-hud .creator-academy-detail .cr-field-label,
+.creator-hud .creator-guide-detail .cr-field-label,
+.creator-hud .sponsor-guide-detail .cr-field-label,
+.creator-hud .creator-settings-detail .cr-field-label,
+.creator-hud .admin-settings-detail .cr-field-label,
+.creator-hud .admin-users-detail .cr-field-label,
+.creator-hud .admin-campaigns-detail .cr-field-label,
+.creator-hud .admin-verification-queue-detail .cr-field-label,
+.creator-hud .admin-disputes-detail .cr-field-label,
+.creator-hud .admin-surveys-detail .cr-field-label,
+.creator-hud .sponsor-settings-detail .cr-field-label,
+.creator-hud .sponsor-profile-detail .cr-field-label,
+.creator-hud .sponsor-applications-detail .cr-field-label,
+.creator-hud .sponsor-deal-room-detail .cr-field-label,
+.creator-hud .sponsor-creators-detail .cr-field-label,
+.creator-hud .sponsor-payouts-detail .cr-field-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(153 247 255 / 88%);
+}
+
+.creator-hud .creator-campaign-detail span.cr-field-label,
+.creator-hud .creator-deal-room-detail span.cr-field-label,
+.creator-hud .creator-academy-detail span.cr-field-label,
+.creator-hud .creator-guide-detail span.cr-field-label,
+.creator-hud .sponsor-guide-detail span.cr-field-label,
+.creator-hud .creator-settings-detail span.cr-field-label,
+.creator-hud .admin-settings-detail span.cr-field-label,
+.creator-hud .admin-users-detail span.cr-field-label,
+.creator-hud .admin-campaigns-detail span.cr-field-label,
+.creator-hud .admin-verification-queue-detail span.cr-field-label,
+.creator-hud .sponsor-settings-detail span.cr-field-label,
+.creator-hud .sponsor-profile-detail span.cr-field-label,
+.creator-hud .sponsor-applications-detail span.cr-field-label,
+.creator-hud .sponsor-deal-room-detail span.cr-field-label,
+.creator-hud .sponsor-creators-detail span.cr-field-label,
+.creator-hud .sponsor-payouts-detail span.cr-field-label {
+  display: inline-block;
+}
+
+.creator-hud .creator-campaign-detail .cr-meta-label,
+.creator-hud .creator-deal-room-detail .cr-meta-label,
+.creator-hud .creator-academy-detail .cr-meta-label,
+.creator-hud .creator-guide-detail .cr-meta-label,
+.creator-hud .sponsor-guide-detail .cr-meta-label,
+.creator-hud .creator-settings-detail .cr-meta-label,
+.creator-hud .admin-settings-detail .cr-meta-label,
+.creator-hud .admin-users-detail .cr-meta-label,
+.creator-hud .admin-campaigns-detail .cr-meta-label,
+.creator-hud .admin-verification-queue-detail .cr-meta-label,
+.creator-hud .admin-disputes-detail .cr-meta-label,
+.creator-hud .admin-surveys-detail .cr-meta-label,
+.creator-hud .sponsor-settings-detail .cr-meta-label,
+.creator-hud .sponsor-profile-detail .cr-meta-label,
+.creator-hud .sponsor-applications-detail .cr-meta-label,
+.creator-hud .sponsor-deal-room-detail .cr-meta-label,
+.creator-hud .sponsor-creators-detail .cr-meta-label,
+.creator-hud .sponsor-payouts-detail .cr-meta-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--creator-muted);
+}
+
+.creator-hud .creator-campaign-detail .cr-stat-caption,
+.creator-hud .creator-deal-room-detail .cr-stat-caption,
+.creator-hud .creator-academy-detail .cr-stat-caption,
+.creator-hud .creator-guide-detail .cr-stat-caption,
+.creator-hud .sponsor-guide-detail .cr-stat-caption,
+.creator-hud .creator-settings-detail .cr-stat-caption,
+.creator-hud .admin-settings-detail .cr-stat-caption,
+.creator-hud .admin-users-detail .cr-stat-caption,
+.creator-hud .admin-campaigns-detail .cr-stat-caption,
+.creator-hud .admin-verification-queue-detail .cr-stat-caption,
+.creator-hud .admin-disputes-detail .cr-stat-caption,
+.creator-hud .admin-surveys-detail .cr-stat-caption,
+.creator-hud .sponsor-settings-detail .cr-stat-caption,
+.creator-hud .sponsor-profile-detail .cr-stat-caption,
+.creator-hud .sponsor-applications-detail .cr-stat-caption,
+.creator-hud .sponsor-deal-room-detail .cr-stat-caption,
+.creator-hud .sponsor-creators-detail .cr-stat-caption,
+.creator-hud .sponsor-payouts-detail .cr-stat-caption {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--creator-muted);
+}
+
+.creator-hud .creator-campaign-detail .cr-text,
+.creator-hud .creator-deal-room-detail .cr-text,
+.creator-hud .creator-academy-detail .cr-text,
+.creator-hud .creator-guide-detail .cr-text,
+.creator-hud .sponsor-guide-detail .cr-text,
+.creator-hud .creator-settings-detail .cr-text,
+.creator-hud .admin-settings-detail .cr-text,
+.creator-hud .admin-users-detail .cr-text,
+.creator-hud .admin-campaigns-detail .cr-text,
+.creator-hud .admin-verification-queue-detail .cr-text,
+.creator-hud .admin-disputes-detail .cr-text,
+.creator-hud .admin-surveys-detail .cr-text,
+.creator-hud .sponsor-settings-detail .cr-text,
+.creator-hud .sponsor-profile-detail .cr-text,
+.creator-hud .sponsor-applications-detail .cr-text,
+.creator-hud .sponsor-deal-room-detail .cr-text,
+.creator-hud .sponsor-creators-detail .cr-text,
+.creator-hud .sponsor-payouts-detail .cr-text {
+  color: #e8ecf4;
+}
+
+.creator-hud .creator-campaign-detail .cr-text-muted,
+.creator-hud .creator-deal-room-detail .cr-text-muted,
+.creator-hud .creator-academy-detail .cr-text-muted,
+.creator-hud .creator-guide-detail .cr-text-muted,
+.creator-hud .sponsor-guide-detail .cr-text-muted,
+.creator-hud .creator-settings-detail .cr-text-muted,
+.creator-hud .admin-settings-detail .cr-text-muted,
+.creator-hud .admin-users-detail .cr-text-muted,
+.creator-hud .admin-campaigns-detail .cr-text-muted,
+.creator-hud .admin-verification-queue-detail .cr-text-muted,
+.creator-hud .admin-disputes-detail .cr-text-muted,
+.creator-hud .admin-surveys-detail .cr-text-muted,
+.creator-hud .sponsor-settings-detail .cr-text-muted,
+.creator-hud .sponsor-profile-detail .cr-text-muted,
+.creator-hud .sponsor-applications-detail .cr-text-muted,
+.creator-hud .sponsor-deal-room-detail .cr-text-muted,
+.creator-hud .sponsor-creators-detail .cr-text-muted,
+.creator-hud .sponsor-payouts-detail .cr-text-muted {
+  color: var(--creator-muted);
+}
+
+.creator-hud .creator-academy-detail .cr-breadcrumb-muted,
+.creator-hud .creator-guide-detail .cr-breadcrumb-muted,
+.creator-hud .sponsor-guide-detail .cr-breadcrumb-muted {
+  color: rgb(153 247 255 / 55%);
+}
+
+.creator-hud .creator-guide-detail .cr-guide-nav-inactive,
+.creator-hud .sponsor-guide-detail .cr-guide-nav-inactive {
+  color: var(--creator-muted);
+}
+
+.creator-hud .creator-guide-detail .cr-guide-nav-inactive:hover,
+.creator-hud .sponsor-guide-detail .cr-guide-nav-inactive:hover {
+  color: #e8f4ff;
+}
+
+.creator-hud .creator-guide-detail .cr-guide-step-card,
+.creator-hud .sponsor-guide-detail .cr-guide-step-card {
+  border-color: rgb(255 255 255 / 0.12);
+  background: rgb(255 255 255 / 0.04);
+}
+
+/* Sponsor campaign applications — scannable cards */
+.creator-hud .admin-users-detail .sp-app-header-stat,
+.creator-hud .admin-campaigns-detail .sp-app-header-stat,
+.creator-hud .admin-verification-queue-detail .sp-app-header-stat,
+.creator-hud .admin-disputes-detail .sp-app-header-stat,
+.creator-hud .admin-surveys-detail .sp-app-header-stat,
+.creator-hud .sponsor-applications-detail .sp-app-header-stat,
+.creator-hud .sponsor-deal-room-detail .sp-app-header-stat,
+.creator-hud .sponsor-creators-detail .sp-app-header-stat,
+.creator-hud .sponsor-payouts-detail .sp-app-header-stat {
+  border: 1px solid rgb(255 255 255 / 12%);
+  background: rgb(255 255 255 / 4%);
+}
+
+.creator-hud .sponsor-applications-detail .sp-app-stat-panel,
+.creator-hud .sponsor-deal-room-detail .sp-app-stat-panel,
+.creator-hud .sponsor-creators-detail .sp-app-stat-panel,
+.creator-hud .admin-users-detail .sp-app-stat-panel,
+.creator-hud .admin-campaigns-detail .sp-app-stat-panel,
+.creator-hud .admin-verification-queue-detail .sp-app-stat-panel,
+.creator-hud .admin-disputes-detail .sp-app-stat-panel,
+.creator-hud .admin-surveys-detail .sp-app-stat-panel,
+.creator-hud .sponsor-payouts-detail .sp-app-stat-panel {
+  border: 1px solid rgb(255 255 255 / 10%);
+  background: rgb(0 0 0 / 22%);
+}
+
+.creator-hud .sponsor-applications-detail .sp-app-note-panel,
+.creator-hud .sponsor-deal-room-detail .sp-app-note-panel,
+.creator-hud .sponsor-creators-detail .sp-app-note-panel,
+.creator-hud .sponsor-payouts-detail .sp-app-note-panel {
+  border: 1px solid rgb(153 247 255 / 18%);
+  background: rgb(153 247 255 / 6%);
+}
+
+.creator-hud .sponsor-applications-detail .sp-app-stat-value,
+.creator-hud .sponsor-deal-room-detail .sp-app-stat-value,
+.creator-hud .sponsor-creators-detail .sp-app-stat-value,
+.creator-hud .admin-users-detail .sp-app-stat-value,
+.creator-hud .admin-campaigns-detail .sp-app-stat-value,
+.creator-hud .admin-verification-queue-detail .sp-app-stat-value,
+.creator-hud .admin-disputes-detail .sp-app-stat-value,
+.creator-hud .admin-surveys-detail .sp-app-stat-value,
+.creator-hud .sponsor-payouts-detail .sp-app-stat-value {
+  color: #e8f4ff;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.creator-hud .sponsor-applications-detail .sp-app-stat-label,
+.creator-hud .sponsor-deal-room-detail .sp-app-stat-label,
+.creator-hud .sponsor-creators-detail .sp-app-stat-label,
+.creator-hud .admin-users-detail .sp-app-stat-label,
+.creator-hud .admin-campaigns-detail .sp-app-stat-label,
+.creator-hud .admin-verification-queue-detail .sp-app-stat-label,
+.creator-hud .admin-disputes-detail .sp-app-stat-label,
+.creator-hud .admin-surveys-detail .sp-app-stat-label,
+.creator-hud .sponsor-payouts-detail .sp-app-stat-label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(153 247 255 / 65%);
+}
+
+/* Notification bell dropdown — readable on dark glass */
+.nx-notif-panel {
+  background: rgb(12 18 32 / 98%);
+  border: 1px solid rgb(153 247 255 / 22%);
+  box-shadow:
+    0 20px 48px rgb(0 0 0 / 45%),
+    0 0 0 1px rgb(153 247 255 / 8%);
+}
+
+.nx-notif-panel .nx-notif-header {
+  border-color: rgb(255 255 255 / 12%);
+}
+
+.nx-notif-panel .nx-notif-title {
+  color: #e8f4ff;
+}
+
+.nx-notif-panel .nx-notif-section-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(153 247 255 / 72%);
+}
+
+.nx-notif-panel .nx-notif-type-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #99f7ff;
+}
+
+.nx-notif-panel .nx-notif-item-title {
+  color: #f0f6ff;
+}
+
+.nx-notif-panel .nx-notif-body {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: #c8d4e4;
+}
+
+.nx-notif-panel .nx-notif-meta {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #a8b8cc;
+}
+
+.nx-notif-panel .nx-notif-action {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #b8c6d6;
+  transition: color 0.15s;
+}
+
+.nx-notif-panel .nx-notif-action:hover {
+  color: #99f7ff;
+}
+
+.nx-notif-panel .nx-notif-action--danger:hover {
+  color: #f87171;
+}
+
+.nx-notif-panel .nx-notif-empty {
+  color: #c4d0de;
+}
+
+.nx-notif-panel .nx-notif-empty-sub {
+  color: #9eb0c4;
+}
+
+.nx-notif-panel .nx-notif-divider {
+  border-color: rgb(255 255 255 / 12%);
+}
+
+.nx-notif-panel .nx-notif-row--unread {
+  background: rgb(153 247 255 / 8%);
+}
+
+.nx-notif-panel .nx-notif-row:hover {
+  background: rgb(255 255 255 / 6%);
+}
+
+.nx-notif-panel .nx-notif-survey-banner {
+  border-color: rgb(153 247 255 / 25%);
+  background: rgb(153 247 255 / 8%);
+}
+
 .creator-hud .cr-text {
   color: var(--creator-fg);
 }
@@ -241,4 +623,40 @@
     animation: none;
     transform: scaleX(1);
   }
+}
+
+/* Sponsor data tables (creators directory, payout ledger) */
+.creator-hud .sponsor-creators-detail .sp-creators-table thead th,
+.creator-hud .admin-users-detail .sp-ledger-table thead th,
+.creator-hud .admin-campaigns-detail .sp-ledger-table thead th,
+.creator-hud .admin-verification-queue-detail .sp-ledger-table thead th,
+.creator-hud .admin-disputes-detail .sp-ledger-table thead th,
+.creator-hud .admin-surveys-detail .sp-ledger-table thead th,
+.creator-hud .sponsor-payouts-detail .sp-ledger-table thead th {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(153 247 255 / 72%);
+  background: rgb(0 0 0 / 30%);
+}
+
+.creator-hud .sponsor-creators-detail .sp-creators-table tbody tr,
+.creator-hud .admin-users-detail .sp-ledger-table tbody tr,
+.creator-hud .admin-campaigns-detail .sp-ledger-table tbody tr,
+.creator-hud .admin-verification-queue-detail .sp-ledger-table tbody tr,
+.creator-hud .admin-disputes-detail .sp-ledger-table tbody tr,
+.creator-hud .admin-surveys-detail .sp-ledger-table tbody tr,
+.creator-hud .sponsor-payouts-detail .sp-ledger-table tbody tr {
+  transition: background-color 0.15s;
+}
+
+.creator-hud .sponsor-creators-detail .sp-creators-table tbody tr:hover,
+.creator-hud .admin-users-detail .sp-ledger-table tbody tr:hover,
+.creator-hud .admin-campaigns-detail .sp-ledger-table tbody tr:hover,
+.creator-hud .admin-verification-queue-detail .sp-ledger-table tbody tr:hover,
+.creator-hud .admin-disputes-detail .sp-ledger-table tbody tr:hover,
+.creator-hud .admin-surveys-detail .sp-ledger-table tbody tr:hover,
+.creator-hud .sponsor-payouts-detail .sp-ledger-table tbody tr:hover {
+  background: rgb(153 247 255 / 6%);
 }

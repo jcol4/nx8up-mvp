@@ -98,7 +98,7 @@ export default function NotificationPreferencesForm({ entries }: Props) {
   if (loading) {
     return (
       <div className="dash-panel dash-panel--nx-top rounded-xl border border-white/16 border-t-2 border-t-[#bffcff] bg-black/20 p-6">
-        <p className="text-sm text-[#a9abb5]">Loading preferences…</p>
+        <p className="text-sm cr-text-muted">Loading preferences…</p>
       </div>
     )
   }
@@ -120,7 +120,7 @@ export default function NotificationPreferencesForm({ entries }: Props) {
           >
             <div>
               <p className="text-sm font-semibold text-[#e8f4ff]">{entry.label}</p>
-              <p className="mt-0.5 text-xs text-[#a9abb5]">{entry.description}</p>
+              <p className="mt-1 text-sm leading-relaxed cr-text-muted">{entry.description}</p>
             </div>
             <div className="flex justify-center w-16">
               <Toggle
@@ -152,7 +152,7 @@ export default function NotificationPreferencesForm({ entries }: Props) {
         </button>
         {saved && <span className="text-xs text-emerald-300">Saved successfully.</span>}
         </div>
-        <p className="mt-2 text-xs text-[#a9abb5]">
+        <p className="mt-2 text-sm leading-relaxed cr-text-muted">
           Email notifications require <span className="text-[#99f7ff]">RESEND_API_KEY</span> to be configured.
         </p>
       </div>
