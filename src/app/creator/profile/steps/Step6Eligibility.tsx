@@ -36,7 +36,7 @@ export default function Step6Eligibility({ draft, setDraft, error, isSaving, onS
       <div className="rounded-xl border border-white/10 bg-black/20 p-4">
         <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Eligibility</p>
         <h2 className="mt-1 font-headline text-lg font-semibold text-[#e8f4ff]">Availability & Limits</h2>
-        <p className="mt-1 text-sm text-[#a9abb5]">
+        <p className="mt-1 text-sm cr-text-muted">
           Set your availability and monthly campaign capacity so sponsors can plan accurately.
         </p>
       </div>
@@ -44,7 +44,7 @@ export default function Step6Eligibility({ draft, setDraft, error, isSaving, onS
       {/* Availability toggle */}
       <div className={sectionCardClass}>
         <p className={sectionTitle}>Availability</p>
-        <p className="mb-4 text-xs text-[#a9abb5]">
+        <p className="mb-4 text-xs cr-text-muted">
           Let sponsors know whether you are currently open to new sponsorship opportunities.
         </p>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -54,7 +54,7 @@ export default function Step6Eligibility({ draft, setDraft, error, isSaving, onS
             className={`rounded-lg border py-3 px-4 text-sm font-semibold transition-all ${
               draft.is_available
                 ? 'border-[#22c55e]/45 bg-[#22c55e]/12 text-[#4ade80] shadow-[0_0_12px_rgba(34,197,94,0.16)]'
-                : 'border-white/10 bg-black/20 text-[#a9abb5] hover:border-[#22c55e]/30 hover:bg-[#22c55e]/[0.04]'
+                : 'border-white/10 bg-black/20 cr-text-muted hover:border-[#22c55e]/30 hover:bg-[#22c55e]/[0.04]'
             }`}
           >
             Available
@@ -65,7 +65,7 @@ export default function Step6Eligibility({ draft, setDraft, error, isSaving, onS
             className={`rounded-lg border py-3 px-4 text-sm font-semibold transition-all ${
               !draft.is_available
                 ? 'border-[#f87171]/45 bg-[#f87171]/12 text-[#fca5a5] shadow-[0_0_12px_rgba(248,113,113,0.14)]'
-                : 'border-white/10 bg-black/20 text-[#a9abb5] hover:border-[#f87171]/30 hover:bg-[#f87171]/[0.04]'
+                : 'border-white/10 bg-black/20 cr-text-muted hover:border-[#f87171]/30 hover:bg-[#f87171]/[0.04]'
             }`}
           >
             Not Available
@@ -76,7 +76,7 @@ export default function Step6Eligibility({ draft, setDraft, error, isSaving, onS
       {/* Max campaigns */}
       <div className={sectionCardClass}>
         <p className={sectionTitle}>Max Campaigns Per Month</p>
-        <p className="mb-3 text-xs text-[#a9abb5]">
+        <p className="mb-3 text-xs cr-text-muted">
           How many active sponsorships can you handle at once? Leave blank for no limit.
         </p>
         <FormInput
@@ -97,7 +97,7 @@ export default function Step6Eligibility({ draft, setDraft, error, isSaving, onS
         <button
           type="button"
           onClick={onBack}
-          className="rounded-lg border border-white/10 px-5 py-2.5 text-sm font-medium text-[#a9abb5] transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]"
+          className="rounded-lg border border-white/10 px-5 py-2.5 text-sm font-medium cr-text-muted transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]"
         >
           Back
         </button>

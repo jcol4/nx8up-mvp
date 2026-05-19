@@ -30,25 +30,25 @@ export default async function AcademyLessonPage({ params }: Props) {
 
   return (
     <CreatorShell>
-      <main className="mx-auto max-w-4xl px-4 pb-12 pt-6 sm:px-6 sm:pt-8 md:px-8">
-        <nav className="mb-3 text-nx-11 font-medium uppercase tracking-[0.18em] text-white/90" aria-label="Breadcrumb">
+      <main className="creator-academy creator-academy-detail mx-auto max-w-4xl px-4 pb-12 pt-6 sm:px-6 sm:pt-8 md:px-8">
+        <nav className="mb-3 text-sm font-medium uppercase tracking-[0.18em] cr-text-muted" aria-label="Breadcrumb">
           <Link
             href="/creator/academy"
             className="text-[#99f7ff] transition-colors hover:text-[#bffcff]"
           >
             ← Academy
           </Link>
-          <span className="mx-2 text-white/35" aria-hidden>
+          <span className="mx-2 cr-breadcrumb-muted" aria-hidden>
             /
           </span>
-          <span className="text-white">Lesson</span>
+          <span className="cr-text-bright">Lesson</span>
         </nav>
 
         <article className={`${CARD} overflow-hidden`} aria-label="Lesson overview and video">
           <header className="border-b border-white/10 bg-black/30 p-4 sm:p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
               <div className="min-w-0 flex-1">
-                <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-white">
+                <p className="cr-field-label">
                   Lesson {currentIndex + 1} of {LESSONS.length}
                 </p>
                 <h1 className="mt-1 font-headline text-xl font-semibold leading-tight text-[#e8f4ff] sm:text-2xl">
@@ -64,7 +64,7 @@ export default async function AcademyLessonPage({ params }: Props) {
                 </div>
               </div>
               <div className="shrink-0 rounded-lg border border-white/10 bg-black/40 px-3 py-2.5">
-                <p className="mb-2 text-center font-headline text-nx-9 uppercase tracking-[0.16em] text-white lg:text-right">
+                <p className="mb-2 text-center cr-field-label lg:text-right">
                   Jump to module
                 </p>
                 <div className="flex flex-wrap justify-center gap-1.5 lg:justify-end" aria-label="Lesson progress">
@@ -100,7 +100,7 @@ export default async function AcademyLessonPage({ params }: Props) {
         </article>
 
         <section className={`${CARD} mt-6 p-5 sm:p-6`}>
-          <h2 className="font-headline text-nx-11 uppercase tracking-[0.2em] text-white">Steps</h2>
+          <h2 className="cr-panel-title">Steps</h2>
           <ol className="mt-5 space-y-6">
             {lesson.steps.map((step, i) => (
               <li key={i} className="flex gap-4">
@@ -112,11 +112,11 @@ export default async function AcademyLessonPage({ params }: Props) {
                 </span>
                 <div className="min-w-0 pt-0.5">
                   <h3 className="font-headline text-sm font-semibold text-[#e8f4ff]">{step.title}</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-white/90">{step.description}</p>
+                  <p className="mt-1.5 text-sm leading-relaxed cr-text">{step.description}</p>
                   {step.tips && step.tips.length > 0 && (
-                    <ul className="mt-2 space-y-1.5 border-l border-[#99f7ff]/20 pl-3">
+                    <ul className="mt-3 space-y-2 border-l-2 border-[#99f7ff]/30 pl-3">
                       {step.tips.map((tip, j) => (
-                        <li key={j} className="text-xs leading-relaxed text-white/85">
+                        <li key={j} className="text-sm leading-relaxed cr-text-muted">
                           {tip}
                         </li>
                       ))}

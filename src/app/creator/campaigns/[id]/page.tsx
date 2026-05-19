@@ -128,11 +128,11 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
 
   return (
     <CreatorShell>
-    <main className="max-w-5xl mx-auto p-6 sm:p-8 space-y-6">
+    <main className="creator-campaigns creator-campaign-detail max-w-5xl mx-auto p-6 sm:p-8 space-y-6">
       {/* Back link */}
       <Link
         href="/creator/campaigns"
-        className="inline-flex items-center gap-1.5 text-xs cr-text-muted hover:text-[#c8dff0] transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm cr-text-muted hover:text-[#99f7ff] transition-colors"
       >
         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -171,8 +171,8 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                   unoptimized
                 />
               )}
-              <p className="text-sm cr-text-muted">
-                by <span className="cr-text font-medium">{campaign.sponsor.company_name ?? 'Sponsor'}</span>
+              <p className="text-sm text-[#d6dce6]">
+                by <span className="cr-text-bright font-medium">{campaign.sponsor.company_name ?? 'Sponsor'}</span>
               </p>
             </div>
 
@@ -198,37 +198,37 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
                 {campaign.objective && (
                   <div className="sm:col-span-2">
-                    <dt className="text-nx-11 cr-text-muted uppercase tracking-wide mb-0.5">Objective</dt>
+                    <dt className="cr-field-label mb-1">Objective</dt>
                     <dd className="text-sm cr-text">{campaign.objective}</dd>
                   </div>
                 )}
                 {campaign.brand_name && (
                   <div>
-                    <dt className="text-nx-11 cr-text-muted uppercase tracking-wide mb-0.5">Brand</dt>
+                    <dt className="cr-field-label mb-1">Brand</dt>
                     <dd className="text-sm cr-text-bright font-medium">{campaign.brand_name}</dd>
                   </div>
                 )}
                 {campaign.product_name && (
                   <div>
-                    <dt className="text-nx-11 cr-text-muted uppercase tracking-wide mb-0.5">Product</dt>
+                    <dt className="cr-field-label mb-1">Product</dt>
                     <dd className="text-sm cr-text-bright font-medium">{campaign.product_name}</dd>
                   </div>
                 )}
                 {campaign.product_type && (
                   <div>
-                    <dt className="text-nx-11 cr-text-muted uppercase tracking-wide mb-0.5">Product Type</dt>
+                    <dt className="cr-field-label mb-1">Product Type</dt>
                     <dd className="text-sm cr-text capitalize">{campaign.product_type}</dd>
                   </div>
                 )}
                 {campaign.campaign_type && (
                   <div>
-                    <dt className="text-nx-11 cr-text-muted uppercase tracking-wide mb-0.5">Campaign Type</dt>
+                    <dt className="cr-field-label mb-1">Campaign Type</dt>
                     <dd className="text-sm cr-text capitalize">{campaign.campaign_type}</dd>
                   </div>
                 )}
                 {campaign.payment_model && (
                   <div>
-                    <dt className="text-nx-11 cr-text-muted uppercase tracking-wide mb-0.5">Payment Model</dt>
+                    <dt className="cr-field-label mb-1">Payment Model</dt>
                     <dd className="text-sm cr-text-bright font-medium uppercase">{campaign.payment_model}</dd>
                   </div>
                 )}
@@ -244,46 +244,46 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 {campaign.num_videos != null && campaign.num_videos > 0 && (
                   <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
                     <p className="text-2xl font-bold cr-text-bright">{campaign.num_videos}</p>
-                    <p className="text-nx-11 cr-text-muted mt-0.5">Video{campaign.num_videos !== 1 ? 's' : ''}</p>
+                    <p className="cr-stat-caption mt-1">Video{campaign.num_videos !== 1 ? 's' : ''}</p>
                   </div>
                 )}
                 {campaign.num_youtube_shorts != null && campaign.num_youtube_shorts > 0 && (
                   <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
                     <p className="text-2xl font-bold cr-text-bright">{campaign.num_youtube_shorts}</p>
-                    <p className="text-nx-11 cr-text-muted mt-0.5">YT Short{campaign.num_youtube_shorts !== 1 ? 's' : ''}</p>
+                    <p className="cr-stat-caption mt-1">YT Short{campaign.num_youtube_shorts !== 1 ? 's' : ''}</p>
                   </div>
                 )}
                 {campaign.num_streams != null && campaign.num_streams > 0 && (
                   <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
                     <p className="text-2xl font-bold cr-text-bright">{campaign.num_streams}</p>
-                    <p className="text-nx-11 cr-text-muted mt-0.5">Stream{campaign.num_streams !== 1 ? 's' : ''}</p>
+                    <p className="cr-stat-caption mt-1">Stream{campaign.num_streams !== 1 ? 's' : ''}</p>
                     {campaign.min_stream_duration != null && (
-                      <p className="text-nx-10 text-[#3a5570] mt-0.5">{campaign.min_stream_duration}h min</p>
+                      <p className="text-nx-10 text-[#c4ccd8] mt-0.5">{campaign.min_stream_duration}h min</p>
                     )}
                   </div>
                 )}
                 {campaign.num_twitch_clips != null && campaign.num_twitch_clips > 0 && (
                   <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
                     <p className="text-2xl font-bold cr-text-bright">{campaign.num_twitch_clips}</p>
-                    <p className="text-nx-11 cr-text-muted mt-0.5">Twitch Clip{campaign.num_twitch_clips !== 1 ? 's' : ''}</p>
+                    <p className="cr-stat-caption mt-1">Twitch Clip{campaign.num_twitch_clips !== 1 ? 's' : ''}</p>
                   </div>
                 )}
                 {campaign.num_posts != null && campaign.num_posts > 0 && (
                   <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
                     <p className="text-2xl font-bold cr-text-bright">{campaign.num_posts}</p>
-                    <p className="text-nx-11 cr-text-muted mt-0.5">Post{campaign.num_posts !== 1 ? 's' : ''}</p>
+                    <p className="cr-stat-caption mt-1">Post{campaign.num_posts !== 1 ? 's' : ''}</p>
                   </div>
                 )}
                 {campaign.num_short_videos != null && campaign.num_short_videos > 0 && (
                   <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
                     <p className="text-2xl font-bold cr-text-bright">{campaign.num_short_videos}</p>
-                    <p className="text-nx-11 cr-text-muted mt-0.5">Short{campaign.num_short_videos !== 1 ? 's' : ''}</p>
+                    <p className="cr-stat-caption mt-1">Short{campaign.num_short_videos !== 1 ? 's' : ''}</p>
                   </div>
                 )}
               </div>
               {campaign.video_includes.length > 0 && (
                 <div className="mt-4 pt-4 border-t cr-border">
-                  <p className="text-nx-11 cr-text-muted uppercase tracking-wide mb-2">Video must include</p>
+                  <p className="cr-field-label mb-2">Video must include</p>
                   <div className="flex flex-wrap gap-1.5">
                     {campaign.video_includes.map((v: string) => (
                       <span key={v} className="text-xs px-2 py-0.5 rounded bg-white/5 cr-text border border-white/5">
@@ -309,7 +309,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                     <span className="text-[#00c8ff] text-sm">✓</span>
                     <span className="text-sm cr-text">Must include tracking link</span>
                     {campaign.landing_page_url && (
-                      <span className="text-xs cr-text-muted truncate">({campaign.landing_page_url})</span>
+                      <span className="text-xs text-[#c4ccd8] truncate">({campaign.landing_page_url})</span>
                     )}
                   </div>
                 )}
@@ -327,13 +327,13 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 )}
                 {campaign.conversion_goal && (
                   <div className="flex items-center gap-2 pt-1">
-                    <span className="text-nx-11 cr-text-muted uppercase tracking-wide w-28 shrink-0">Conversion goal</span>
+                    <span className="cr-field-label w-28 shrink-0">Conversion goal</span>
                     <span className="text-sm cr-text capitalize">{campaign.conversion_goal}</span>
                   </div>
                 )}
                 {campaign.tracking_type && (
                   <div className="flex items-center gap-2">
-                    <span className="text-nx-11 cr-text-muted uppercase tracking-wide w-28 shrink-0">Tracking</span>
+                    <span className="cr-field-label w-28 shrink-0">Tracking</span>
                     <span className="text-sm cr-text capitalize">{campaign.tracking_type}</span>
                   </div>
                 )}
@@ -348,7 +348,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 <h2 className="cr-panel-title mb-0">Creator Requirements</h2>
                 {creatorProfile && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-[#3a5570]">Your match</span>
+                    <span className="text-sm cr-meta-label">Your match</span>
                     <span className={`text-nx-11 px-2 py-0.5 rounded-full font-medium border ${
                       score >= 75
                         ? 'bg-[#22c55e]/10 text-[#22c55e] border-[#22c55e]/20'
@@ -370,19 +370,19 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 {campaign.min_avg_viewers != null && (
                   <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
                     <p className="text-lg font-bold cr-text-bright">{campaign.min_avg_viewers.toLocaleString()}</p>
-                    <p className="text-nx-11 cr-text-muted mt-0.5">Min. avg viewers</p>
+                    <p className="cr-stat-caption mt-1">Min. avg viewers</p>
                   </div>
                 )}
                 {campaign.min_subs_followers != null && (
                   <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
                     <p className="text-lg font-bold cr-text-bright">{campaign.min_subs_followers.toLocaleString()}</p>
-                    <p className="text-nx-11 cr-text-muted mt-0.5">Min. followers / subs</p>
+                    <p className="cr-stat-caption mt-1">Min. followers / subs</p>
                   </div>
                 )}
                 {campaign.min_engagement_rate != null && (
                   <div className="rounded-lg bg-white/[0.02] border border-white/5 p-3 text-center">
                     <p className="text-lg font-bold cr-text-bright">{Number(campaign.min_engagement_rate).toFixed(1)}%</p>
-                    <p className="text-nx-11 cr-text-muted mt-0.5">Min. CTR</p>
+                    <p className="cr-stat-caption mt-1">Min. CTR</p>
                   </div>
                 )}
                 {(campaign.min_audience_age != null || campaign.max_audience_age != null) && (
@@ -390,7 +390,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                     <p className="text-lg font-bold cr-text-bright">
                       {campaign.min_audience_age ?? '?'}–{campaign.max_audience_age ?? '?'}
                     </p>
-                    <p className="text-nx-11 cr-text-muted mt-0.5">Target audience age</p>
+                    <p className="cr-stat-caption mt-1">Target audience age</p>
                   </div>
                 )}
                 {campaign.required_audience_locations.length > 0 && (
@@ -398,7 +398,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                     <p className="text-sm font-semibold cr-text-bright leading-snug">
                       {campaign.required_audience_locations.join(', ')}
                     </p>
-                    <p className="text-nx-11 cr-text-muted mt-0.5">Required audience locations</p>
+                    <p className="cr-stat-caption mt-1">Required audience locations</p>
                   </div>
                 )}
               </div>
@@ -414,10 +414,10 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
               )}
               {notes.length > 0 && (
                 <div className="mt-3 pt-3 border-t cr-border">
-                  <p className="text-xs cr-text-muted font-medium mb-1">Soft mismatches:</p>
+                  <p className="text-sm cr-meta-label font-medium mb-1">Soft mismatches</p>
                   <ul className="space-y-0.5">
                     {notes.map((n) => (
-                      <li key={n} className="text-xs cr-text-muted opacity-70">· {n}</li>
+                      <li key={n} className="text-sm text-[#c4ccd8]">· {n}</li>
                     ))}
                   </ul>
                 </div>
@@ -435,18 +435,18 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 <div className="mb-4 pb-4 border-b cr-border">
                   <div className="text-center mb-3">
                     <p className="text-3xl font-bold cr-success">${creatorPool.toLocaleString()}</p>
-                    <p className="text-xs cr-text-muted mt-1">Creator Payout Pool</p>
+                    <p className="text-sm cr-meta-label mt-1">Creator Payout Pool</p>
                     {perCreator && (
                       <p className="text-sm font-semibold text-[#22c55e] mt-1">≈ ${perCreator.toLocaleString()} per creator</p>
                     )}
                   </div>
                   <div className="space-y-1 pt-2 border-t cr-border">
-                    <div className="flex justify-between text-nx-11">
-                      <span className="cr-text-muted">Total Budget</span>
-                      <span className="cr-text">${campaign.budget.toLocaleString()}</span>
+                    <div className="flex justify-between text-sm">
+                      <span className="cr-meta-label">Total Budget</span>
+                      <span className="cr-text-bright font-medium">${campaign.budget.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between text-nx-11">
-                      <span className="cr-text-muted">nx8up Fee ({Math.round(NX_FEE_RATE * 100)}%)</span>
+                    <div className="flex justify-between text-sm">
+                      <span className="cr-meta-label">nx8up Fee ({Math.round(NX_FEE_RATE * 100)}%)</span>
                       <span className="text-red-400/80">−${fee.toLocaleString()}</span>
                     </div>
                   </div>
@@ -456,14 +456,14 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
 
             <ul className="space-y-3 text-sm">
               <li className="flex justify-between items-center">
-                <span className="cr-text-muted">Status</span>
+                <span className="cr-meta-label">Status</span>
                 <span className="capitalize text-[#22c55e] font-medium text-xs px-2 py-0.5 rounded-full bg-[#22c55e]/10 border border-[#22c55e]/20">
                   {campaign.status}
                 </span>
               </li>
               {campaign.start_date && (
                 <li className="flex justify-between items-center">
-                  <span className="cr-text-muted">Starts</span>
+                  <span className="cr-meta-label">Starts</span>
                   <span className="cr-text-bright font-medium text-xs">
                     {new Date(campaign.start_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
@@ -471,38 +471,38 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
               )}
               {campaign.end_date && (
                 <li className="flex justify-between items-center">
-                  <span className="cr-text-muted">Ends</span>
+                  <span className="cr-meta-label">Ends</span>
                   <span className="cr-text-bright font-medium text-xs">
                     {new Date(campaign.end_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
                 </li>
               )}
               <li className="flex justify-between items-center">
-                <span className="cr-text-muted">Applicants</span>
+                <span className="cr-meta-label">Applicants</span>
                 <span className="cr-text-bright font-medium text-xs">{campaign._count.applications}</span>
               </li>
               {campaign.creator_count != null && (
                 <li className="flex justify-between items-center">
-                  <span className="cr-text-muted">Spots available</span>
+                  <span className="cr-meta-label">Spots available</span>
                   <span className="cr-text-bright font-medium text-xs">{campaign.creator_count}</span>
                 </li>
               )}
               {campaign.target_cities && (
                 <li className="flex justify-between items-start gap-3">
-                  <span className="cr-text-muted shrink-0">Target cities</span>
-                  <span className="cr-text text-xs text-right">{campaign.target_cities}</span>
+                  <span className="cr-meta-label shrink-0">Target cities</span>
+                  <span className="cr-text-bright text-sm text-right">{campaign.target_cities}</span>
                 </li>
               )}
               {campaign.creator_types.length > 0 && (
                 <li className="flex justify-between items-start gap-3">
-                  <span className="cr-text-muted shrink-0">Creator types</span>
-                  <span className="cr-text text-xs text-right capitalize">{campaign.creator_types.join(', ')}</span>
+                  <span className="cr-meta-label shrink-0">Creator types</span>
+                  <span className="cr-text-bright text-sm text-right capitalize">{campaign.creator_types.join(', ')}</span>
                 </li>
               )}
               {campaign.creator_sizes.length > 0 && (
                 <li className="flex justify-between items-start gap-3">
-                  <span className="cr-text-muted shrink-0">Creator size</span>
-                  <span className="cr-text text-xs text-right capitalize">{campaign.creator_sizes.join(', ')}</span>
+                  <span className="cr-meta-label shrink-0">Creator size</span>
+                  <span className="cr-text-bright text-sm text-right capitalize">{campaign.creator_sizes.join(', ')}</span>
                 </li>
               )}
             </ul>
@@ -518,7 +518,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
               <span className="w-2 h-2 rounded-full bg-[#00c8ff] shrink-0" />
               <div>
                 <p className="text-sm font-semibold text-[#00c8ff]">You&apos;ve been invited</p>
-                <p className="text-xs cr-text-muted">The sponsor selected you directly for this campaign.</p>
+                <p className="text-sm cr-text-muted">The sponsor selected you directly for this campaign.</p>
               </div>
             </div>
             <InviteResponseButtons applicationId={myApplication.id} />
@@ -529,11 +529,11 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             <div>
               <p className="text-sm font-semibold text-[#a855f7]">Campaign Launched</p>
               {alreadyApplied ? (
-                <p className="text-xs cr-text-muted">
-                  Your application status: <span className="capitalize cr-text">{myApplication!.status}</span>
+                <p className="text-sm cr-text-muted">
+                  Your application status: <span className="capitalize cr-text-bright">{myApplication!.status}</span>
                 </p>
               ) : (
-                <p className="text-xs cr-text-muted">This campaign is no longer accepting applications.</p>
+                <p className="text-sm cr-text-muted">This campaign is no longer accepting applications.</p>
               )}
             </div>
           </div>
@@ -542,7 +542,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             <span className="text-lg">✓</span>
             <div>
               <p className="text-sm font-semibold text-[#22c55e]">Application Submitted</p>
-              <p className="text-xs cr-text-muted">Status: <span className="capitalize cr-text">{myApplication!.status}</span></p>
+              <p className="text-sm cr-text-muted">Status: <span className="capitalize cr-text-bright">{myApplication!.status}</span></p>
             </div>
           </div>
         ) : (

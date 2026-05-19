@@ -89,7 +89,7 @@ function Row({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 border-b border-white/18 py-2.5 last:border-0">
-      <span className="shrink-0 text-xs text-[#8f97ab]">{label}</span>
+      <span className="shrink-0 text-xs cr-text-muted-subtle">{label}</span>
       <span className="text-right text-xs text-[#e8f4ff]">{value}</span>
     </div>
   )
@@ -102,7 +102,7 @@ function Pills({ label, values, color = 'cyan' }: { label: string; values: strin
     : 'rounded border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-1.5 py-0.5 text-nx-10 text-[#99f7ff]'
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-4 border-b border-white/18 py-2.5 last:border-0">
-      <span className="shrink-0 text-xs text-[#8f97ab]">{label}</span>
+      <span className="shrink-0 text-xs cr-text-muted-subtle">{label}</span>
       <div className="flex flex-wrap gap-1 justify-end">
         {values.map(v => <span key={v} className={chip}>{v}</span>)}
       </div>
@@ -159,7 +159,7 @@ export default function Step7Summary({
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-        <p className="text-xs text-[#a9abb5]">
+        <p className="text-xs cr-text-muted">
         Your profile is complete. You can edit any section below, or head to your dashboard.
         </p>
       </div>
@@ -176,11 +176,11 @@ export default function Step7Summary({
                 <div className="flex-1 min-w-0">
                   <span className="text-xs text-[#e8f4ff] truncate block">{twitchInitial.username}</span>
                   {twitchInitial.broadcaster_type && (
-                    <span className="text-nx-10 text-[#8f97ab] capitalize">{twitchInitial.broadcaster_type || 'Standard'}</span>
+                    <span className="text-nx-10 cr-text-muted-subtle capitalize">{twitchInitial.broadcaster_type || 'Standard'}</span>
                   )}
                 </div>
               ) : (
-                <span className="text-xs text-[#8f97ab] italic">Not connected</span>
+                <span className="text-xs cr-text-muted-subtle italic">Not connected</span>
               )}
               {twitchInitial.username && (
                 <span className="shrink-0 rounded border border-[#a970ff]/35 bg-[#a970ff]/12 px-1.5 py-0.5 text-nx-10 text-[#d8b4fe]">Connected</span>
@@ -194,11 +194,11 @@ export default function Step7Summary({
                 <div className="flex-1 min-w-0">
                   <span className="text-xs text-[#e8f4ff] truncate block">{youtubeInitial.channel_name || youtubeInitial.handle}</span>
                   {youtubeInitial.handle && youtubeInitial.channel_name && (
-                    <span className="text-nx-10 text-[#8f97ab]">{youtubeInitial.handle}</span>
+                    <span className="text-nx-10 cr-text-muted-subtle">{youtubeInitial.handle}</span>
                   )}
                 </div>
               ) : (
-                <span className="text-xs text-[#8f97ab] italic">Not connected</span>
+                <span className="text-xs cr-text-muted-subtle italic">Not connected</span>
               )}
               {(youtubeInitial.channel_name || youtubeInitial.handle) && (
                 <span className="shrink-0 rounded border border-red-500/35 bg-red-500/10 px-1.5 py-0.5 text-nx-10 text-red-300">Connected</span>
@@ -211,10 +211,10 @@ export default function Step7Summary({
               {steamInitial.steam_id ? (
                 <div className="flex-1 min-w-0">
                   <span className="text-xs text-[#e8f4ff] truncate block">{steamInitial.steam_username ?? 'Steam User'}</span>
-                  <span className="text-nx-10 text-[#8f97ab] font-mono">{steamInitial.steam_id}</span>
+                  <span className="text-nx-10 cr-text-muted-subtle font-mono">{steamInitial.steam_id}</span>
                 </div>
               ) : (
-                <span className="text-xs text-[#8f97ab] italic">Not connected</span>
+                <span className="text-xs cr-text-muted-subtle italic">Not connected</span>
               )}
               {steamInitial.steam_id && (
                 <span className="shrink-0 rounded border border-[#66c0f4]/35 bg-[#66c0f4]/10 px-1.5 py-0.5 text-nx-10 text-[#bcdcf2]">Connected</span>
@@ -229,7 +229,7 @@ export default function Step7Summary({
           <div className="rounded-lg border border-white/16 bg-black/25 p-3">
             {creatorStats.twitch_username && (
               <>
-                <p className="mb-1.5 text-nx-10 font-semibold uppercase tracking-widest text-[#8f97ab]">Twitch</p>
+                <p className="mb-1.5 text-nx-10 font-semibold uppercase tracking-widest cr-text-muted-subtle">Twitch</p>
                 <Row label="Followers" value={fmt(creatorStats.subs_followers)} />
                 <Row label="Subscribers" value={fmt(creatorStats.twitch_subscriber_count)} />
                 <Row label="Avg VOD views" value={fmt(creatorStats.average_vod_views)} />
@@ -241,7 +241,7 @@ export default function Step7Summary({
             {creatorStats.youtube_channel_name && (
               <>
                 {creatorStats.twitch_username && <div className="my-2 border-t border-white/18" />}
-                <p className="mb-1.5 text-nx-10 font-semibold uppercase tracking-widest text-[#8f97ab]">YouTube</p>
+                <p className="mb-1.5 text-nx-10 font-semibold uppercase tracking-widest cr-text-muted-subtle">YouTube</p>
                 <Row label="Subscribers" value={fmt(creatorStats.youtube_subscribers)} />
                 <Row label="Avg views" value={fmt(creatorStats.youtube_avg_views)} />
                 {creatorStats.youtube_watch_time_hours != null && (
@@ -250,7 +250,7 @@ export default function Step7Summary({
               </>
             )}
             {!creatorStats.twitch_username && !creatorStats.youtube_channel_name && (
-              <p className="py-2 text-xs text-[#8f97ab] italic">No accounts connected yet.</p>
+              <p className="py-2 text-xs cr-text-muted-subtle italic">No accounts connected yet.</p>
             )}
           </div>
         </div>
@@ -266,7 +266,7 @@ export default function Step7Summary({
             <Row label="Primary platform" value={draft.primary_platform || undefined} />
             {draft.bio && (
               <div className="border-b border-white/10 py-2.5 last:border-0">
-                <span className="mb-1 block text-xs text-[#8f97ab]">Bio</span>
+                <span className="mb-1 block text-xs cr-text-muted-subtle">Bio</span>
                 <span className="line-clamp-3 text-xs leading-relaxed text-[#e8f4ff]">{draft.bio}</span>
               </div>
             )}
@@ -300,7 +300,7 @@ export default function Step7Summary({
             <Pills label="Campaign types" values={campaignTypeLabels} />
             <Pills label="Product types" values={productTypeLabels} color="purple" />
             {!campaignTypeLabels.length && !productTypeLabels.length && (
-              <p className="py-2 text-xs text-[#8f97ab] italic">No preferences set</p>
+              <p className="py-2 text-xs cr-text-muted-subtle italic">No preferences set</p>
             )}
           </div>
         </div>
@@ -325,7 +325,7 @@ export default function Step7Summary({
         <button
           type="button"
           onClick={onBack}
-          className="rounded-lg border border-white/10 px-5 py-2.5 text-sm font-medium text-[#a9abb5] transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]"
+          className="rounded-lg border border-white/10 px-5 py-2.5 text-sm font-medium cr-text-muted transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]"
         >
           Back
         </button>

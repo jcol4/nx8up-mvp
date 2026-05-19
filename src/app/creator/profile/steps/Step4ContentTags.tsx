@@ -76,7 +76,7 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
       <div className="rounded-xl border border-white/10 bg-black/20 p-4">
         <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Content</p>
         <h2 className="mt-1 font-headline text-lg font-semibold text-[#e8f4ff]">Content & Audience Tags</h2>
-        <p className="mt-1 text-sm text-[#a9abb5]">
+        <p className="mt-1 text-sm cr-text-muted">
           Define your platforms, content themes, and audience profile for better campaign matching.
         </p>
       </div>
@@ -85,7 +85,7 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
         {/* Platforms */}
         <div>
           <p className={sectionTitle}>Platforms</p>
-          <p className="mb-3 text-xs text-[#a9abb5]">All platforms you create content on.</p>
+          <p className="mb-3 text-xs cr-text-muted">All platforms you create content on.</p>
           <div className="flex flex-wrap gap-2">
             {PLATFORM_OPTIONS.map(p => (
               <button
@@ -103,7 +103,7 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
         {/* Game genres */}
         <div className="mt-5">
           <p className={sectionTitle}>Game Genres</p>
-          <p className="mb-2 text-xs text-[#a9abb5]">Add tags (e.g. FPS, MOBA, RPG, Battle Royale).</p>
+          <p className="mb-2 text-xs cr-text-muted">Add tags (e.g. FPS, MOBA, RPG, Battle Royale).</p>
           <div className="mb-2 flex flex-wrap gap-2">
             {draft.game_category.map(t => (
               <span key={t} className="inline-flex items-center gap-1 rounded-lg border border-[#99f7ff]/35 bg-[#99f7ff]/12 px-2.5 py-1 text-sm text-[#99f7ff]">
@@ -180,7 +180,7 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
         {/* Audience interests */}
         <div>
           <p className={sectionTitle}>Audience Interests</p>
-          <p className="mb-2 text-xs text-[#a9abb5]">Tags describing what your audience is into.</p>
+          <p className="mb-2 text-xs cr-text-muted">Tags describing what your audience is into.</p>
           <div className="mb-2 flex flex-wrap gap-2">
             {draft.audience_interests.map(t => (
               <span key={t} className="inline-flex items-center gap-1 rounded-lg border border-[#c084fc]/35 bg-[#c084fc]/15 px-2.5 py-1 text-sm text-[#e9d5ff]">
@@ -221,7 +221,7 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
         {/* Audience gender */}
         <div className="mt-5">
           <p className={sectionTitle}>Audience Gender</p>
-          <p className="mb-3 text-xs text-[#a9abb5]">Primary gender makeup of your audience.</p>
+          <p className="mb-3 text-xs cr-text-muted">Primary gender makeup of your audience.</p>
           <div className="flex flex-wrap gap-2">
             {AUDIENCE_GENDER_OPTIONS.map(g => (
               <button
@@ -246,7 +246,7 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
               step={1} min={13} max={65} placeholder="13"
               className="w-36"
             />
-            <span className="text-sm text-[#a9abb5]">to</span>
+            <span className="text-sm cr-text-muted">to</span>
             <NXStepper
               value={draft.audience_age_max}
               onChange={v => setDraft(d => ({ ...d, audience_age_max: v }))}
@@ -254,7 +254,7 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
               className="w-36"
             />
           </div>
-          <p className="mt-1.5 text-xs text-[#a9abb5]">e.g. 18 to 34</p>
+          <p className="mt-1.5 text-xs cr-text-muted">e.g. 18 to 34</p>
         </div>
 
         {/* Audience locations */}
@@ -279,7 +279,7 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
         <button
           type="button"
           onClick={onBack}
-          className="rounded-lg border border-white/10 px-5 py-2.5 text-sm font-medium text-[#a9abb5] transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]"
+          className="rounded-lg border border-white/10 px-5 py-2.5 text-sm font-medium cr-text-muted transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]"
         >
           Back
         </button>

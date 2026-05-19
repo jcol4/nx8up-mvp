@@ -200,7 +200,7 @@ export default function CreatorProfileWizard({
                   ? 'bg-[#99f7ff] text-slate-900 shadow-[0_0_12px_rgba(153,247,255,0.45)]'
                   : isDone
                     ? 'border border-[#99f7ff]/40 bg-[#99f7ff]/15 text-[#99f7ff]'
-                    : 'border border-white/10 bg-white/5 text-[#4b5563]'
+                    : 'border border-white/10 bg-white/5 cr-text-muted'
               }`}>
                 {isDone ? (
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -224,7 +224,7 @@ export default function CreatorProfileWizard({
                     </button>
                   ) : circle}
                   <span className={`text-nx-10 font-medium hidden sm:block ${
-                    isActive ? 'text-[#99f7ff]' : isDone ? 'text-[#8f97ab]' : 'text-[#4b5563]'
+                    isActive ? 'text-[#99f7ff]' : isDone ? 'cr-text-muted' : 'cr-text-muted-subtle'
                   }`}>
                     {label}
                   </span>
@@ -246,7 +246,7 @@ export default function CreatorProfileWizard({
           <h2 className="text-base font-semibold cr-text-bright">
             Step {step} — {STEP_LABELS[step - 1]}
           </h2>
-          <p className="text-xs text-[#a9abb5] mt-0.5">{step} of {TOTAL_STEPS}</p>
+          <p className="text-xs cr-text-muted mt-0.5">{step} of {TOTAL_STEPS}</p>
         </div>
       </div>
 

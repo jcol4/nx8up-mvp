@@ -229,7 +229,7 @@ export default function ProofSubmitForm({ applicationId, existing }: Props) {
 
       {/* Post URLs */}
       <div>
-        <label className={labelClass}>Post URLs * <span className="normal-case font-normal text-[#4a6080]">(add one per video / stream / clip)</span></label>
+        <label className={labelClass}>Post URLs * <span className="normal-case font-normal cr-text-muted-subtle">(add one per video / stream / clip)</span></label>
         <div className="space-y-2">
           {urls.map((url, i) => (
             <div key={i} className="flex gap-2 items-center">
@@ -275,7 +275,7 @@ export default function ProofSubmitForm({ applicationId, existing }: Props) {
       {/* Screenshot — optional */}
       <div>
         <label className={labelClass}>
-          Screenshot URL <span className="normal-case text-[#4a6080] font-normal">(optional)</span>
+          Screenshot URL <span className="normal-case cr-text-muted-subtle font-normal">(optional)</span>
         </label>
         <input
           type="url"

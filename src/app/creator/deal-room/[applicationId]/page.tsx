@@ -77,11 +77,11 @@ export default async function CreatorDealRoomDetailPage({
 
   return (
     <CreatorShell>
-      <main className="mx-auto max-w-6xl space-y-6 p-6 sm:p-8">
+      <main className="creator-deal-room creator-deal-room-detail mx-auto max-w-6xl space-y-6 p-6 sm:p-8">
         <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
           <Link
             href="/creator/deal-room"
-            className="inline-flex items-center gap-1.5 text-xs cr-text-muted transition-colors hover:text-[#c8dff0]"
+            className="inline-flex items-center gap-1.5 text-sm cr-text-muted transition-colors hover:text-[#99f7ff]"
           >
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -124,9 +124,9 @@ export default async function CreatorDealRoomDetailPage({
                   unoptimized
                 />
               )}
-              <p className="text-sm cr-text-muted">
-                {c.sponsor.company_name ?? 'Sponsor'}
-                {c.brand_name ? ` · ${c.brand_name}` : ''}
+              <p className="text-sm text-[#d6dce6]">
+                <span className="cr-text-bright font-medium">{c.sponsor.company_name ?? 'Sponsor'}</span>
+                {c.brand_name ? <span className="cr-text-muted"> · {c.brand_name}</span> : ''}
               </p>
             </div>
           </div>
@@ -136,12 +136,12 @@ export default async function CreatorDealRoomDetailPage({
               return (
                 <>
                   <p className="text-lg font-bold cr-success">${(perCreator ?? creatorPool).toLocaleString()}</p>
-                  <p className="text-nx-10 cr-text-muted">{perCreator ? 'your payout' : 'creator pool'}</p>
+                  <p className="cr-stat-caption">{perCreator ? 'your payout' : 'creator pool'}</p>
                 </>
               )
             })()}
             {c.end_date && (
-              <p className="text-xs cr-text-muted mt-0.5">
+              <p className="text-sm cr-meta-label mt-0.5">
                 Deadline: {new Date(c.end_date).toLocaleDateString()}
               </p>
             )}
@@ -160,7 +160,7 @@ export default async function CreatorDealRoomDetailPage({
               {trackingUrl ? 'Your Tracking Link' : 'Link to Include'}
             </p>
           </div>
-          <p className="mb-3 text-xs leading-relaxed cr-text-muted">
+          <p className="mb-3 text-sm leading-relaxed cr-text-muted">
             {trackingUrl
               ? 'Use this personalised link in your bio and content description. Every click is tracked and counts toward your campaign performance.'
               : 'Include this link in your bio and content description as specified by the sponsor.'}
@@ -181,39 +181,39 @@ export default async function CreatorDealRoomDetailPage({
           {hasDeliverables && (
             <NxHudCard className="p-5">
               <h2 className="cr-panel-title">Mission Requirements</h2>
-              <p className="mb-4 mt-1 text-xs cr-text-muted">Complete each required deliverable before submitting proof.</p>
+              <p className="mb-4 mt-1 text-sm cr-text-muted">Complete each required deliverable before submitting proof.</p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 {c.num_videos ? (
                   <div className="text-center p-3 rounded-lg bg-[#00c8ff]/5 border border-[#00c8ff]/15">
                     <p className="text-xl font-bold cr-text-bright">{c.num_videos}</p>
-                    <p className="text-xs cr-text-muted mt-0.5">Video{c.num_videos !== 1 ? 's' : ''}</p>
+                    <p className="cr-stat-caption mt-1">Video{c.num_videos !== 1 ? 's' : ''}</p>
                   </div>
                 ) : null}
                 {c.num_streams ? (
                   <div className="text-center p-3 rounded-lg bg-[#7b4fff]/5 border border-[#7b4fff]/15">
                     <p className="text-xl font-bold cr-text-bright">{c.num_streams}</p>
-                    <p className="text-xs cr-text-muted mt-0.5">Stream{c.num_streams !== 1 ? 's' : ''}</p>
+                    <p className="cr-stat-caption mt-1">Stream{c.num_streams !== 1 ? 's' : ''}</p>
                     {c.min_stream_duration && (
-                      <p className="text-xs cr-text-muted">≥ {c.min_stream_duration} min</p>
+                      <p className="text-nx-10 text-[#c4ccd8]">≥ {c.min_stream_duration} min</p>
                     )}
                   </div>
                 ) : null}
                 {c.num_posts ? (
                   <div className="text-center p-3 rounded-lg bg-[#22c55e]/5 border border-[#22c55e]/15">
                     <p className="text-xl font-bold cr-text-bright">{c.num_posts}</p>
-                    <p className="text-xs cr-text-muted mt-0.5">Post{c.num_posts !== 1 ? 's' : ''}</p>
+                    <p className="cr-stat-caption mt-1">Post{c.num_posts !== 1 ? 's' : ''}</p>
                   </div>
                 ) : null}
                 {c.num_short_videos ? (
                   <div className="text-center p-3 rounded-lg bg-[#eab308]/5 border border-[#eab308]/15">
                     <p className="text-xl font-bold cr-text-bright">{c.num_short_videos}</p>
-                    <p className="text-xs cr-text-muted mt-0.5">Short{c.num_short_videos !== 1 ? 's' : ''}</p>
+                    <p className="cr-stat-caption mt-1">Short{c.num_short_videos !== 1 ? 's' : ''}</p>
                   </div>
                 ) : null}
               </div>
 
               {/* Checklist */}
-              <h3 className="text-xs font-semibold cr-text-muted uppercase tracking-wide mb-3">Delivery Checklist</h3>
+              <h3 className="cr-field-label mb-3">Delivery Checklist</h3>
               <ul className="space-y-2">
                 {c.num_videos ? (
                   <li className="flex items-center gap-2 text-sm cr-text">
@@ -283,29 +283,29 @@ export default async function CreatorDealRoomDetailPage({
           {/* Creative Package */}
           <NxHudCard className="p-5">
             <h2 className="cr-panel-title">Creative Package</h2>
-            <p className="mb-4 mt-1 text-xs cr-text-muted">Use this brief as your source of truth for production details.</p>
+            <p className="mb-4 mt-1 text-sm cr-text-muted">Use this brief as your source of truth for production details.</p>
             <dl className="space-y-3">
               {c.brand_name && (
                 <div>
-                  <dt className="text-xs cr-text-muted uppercase tracking-wide">Brand</dt>
+                  <dt className="cr-field-label mb-1">Brand</dt>
                   <dd className="text-sm cr-text-bright font-medium mt-0.5">{c.brand_name}</dd>
                 </div>
               )}
               {c.product_name && (
                 <div>
-                  <dt className="text-xs cr-text-muted uppercase tracking-wide">Product</dt>
+                  <dt className="cr-field-label mb-1">Product</dt>
                   <dd className="text-sm cr-text-bright font-medium mt-0.5">{c.product_name}</dd>
                 </div>
               )}
               {c.objective && (
                 <div>
-                  <dt className="text-xs cr-text-muted uppercase tracking-wide">Campaign Objective</dt>
+                  <dt className="cr-field-label mb-1">Campaign Objective</dt>
                   <dd className="text-sm cr-text mt-0.5 capitalize">{c.objective}</dd>
                 </div>
               )}
               {c.landing_page_url && !trackingUrl && (
                 <div>
-                  <dt className="text-xs cr-text-muted uppercase tracking-wide">Landing Page / Link to Include</dt>
+                  <dt className="cr-field-label mb-1">Landing Page / Link to Include</dt>
                   <dd className="mt-0.5">
                     <a
                       href={c.landing_page_url}
@@ -320,13 +320,13 @@ export default async function CreatorDealRoomDetailPage({
               )}
               {c.content_guidelines && (
                 <div>
-                  <dt className="text-xs cr-text-muted uppercase tracking-wide">Content Guidelines</dt>
+                  <dt className="cr-field-label mb-1">Content Guidelines</dt>
                   <dd className="text-sm cr-text mt-0.5 whitespace-pre-line leading-relaxed">{c.content_guidelines}</dd>
                 </div>
               )}
               {c.video_includes.length > 0 && (
                 <div>
-                  <dt className="text-xs cr-text-muted uppercase tracking-wide mb-1.5">Must Include in Content</dt>
+                  <dt className="cr-field-label mb-2">Must Include in Content</dt>
                   <dd className="flex flex-wrap gap-1.5">
                     {c.video_includes.map((item: string) => (
                       <span key={item} className="text-xs px-2 py-0.5 rounded bg-[#00c8ff]/10 text-[#00c8ff]">
@@ -338,13 +338,13 @@ export default async function CreatorDealRoomDetailPage({
               )}
               {c.conversion_goal && (
                 <div>
-                  <dt className="text-xs cr-text-muted uppercase tracking-wide">Conversion Goal</dt>
+                  <dt className="cr-field-label mb-1">Conversion Goal</dt>
                   <dd className="text-sm cr-text mt-0.5">{c.conversion_goal}</dd>
                 </div>
               )}
               {c.tracking_type && (
                 <div>
-                  <dt className="text-xs cr-text-muted uppercase tracking-wide">Tracking Method</dt>
+                  <dt className="cr-field-label mb-1">Tracking Method</dt>
                   <dd className="text-sm cr-text mt-0.5 capitalize">{c.tracking_type}</dd>
                 </div>
               )}
@@ -377,7 +377,7 @@ export default async function CreatorDealRoomDetailPage({
                   <span><span className="cr-text-bright">Twitch:</span> Check the &quot;This is an Ad or Sponsored Content&quot; box in your stream settings or announce verbally at the start.</span>
                 </li>
               </ul>
-              <p className="text-xs cr-text-muted pt-1">
+              <p className="text-sm cr-text-muted pt-1">
                 Reference: <a href="https://www.ftc.gov/business-guidance/resources/ftcs-endorsement-guides-what-people-are-asking" target="_blank" rel="noopener noreferrer" className="cr-accent hover:underline">FTC Endorsement Guides</a>
               </p>
             </div>
@@ -386,7 +386,7 @@ export default async function CreatorDealRoomDetailPage({
           {/* Submit Proof */}
           <NxHudCard className="p-5">
             <h2 className="cr-panel-title">Submit Proof of Delivery</h2>
-            <p className="mb-4 mt-1 text-xs cr-text-muted">Submit your links once content is live and disclosures are in place.</p>
+            <p className="mb-4 mt-1 text-sm cr-text-muted">Submit your links once content is live and disclosures are in place.</p>
             <ProofSubmitForm applicationId={applicationId} existing={sub ?? null} />
           </NxHudCard>
 
@@ -399,7 +399,7 @@ export default async function CreatorDealRoomDetailPage({
             <dl className="space-y-2.5 text-sm">
               {c.payment_model && (
                 <div className="flex justify-between gap-2">
-                  <dt className="cr-text-muted">Payment</dt>
+                  <dt className="cr-meta-label">Payment</dt>
                   <dd className="cr-text-bright text-right capitalize">{c.payment_model.replace(/_/g, ' ')}</dd>
                 </div>
               )}
@@ -409,20 +409,20 @@ export default async function CreatorDealRoomDetailPage({
                   <>
                     {perCreator && (
                       <div className="flex justify-between gap-2">
-                        <dt className="cr-text-muted">Your Payout</dt>
+                        <dt className="cr-meta-label">Your Payout</dt>
                         <dd className="cr-success font-bold">${perCreator.toLocaleString()}</dd>
                       </div>
                     )}
                     <div className="flex justify-between gap-2">
-                      <dt className="cr-text-muted">Creator Pool</dt>
+                      <dt className="cr-meta-label">Creator Pool</dt>
                       <dd className="cr-success font-semibold">${creatorPool.toLocaleString()}</dd>
                     </div>
-                    <div className="flex justify-between gap-2 text-nx-11">
-                      <dt className="cr-text-muted">Total Budget</dt>
-                      <dd className="cr-text">${c.budget.toLocaleString()}</dd>
+                    <div className="flex justify-between gap-2 text-sm">
+                      <dt className="cr-meta-label">Total Budget</dt>
+                      <dd className="cr-text-bright font-medium">${c.budget.toLocaleString()}</dd>
                     </div>
-                    <div className="flex justify-between gap-2 text-nx-11">
-                      <dt className="cr-text-muted">nx8up Fee ({Math.round(NX_FEE_RATE * 100)}%)</dt>
+                    <div className="flex justify-between gap-2 text-sm">
+                      <dt className="cr-meta-label">nx8up Fee ({Math.round(NX_FEE_RATE * 100)}%)</dt>
                       <dd className="text-red-400/70">−${fee.toLocaleString()}</dd>
                     </div>
                   </>
@@ -430,19 +430,19 @@ export default async function CreatorDealRoomDetailPage({
               })()}
               {c.start_date && (
                 <div className="flex justify-between gap-2">
-                  <dt className="cr-text-muted">Start</dt>
-                  <dd className="cr-text">{new Date(c.start_date).toLocaleDateString()}</dd>
+                  <dt className="cr-meta-label">Start</dt>
+                  <dd className="cr-text-bright">{new Date(c.start_date).toLocaleDateString()}</dd>
                 </div>
               )}
               {c.end_date && (
                 <div className="flex justify-between gap-2">
-                  <dt className="cr-text-muted">Deadline</dt>
-                  <dd className="cr-text">{new Date(c.end_date).toLocaleDateString()}</dd>
+                  <dt className="cr-meta-label">Deadline</dt>
+                  <dd className="cr-text-bright">{new Date(c.end_date).toLocaleDateString()}</dd>
                 </div>
               )}
               {c.platform.length > 0 && (
                 <div>
-                  <dt className="cr-text-muted mb-1">Platforms</dt>
+                  <dt className="cr-meta-label mb-1">Platforms</dt>
                   <dd className="flex flex-wrap gap-1">
                     {c.platform.map((p: string) => (
                       <span key={p} className="text-xs px-2 py-0.5 rounded bg-[#22c55e]/10 text-[#22c55e]">{p}</span>
@@ -458,7 +458,7 @@ export default async function CreatorDealRoomDetailPage({
               <h3 className="cr-panel-title">Your Submission</h3>
               <dl className="space-y-2.5 text-sm">
                 <div className="flex justify-between gap-2">
-                  <dt className="cr-text-muted">Status</dt>
+                  <dt className="cr-meta-label">Status</dt>
                   <dd className={
                     sub.status === 'approved'           ? 'text-green-400 font-medium' :
                     sub.status === 'admin_verified'     ? 'text-[#00c8ff] font-medium' :
@@ -476,13 +476,13 @@ export default async function CreatorDealRoomDetailPage({
                 </div>
                 {sub.submitted_at && (
                   <div className="flex justify-between gap-2">
-                    <dt className="cr-text-muted">Submitted</dt>
-                    <dd className="cr-text text-right">{new Date(sub.submitted_at).toLocaleDateString()}</dd>
+                    <dt className="cr-meta-label">Submitted</dt>
+                    <dd className="cr-text-bright text-right">{new Date(sub.submitted_at).toLocaleDateString()}</dd>
                   </div>
                 )}
                 {sub.status === 'approved' && (
                   <div className="flex justify-between gap-2">
-                    <dt className="cr-text-muted">Payout</dt>
+                    <dt className="cr-meta-label">Payout</dt>
                     <dd className={sub.payout_status === 'paid' ? 'text-[#22c55e] font-medium' : 'text-yellow-400'}>
                       {sub.payout_status === 'paid' ? 'Sent' : 'Pending'}
                     </dd>

@@ -24,7 +24,7 @@ import CreatorShell from '@/components/creator/CreatorShell'
 import { getClerkImageUrls } from '@/lib/get-clerk-images'
 
 const SUBMISSION_STATUS: Record<string, { label: string; className: string }> = {
-  pending: { label: 'Not submitted', className: 'border border-white/12 bg-white/8 text-[#a9abb5]' },
+  pending: { label: 'Not submitted', className: 'border border-white/12 bg-white/8 cr-text-muted' },
   submitted: { label: 'Pending review', className: 'border border-yellow-500/30 bg-yellow-500/15 text-yellow-300' },
   admin_verified: { label: 'Verified - awaiting sponsor', className: 'border border-[#99f7ff]/30 bg-[#99f7ff]/12 text-[#99f7ff]' },
   admin_rejected: { label: 'Rejected - resubmit', className: 'border border-red-500/30 bg-red-500/15 text-red-300' },
@@ -45,11 +45,11 @@ export default async function CreatorDealRoomPage() {
 
   return (
     <CreatorShell>
-    <main className="max-w-4xl mx-auto p-6 sm:p-8">
+    <main className="creator-deal-room max-w-4xl mx-auto p-6 sm:p-8">
       <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
         <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Deal Room</p>
         <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Deal Room</h1>
-        <p className="mt-1 text-sm text-[#a9abb5]">
+        <p className="mt-1 text-sm cr-text-muted">
           Your accepted campaigns. Submit proof of content delivery here.
         </p>
         <div className="mt-3 inline-flex items-center rounded-full border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2.5 py-1 text-nx-11 text-[#99f7ff]">
@@ -59,8 +59,8 @@ export default async function CreatorDealRoomPage() {
 
       {applications.length === 0 ? (
         <div className="rounded-xl border border-white/16 bg-[linear-gradient(90deg,rgba(153,247,255,0.95),rgba(153,247,255,0.22))] bg-[length:100%_2px] bg-no-repeat bg-[position:top_left] bg-black/20 shadow-[inset_0_1px_0_rgba(153,247,255,0.28)] p-8 text-center">
-          <p className="mb-2 text-sm text-[#a9abb5]">No active deals yet.</p>
-          <p className="text-xs text-[#a9abb5]">
+          <p className="mb-2 text-sm cr-text-muted">No active deals yet.</p>
+          <p className="text-xs cr-text-muted">
             Once a sponsor accepts your application, your deal room will appear here.
           </p>
           <Link
@@ -106,7 +106,7 @@ export default async function CreatorDealRoomPage() {
                       </div>
                       <div className="flex flex-wrap items-center gap-1.5">
                         {app.campaign.brand_name && (
-                          <span className="rounded border border-white/12 bg-white/6 px-2 py-0.5 text-nx-11 text-[#a9abb5]">
+                          <span className="rounded border border-white/12 bg-white/6 px-2 py-0.5 text-nx-11 cr-text-muted">
                             {app.campaign.brand_name}
                           </span>
                         )}
@@ -119,7 +119,7 @@ export default async function CreatorDealRoomPage() {
                           </span>
                         ))}
                         {app.campaign.end_date && (
-                          <span className="rounded border border-white/12 bg-white/6 px-2 py-0.5 text-nx-11 text-[#a9abb5]">
+                          <span className="rounded border border-white/12 bg-white/6 px-2 py-0.5 text-nx-11 cr-text-muted">
                             Due {new Date(app.campaign.end_date).toLocaleDateString()}
                           </span>
                         )}
@@ -134,7 +134,7 @@ export default async function CreatorDealRoomPage() {
                             <span className="text-sm font-bold text-emerald-300">
                               ${(perCreator ?? creatorPool).toLocaleString()}
                             </span>
-                            <p className="text-nx-10 text-[#a9abb5]">{perCreator ? 'your payout' : 'creator pool'}</p>
+                            <p className="text-nx-10 cr-text-muted">{perCreator ? 'your payout' : 'creator pool'}</p>
                           </div>
                         )
                       })()}

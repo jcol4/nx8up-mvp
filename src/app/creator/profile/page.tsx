@@ -55,10 +55,9 @@ export default async function CreatorProfilePage() {
   const role = (sessionClaims?.metadata as { role?: string })?.role
   if (role !== 'creator' && role !== 'admin') redirect('/')
 
-  await Promise.all([
-    refreshTwitchDataIfStale(userId),
-    refreshYouTubeDataIfStale(userId),
-  ])
+  // Refresh platform stats in the background — do not block first paint.
+  void refreshTwitchDataIfStale(userId)
+  void refreshYouTubeDataIfStale(userId)
 
   const [{ displayName, username }, profile, creator] = await Promise.all([
     getUserDisplayInfo(),
@@ -125,11 +124,11 @@ export default async function CreatorProfilePage() {
 
   return (
     <CreatorShell>
-      <main className="w-full max-w-3xl mx-auto p-6 sm:p-8">
+      <main className="creator-profile w-full max-w-3xl mx-auto p-6 sm:p-8">
         <div className="dash-panel dash-panel--nx-top mb-6 rounded-xl border border-white/16 border-t-2 border-t-[#bffcff] bg-black/20 p-4">
           <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Creator</p>
           <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Creator Profile</h1>
-          <p className="mt-1 text-sm text-[#a9abb5]">
+          <p className="mt-1 text-sm cr-text-muted">
             Complete your profile to get discovered by sponsors.
           </p>
         </div>

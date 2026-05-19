@@ -34,7 +34,7 @@ function StatRow({ label, value, highlight, tone = 'default' }: StatRowProps) {
     tone === 'twitch' ? 'text-[#b7a2d8]' :
     tone === 'youtube' ? 'text-[#c8a0a0]' :
     tone === 'steam' ? 'text-[#9bb8cf]' :
-    'text-[#8f97ab]'
+    'cr-text-muted-subtle'
   const valueClass = highlight
     ? tone === 'twitch'
       ? 'text-[#d8b4fe]'
@@ -48,7 +48,7 @@ function StatRow({ label, value, highlight, tone = 'default' }: StatRowProps) {
     tone === 'twitch' ? 'text-[#a48fbf]' :
     tone === 'youtube' ? 'text-[#b79696]' :
     tone === 'steam' ? 'text-[#7a96aa]' :
-    'text-[#8f97ab]'
+    'cr-text-muted-subtle'
 
   return (
     <div className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b py-2.5 last:border-0 ${dividerClass}`}>
@@ -126,7 +126,7 @@ export default function CreatorStatsPanel({ creator }: Props) {
   if (!hasTwitch && !hasYouTube && !hasSteam) {
     return (
       <div className="dash-panel dash-panel--nx-top rounded-xl border border-white/16 border-t-2 border-t-[#bffcff] bg-black/20 p-4 text-center">
-        <p className="text-sm text-[#a9abb5]">
+        <p className="text-sm cr-text-muted">
           Connect Twitch, YouTube, or Steam above to see your verified stats here.
         </p>
       </div>
@@ -359,7 +359,7 @@ export default function CreatorStatsPanel({ creator }: Props) {
               highlight
             />
             <div className="py-2">
-              <p className="text-nx-10 leading-relaxed text-[#8f97ab]">
+              <p className="text-nx-10 leading-relaxed cr-text-muted-subtle">
                 Computed from actual link clicks across your sponsored campaigns — updated after each click.
               </p>
             </div>

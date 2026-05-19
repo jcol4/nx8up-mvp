@@ -75,14 +75,14 @@ export default function Step3CreatorIdentity({ draft, setDraft, error, onNext, o
       <div className="rounded-xl border border-white/10 bg-black/20 p-4">
         <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Identity</p>
         <h2 className="mt-1 font-headline text-lg font-semibold text-[#e8f4ff]">Creator Identity</h2>
-        <p className="mt-1 text-sm text-[#a9abb5]">
+        <p className="mt-1 text-sm cr-text-muted">
           Add your public profile details so sponsors can quickly understand who you are.
         </p>
       </div>
 
       <div className={sectionCardClass}>
         <p className={sectionTitle}>Identity Details</p>
-        <p className="mb-4 text-xs text-[#a9abb5]">
+        <p className="mb-4 text-xs cr-text-muted">
           Add your public identity details so sponsors can quickly understand who you are and where your audience is.
         </p>
 
@@ -160,7 +160,7 @@ export default function Step3CreatorIdentity({ draft, setDraft, error, onNext, o
       {/* Languages */}
       <div className={sectionCardClass}>
         <p className={sectionTitle}>Languages</p>
-        <p className="mb-3 text-xs text-[#a9abb5]">Select the languages you primarily create in.</p>
+        <p className="mb-3 text-xs cr-text-muted">Select the languages you primarily create in.</p>
         <div className="flex flex-wrap gap-2">
           {COMMON_LANGUAGES.map(lang => (
             <button
@@ -170,7 +170,7 @@ export default function Step3CreatorIdentity({ draft, setDraft, error, onNext, o
               className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-all ${
                 draft.language.includes(lang)
                   ? 'border-[#c084fc]/45 bg-[#c084fc]/20 text-[#e9d5ff] shadow-[0_0_12px_rgba(192,132,252,0.22)]'
-                  : 'border-white/10 text-[#a9abb5] hover:border-[#c084fc]/35 hover:bg-[#c084fc]/8 hover:text-[#e8f4ff]'
+                  : 'border-white/10 cr-text-muted hover:border-[#c084fc]/35 hover:bg-[#c084fc]/8 hover:text-[#e8f4ff]'
               }`}
             >
               {lang}
@@ -182,7 +182,7 @@ export default function Step3CreatorIdentity({ draft, setDraft, error, onNext, o
       {/* Creator type */}
       <div className={sectionCardClass}>
         <p className={sectionTitle}>Creator Type</p>
-        <p className="mb-3 text-xs text-[#a9abb5]">Select all that apply.</p>
+        <p className="mb-3 text-xs cr-text-muted">Select all that apply.</p>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {CREATOR_TYPE_OPTIONS.map(opt => {
             const active = draft.creator_types.includes(opt.value)
@@ -200,7 +200,7 @@ export default function Step3CreatorIdentity({ draft, setDraft, error, onNext, o
                 <div className={`mb-0.5 text-sm font-semibold ${active ? 'text-[#99f7ff]' : 'text-[#e8f4ff]'}`}>
                   {opt.label}
                 </div>
-                <div className="text-xs text-[#a9abb5]">{opt.description}</div>
+                <div className="text-xs cr-text-muted">{opt.description}</div>
               </button>
             )
           })}
@@ -210,7 +210,7 @@ export default function Step3CreatorIdentity({ draft, setDraft, error, onNext, o
       {/* Primary platform */}
       <div className={sectionCardClass}>
         <p className={sectionTitle}>Primary Platform</p>
-        <p className="mb-3 text-xs text-[#a9abb5]">Where do you create most of your content?</p>
+        <p className="mb-3 text-xs cr-text-muted">Where do you create most of your content?</p>
         <div className="flex flex-wrap gap-2">
           {PLATFORM_OPTIONS.map(p => (
             <button
@@ -231,7 +231,7 @@ export default function Step3CreatorIdentity({ draft, setDraft, error, onNext, o
         <button
           type="button"
           onClick={onBack}
-          className="rounded-lg border border-white/10 px-5 py-2.5 text-sm font-medium text-[#a9abb5] transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]"
+          className="rounded-lg border border-white/10 px-5 py-2.5 text-sm font-medium cr-text-muted transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]"
         >
           Back
         </button>

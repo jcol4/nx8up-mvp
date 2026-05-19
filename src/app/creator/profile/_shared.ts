@@ -165,7 +165,7 @@ export const COMMON_LANGUAGES = [
   'Arabic',
 ]
 
-export const labelClass = 'block text-sm font-medium text-[#a9abb5] mb-1.5'
+export const labelClass = 'block text-sm font-medium cr-text-muted mb-1.5'
 export const sectionTitle =
   'font-headline text-nx-11 font-semibold uppercase tracking-[0.2em] text-[#99f7ff] mb-3'
 
@@ -177,6 +177,6 @@ export function toggleBtn(active: boolean): string {
   return `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
     active
       ? 'bg-[#99f7ff] text-slate-900 border-[#99f7ff] shadow-[0_0_14px_rgba(153,247,255,0.3)]'
-      : 'border-white/10 text-[#a9abb5] hover:text-[#e8f4ff] hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/5'
+      : 'border-white/10 cr-text-muted hover:text-[#e8f4ff] hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/5'
   }`
 }

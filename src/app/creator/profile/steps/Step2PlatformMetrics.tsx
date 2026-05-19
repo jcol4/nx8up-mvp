@@ -45,7 +45,7 @@ type Props = {
 export default function Step2PlatformMetrics({ creator, onNext, onBack }: Props) {
   return (
     <div className="space-y-4">
-      <p className="mb-4 text-sm text-[#a9abb5] leading-relaxed">
+      <p className="mb-4 text-sm cr-text-muted leading-relaxed">
         These stats are synced automatically from your connected accounts. They are read-only and verified by NX8UP.
       </p>
 
@@ -55,7 +55,7 @@ export default function Step2PlatformMetrics({ creator, onNext, onBack }: Props)
         <button
           type="button"
           onClick={onBack}
-          className="rounded-lg border border-white/10 px-5 py-2.5 text-sm font-medium text-[#a9abb5] transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]"
+          className="rounded-lg border border-white/10 px-5 py-2.5 text-sm font-medium cr-text-muted transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]"
         >
           Back
         </button>

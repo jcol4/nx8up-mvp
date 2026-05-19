@@ -27,12 +27,12 @@ export default function GettingStartedCard({
     <div data-reveal className="reveal-item rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/30 p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Getting Started</p>
+          <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Getting Started</p>
           <p className="mt-1 text-sm text-[#a9abb5]">{doneCount} of {items.length} steps complete</p>
         </div>
         <Link
           href="/creator/guide"
-          className="shrink-0 rounded-lg border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-3 py-1.5 text-[11px] uppercase tracking-widest text-[#99f7ff] transition hover:bg-[#99f7ff]/20"
+          className="shrink-0 rounded-lg border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-3 py-1.5 text-nx-11 uppercase tracking-widest text-[#99f7ff] transition hover:bg-[#99f7ff]/20"
         >
           Full Guide →
         </Link>
@@ -55,9 +55,9 @@ export default function GettingStartedCard({
               {item.done ? (
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-[#22c55e]" />
               ) : (
-                <Circle className="h-4 w-4 shrink-0 text-slate-600" />
+                <Circle className="h-4 w-4 shrink-0 text-white/55" />
               )}
-              <span className={`text-sm ${item.done ? 'text-slate-500 line-through' : 'text-[#c8cad4]'}`}>
+              <span className={`text-sm ${item.done ? 'text-slate-500 line-through' : 'text-white'}`}>
                 {item.label}
               </span>
             </Link>

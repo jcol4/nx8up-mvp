@@ -35,11 +35,11 @@ async function AcademyPageInner() {
 
   return (
     <CreatorShell>
-      <main className="mx-auto max-w-5xl p-6 sm:p-8">
+      <main className="creator-academy mx-auto max-w-5xl p-6 sm:p-8">
         <div className="mb-6 rounded-xl border border-white/10 bg-black/20 p-4">
           <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Academy</p>
           <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Creator Academy</h1>
-          <p className="mt-1 text-sm text-[#a9abb5]">
+          <p className="mt-1 text-sm cr-text-muted">
             Structured modules to sharpen your content strategy, partnerships, and creator business.
           </p>
           <div className="mt-3 inline-flex items-center rounded-full border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2.5 py-1 text-nx-11 text-[#99f7ff]">
@@ -77,7 +77,7 @@ async function AcademyPageInner() {
                     {lesson.title}
                   </p>
                   <div className="mt-2 flex items-center justify-between">
-                    <span className="text-xs text-[#a9abb5]">{lesson.duration}</span>
+                    <span className="text-sm cr-text-muted">{lesson.duration}</span>
                     <span className="text-xs font-medium text-[#99f7ff] transition-colors group-hover:text-[#c9fbff]">
                       Open lesson →
                     </span>

@@ -49,7 +49,7 @@ export default function Step5BrandPreferences({ draft, setDraft, onNext, onBack,
       <div className="rounded-xl border border-white/10 bg-black/20 p-4">
         <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Brands</p>
         <h2 className="mt-1 font-headline text-lg font-semibold text-[#e8f4ff]">Brand Preferences</h2>
-        <p className="mt-1 text-sm text-[#a9abb5]">
+        <p className="mt-1 text-sm cr-text-muted">
           Tell sponsors which campaign formats and product categories fit your audience best.
         </p>
       </div>
@@ -57,7 +57,7 @@ export default function Step5BrandPreferences({ draft, setDraft, onNext, onBack,
       {/* Preferred campaign types */}
       <div className={sectionCardClass}>
         <p className={sectionTitle}>Preferred Campaign Types</p>
-        <p className="mb-3 text-xs text-[#a9abb5]">What kinds of sponsorship formats work best for your content?</p>
+        <p className="mb-3 text-xs cr-text-muted">What kinds of sponsorship formats work best for your content?</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {PREFERRED_CAMPAIGN_TYPE_OPTIONS.map(opt => {
             const active = draft.preferred_campaign_types.includes(opt.value)
@@ -75,7 +75,7 @@ export default function Step5BrandPreferences({ draft, setDraft, onNext, onBack,
                 <div className={`text-sm font-semibold mb-0.5 ${active ? 'text-[#99f7ff]' : 'text-[#e8f4ff]'}`}>
                   {opt.label}
                 </div>
-                <div className="text-xs text-[#a9abb5]">{opt.description}</div>
+                <div className="text-xs cr-text-muted">{opt.description}</div>
               </button>
             )
           })}
@@ -85,7 +85,7 @@ export default function Step5BrandPreferences({ draft, setDraft, onNext, onBack,
       {/* Preferred product types */}
       <div className={sectionCardClass}>
         <p className={sectionTitle}>Preferred Product Types</p>
-        <p className="mb-3 text-xs text-[#a9abb5]">What sponsor categories are you comfortable promoting?</p>
+        <p className="mb-3 text-xs cr-text-muted">What sponsor categories are you comfortable promoting?</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {PREFERRED_PRODUCT_TYPE_OPTIONS.map(opt => {
             const active = draft.preferred_product_types.includes(opt.value)
@@ -103,7 +103,7 @@ export default function Step5BrandPreferences({ draft, setDraft, onNext, onBack,
                 <div className={`text-sm font-semibold mb-0.5 ${active ? 'text-[#d8b4fe]' : 'text-[#e8f4ff]'}`}>
                   {opt.label}
                 </div>
-                <div className="text-xs text-[#a9abb5]">{opt.description}</div>
+                <div className="text-xs cr-text-muted">{opt.description}</div>
               </button>
             )
           })}
@@ -114,7 +114,7 @@ export default function Step5BrandPreferences({ draft, setDraft, onNext, onBack,
         <button
           type="button"
           onClick={onBack}
-          className="rounded-lg border border-white/10 px-5 py-2.5 text-sm font-medium text-[#a9abb5] transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]"
+          className="rounded-lg border border-white/10 px-5 py-2.5 text-sm font-medium cr-text-muted transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]"
         >
           Back
         </button>
