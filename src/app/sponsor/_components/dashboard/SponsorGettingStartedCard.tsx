@@ -1,53 +1,34 @@
-import { auth } from '@clerk/nextjs/server'
-import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { CheckCircle2, Circle } from 'lucide-react'
+import type { SponsorGettingStartedData } from '@/lib/sponsor-dashboard-cache'
 
-export default async function SponsorGettingStartedCard() {
-  const { userId } = await auth()
-  if (!userId) return null
+type Props = SponsorGettingStartedData
 
-  const sponsor = await prisma.sponsors.findUnique({
-    where: { clerk_user_id: userId },
-    select: { id: true, company_name: true, platform: true },
-  })
-
-  let campaignCount = 0
-  let applicationsCount = 0
-  let paidCount = 0
-
-  if (sponsor) {
-    ;[campaignCount, applicationsCount, paidCount] = await Promise.all([
-      prisma.campaigns.count({ where: { sponsor_id: sponsor.id } }),
-      prisma.campaign_applications.count({ where: { campaign: { sponsor_id: sponsor.id } } }),
-      prisma.campaign_applications.count({
-        where: {
-          campaign: { sponsor_id: sponsor.id },
-          status: { in: ['accepted', 'payout_due', 'paid', 'completed'] },
-        },
-      }),
-    ])
-  }
-
+export default function SponsorGettingStartedCard({
+  profileComplete,
+  hasCampaign,
+  hasApplications,
+  hasPaidApplication,
+}: Props) {
   const items = [
     {
       label: 'Complete your company profile',
-      done: !!(sponsor?.company_name && sponsor.platform.length > 0),
+      done: profileComplete,
       href: '/sponsor/profile',
     },
     {
       label: 'Create your first campaign',
-      done: campaignCount > 0,
+      done: hasCampaign,
       href: '/sponsor/campaigns/new',
     },
     {
       label: 'Review matched creators',
-      done: applicationsCount > 0,
+      done: hasApplications,
       href: '/sponsor/creators',
     },
     {
       label: 'Make your first payment',
-      done: paidCount > 0,
+      done: hasPaidApplication,
       href: '/sponsor/payouts',
     },
   ]
@@ -58,12 +39,12 @@ export default async function SponsorGettingStartedCard() {
     <div className="rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/30 p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-headline text-[11px] uppercase tracking-[0.2em] text-[#99f7ff]">Getting Started</p>
+          <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Getting Started</p>
           <p className="mt-1 text-sm text-[#a9abb5]">{doneCount} of {items.length} steps complete</p>
         </div>
         <Link
           href="/sponsor/guide"
-          className="shrink-0 rounded-lg border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-3 py-1.5 text-[11px] uppercase tracking-widest text-[#99f7ff] transition hover:bg-[#99f7ff]/20"
+          className="shrink-0 rounded-lg border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-3 py-1.5 text-nx-11 uppercase tracking-widest text-[#99f7ff] transition hover:bg-[#99f7ff]/20"
         >
           Full Guide →
         </Link>
@@ -86,9 +67,9 @@ export default async function SponsorGettingStartedCard() {
               {item.done ? (
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-[#22c55e]" />
               ) : (
-                <Circle className="h-4 w-4 shrink-0 text-slate-600" />
+                <Circle className="h-4 w-4 shrink-0 text-white/55" />
               )}
-              <span className={`text-sm ${item.done ? 'text-slate-500 line-through' : 'text-[#c8cad4]'}`}>
+              <span className={`text-sm ${item.done ? 'text-slate-500 line-through' : 'text-white'}`}>
                 {item.label}
               </span>
             </Link>

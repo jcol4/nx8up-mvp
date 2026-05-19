@@ -19,6 +19,13 @@ export type SponsorMatchedCreatorPreview = {
   href: string
 }
 
+export type SponsorGettingStartedData = {
+  profileComplete: boolean
+  hasCampaign: boolean
+  hasApplications: boolean
+  hasPaidApplication: boolean
+}
+
 /** Use with `revalidateTag(sponsorDashboardCacheTag(sponsorId))` after sponsor mutations. */
 export function sponsorDashboardCacheTag(sponsorId: string) {
   return `sponsor-dashboard:${sponsorId}`
@@ -66,6 +73,38 @@ export function getSponsorKpiCached(sponsorId: string) {
       }
     },
     ['sponsor-dashboard-kpi', sponsorId],
+    { revalidate: 20, tags: [sponsorDashboardCacheTag(sponsorId)] },
+  )()
+}
+
+export function getSponsorGettingStartedCached(sponsorId: string) {
+  return unstable_cache(
+    async (): Promise<SponsorGettingStartedData> => {
+      const [sponsor, campaignCount, applicationsCount, paidCount] = await Promise.all([
+        prisma.sponsors.findUnique({
+          where: { id: sponsorId },
+          select: { company_name: true, platform: true },
+        }),
+        prisma.campaigns.count({ where: { sponsor_id: sponsorId } }),
+        prisma.campaign_applications.count({
+          where: { campaign: { sponsor_id: sponsorId } },
+        }),
+        prisma.campaign_applications.count({
+          where: {
+            campaign: { sponsor_id: sponsorId },
+            status: { in: ['accepted', 'payout_due', 'paid', 'completed'] },
+          },
+        }),
+      ])
+
+      return {
+        profileComplete: !!(sponsor?.company_name && sponsor.platform.length > 0),
+        hasCampaign: campaignCount > 0,
+        hasApplications: applicationsCount > 0,
+        hasPaidApplication: paidCount > 0,
+      }
+    },
+    ['sponsor-dashboard-getting-started', sponsorId],
     { revalidate: 20, tags: [sponsorDashboardCacheTag(sponsorId)] },
   )()
 }

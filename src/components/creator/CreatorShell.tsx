@@ -44,18 +44,22 @@ const FALLBACK_STATS_ROWS: SidebarStatRow[] = [
 export default async function CreatorShell({ children }: Props) {
   const { sessionClaims, userId } = await auth()
   const role = (sessionClaims?.metadata as { role?: string })?.role
-  const { displayName, username } = await getUserDisplayInfo()
+
+  const [{ displayName, username }, statsResult] = await Promise.all([
+    getUserDisplayInfo(),
+    userId
+      ? getCreatorSidebarStatsCached(userId)
+          .then((stats) => ({ ok: true as const, stats }))
+          .catch(() => ({ ok: false as const }))
+      : Promise.resolve({ ok: false as const }),
+  ])
 
   let statsRows: SidebarStatRow[] = FALLBACK_STATS_ROWS
   let statsUnavailable = false
-
-  if (userId) {
-    try {
-      const stats = await getCreatorSidebarStatsCached(userId)
-      statsRows = buildStatsRows(stats)
-    } catch {
-      statsUnavailable = true
-    }
+  if (statsResult.ok) {
+    statsRows = buildStatsRows(statsResult.stats)
+  } else if (userId) {
+    statsUnavailable = true
   }
 
   return (
