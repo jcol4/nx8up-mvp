@@ -45,7 +45,7 @@ import FormSelect from '@/components/ui/FormSelect'
 
 const PLATFORMS = ['Twitch', 'YouTube', 'TikTok', 'Instagram', 'Other'] as const
 
-const labelClass = 'mb-1.5 block text-sm font-medium text-[#a9abb5]'
+const labelClass = 'mb-1.5 block text-sm font-medium cr-text-muted'
 const sectionClass =
   'dash-panel dash-panel--nx-top space-y-4 rounded-xl border border-white/16 border-t-2 border-t-[#bffcff] bg-black/20 p-4 sm:p-5'
 const sectionTitle = 'font-headline text-nx-11 font-semibold uppercase tracking-[0.2em] text-[#99f7ff]'
@@ -111,10 +111,10 @@ export default function SponsorProfileForm({ profile }: Props) {
   }
 
   const toggleBtn = (active: boolean) =>
-    `px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 border ${
+    `rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors duration-150 ${
       active
-        ? 'border-[#99f7ff] bg-[#99f7ff] text-slate-900 shadow-[0_0_14px_rgba(153,247,255,0.3)]'
-        : 'border-white/15 text-[#a9abb5] hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/8 hover:text-[#e8f4ff] hover:shadow-[0_0_14px_rgba(153,247,255,0.12)]'
+        ? 'border-[#99f7ff]/35 bg-[#99f7ff]/10 text-[#e8f4ff]'
+        : 'border-white/15 cr-text-muted hover:border-[#99f7ff]/25 hover:bg-[#99f7ff]/5 hover:text-[#e8f4ff]'
     }`
 
   const budgetMinNum = budgetMin ? parseInt(budgetMin, 10) : 0
@@ -208,7 +208,7 @@ export default function SponsorProfileForm({ profile }: Props) {
               <p className="font-headline text-nx-15 font-semibold leading-snug text-[#e8f4ff] sm:text-base">
                 Profile saved
               </p>
-              <p className="mt-0.5 text-xs leading-relaxed text-[#a9abb5] sm:text-sm">
+              <p className="mt-0.5 text-xs leading-relaxed cr-text-muted sm:text-sm">
                 Updates are live. Returning to your dashboard.
               </p>
               <div className="mt-3 h-0.5 w-full overflow-hidden rounded-full bg-white/10" aria-hidden>
@@ -230,7 +230,7 @@ export default function SponsorProfileForm({ profile }: Props) {
       {/* ── Profile Picture ──────────────────────────────────────────── */}
       <div className={sectionClass}>
         <p className={sectionTitle}>Profile Picture</p>
-        <p className="mb-3 text-xs text-[#a9abb5]">
+        <p className="mb-3 text-xs cr-text-muted">
           Your profile picture is shown to creators on campaign listings and deal room pages.
         </p>
         <ProfilePictureUpload />
@@ -295,17 +295,17 @@ export default function SponsorProfileForm({ profile }: Props) {
 
         <div>
           <label className={labelClass}>Languages</label>
-          <p className="mb-2 text-xs text-[#a9abb5]">Languages your campaigns are targeted to.</p>
+          <p className="mb-2 text-xs cr-text-muted">Languages your campaigns are targeted to.</p>
           <div className="flex flex-wrap gap-2">
             {COMMON_LANGUAGES.map(lang => (
               <button
                 key={lang}
                 type="button"
                 onClick={() => toggleArr(language, setLanguage, lang)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 border ${
+                className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors duration-150 ${
                   language.includes(lang)
-                    ? 'border-[#7b4fff]/50 bg-[#7b4fff]/30 text-[#c8dff0] shadow-[0_0_14px_rgba(123,79,255,0.25)]'
-                    : 'border-white/15 text-[#a9abb5] hover:border-[rgba(123,79,255,0.35)] hover:bg-[rgba(123,79,255,0.05)] hover:text-[#c8dff0]'
+                    ? 'border-[#7b4fff]/35 bg-[#7b4fff]/12 text-[#e8f4ff]'
+                    : 'border-white/15 cr-text-muted hover:border-[#7b4fff]/25 hover:bg-[#7b4fff]/5 hover:text-[#e8f4ff]'
                 }`}
               >
                 {lang}
@@ -321,7 +321,7 @@ export default function SponsorProfileForm({ profile }: Props) {
 
         <div>
           <label className={labelClass}>Preferred platforms</label>
-          <p className="mb-2 text-xs text-[#a9abb5]">Platforms you typically run campaigns on.</p>
+          <p className="mb-2 text-xs cr-text-muted">Platforms you typically run campaigns on.</p>
           <div className="flex flex-wrap gap-2">
             {PLATFORMS.map(p => (
               <button
@@ -338,7 +338,7 @@ export default function SponsorProfileForm({ profile }: Props) {
 
         <div>
           <label className={labelClass}>Content types</label>
-          <p className="mb-2 text-xs text-[#a9abb5]">Types of content you want creators to produce.</p>
+          <p className="mb-2 text-xs cr-text-muted">Types of content you want creators to produce.</p>
           <div className="flex flex-wrap gap-2">
             {DEFAULT_CONTENT_CATEGORIES.map(cat => (
               <button
@@ -355,14 +355,14 @@ export default function SponsorProfileForm({ profile }: Props) {
 
         <div>
           <label className={labelClass}>Game / genre focus</label>
-          <p className="mb-2 text-xs text-[#a9abb5]">
+          <p className="mb-2 text-xs cr-text-muted">
             Games or genres you want your campaigns to appear in. Press Enter or click Add.
           </p>
           <div className="flex flex-wrap gap-1.5 mb-2">
             {gameTags.map(t => (
               <span
                 key={t}
-                className="inline-flex items-center gap-1 rounded-lg bg-[#99f7ff]/20 px-2.5 py-1 text-sm text-[#99f7ff]"
+                className="inline-flex items-center gap-1 rounded-lg border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2.5 py-1 text-sm text-[#c8dff0]"
               >
                 {t}
                 <button
@@ -391,7 +391,7 @@ export default function SponsorProfileForm({ profile }: Props) {
             <button
               type="button"
               onClick={addGameTag}
-              className="rounded-lg border border-white/15 px-3 py-1.5 text-sm font-medium text-[#a9abb5] transition-all duration-150 hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/8 hover:text-[#e8f4ff] hover:shadow-[0_0_14px_rgba(153,247,255,0.12)]"
+              className="rounded-lg border border-white/15 px-3 py-1.5 text-sm font-medium cr-text-muted transition-colors duration-150 hover:border-[#99f7ff]/25 hover:bg-[#99f7ff]/5 hover:text-[#e8f4ff]"
             >
               Add
             </button>
@@ -445,7 +445,7 @@ export default function SponsorProfileForm({ profile }: Props) {
       {/* ── Payment Preferences ──────────────────────────────────────── */}
       <div className={sectionClass}>
         <p className={sectionTitle}>Payment Preferences</p>
-        <p className="mb-3 text-xs text-[#a9abb5]">
+        <p className="mb-3 text-xs cr-text-muted">
           Your default payment method for campaign funding. You can override this per campaign.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -460,18 +460,18 @@ export default function SponsorProfileForm({ profile }: Props) {
                 key={opt.value}
                 type="button"
                 onClick={() => setPreferredPaymentMethod(opt.value)}
-                className={`text-left p-3.5 rounded-lg border transition-all ${
+                className={`rounded-lg border p-3.5 text-left transition-colors ${
                   active
-                    ? 'border-[#99f7ff] bg-[#99f7ff]/10 shadow-[0_0_12px_rgba(153,247,255,0.15)]'
+                    ? 'border-[#99f7ff]/35 bg-[#99f7ff]/8'
                     : 'border-white/10 bg-white/[0.02] hover:border-white/20'
                 }`}
               >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`text-sm font-semibold ${active ? 'text-[#99f7ff]' : 'text-[#e8f4ff]'}`}>
+                <div className="mb-1 flex items-center gap-2">
+                  <span className={`text-sm font-semibold ${active ? 'text-[#c8dff0]' : 'text-[#e8f4ff]'}`}>
                     {opt.label}
                   </span>
                 </div>
-                <p className="text-xs leading-snug text-[#a9abb5]">{opt.desc}</p>
+                <p className="text-xs leading-snug cr-text-muted">{opt.desc}</p>
               </button>
             )
           })}
@@ -495,7 +495,7 @@ export default function SponsorProfileForm({ profile }: Props) {
           Default creator requirements{' '}
           <span className="normal-case font-normal">(optional)</span>
         </p>
-        <p className="-mt-2 text-xs text-[#a9abb5]">
+        <p className="-mt-2 text-xs cr-text-muted">
           These defaults pre-fill new campaigns. You can override them per campaign.
         </p>
 
@@ -543,7 +543,7 @@ export default function SponsorProfileForm({ profile }: Props) {
       <div className={sectionClass}>
         <div>
           <p className={sectionTitle}>Age Restrictions</p>
-          <p className="mt-1 mb-5 text-xs text-[#a9abb5]">
+          <p className="mt-1 mb-5 text-xs cr-text-muted">
             If your products have legal age-marketing restrictions, enable this setting. Changes to age
             restrictions require admin approval.
           </p>
@@ -567,14 +567,14 @@ export default function SponsorProfileForm({ profile }: Props) {
               }}
               className="h-4 w-4 rounded border border-white/20 bg-white/5 accent-[#99f7ff]"
             />
-            <span className="text-sm text-[#a9abb5]">
+            <span className="text-sm cr-text-muted">
               My company has products that legally cannot be marketed to certain age groups
             </span>
           </label>
 
           {ageRestricted && (
             <div className="mt-3 ml-7 space-y-2">
-              <p className="mb-2 text-xs text-[#a9abb5]">Minimum legal marketing age:</p>
+              <p className="mb-2 text-xs cr-text-muted">Minimum legal marketing age:</p>
               <div className="flex gap-3">
                 {['18+', '21+'].map(opt => (
                   <button
@@ -584,7 +584,7 @@ export default function SponsorProfileForm({ profile }: Props) {
                     className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 border ${
                       ageRestrictionType === opt
                         ? 'bg-orange-500/20 text-orange-400 border-orange-500/40'
-                        : 'border-white/15 text-[#a9abb5] hover:border-orange-500/30 hover:bg-orange-500/5 hover:text-[#c8dff0]'
+                        : 'border-white/15 cr-text-muted hover:border-orange-500/30 hover:bg-orange-500/5 hover:text-[#c8dff0]'
                     }`}
                   >
                     {opt}
@@ -612,7 +612,7 @@ export default function SponsorProfileForm({ profile }: Props) {
                 maxLength={500}
                 className="w-full resize-none rounded-lg border border-white/15 bg-black/25 p-3 text-sm text-[#e8f4ff] focus:border-[#99f7ff]/50 focus:outline-none"
               />
-              <p className="mt-0.5 text-right text-xs text-[#a9abb5]">{ageChangeMessage.length}/500</p>
+              <p className="mt-0.5 text-right text-xs cr-text-muted">{ageChangeMessage.length}/500</p>
             </div>
             {ageChangeError && <p className="text-xs text-red-400">{ageChangeError}</p>}
             {ageChangeSuccess && <p className="text-xs text-[#22c55e]">Change request submitted. Awaiting admin approval.</p>}
@@ -652,7 +652,7 @@ export default function SponsorProfileForm({ profile }: Props) {
           <button
             type="button"
             onClick={() => router.push('/sponsor')}
-            className="rounded-lg border border-white/15 px-5 py-2.5 text-sm font-medium text-[#a9abb5] transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]"
+            className="rounded-lg border border-white/15 px-5 py-2.5 text-sm font-medium cr-text-muted transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]"
           >
             Cancel
           </button>

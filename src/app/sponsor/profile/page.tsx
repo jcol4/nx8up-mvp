@@ -20,18 +20,18 @@ export default async function SponsorProfilePage() {
     <>
       <SponsorHeader />
       <div className="flex-1 overflow-auto p-6 sm:p-8">
-        <div className="mx-auto max-w-5xl space-y-6">
+        <div className="sponsor-profile sponsor-profile-detail mx-auto max-w-5xl space-y-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
               <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Sponsor</p>
               <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Sponsor Profile</h1>
-              <p className="mt-1 text-sm leading-relaxed text-[#a9abb5]">
+              <p className="mt-1 text-sm leading-relaxed cr-text-muted">
                 Manage your company info, campaign preferences, and creator requirements.
               </p>
             </div>
             <Link
               href="/sponsor"
-              className="shrink-0 text-sm text-[#a9abb5] transition-colors hover:text-[#99f7ff]"
+              className="shrink-0 text-sm cr-text-muted transition-colors hover:text-[#99f7ff]"
             >
               ← Dashboard
             </Link>
@@ -43,7 +43,7 @@ export default async function SponsorProfilePage() {
             const tierColors: Record<ReputationTier, string> = {
               sanctioned: 'border-red-500/30 bg-red-500/10 text-red-400',
               restricted: 'border-orange-500/30 bg-orange-500/10 text-orange-400',
-              neutral:    'border-white/15 bg-white/5 text-[#a9abb5]',
+              neutral:    'border-white/15 bg-white/5 cr-text-muted',
               trusted:    'border-[#22c55e]/30 bg-[#22c55e]/10 text-[#4ade80]',
               verified:   'border-[#99f7ff]/30 bg-[#99f7ff]/10 text-[#99f7ff]',
             }
@@ -56,7 +56,7 @@ export default async function SponsorProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold">{TIER_LABELS[tier]} Sponsor</p>
-                  <p className="mt-0.5 text-xs opacity-80">{TIER_DESCRIPTIONS[tier]}</p>
+                  <p className="mt-0.5 text-sm cr-text-muted">{TIER_DESCRIPTIONS[tier]}</p>
                 </div>
               </div>
             )

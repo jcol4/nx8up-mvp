@@ -190,17 +190,17 @@ export default function SponsorGuideContent() {
   return (
     <div className="flex gap-6">
       {/* Tab sidebar */}
-      <nav className="w-52 shrink-0">
+      <nav className="w-48 shrink-0">
         <ul className="space-y-1">
           {SECTIONS.map((section) => (
             <li key={section.id}>
               <button
                 type="button"
                 onClick={() => setActiveId(section.id)}
-                className={`w-full rounded-lg px-3 py-2 text-left text-sm transition ${
+                className={`w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
                   section.id === activeId
-                    ? 'bg-[#99f7ff]/10 text-[#99f7ff] border border-[#99f7ff]/30'
-                    : 'text-[#a9abb5] hover:bg-white/5 hover:text-[#e8f4ff] border border-transparent'
+                    ? 'bg-[#99f7ff]/10 text-[#bffcff] border border-[#99f7ff]/40'
+                    : 'cr-guide-nav-inactive hover:bg-white/5 border border-transparent'
                 }`}
               >
                 {section.label}
@@ -212,20 +212,21 @@ export default function SponsorGuideContent() {
 
       {/* Content area */}
       <div className="min-w-0 flex-1">
-        <div className="rounded-xl border border-white/10 bg-black/20 p-6">
-          <h2 className="font-headline text-xl font-semibold text-[#e8f4ff]">{active.title}</h2>
-          <p className="mt-2 text-sm leading-relaxed text-[#a9abb5]">{active.intro}</p>
+        <div className="rounded-xl border border-white/10 bg-black/20 p-6 sm:p-7">
+          <p className="cr-field-label mb-1">{active.label}</p>
+          <h2 className="font-headline text-xl font-semibold text-[#e8f4ff] sm:text-2xl">{active.title}</h2>
+          <p className="mt-3 text-sm leading-relaxed cr-text">{active.intro}</p>
 
-          <div className="mt-6 space-y-5">
+          <div className="mt-6 space-y-4">
             {active.steps.map((step, i) => (
-              <div key={step.title} className="rounded-lg border border-white/8 bg-white/[0.02] p-4">
+              <div key={step.title} className="cr-guide-step-card rounded-lg border p-4 sm:p-5">
                 <div className="mb-2 flex items-center gap-3">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#99f7ff]/40 bg-[#99f7ff]/10 text-[10px] font-bold text-[#99f7ff]">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#99f7ff]/40 bg-[#99f7ff]/10 text-nx-10 font-bold text-[#99f7ff]">
                     {i + 1}
                   </span>
-                  <h3 className="text-sm font-semibold text-[#e8f4ff]">{step.title}</h3>
+                  <h3 className="text-sm font-semibold text-[#e8f4ff] sm:text-base">{step.title}</h3>
                 </div>
-                <p className="text-sm leading-relaxed text-[#a9abb5]">{step.body}</p>
+                <p className="text-sm leading-relaxed cr-text-muted sm:pl-9">{step.body}</p>
               </div>
             ))}
           </div>
@@ -239,7 +240,7 @@ export default function SponsorGuideContent() {
                 const idx = SECTIONS.findIndex((s) => s.id === activeId)
                 setActiveId(SECTIONS[idx - 1].id)
               }}
-              className="text-sm text-[#a9abb5] transition hover:text-[#99f7ff]"
+              className="text-sm cr-text-muted transition hover:text-[#99f7ff]"
             >
               ← Previous
             </button>
@@ -251,7 +252,7 @@ export default function SponsorGuideContent() {
                 const idx = SECTIONS.findIndex((s) => s.id === activeId)
                 setActiveId(SECTIONS[idx + 1].id)
               }}
-              className="ml-auto text-sm text-[#a9abb5] transition hover:text-[#99f7ff]"
+              className="ml-auto text-sm cr-text-muted transition hover:text-[#99f7ff]"
             >
               Next →
             </button>

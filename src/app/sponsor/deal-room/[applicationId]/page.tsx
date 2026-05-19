@@ -5,6 +5,7 @@ import ReviewButtons from './ReviewButtons'
 import RetryPayoutButton from './RetryPayoutButton'
 import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
 import NxHudCard from '@/components/nx-shell/NxHudCard'
+import SponsorHeader from '../../_components/dashboard/SponsorHeader'
 
 const DELIVERABLE_LABELS: Record<string, string> = {
   gameplay_footage: 'Gameplay footage',
@@ -14,6 +15,57 @@ const DELIVERABLE_LABELS: Record<string, string> = {
   review: 'Review',
   challenge: 'Challenge',
   sponsored_segment: 'Sponsored segment',
+}
+
+const SUB_STATUS: Record<string, { label: string; badge: string; border: string }> = {
+  pending: {
+    label: 'Awaiting submission',
+    badge: 'bg-slate-500/20 text-slate-200 border border-slate-400/40',
+    border: 'border-l-slate-400/80',
+  },
+  submitted: {
+    label: 'Under admin review',
+    badge: 'bg-[#99f7ff]/12 text-[#99f7ff] border border-[#99f7ff]/30',
+    border: 'border-l-[#99f7ff]/50',
+  },
+  admin_rejected: {
+    label: 'Under admin review',
+    badge: 'bg-[#99f7ff]/12 text-[#99f7ff] border border-[#99f7ff]/30',
+    border: 'border-l-[#99f7ff]/50',
+  },
+  admin_verified: {
+    label: 'Needs your review',
+    badge: 'bg-[#eab308]/20 text-[#facc15] border border-[#eab308]/35',
+    border: 'border-l-[#eab308]/70',
+  },
+  approved: {
+    label: 'Approved',
+    badge: 'bg-[#22c55e]/20 text-[#4ade80] border border-[#22c55e]/35',
+    border: 'border-l-[#22c55e]/70',
+  },
+  revision_requested: {
+    label: 'Revision requested',
+    badge: 'bg-orange-500/20 text-orange-300 border border-orange-500/35',
+    border: 'border-l-orange-500/60',
+  },
+}
+
+function Field({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div>
+      <p className="sp-app-stat-label">{label}</p>
+      <div className="sp-app-stat-value mt-0.5">{value}</div>
+    </div>
+  )
+}
+
+function SideRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex justify-between gap-3 text-sm">
+      <span className="sp-app-stat-label shrink-0">{label}</span>
+      <span className="sp-app-stat-value text-right">{children}</span>
+    </div>
+  )
 }
 
 export default async function SponsorDealRoomDetailPage({
@@ -31,9 +83,12 @@ export default async function SponsorDealRoomDetailPage({
   const clickCount = app._count.link_clicks
   const ctr = sub?.ctr != null ? Number(sub.ctr).toFixed(2) : null
   const videoViews = sub?.video_views as Record<string, number> | null | undefined
-  const avgVideoViews = videoViews && Object.keys(videoViews).length > 0
-    ? Math.round(Object.values(videoViews).reduce((a, b) => a + b, 0) / Object.values(videoViews).length)
-    : null
+  const avgVideoViews =
+    videoViews && Object.keys(videoViews).length > 0
+      ? Math.round(
+          Object.values(videoViews).reduce((a, b) => a + b, 0) / Object.values(videoViews).length,
+        )
+      : null
 
   const handle =
     creator.twitch_username
@@ -43,368 +98,413 @@ export default async function SponsorDealRoomDetailPage({
         : 'Creator'
 
   const hasDeliverables = c.num_videos || c.num_streams || c.num_posts || c.num_short_videos
+  const statusKey = sub?.status ?? 'pending'
+  const status = SUB_STATUS[statusKey] ?? SUB_STATUS.pending
+  const { fee, creatorPool, perCreator } =
+    c.budget != null ? calcFeeBreakdown(c.budget, c.creator_count) : { fee: 0, creatorPool: 0, perCreator: null }
 
   return (
-    <main className="mx-auto max-w-5xl space-y-5 p-5 sm:p-6">
-          <div className="flex items-center justify-start">
-            <Link
-              href="/sponsor/deal-room"
-              className="inline-flex items-center gap-2 rounded-lg border border-[#99f7ff]/45 bg-[#99f7ff]/12 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#bffcff] shadow-[0_0_0_1px_rgba(153,247,255,0.2)] transition hover:border-[#99f7ff]/70 hover:bg-[#99f7ff]/20 hover:text-[#e9fdff]"
-            >
-              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back to Deal Room
-            </Link>
-          </div>
+    <>
+      <SponsorHeader />
+      <div className="flex-1 overflow-auto p-6 sm:p-8">
+        <div className="sponsor-deal-room sponsor-deal-room-detail mx-auto max-w-5xl space-y-6">
+          <Link
+            href="/sponsor/deal-room"
+            className="inline-flex items-center gap-2 text-sm text-[#99f7ff] transition-colors hover:text-[#bffcff]"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Deal Room
+          </Link>
 
-          {/* Header */}
-          <NxHudCard as="div" className="p-5 sm:p-6">
+          <header
+            className={`dash-panel dash-panel--nx-top rounded-xl border border-white/16 border-l-4 bg-black/20 p-5 sm:p-6 ${status.border}`}
+          >
             <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <span className="text-xs px-2 py-0.5 rounded bg-[#a855f7]/20 text-[#a855f7]">Deal Room</span>
-                  {(!sub || sub.status === 'pending') && (
-                    <span className="text-xs px-2 py-0.5 rounded bg-[#94a3b8]/20 text-[#94a3b8]">Awaiting submission</span>
-                  )}
-                  {(sub?.status === 'submitted' || sub?.status === 'admin_rejected') && (
-                    <span className="text-xs px-2 py-0.5 rounded bg-[#94a3b8]/20 text-[#94a3b8]">Under review</span>
-                  )}
-                  {sub?.status === 'admin_verified' && (
-                    <span className="text-xs px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-400">Needs your review</span>
-                  )}
-                  {sub?.status === 'revision_requested' && (
-                    <span className="text-xs px-2 py-0.5 rounded bg-orange-500/20 text-orange-400">Revision requested</span>
-                  )}
-                  {sub?.status === 'approved' && (
-                    <span className="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-400">Approved</span>
-                  )}
-                </div>
-                <h1 className="text-xl font-bold dash-text-bright">{c.title}</h1>
-                <p className="text-sm dash-text-muted mt-0.5">
-                  Creator: <span className="dash-accent">{handle}</span>
+              <div className="min-w-0">
+                <p className="cr-field-label">Deal room</p>
+                <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff] sm:text-2xl">
+                  {c.title}
+                </h1>
+                <p className="mt-2 text-sm cr-text-muted">
+                  Creator: <span className="font-medium text-[#99f7ff]">{handle}</span>
                   {c.brand_name ? ` · ${c.brand_name}` : ''}
                 </p>
+                <div className="mt-3">
+                  <span
+                    className={`inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${status.badge}`}
+                  >
+                    {status.label}
+                  </span>
+                </div>
               </div>
-              <div className="text-right">
-                {c.budget != null && (() => {
-                  const { fee, creatorPool } = calcFeeBreakdown(c.budget, c.creator_count)
-                  return (
-                    <>
-                      <p className="text-lg font-bold" style={{ color: '#00e5a0' }}>${c.budget.toLocaleString()}</p>
-                      <p className="text-nx-10 dash-text-muted">total · ${creatorPool.toLocaleString()} creator pool · −${fee.toLocaleString()} fee</p>
-                    </>
-                  )
-                })()}
-                {c.end_date && (
-                  <p className="text-xs dash-text-muted mt-0.5">
-                    Deadline: {new Date(c.end_date).toLocaleDateString()}
+              {c.budget != null && (
+                <div className="sp-app-header-stat shrink-0 rounded-lg px-4 py-3 text-right">
+                  <p className="font-headline text-xl font-semibold tabular-nums text-[#4ade80]">
+                    ${c.budget.toLocaleString()}
                   </p>
-                )}
-              </div>
+                  <p className="mt-1 text-xs cr-stat-caption">
+                    ${creatorPool.toLocaleString()} creator pool · −${fee.toLocaleString()} fee
+                  </p>
+                  {c.end_date && (
+                    <p className="mt-1 text-xs cr-stat-caption">
+                      Deadline {new Date(c.end_date).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
-          </NxHudCard>
+          </header>
 
           <div className="grid gap-5 lg:grid-cols-12">
             <div className="space-y-5 lg:col-span-8">
+              <NxHudCard as="section" className="p-5 sm:p-6">
+                <h2 className="cr-field-label mb-4">Creator submission</h2>
 
-              {/* Creator Submission */}
-              <NxHudCard as="section" className="p-5">
-                <h2 className="dash-panel-title">Creator Submission</h2>
-
-                {/* Not yet submitted or pending admin review — hide content from sponsor */}
                 {(!sub || sub.status === 'pending') && (
-                  <p className="text-sm dash-text-muted py-4 text-center">
-                    The creator has not submitted proof yet.
-                  </p>
+                  <div className="sp-app-stat-panel rounded-lg p-6 text-center">
+                    <p className="text-sm cr-text-muted">The creator has not submitted proof yet.</p>
+                  </div>
                 )}
+
                 {(sub?.status === 'submitted' || sub?.status === 'admin_rejected') && (
-                  <div className="py-6 text-center space-y-2">
-                    <div className="w-8 h-8 rounded-full border-2 border-[#94a3b8]/40 flex items-center justify-center mx-auto">
-                      <svg className="w-4 h-4 text-[#94a3b8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <div className="sp-app-stat-panel space-y-2 rounded-lg p-6 text-center">
+                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#99f7ff]/40">
+                      <svg
+                        className="h-4 w-4 text-[#99f7ff]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
                       </svg>
                     </div>
-                    <p className="text-sm dash-text-muted">Under review by nx8up admin.</p>
-                    <p className="text-xs dash-text-muted">
+                    <p className="text-sm cr-text">Under review by nx8up admin.</p>
+                    <p className="text-sm cr-text-muted">
                       You will be notified once the submission has been verified.
                     </p>
                   </div>
                 )}
 
-                {/* Admin verified — sponsor can now review */}
-                {sub && (sub.status === 'admin_verified' || sub.status === 'approved' || sub.status === 'revision_requested') && (
-                  <div className="space-y-4">
-                    {sub.status === 'admin_verified' && (
-                      <div className="flex items-center gap-2 p-2.5 rounded-lg bg-[#00c8ff]/5 border border-[#00c8ff]/20">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#00c8ff] shrink-0" />
-                        <p className="text-xs text-[#00c8ff]">Verified by nx8up admin — ready for your review.</p>
-                      </div>
-                    )}
-                    <dl className="space-y-3">
-                      {sub.proof_urls.length > 0 && (
-                        <div>
-                          <dt className="text-xs dash-text-muted uppercase tracking-wide mb-1">
-                            Post URL{sub.proof_urls.length !== 1 ? 's' : ''}
-                          </dt>
-                          <dd className="space-y-1">
-                            {sub.proof_urls.map((url, i) => (
-                              <a key={i} href={url} target="_blank" rel="noopener noreferrer"
-                                className="block text-sm dash-accent hover:underline break-all">
-                                {url}
-                              </a>
-                            ))}
-                          </dd>
+                {sub &&
+                  (sub.status === 'admin_verified' ||
+                    sub.status === 'approved' ||
+                    sub.status === 'revision_requested') && (
+                    <div className="space-y-4">
+                      {sub.status === 'admin_verified' && (
+                        <div className="rounded-lg border border-[#99f7ff]/25 bg-[#99f7ff]/8 px-3 py-2.5">
+                          <p className="text-sm text-[#99f7ff]">
+                            Verified by nx8up admin — ready for your review.
+                          </p>
                         </div>
                       )}
-                      {sub.screenshot_url && (
-                        <div>
-                          <dt className="text-xs dash-text-muted uppercase tracking-wide mb-1">Screenshot</dt>
-                          <dd>
-                            <a href={sub.screenshot_url} target="_blank" rel="noopener noreferrer"
-                              className="text-sm dash-accent hover:underline break-all">
-                              {sub.screenshot_url}
-                            </a>
-                          </dd>
-                        </div>
-                      )}
-                      {sub.posted_at && (
-                        <div>
-                          <dt className="text-xs dash-text-muted uppercase tracking-wide mb-0.5">Posted at</dt>
-                          <dd className="text-sm dash-text-bright">{new Date(sub.posted_at).toLocaleString()}</dd>
-                        </div>
-                      )}
-                      <div>
-                        <dt className="text-xs dash-text-muted uppercase tracking-wide mb-0.5">Disclosure confirmed</dt>
-                        <dd className={`text-sm font-medium ${sub.disclosure_confirmed ? 'text-green-400' : 'text-red-400'}`}>
-                          {sub.disclosure_confirmed ? 'Yes — creator confirmed disclosure' : 'No'}
-                        </dd>
-                      </div>
-                      {sub.submitted_at && (
-                        <div>
-                          <dt className="text-xs dash-text-muted uppercase tracking-wide mb-0.5">Submitted</dt>
-                          <dd className="text-sm dash-text-muted">{new Date(sub.submitted_at).toLocaleString()}</dd>
-                        </div>
-                      )}
-                    </dl>
 
-                    {sub.status === 'approved' ? (
-                      <div className="pt-3 border-t border-white/10 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-green-400" />
-                          <p className="text-sm text-green-400 font-medium">Submission approved</p>
-                        </div>
-                        {sub.payout_status === 'paid' ? (
-                          <div className="flex items-center gap-2 p-2.5 rounded-lg bg-[#22c55e]/5 border border-[#22c55e]/20">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] shrink-0" />
-                            <p className="text-xs text-[#22c55e]">
-                              Payout sent to creator
-                              {sub.stripe_transfer_id ? ` · ${sub.stripe_transfer_id}` : ''}
-                            </p>
-                          </div>
-                        ) : (
-                          <RetryPayoutButton applicationId={applicationId} />
+                      <div className="sp-app-stat-panel space-y-4 rounded-lg p-4">
+                        {sub.proof_urls.length > 0 && (
+                          <Field
+                            label={`Post URL${sub.proof_urls.length !== 1 ? 's' : ''}`}
+                            value={
+                              <span className="space-y-1 block">
+                                {sub.proof_urls.map((url, i) => (
+                                  <a
+                                    key={i}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block break-all text-[#99f7ff] hover:text-[#bffcff] hover:underline"
+                                  >
+                                    {url}
+                                  </a>
+                                ))}
+                              </span>
+                            }
+                          />
+                        )}
+                        {sub.screenshot_url && (
+                          <Field
+                            label="Screenshot"
+                            value={
+                              <a
+                                href={sub.screenshot_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="break-all text-[#99f7ff] hover:text-[#bffcff] hover:underline"
+                              >
+                                {sub.screenshot_url}
+                              </a>
+                            }
+                          />
+                        )}
+                        {sub.posted_at && (
+                          <Field
+                            label="Posted at"
+                            value={new Date(sub.posted_at).toLocaleString()}
+                          />
+                        )}
+                        <Field
+                          label="Disclosure confirmed"
+                          value={
+                            <span
+                              className={
+                                sub.disclosure_confirmed ? 'text-[#4ade80]' : 'text-red-400'
+                              }
+                            >
+                              {sub.disclosure_confirmed
+                                ? 'Yes — creator confirmed disclosure'
+                                : 'No'}
+                            </span>
+                          }
+                        />
+                        {sub.submitted_at && (
+                          <Field
+                            label="Submitted"
+                            value={new Date(sub.submitted_at).toLocaleString()}
+                          />
                         )}
                       </div>
-                    ) : (
-                      <div className="pt-3 border-t border-white/10">
-                        <p className="text-xs font-semibold dash-text-muted uppercase tracking-wide mb-3">Your Review</p>
-                        <ReviewButtons
-                          applicationId={applicationId}
-                          currentNotes={sub.sponsor_notes ?? null}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
+
+                      {sub.status === 'approved' ? (
+                        <div className="space-y-2 border-t border-white/10 pt-4">
+                          <div className="flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-[#4ade80]" />
+                            <p className="text-sm font-medium text-[#4ade80]">Submission approved</p>
+                          </div>
+                          {sub.payout_status === 'paid' ? (
+                            <div className="rounded-lg border border-[#22c55e]/25 bg-[#22c55e]/8 px-3 py-2.5">
+                              <p className="text-sm text-[#4ade80]">
+                                Payout sent to creator
+                                {sub.stripe_transfer_id ? ` · ${sub.stripe_transfer_id}` : ''}
+                              </p>
+                            </div>
+                          ) : (
+                            <RetryPayoutButton applicationId={applicationId} />
+                          )}
+                        </div>
+                      ) : (
+                        <div className="border-t border-white/10 pt-4">
+                          <p className="cr-field-label mb-3">Your review</p>
+                          <ReviewButtons
+                            applicationId={applicationId}
+                            currentNotes={sub.sponsor_notes ?? null}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
               </NxHudCard>
 
-              {/* Mission Requirements */}
               {hasDeliverables && (
-                <NxHudCard as="section" className="p-5">
-                  <h2 className="dash-panel-title">Mission Requirements</h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                <NxHudCard as="section" className="p-5 sm:p-6">
+                  <h2 className="cr-field-label mb-4">Mission requirements</h2>
+                  <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {c.num_videos ? (
-                      <div className="text-center p-3 rounded-lg bg-[#00c8ff]/5 border border-[#00c8ff]/15">
-                        <p className="text-xl font-bold dash-text-bright">{c.num_videos}</p>
-                        <p className="text-xs dash-text-muted mt-0.5">Video{c.num_videos !== 1 ? 's' : ''}</p>
+                      <div className="sp-app-stat-panel rounded-lg p-3 text-center">
+                        <p className="font-headline text-xl font-semibold text-[#e8f4ff]">{c.num_videos}</p>
+                        <p className="mt-0.5 text-xs cr-stat-caption">
+                          Video{c.num_videos !== 1 ? 's' : ''}
+                        </p>
                       </div>
                     ) : null}
                     {c.num_streams ? (
-                      <div className="text-center p-3 rounded-lg bg-[#7b4fff]/5 border border-[#7b4fff]/15">
-                        <p className="text-xl font-bold dash-text-bright">{c.num_streams}</p>
-                        <p className="text-xs dash-text-muted mt-0.5">Stream{c.num_streams !== 1 ? 's' : ''}</p>
+                      <div className="sp-app-stat-panel rounded-lg p-3 text-center">
+                        <p className="font-headline text-xl font-semibold text-[#e8f4ff]">{c.num_streams}</p>
+                        <p className="mt-0.5 text-xs cr-stat-caption">
+                          Stream{c.num_streams !== 1 ? 's' : ''}
+                        </p>
                         {c.min_stream_duration && (
-                          <p className="text-xs dash-text-muted">≥ {c.min_stream_duration} min</p>
+                          <p className="text-xs cr-stat-caption">≥ {c.min_stream_duration} min</p>
                         )}
                       </div>
                     ) : null}
                     {c.num_posts ? (
-                      <div className="text-center p-3 rounded-lg bg-[#22c55e]/5 border border-[#22c55e]/15">
-                        <p className="text-xl font-bold dash-text-bright">{c.num_posts}</p>
-                        <p className="text-xs dash-text-muted mt-0.5">Post{c.num_posts !== 1 ? 's' : ''}</p>
+                      <div className="sp-app-stat-panel rounded-lg p-3 text-center">
+                        <p className="font-headline text-xl font-semibold text-[#e8f4ff]">{c.num_posts}</p>
+                        <p className="mt-0.5 text-xs cr-stat-caption">
+                          Post{c.num_posts !== 1 ? 's' : ''}
+                        </p>
                       </div>
                     ) : null}
                     {c.num_short_videos ? (
-                      <div className="text-center p-3 rounded-lg bg-[#eab308]/5 border border-[#eab308]/15">
-                        <p className="text-xl font-bold dash-text-bright">{c.num_short_videos}</p>
-                        <p className="text-xs dash-text-muted mt-0.5">Short{c.num_short_videos !== 1 ? 's' : ''}</p>
+                      <div className="sp-app-stat-panel rounded-lg p-3 text-center">
+                        <p className="font-headline text-xl font-semibold text-[#e8f4ff]">
+                          {c.num_short_videos}
+                        </p>
+                        <p className="mt-0.5 text-xs cr-stat-caption">
+                          Short{c.num_short_videos !== 1 ? 's' : ''}
+                        </p>
                       </div>
                     ) : null}
                   </div>
-                  <ul className="space-y-1.5 text-sm dash-text">
+                  <ul className="space-y-2 text-sm cr-text">
                     {c.must_include_link && c.landing_page_url && (
                       <li className="flex gap-2">
-                        <span className="dash-accent">▸</span>
-                        Include link: <a href={c.landing_page_url} target="_blank" rel="noopener noreferrer" className="dash-accent hover:underline">{c.landing_page_url}</a>
+                        <span className="text-[#99f7ff]">▸</span>
+                        Include link:{' '}
+                        <a
+                          href={c.landing_page_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#99f7ff] hover:text-[#bffcff] hover:underline"
+                        >
+                          {c.landing_page_url}
+                        </a>
                       </li>
                     )}
                     {c.must_include_promo_code && (
-                      <li className="flex gap-2"><span className="dash-accent">▸</span> Include promo code</li>
+                      <li className="flex gap-2">
+                        <span className="text-[#99f7ff]">▸</span> Include promo code
+                      </li>
                     )}
                     {c.must_tag_brand && (
-                      <li className="flex gap-2"><span className="dash-accent">▸</span> Tag / mention the brand</li>
+                      <li className="flex gap-2">
+                        <span className="text-[#99f7ff]">▸</span> Tag / mention the brand
+                      </li>
                     )}
                   </ul>
                 </NxHudCard>
               )}
 
-              {/* Creative Package */}
-              <NxHudCard as="section" className="p-5">
-                <h2 className="dash-panel-title">Creative Package</h2>
-                <dl className="space-y-3 text-sm">
-                  {c.brand_name && (
-                    <div>
-                      <dt className="text-xs dash-text-muted uppercase tracking-wide">Brand</dt>
-                      <dd className="dash-text-bright font-medium mt-0.5">{c.brand_name}</dd>
-                    </div>
-                  )}
-                  {c.product_name && (
-                    <div>
-                      <dt className="text-xs dash-text-muted uppercase tracking-wide">Product</dt>
-                      <dd className="dash-text-bright font-medium mt-0.5">{c.product_name}</dd>
-                    </div>
-                  )}
+              <NxHudCard as="section" className="p-5 sm:p-6">
+                <h2 className="cr-field-label mb-4">Creative package</h2>
+                <div className="sp-app-stat-panel space-y-4 rounded-lg p-4">
+                  {c.brand_name && <Field label="Brand" value={c.brand_name} />}
+                  {c.product_name && <Field label="Product" value={c.product_name} />}
                   {c.content_guidelines && (
-                    <div>
-                      <dt className="text-xs dash-text-muted uppercase tracking-wide">Content Guidelines</dt>
-                      <dd className="dash-text mt-0.5 whitespace-pre-line leading-relaxed">{c.content_guidelines}</dd>
-                    </div>
+                    <Field
+                      label="Content guidelines"
+                      value={
+                        <span className="whitespace-pre-line leading-relaxed">{c.content_guidelines}</span>
+                      }
+                    />
                   )}
                   {c.video_includes.length > 0 && (
                     <div>
-                      <dt className="text-xs dash-text-muted uppercase tracking-wide mb-1.5">Must Include</dt>
-                      <dd className="flex flex-wrap gap-1.5">
+                      <p className="sp-app-stat-label mb-2">Must include</p>
+                      <div className="flex flex-wrap gap-1.5">
                         {c.video_includes.map((item: string) => (
-                          <span key={item} className="text-xs px-2 py-0.5 rounded bg-[#00c8ff]/10 text-[#00c8ff]">
+                          <span
+                            key={item}
+                            className="rounded-lg border border-[#99f7ff]/25 bg-[#99f7ff]/10 px-2 py-0.5 text-xs text-[#c8dff0]"
+                          >
                             {DELIVERABLE_LABELS[item] ?? item}
                           </span>
                         ))}
-                      </dd>
+                      </div>
                     </div>
                   )}
-                </dl>
+                </div>
               </NxHudCard>
             </div>
 
-            {/* Sidebar */}
-            <div className="space-y-4 lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
-              <NxHudCard as="div" className="p-4">
-                <h3 className="dash-panel-title">Creator</h3>
-                <dl className="space-y-2 text-sm">
-                  <div className="flex justify-between gap-2">
-                    <dt className="dash-text-muted">Handle</dt>
-                    <dd className="dash-text-bright text-right">{handle}</dd>
-                  </div>
+            <aside className="space-y-4 lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
+              <NxHudCard as="div" className="p-4 sm:p-5">
+                <h3 className="cr-field-label mb-3">Creator</h3>
+                <div className="space-y-2">
+                  <SideRow label="Handle" children={handle} />
                   {creator.platform.length > 0 && (
                     <div>
-                      <dt className="dash-text-muted mb-1">Platforms</dt>
-                      <dd className="flex flex-wrap gap-1">
+                      <p className="sp-app-stat-label mb-1.5">Platforms</p>
+                      <div className="flex flex-wrap gap-1">
                         {creator.platform.map((p: string) => (
-                          <span key={p} className="text-xs px-2 py-0.5 rounded bg-[#22c55e]/10 text-[#22c55e]">{p}</span>
+                          <span
+                            key={p}
+                            className="rounded-lg border border-[#22c55e]/30 bg-[#22c55e]/10 px-2 py-0.5 text-xs text-[#4ade80]"
+                          >
+                            {p}
+                          </span>
                         ))}
-                      </dd>
+                      </div>
                     </div>
                   )}
                   {(creator.subs_followers != null || creator.youtube_subscribers != null) && (
-                    <div className="flex justify-between gap-2">
-                      <dt className="dash-text-muted">Followers</dt>
-                      <dd className="dash-text-bright">
-                        {(creator.subs_followers ?? creator.youtube_subscribers ?? 0).toLocaleString()}
-                      </dd>
-                    </div>
+                    <SideRow
+                      label="Followers"
+                      children={(
+                        creator.subs_followers ??
+                        creator.youtube_subscribers ??
+                        0
+                      ).toLocaleString()}
+                    />
                   )}
-                </dl>
+                </div>
               </NxHudCard>
 
               {app.tracking_short_code && (
-                <NxHudCard as="div" className="p-4">
-                  <h3 className="dash-panel-title">Link Performance</h3>
-                  <dl className="space-y-2 text-sm">
-                    <div className="flex justify-between gap-2">
-                      <dt className="dash-text-muted">Total Clicks</dt>
-                      <dd className="dash-text-bright font-bold">{clickCount.toLocaleString()}</dd>
-                    </div>
+                <NxHudCard as="div" className="p-4 sm:p-5">
+                  <h3 className="cr-field-label mb-3">Link performance</h3>
+                  <div className="space-y-2">
+                    <SideRow label="Total clicks" children={clickCount.toLocaleString()} />
                     {ctr !== null && (
-                      <div className="flex justify-between gap-2">
-                        <dt className="dash-text-muted">CTR</dt>
-                        <dd className="text-[#00c8ff] font-semibold">{ctr}%</dd>
-                      </div>
+                      <SideRow
+                        label="CTR"
+                        children={<span className="font-semibold text-[#99f7ff]">{ctr}%</span>}
+                      />
                     )}
                     {avgVideoViews !== null && (
-                      <div className="flex justify-between gap-2 text-nx-11">
-                        <dt className="dash-text-muted">Avg video views</dt>
-                        <dd className="dash-text-muted">{avgVideoViews.toLocaleString()}</dd>
-                      </div>
+                      <SideRow label="Avg video views" children={avgVideoViews.toLocaleString()} />
                     )}
-                  </dl>
+                  </div>
                 </NxHudCard>
               )}
 
-              <NxHudCard as="div" className="p-4">
-                <h3 className="dash-panel-title">Campaign</h3>
-                <dl className="space-y-2 text-sm">
+              <NxHudCard as="div" className="p-4 sm:p-5">
+                <h3 className="cr-field-label mb-3">Campaign</h3>
+                <div className="space-y-2">
                   {c.payment_model && (
-                    <div className="flex justify-between gap-2">
-                      <dt className="dash-text-muted">Payment</dt>
-                      <dd className="dash-text-bright capitalize">{c.payment_model.replace(/_/g, ' ')}</dd>
-                    </div>
+                    <SideRow
+                      label="Payment"
+                      children={<span className="capitalize">{c.payment_model.replace(/_/g, ' ')}</span>}
+                    />
                   )}
-                  {c.budget != null && (() => {
-                    const { fee, creatorPool, perCreator } = calcFeeBreakdown(c.budget, c.creator_count)
-                    return (
-                      <>
-                        <div className="flex justify-between gap-2">
-                          <dt className="dash-text-muted">Total Budget</dt>
-                          <dd className="font-bold" style={{ color: '#00e5a0' }}>${c.budget.toLocaleString()}</dd>
-                        </div>
-                        <div className="flex justify-between gap-2 text-nx-11">
-                          <dt className="dash-text-muted">nx8up Fee ({Math.round(NX_FEE_RATE * 100)}%)</dt>
-                          <dd className="text-red-400/70">−${fee.toLocaleString()}</dd>
-                        </div>
-                        <div className="flex justify-between gap-2 text-nx-11 pb-1 border-b border-white/5">
-                          <dt className="dash-text-muted">Creator Pool</dt>
-                          <dd className="text-[#22c55e] font-semibold">${creatorPool.toLocaleString()}</dd>
-                        </div>
-                        {perCreator && (
-                          <div className="flex justify-between gap-2 text-nx-11">
-                            <dt className="dash-text-muted">Per Creator</dt>
-                            <dd className="text-[#22c55e]">≈ ${perCreator.toLocaleString()}</dd>
-                          </div>
-                        )}
-                      </>
-                    )
-                  })()}
+                  {c.budget != null && (
+                    <>
+                      <SideRow
+                        label="Total budget"
+                        children={
+                          <span className="font-semibold text-[#4ade80]">
+                            ${c.budget.toLocaleString()}
+                          </span>
+                        }
+                      />
+                      <SideRow
+                        label={`nx8up fee (${Math.round(NX_FEE_RATE * 100)}%)`}
+                        children={
+                          <span className="text-red-400/80">−${fee.toLocaleString()}</span>
+                        }
+                      />
+                      <SideRow
+                        label="Creator pool"
+                        children={
+                          <span className="font-semibold text-[#4ade80]">
+                            ${creatorPool.toLocaleString()}
+                          </span>
+                        }
+                      />
+                      {perCreator && (
+                        <SideRow
+                          label="Per creator"
+                          children={
+                            <span className="text-[#4ade80]">≈ ${perCreator.toLocaleString()}</span>
+                          }
+                        />
+                      )}
+                    </>
+                  )}
                   {c.end_date && (
-                    <div className="flex justify-between gap-2">
-                      <dt className="dash-text-muted">Deadline</dt>
-                      <dd className="dash-text">{new Date(c.end_date).toLocaleDateString()}</dd>
-                    </div>
+                    <SideRow label="Deadline" children={new Date(c.end_date).toLocaleDateString()} />
                   )}
-                </dl>
+                </div>
               </NxHudCard>
-            </div>
+            </aside>
           </div>
-    </main>
+        </div>
+      </div>
+    </>
   )
 }

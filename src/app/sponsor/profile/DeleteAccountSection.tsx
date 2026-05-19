@@ -23,7 +23,7 @@ export default function DeleteAccountSection() {
   return (
     <div className="mt-8 rounded-xl border border-red-500/25 bg-red-950/10 p-5">
       <h2 className="font-headline text-sm font-semibold text-red-400">Danger Zone</h2>
-      <p className="mt-1 text-sm text-[#a9abb5]">
+      <p className="mt-1 text-sm cr-text-muted">
         Permanently delete your account and all associated data.
       </p>
       <button
@@ -37,7 +37,7 @@ export default function DeleteAccountSection() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="mx-4 w-full max-w-md rounded-xl border border-white/10 bg-[#0d0f14] p-6 shadow-2xl">
             <h3 className="font-headline text-lg font-semibold text-[#e8f4ff]">Delete account?</h3>
-            <p className="mt-3 text-sm text-[#a9abb5]">
+            <p className="mt-3 text-sm cr-text-muted">
               This is permanent and cannot be undone. Your profile, campaigns, and all associated
               data will be removed. Your Clerk account will be deleted immediately.
             </p>
@@ -52,7 +52,7 @@ export default function DeleteAccountSection() {
               <button
                 onClick={() => { setOpen(false); setError(null) }}
                 disabled={isPending}
-                className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-[#a9abb5] transition-colors hover:border-white/20 hover:text-[#e8f4ff] disabled:opacity-50"
+                className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium cr-text-muted transition-colors hover:border-white/20 hover:text-[#e8f4ff] disabled:opacity-50"
               >
                 Cancel
               </button>
