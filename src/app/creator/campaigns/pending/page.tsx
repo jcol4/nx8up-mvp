@@ -20,11 +20,11 @@ export default async function CreatorPendingCampaignsPage() {
   if (!creator?.id) {
     return (
       <CreatorShell>
-        <main className="mx-auto max-w-5xl space-y-6 p-6 sm:p-8">
+        <main className="creator-campaigns mx-auto max-w-5xl space-y-6 p-6 sm:p-8">
           <div className="rounded-xl border border-white/10 bg-black/20 p-5">
             <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
             <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Pending Campaigns</h1>
-            <p className="mt-2 text-sm text-[#a9abb5]">We could not load your creator profile.</p>
+            <p className="mt-2 text-sm cr-text-muted">We could not load your creator profile.</p>
           </div>
         </main>
       </CreatorShell>
@@ -50,16 +50,16 @@ export default async function CreatorPendingCampaignsPage() {
 
   return (
     <CreatorShell>
-      <main className="mx-auto max-w-5xl space-y-6 p-6 sm:p-8">
+      <main className="creator-campaigns mx-auto max-w-5xl space-y-6 p-6 sm:p-8">
         <div className="rounded-xl border border-white/10 bg-black/20 p-5">
           <p className="font-headline text-nx-11 uppercase tracking-[0.2em] text-[#99f7ff]">Campaigns</p>
           <h1 className="mt-1 font-headline text-xl font-semibold text-[#e8f4ff]">Pending Campaigns</h1>
-          <p className="mt-1 text-sm text-[#a9abb5]">Campaigns awaiting an acceptance or rejection decision.</p>
+          <p className="mt-1 text-sm cr-text-muted">Campaigns awaiting an acceptance or rejection decision.</p>
         </div>
 
         {applications.length === 0 ? (
           <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] p-8 text-center">
-            <p className="text-sm text-[#a9abb5]">No pending campaigns right now.</p>
+            <p className="text-sm cr-text-muted">No pending campaigns right now.</p>
           </div>
         ) : (
           <ul className="space-y-3.5">
@@ -79,7 +79,7 @@ export default async function CreatorPendingCampaignsPage() {
                           Pending Review
                         </span>
                       </div>
-                      <p className="text-xs text-[#a9abb5]">
+                      <p className="text-xs cr-text-muted">
                         {app.campaign.sponsor.company_name ?? app.campaign.brand_name ?? 'Sponsor'}
                         {app.campaign.end_date ? ` · Deadline ${new Date(app.campaign.end_date).toLocaleDateString()}` : ''}
                       </p>
@@ -88,7 +88,7 @@ export default async function CreatorPendingCampaignsPage() {
                       <p className="text-sm font-semibold text-[#99f7ff]">
                         {app.campaign.budget != null ? `$${app.campaign.budget.toLocaleString()}` : '—'}
                       </p>
-                      <p className="text-nx-10 text-[#a9abb5]">campaign budget</p>
+                      <p className="text-nx-10 cr-text-muted">campaign budget</p>
                     </div>
                   </div>
                 </Link>
