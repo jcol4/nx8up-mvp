@@ -47,16 +47,14 @@ export default function DisputeActions({ disputeId, initialNotes, status }: Prop
   return (
     <div className="space-y-4">
       <div>
-        <label className="text-xs dash-text-muted uppercase tracking-wide block mb-1">
-          Admin Notes
-        </label>
+        <label className="sp-app-stat-label mb-1.5 block">Admin notes</label>
         <textarea
           value={notes}
           onChange={e => setNotes(e.target.value)}
           rows={4}
           disabled={isSubmitted}
           placeholder="Add context, rebuttal points, or review notes before submitting…"
-          className="w-full rounded-lg bg-[#0a1628] border border-[#1e3a5f] text-sm dash-text p-3 resize-none focus:outline-none focus:border-[#00c8ff]/50 disabled:opacity-50"
+          className="w-full resize-none rounded-lg border border-white/12 bg-black/25 px-3 py-2.5 text-sm text-[#e8f4ff] placeholder:cr-stat-caption focus:border-[#99f7ff]/45 focus:outline-none disabled:opacity-50"
         />
       </div>
 
@@ -64,28 +62,28 @@ export default function DisputeActions({ disputeId, initialNotes, status }: Prop
         <button
           onClick={handleSaveNotes}
           disabled={saving || isSubmitted}
-          className="px-4 py-2 text-sm rounded-lg bg-[#1e3a5f] dash-text-bright hover:bg-[#264d7a] disabled:opacity-50 transition-colors"
+          className="rounded-lg border border-white/12 bg-black/25 px-4 py-2 text-sm font-medium text-[#e8f4ff] transition hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/10 disabled:opacity-50"
         >
-          {saving ? 'Saving…' : 'Save Notes'}
+          {saving ? 'Saving…' : 'Save notes'}
         </button>
 
         {!isSubmitted && (
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="px-4 py-2 text-sm rounded-lg bg-[#00c8ff] text-[#060d1b] font-semibold hover:bg-[#00b0e0] disabled:opacity-50 transition-colors"
+            className="rounded-lg border border-[#99f7ff]/35 bg-[#99f7ff]/15 px-4 py-2 text-sm font-semibold text-[#bffcff] transition hover:bg-[#99f7ff]/25 disabled:opacity-50"
           >
             {submitting ? 'Submitting…' : 'Submit to Stripe'}
           </button>
         )}
 
         {saveMsg && (
-          <span className={`text-xs ${saveMsg.startsWith('Error') ? 'text-red-400' : 'text-green-400'}`}>
+          <span className={`text-xs ${saveMsg.startsWith('Error') ? 'text-[#fca5a5]' : 'text-[#86efac]'}`}>
             {saveMsg}
           </span>
         )}
         {submitMsg && (
-          <span className={`text-xs ${submitMsg.startsWith('Error') ? 'text-red-400' : 'text-green-400'}`}>
+          <span className={`text-xs ${submitMsg.startsWith('Error') ? 'text-[#fca5a5]' : 'text-[#86efac]'}`}>
             {submitMsg}
           </span>
         )}

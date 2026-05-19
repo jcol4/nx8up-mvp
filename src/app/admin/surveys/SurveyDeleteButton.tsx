@@ -28,7 +28,7 @@ export default function SurveyDeleteButton({ id }: { id: string }) {
         <button
           type="button"
           onClick={() => setConfirming(false)}
-          className="rounded-md border border-white/15 px-2 py-0.5 text-xs font-semibold text-white/85 transition-colors hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/10 hover:text-[#bffcff]"
+          className="rounded-md border border-white/12 px-2 py-0.5 text-xs font-medium cr-text-muted transition hover:border-[#99f7ff]/35 hover:text-[#bffcff]"
         >
           Cancel
         </button>

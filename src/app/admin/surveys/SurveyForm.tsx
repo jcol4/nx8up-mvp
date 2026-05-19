@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 type QuestionDraft = {
@@ -174,85 +175,97 @@ export default function SurveyForm({
     }
   }
 
+  const inputClass =
+    'w-full rounded-lg border border-white/12 bg-black/25 px-3 py-2 text-sm text-[#e8f4ff] outline-none transition-colors placeholder:cr-stat-caption focus:border-[#99f7ff]/45'
+
   return (
-    <div className="flex-1 overflow-auto p-6 sm:p-8">
-      <div className="mx-auto max-w-5xl space-y-6">
-      <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-        <p className="text-nx-11 uppercase tracking-[0.18em] text-[#99f7ff]">Admin Center</p>
+    <div className="admin-surveys admin-surveys-detail mx-auto max-w-5xl space-y-6 p-6 sm:p-8">
+      <Link
+        href="/admin/surveys"
+        className="inline-flex items-center gap-2 rounded-lg border border-[#99f7ff]/35 bg-[#99f7ff]/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#bffcff] transition hover:border-[#99f7ff]/50 hover:bg-[#99f7ff]/15"
+      >
+        <span aria-hidden>&larr;</span>
+        Back to surveys
+      </Link>
+
+      <div className="rounded-xl border border-white/10 border-l-4 border-l-[#99f7ff]/45 bg-black/20 p-4 sm:p-5">
+        <p className="cr-field-label">Admin center</p>
         <h1 className="mt-1 font-headline text-2xl font-semibold text-[#e8f4ff]">
-          {isEdit ? 'Edit Survey' : 'New Survey'}
+          {isEdit ? 'Edit survey' : 'New survey'}
         </h1>
-        <p className="mt-1 text-sm font-medium text-white/90">
+        <p className="mt-2 text-sm leading-relaxed cr-text-muted">
           Build clear survey questions and publish to creators and/or sponsors.
         </p>
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>
+        <div className="rounded-lg border border-[#f87171]/40 bg-[#f87171]/15 px-4 py-3 text-sm text-[#fca5a5]">
+          {error}
+        </div>
       )}
 
-      <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-5 space-y-4">
-        <h2 className="text-sm font-semibold text-[#e8f4ff]">Survey Details</h2>
+      <section className="dash-panel dash-panel--nx-top space-y-4 rounded-xl border border-white/16 border-t-2 border-t-[#bffcff] bg-black/20 p-5 sm:p-6">
+        <h2 className="cr-panel-title">Survey details</h2>
 
         <div className="space-y-1">
-          <label className="text-xs font-medium text-[#b9c5d8]">Title *</label>
+          <label className="sp-app-stat-label">Title *</label>
           <input
             value={title}
             onChange={e => setTitle(e.target.value)}
             placeholder="Enter survey title"
-            className="w-full rounded-lg border border-white/12 bg-black/20 px-3 py-2 text-sm text-[#e8f4ff] outline-none transition-colors placeholder:text-white/35 focus:border-[#99f7ff]/55"
+            className={inputClass}
           />
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-medium text-[#b9c5d8]">Description</label>
+          <label className="sp-app-stat-label">Description</label>
           <textarea
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder="Optional description shown to users"
             rows={2}
-            className="w-full resize-none rounded-lg border border-white/12 bg-black/20 px-3 py-2 text-sm text-[#e8f4ff] outline-none transition-colors placeholder:text-white/35 focus:border-[#99f7ff]/55"
+            className={`${inputClass} resize-none`}
           />
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-medium text-[#b9c5d8]">Target Roles *</label>
+          <label className="sp-app-stat-label">Target roles *</label>
           <div className="flex gap-4">
             {['creator', 'sponsor'].map(r => (
-              <label key={r} className="flex items-center gap-2 cursor-pointer select-none">
+              <label key={r} className="flex cursor-pointer select-none items-center gap-2">
                 <input
                   type="checkbox"
                   checked={targetRoles.includes(r)}
                   onChange={() => toggleRole(r)}
-                  className="accent-[#00c8ff]"
+                  className="accent-[#99f7ff]"
                 />
-                <span className="text-sm capitalize text-[#e8f4ff]">{r}</span>
+                <span className="text-sm capitalize cr-text">{r}</span>
               </label>
             ))}
           </div>
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-medium text-[#b9c5d8]">Status</label>
+          <label className="sp-app-stat-label">Status</label>
           <select
             value={status}
             onChange={e => setStatus(e.target.value)}
-            className="rounded-lg border border-white/12 bg-[#0a1223] px-3 py-2 text-sm text-[#e8f4ff] outline-none transition-colors focus:border-[#99f7ff]/55"
+            className="rounded-lg border border-white/12 bg-black/25 px-3 py-2 text-sm text-[#e8f4ff] outline-none transition-colors focus:border-[#99f7ff]/45"
           >
             <option value="draft">Draft</option>
             <option value="active">Active</option>
             <option value="closed">Closed</option>
           </select>
         </div>
-      </div>
+      </section>
 
-      <div className="glass-panel interactive-panel rounded-xl border border-white/10 border-t-2 border-t-[#99f7ff] bg-black/20 p-5 space-y-4">
+      <section className="dash-panel dash-panel--nx-top space-y-4 rounded-xl border border-white/16 border-t-2 border-t-[#bffcff] bg-black/20 p-5 sm:p-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-[#e8f4ff]">Questions</h2>
+          <h2 className="cr-panel-title">Questions</h2>
           <button
             type="button"
             onClick={addQuestion}
-            className="text-xs font-medium text-[#99f7ff] transition-colors hover:text-[#d7fbff]"
+            className="text-xs font-semibold text-[#bffcff] transition hover:text-[#99f7ff]"
           >
             + Add question
           </button>
@@ -260,15 +273,15 @@ export default function SurveyForm({
 
         <div className="space-y-6">
           {questions.map((q, idx) => (
-            <div key={q.localId} className="space-y-3 rounded-lg border border-white/12 bg-black/20 p-4">
+            <div key={q.localId} className="space-y-3 rounded-lg border border-white/12 bg-black/25 p-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-[#b9c5d8]">Question {idx + 1}</span>
+                <span className="sp-app-stat-label">Question {idx + 1}</span>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => moveQuestion(q.localId, -1)}
                     disabled={idx === 0}
-                    className="p-1 font-medium text-white/80 transition-colors hover:text-[#99f7ff] disabled:opacity-30"
+                    className="p-1 cr-stat-caption transition-colors hover:text-[#bffcff] disabled:opacity-30"
                     aria-label="Move up"
                   >
                     ↑
@@ -277,7 +290,7 @@ export default function SurveyForm({
                     type="button"
                     onClick={() => moveQuestion(q.localId, 1)}
                     disabled={idx === questions.length - 1}
-                    className="p-1 font-medium text-white/80 transition-colors hover:text-[#99f7ff] disabled:opacity-30"
+                    className="p-1 cr-stat-caption transition-colors hover:text-[#bffcff] disabled:opacity-30"
                     aria-label="Move down"
                   >
                     ↓
@@ -286,7 +299,7 @@ export default function SurveyForm({
                     type="button"
                     onClick={() => removeQuestion(q.localId)}
                     disabled={questions.length === 1}
-                    className="p-1 text-red-400/60 hover:text-red-400 disabled:opacity-30 transition-colors"
+                    className="p-1 text-[#fca5a5]/70 transition-colors hover:text-[#fca5a5] disabled:opacity-30"
                     aria-label="Remove question"
                   >
                     ✕
@@ -298,24 +311,24 @@ export default function SurveyForm({
                 value={q.text}
                 onChange={e => updateQuestion(q.localId, { text: e.target.value })}
                 placeholder="Question text"
-                className="w-full rounded-lg border border-white/12 bg-black/20 px-3 py-2 text-sm text-[#e8f4ff] outline-none transition-colors placeholder:text-white/35 focus:border-[#99f7ff]/55"
+                className={inputClass}
               />
 
               <div className="space-y-2">
-                <p className="text-xs text-[#b9c5d8]">Options ({q.options.length}/6)</p>
+                <p className="sp-app-stat-label">Options ({q.options.length}/6)</p>
                 {q.options.map((opt, oi) => (
                   <div key={oi} className="flex gap-2">
                     <input
                       value={opt}
                       onChange={e => updateOption(q.localId, oi, e.target.value)}
                       placeholder={`Option ${oi + 1}`}
-                      className="flex-1 rounded-lg border border-white/12 bg-black/20 px-3 py-1.5 text-sm text-[#e8f4ff] outline-none transition-colors placeholder:text-white/35 focus:border-[#99f7ff]/55"
+                      className={`${inputClass} flex-1 py-1.5`}
                     />
                     <button
                       type="button"
                       onClick={() => removeOption(q.localId, oi)}
                       disabled={q.options.length <= 2}
-                      className="p-1.5 text-red-400/50 hover:text-red-400 disabled:opacity-30 transition-colors"
+                      className="p-1.5 text-[#fca5a5]/50 transition-colors hover:text-[#fca5a5] disabled:opacity-30"
                     >
                       ✕
                     </button>
@@ -334,22 +347,22 @@ export default function SurveyForm({
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={() => handleSubmit()}
           disabled={saving}
-          className="rounded-lg border border-[#99f7ff]/25 bg-[#99f7ff]/8 px-4 py-2 text-sm font-semibold text-[#bffcff] transition-colors hover:border-[#99f7ff]/45 hover:bg-[#99f7ff]/15 hover:text-white disabled:opacity-50"
+          className="rounded-lg border border-white/12 bg-black/25 px-4 py-2 text-sm font-medium text-[#e8f4ff] transition hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/10 disabled:opacity-50"
         >
-          {saving ? 'Saving…' : 'Save as Draft'}
+          {saving ? 'Saving…' : 'Save as draft'}
         </button>
         <button
           type="button"
           onClick={() => handleSubmit('active')}
           disabled={saving}
-          className="rounded-lg border border-[#99f7ff]/45 bg-[#99f7ff]/15 px-4 py-2 text-sm font-semibold text-[#bffcff] transition hover:border-[#99f7ff]/70 hover:bg-[#99f7ff]/22 hover:text-[#e8f4ff] disabled:opacity-50"
+          className="rounded-lg border border-[#99f7ff]/35 bg-[#99f7ff]/15 px-4 py-2 text-sm font-semibold text-[#bffcff] transition hover:bg-[#99f7ff]/25 disabled:opacity-50"
         >
           {saving ? 'Saving…' : 'Publish'}
         </button>
@@ -357,11 +370,10 @@ export default function SurveyForm({
           type="button"
           onClick={() => router.push('/admin/surveys')}
           disabled={saving}
-          className="rounded-lg border border-white/15 px-3 py-2 text-sm font-semibold text-white/85 transition-colors hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/10 hover:text-[#bffcff]"
+          className="rounded-lg border border-white/12 px-3 py-2 text-sm font-medium cr-text-muted transition hover:border-[#99f7ff]/35 hover:text-[#bffcff] disabled:opacity-50"
         >
           Cancel
         </button>
-      </div>
       </div>
     </div>
   )

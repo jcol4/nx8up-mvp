@@ -27,7 +27,7 @@ export default function AdminReviewButtons({ applicationId }: Props) {
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-xs font-medium dash-text-muted uppercase tracking-wide mb-1.5">
+        <label className="sp-app-stat-label mb-1.5 block">
           Notes for creator / sponsor (optional)
         </label>
         <textarea
@@ -35,7 +35,7 @@ export default function AdminReviewButtons({ applicationId }: Props) {
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Add any notes about this review decision…"
           rows={3}
-          className="w-full rounded-lg px-3 py-2.5 text-sm border border-white/10 bg-black/20 text-[#c8dff0] focus:outline-none focus:border-[#00c8ff]/50 resize-none placeholder:text-[#4a6080]"
+          className="w-full resize-none rounded-lg border border-white/12 bg-black/25 px-3 py-2.5 text-sm text-[#e8f4ff] placeholder:cr-stat-caption focus:border-[#99f7ff]/45 focus:outline-none"
         />
       </div>
 
@@ -46,7 +46,7 @@ export default function AdminReviewButtons({ applicationId }: Props) {
           type="button"
           onClick={() => act('admin_verified')}
           disabled={isPending}
-          className="flex-1 py-2.5 rounded-lg text-sm font-semibold bg-[#00c8ff]/20 text-[#00c8ff] border border-[#00c8ff]/30 hover:bg-[#00c8ff]/30 disabled:opacity-50 transition-colors"
+          className="flex-1 rounded-lg border border-[#99f7ff]/35 bg-[#99f7ff]/15 py-2.5 text-sm font-semibold text-[#bffcff] transition-colors hover:bg-[#99f7ff]/25 disabled:opacity-50"
         >
           {isPending ? '…' : 'Approve & Send to Sponsor'}
         </button>

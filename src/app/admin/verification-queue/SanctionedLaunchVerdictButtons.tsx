@@ -71,7 +71,7 @@ export default function SanctionedLaunchVerdictButtons({ requestId }: Props) {
           type="button"
           onClick={() => setExpanded(false)}
           disabled={isPending}
-          className="rounded-lg border border-white/15 bg-transparent px-2.5 py-1.5 text-xs font-semibold text-white/85 transition-colors hover:border-[#99f7ff]/40 hover:bg-[#99f7ff]/10 hover:text-[#bffcff] disabled:opacity-50"
+          className="rounded-lg border border-white/15 bg-transparent px-2.5 py-1.5 text-xs font-semibold cr-stat-caption transition-colors hover:border-[#99f7ff]/40 hover:bg-[#99f7ff]/10 hover:text-[#bffcff] disabled:opacity-50"
         >
           Cancel
         </button>
