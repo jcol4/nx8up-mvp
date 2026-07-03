@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import RoleLayoutShell from '@/components/nx-shell/RoleLayoutShell'
 import { type SidebarNavGroup, type SidebarNavItem, type SidebarStatRow } from '@/components/nx-shell/RoleSidebar'
 import NxHudHeader from '@/components/nx-shell/NxHudHeader'
@@ -21,53 +22,49 @@ export default function CreatorRouteShell({
   statsRows,
   statsUnavailable,
 }: Props) {
+  const t = useTranslations('nav')
   const isAdmin = role === 'admin'
+  const roleSwitchItems: SidebarNavItem[] = [
+    { href: '/admin', label: t('roleAdmin'), icon: 'verification' },
+    { href: '/creator', label: t('roleCreator'), icon: 'creators', exact: true },
+    { href: '/sponsor', label: t('roleSponsor'), icon: 'payouts' },
+  ]
   const collapsedNavItems: SidebarNavItem[] = [
-    ...(isAdmin
-      ? ([
-          { href: '/admin', label: 'Admin', icon: 'verification' },
-          { href: '/creator', label: 'Creator', icon: 'creators', exact: true },
-          { href: '/sponsor', label: 'Sponsor', icon: 'payouts' },
-        ] as SidebarNavItem[])
-      : []),
-    { href: '/creator', label: 'Dashboard', icon: 'dashboard', exact: true },
-    { href: '/creator/profile', label: 'Profile', icon: 'profile' },
-    { href: '/creator/campaigns', label: 'Campaigns', icon: 'campaigns' },
-    { href: '/creator/deal-room', label: 'Deal Room', icon: 'dealRoom' },
-    { href: '/creator/academy', label: 'Academy', icon: 'academy' },
-    { href: '/creator/steam-lookup', label: 'Steam Lookup', icon: 'creators' },
-    { href: '/creator/settings/notifications', label: 'Notifications', icon: 'notifications' },
+    ...(isAdmin ? roleSwitchItems : []),
+    { href: '/creator', label: t('dashboard'), icon: 'dashboard', exact: true },
+    { href: '/creator/profile', label: t('profile'), icon: 'profile' },
+    { href: '/creator/campaigns', label: t('campaigns'), icon: 'campaigns' },
+    { href: '/creator/deal-room', label: t('dealRoom'), icon: 'dealRoom' },
+    { href: '/creator/academy', label: t('academy'), icon: 'academy' },
+    { href: '/creator/steam-lookup', label: t('steamLookup'), icon: 'creators' },
+    { href: '/creator/settings/notifications', label: t('notifications'), icon: 'notifications' },
   ]
 
   const navGroups: SidebarNavGroup[] = [
     ...(isAdmin
       ? [
           {
-            title: 'Sections',
-            items: [
-              { href: '/admin', label: 'Admin', icon: 'verification' },
-              { href: '/creator', label: 'Creator', icon: 'creators', exact: true },
-              { href: '/sponsor', label: 'Sponsor', icon: 'payouts' },
-            ] as SidebarNavItem[],
+            title: t('sections'),
+            items: roleSwitchItems,
           } as SidebarNavGroup,
         ]
       : []),
     {
-      title: 'Creator',
+      title: t('roleCreator'),
       items: [
-        { href: '/creator', label: 'Dashboard', icon: 'dashboard', exact: true },
-        { href: '/creator/profile', label: 'Profile', icon: 'profile' },
-        { href: '/creator/campaigns', label: 'Campaigns', icon: 'campaigns' },
-        { href: '/creator/deal-room', label: 'Deal Room', icon: 'dealRoom' },
-        { href: '/creator/academy', label: 'Academy', icon: 'academy' },
-        { href: '/creator/guide', label: 'Guide', icon: 'reports' },
-        { href: '/creator/steam-lookup', label: 'Steam Lookup', icon: 'creators' },
+        { href: '/creator', label: t('dashboard'), icon: 'dashboard', exact: true },
+        { href: '/creator/profile', label: t('profile'), icon: 'profile' },
+        { href: '/creator/campaigns', label: t('campaigns'), icon: 'campaigns' },
+        { href: '/creator/deal-room', label: t('dealRoom'), icon: 'dealRoom' },
+        { href: '/creator/academy', label: t('academy'), icon: 'academy' },
+        { href: '/creator/guide', label: t('guide'), icon: 'reports' },
+        { href: '/creator/steam-lookup', label: t('steamLookup'), icon: 'creators' },
       ] as SidebarNavItem[],
     },
     {
-      title: 'Notifications',
+      title: t('notifications'),
       borderTop: true,
-      items: [{ href: '/creator/settings/notifications', label: 'Preferences', icon: 'notifications' }] as SidebarNavItem[],
+      items: [{ href: '/creator/settings/notifications', label: t('preferences'), icon: 'notifications' }] as SidebarNavItem[],
     },
   ]
 
@@ -76,9 +73,9 @@ export default function CreatorRouteShell({
       homeHref="/creator"
       navGroups={navGroups}
       collapsedNavItems={collapsedNavItems}
-      statsTitle="My Stats"
       statsRows={statsRows}
       statsUnavailable={statsUnavailable}
+      statsTitle={t('myStats')}
       animateContentOffset={false}
     >
       {(collapsed) => (

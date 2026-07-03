@@ -7,9 +7,10 @@
  */
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname } from '@/i18n/navigation'
 import { SignedIn } from '@clerk/nextjs'
 import UserProfileBlock from '@/components/shared/UserProfileBlock'
+import LocaleSwitcher from '@/components/shared/LocaleSwitcher'
 
 type Props = {
   signedIn: boolean
@@ -66,6 +67,7 @@ export default function ConditionalHeader({
   return (
     <SignedIn>
       <header className="flex h-16 items-center justify-end gap-4 p-4">
+        <LocaleSwitcher />
         <UserProfileBlock
           displayName={displayName ?? null}
           username={username ?? null}

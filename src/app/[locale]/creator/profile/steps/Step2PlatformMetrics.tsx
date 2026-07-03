@@ -1,0 +1,76 @@
+/**
+ * Step 2 — Platform Metrics (profile wizard).
+ *
+ * Read-only display step that shows synced Twitch and YouTube stats via
+ * `CreatorStatsPanel`. Stats are fetched server-side before the wizard
+ * renders and passed as the `creator` prop.
+ *
+ * This step has no save action — navigating forward/back simply changes the
+ * active step in the wizard without persisting any data.
+ */
+'use client'
+
+import { useTranslations } from 'next-intl'
+import CreatorStatsPanel from '../CreatorStatsPanel'
+
+type CreatorStats = {
+  twitch_username: string | null
+  twitch_broadcaster_type: string | null
+  twitch_created_at: Date | null
+  twitch_synced_at: Date | null
+  subs_followers: number | null
+  average_vod_views: number | null
+  twitch_subscriber_count: number | null
+  engagement_rate: number | null
+  youtube_channel_id: string | null
+  youtube_channel_name: string | null
+  youtube_handle: string | null
+  youtube_subscribers: number | null
+  youtube_avg_views: number | null
+  youtube_watch_time_hours: number | null
+  youtube_member_count: number | null
+  youtube_top_categories: string[]
+  youtube_synced_at: Date | null
+  steam_id: string | null
+  steam_username: string | null
+  steam_profile_visibility: number | null
+  steam_top_games: unknown
+  steam_recent_games: unknown
+  steam_synced_at: Date | null
+}
+
+type Props = {
+  creator: CreatorStats
+  onNext: () => void
+  onBack: () => void
+}
+
+export default function Step2PlatformMetrics({ creator, onNext, onBack }: Props) {
+  const t = useTranslations('creator.profile')
+  return (
+    <div className="space-y-4">
+      <p className="mb-4 text-sm cr-text-muted leading-relaxed">
+        {t('s2Desc')}
+      </p>
+
+      <CreatorStatsPanel creator={creator} />
+
+      <div className="flex items-center justify-between pt-2">
+        <button
+          type="button"
+          onClick={onBack}
+          className="rounded-lg border border-white/10 px-5 py-2.5 text-sm font-medium cr-text-muted transition-colors hover:border-[#99f7ff]/30 hover:text-[#e8f4ff]"
+        >
+          {t('s2Back')}
+        </button>
+        <button
+          type="button"
+          onClick={onNext}
+          className="rounded-lg bg-[#99f7ff] px-5 py-2.5 text-sm font-semibold text-slate-900 transition-opacity hover:opacity-90"
+        >
+          {t('s2Next')}
+        </button>
+      </div>
+    </div>
+  )
+}

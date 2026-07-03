@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { getActiveCampaigns } from '../../app/creator/campaigns/_actions'
+import { getActiveCampaigns } from '../../app/[locale]/creator/campaigns/_actions'
 import { prisma } from '../prisma'
 
 vi.mock('@clerk/nextjs/server', () => ({

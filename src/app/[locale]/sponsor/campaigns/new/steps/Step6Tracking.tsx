@@ -1,0 +1,95 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
+import FormInput from '@/components/ui/FormInput'
+import type { CampaignDraft } from '../_shared'
+import { labelClass, sectionClass, sectionTitle, TRACKING_TYPES, CONVERSION_GOALS } from '../_shared'
+
+type Props = {
+  draft: CampaignDraft
+  setDraft: React.Dispatch<React.SetStateAction<CampaignDraft>>
+  onNext: () => void
+  onBack: () => void
+}
+
+export default function Step6Tracking({ draft, setDraft, onNext, onBack }: Props) {
+  const t = useTranslations('sponsor.campaignWizard')
+  const tEnum = useTranslations('enums')
+  const set = <K extends keyof CampaignDraft>(k: K, v: CampaignDraft[K]) =>
+    setDraft(prev => ({ ...prev, [k]: v }))
+
+  return (
+    <div className="space-y-6">
+      {/* Landing page */}
+      <div className={sectionClass}>
+        <p className={sectionTitle}>{t('s6LandingPage')}</p>
+        <div>
+          <label className={labelClass}>{t('s6Url')}</label>
+          <FormInput
+            type="url"
+            variant="dashboard"
+            value={draft.landing_page_url}
+            onChange={e => set('landing_page_url', e.target.value)}
+            placeholder={t('s6UrlPlaceholder')}
+          />
+        </div>
+      </div>
+
+      {/* Tracking type */}
+      <div className={sectionClass}>
+        <p className={sectionTitle}>{t('s6TrackingType')}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {TRACKING_TYPES.map(tt => (
+            <button
+              key={tt.value}
+              type="button"
+              onClick={() => set('tracking_type', tt.value)}
+              className={`flex flex-col gap-1 p-3 rounded-lg border text-left transition-all duration-150 ${
+                draft.tracking_type === tt.value
+                  ? 'border-[#99f7ff] bg-[rgba(153,247,255,0.06)] shadow-[0_0_14px_rgba(153,247,255,0.15)]'
+                  : 'dash-border hover:border-[rgba(153,247,255,0.3)] hover:bg-[rgba(153,247,255,0.03)]'
+              }`}
+            >
+              <p className={`text-sm font-semibold ${draft.tracking_type === tt.value ? 'text-[#99f7ff]' : 'dash-text-bright'}`}>
+                {tEnum(`trackingType.${tt.value}.label`)}
+              </p>
+              <p className="text-xs dash-text-muted">{tEnum(`trackingType.${tt.value}.desc`)}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Conversion goal */}
+      <div className="space-y-3">
+        <p className={sectionTitle}>{t('s6ConversionGoal')}</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {CONVERSION_GOALS.map(cg => (
+            <button
+              key={cg.value}
+              type="button"
+              onClick={() => set('conversion_goal', cg.value)}
+              className={`flex flex-col items-center p-3 rounded-lg border text-center transition-all duration-150 ${
+                draft.conversion_goal === cg.value
+                  ? 'border-[#99f7ff] bg-[rgba(153,247,255,0.06)] shadow-[0_0_14px_rgba(153,247,255,0.15)]'
+                  : 'dash-border hover:border-[rgba(153,247,255,0.3)] hover:bg-[rgba(153,247,255,0.03)]'
+              }`}
+            >
+              <p className={`text-sm font-semibold ${draft.conversion_goal === cg.value ? 'text-[#99f7ff]' : 'dash-text-bright'}`}>
+                {tEnum(`conversionGoal.${cg.value}`)}
+              </p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex justify-between pt-2 border-t dash-border">
+        <button type="button" onClick={onBack} className="py-2.5 px-5 rounded-lg border dash-border dash-text-muted text-sm font-medium hover:text-[#c8dff0] transition-colors">
+          {t('backArrow')}
+        </button>
+        <button type="button" onClick={onNext} className="py-2.5 px-6 rounded-lg bg-[#99f7ff] text-slate-900 text-sm font-semibold hover:opacity-90 transition-opacity">
+          {t('reviewBtn')}
+        </button>
+      </div>
+    </div>
+  )
+}

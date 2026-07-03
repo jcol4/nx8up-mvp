@@ -10,7 +10,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getPayoutLedger, type LedgerRow } from '@/app/sponsor/payouts/_data'
+import { getPayoutLedger, type LedgerRow } from '@/app/[locale]/sponsor/payouts/_data'
 
 /** RFC 4180-compliant CSV escape: wraps values in double-quotes if they contain commas, quotes, or newlines. */
 function csvEscape(value: string | null | undefined): string {

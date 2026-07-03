@@ -28,7 +28,7 @@
 //   }
 // };
 
-// export default nextConfig;
+// export default withNextIntl(nextConfig);
 
 
 /**
@@ -49,6 +49,9 @@
  *   reading it from an env var (e.g. NEXT_ALLOWED_ORIGIN) to avoid repeated edits.
  */
 import type { NextConfig } from "next";
+import createNextIntlPlugin from 'next-intl/plugin'
+
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
 const nextConfig: NextConfig = {
   // Allow dev-server requests from the WSL2 host machine's virtual NIC IP
@@ -70,4 +73,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

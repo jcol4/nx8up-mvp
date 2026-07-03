@@ -53,8 +53,8 @@ let cachedToken: AppToken | null = null
  * Returns a valid Twitch app access token, fetching a new one from the OAuth
  * endpoint only when the cached token is absent or within 60s of expiry.
  */
-export async function getAppToken(): Promise<string> {
-  if (cachedToken && Date.now() < cachedToken.expires_at - 60_000) {
+export async function getAppToken(forceRefresh = false): Promise<string> {
+  if (!forceRefresh && cachedToken && Date.now() < cachedToken.expires_at - 60_000) {
     return cachedToken.access_token
   }
 
@@ -79,18 +79,38 @@ export async function getAppToken(): Promise<string> {
   return cachedToken.access_token
 }
 
+/**
+ * Fetches a Helix endpoint with the app access token, retrying once with a
+ * freshly-minted token if the first attempt is rejected with 401. Twitch can
+ * invalidate a token before its stated expiry (e.g. app secret rotation), and
+ * without this retry every call fails until the module is reloaded.
+ */
+async function fetchHelix(url: string): Promise<Response> {
+  const token = await getAppToken()
+  const res = await fetch(url, {
+    headers: {
+      'Client-Id': process.env.TWITCH_CLIENT_ID!,
+      'Authorization': `Bearer ${token}`,
+    },
+    next: { revalidate: 0 },
+  })
+
+  if (res.status !== 401) return res
+
+  const freshToken = await getAppToken(true)
+  return fetch(url, {
+    headers: {
+      'Client-Id': process.env.TWITCH_CLIENT_ID!,
+      'Authorization': `Bearer ${freshToken}`,
+    },
+    next: { revalidate: 0 },
+  })
+}
+
 /** Looks up a Twitch user by their login name (case-insensitive). Returns null if not found. */
 export async function getTwitchUserByLogin(username: string): Promise<TwitchUser | null> {
-  const token = await getAppToken()
-  const res = await fetch(
-    `https://api.twitch.tv/helix/users?login=${encodeURIComponent(username.toLowerCase().trim())}`,
-    {
-      headers: {
-        'Client-Id': process.env.TWITCH_CLIENT_ID!,
-        'Authorization': `Bearer ${token}`,
-      },
-      next: { revalidate: 0 },
-    }
+  const res = await fetchHelix(
+    `https://api.twitch.tv/helix/users?login=${encodeURIComponent(username.toLowerCase().trim())}`
   )
 
   if (!res.ok) throw new Error(`Twitch API error: ${res.status}`)
@@ -100,17 +120,7 @@ export async function getTwitchUserByLogin(username: string): Promise<TwitchUser
 
 /** Looks up a Twitch user by their numeric broadcaster ID. Returns null if not found. */
 export async function getTwitchUserById(id: string): Promise<TwitchUser | null> {
-  const token = await getAppToken()
-  const res = await fetch(
-    `https://api.twitch.tv/helix/users?id=${encodeURIComponent(id)}`,
-    {
-      headers: {
-        'Client-Id': process.env.TWITCH_CLIENT_ID!,
-        'Authorization': `Bearer ${token}`,
-      },
-      next: { revalidate: 0 },
-    }
-  )
+  const res = await fetchHelix(`https://api.twitch.tv/helix/users?id=${encodeURIComponent(id)}`)
 
   if (!res.ok) throw new Error(`Twitch API error: ${res.status}`)
   const data = await res.json()
@@ -122,16 +132,8 @@ export async function getTwitchUserById(id: string): Promise<TwitchUser | null> 
  * Uses GET /helix/channels/followers with an app access token.
  */
 export async function getTwitchFollowerCount(broadcasterId: string): Promise<number> {
-  const token = await getAppToken()
-  const res = await fetch(
-    `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${encodeURIComponent(broadcasterId)}&first=1`,
-    {
-      headers: {
-        'Client-Id': process.env.TWITCH_CLIENT_ID!,
-        'Authorization': `Bearer ${token}`,
-      },
-      next: { revalidate: 0 },
-    }
+  const res = await fetchHelix(
+    `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${encodeURIComponent(broadcasterId)}&first=1`
   )
 
   if (!res.ok) throw new Error(`Twitch followers API error: ${res.status}`)

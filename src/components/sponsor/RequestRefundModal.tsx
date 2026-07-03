@@ -1,14 +1,15 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 
 const REFUND_REASONS = [
-  { value: 'budget_constraints',       label: 'Budget constraints' },
-  { value: 'strategy_changed',         label: 'Campaign strategy changed' },
-  { value: 'alternative_solution',     label: 'Found alternative solution' },
-  { value: 'timeline_no_longer_works', label: 'Timeline no longer works' },
-  { value: 'other',                    label: 'Other' },
+  { value: 'budget_constraints',       key: 'refundReasonBudget' },
+  { value: 'strategy_changed',         key: 'refundReasonStrategy' },
+  { value: 'alternative_solution',     key: 'refundReasonAlternative' },
+  { value: 'timeline_no_longer_works', key: 'refundReasonTimeline' },
+  { value: 'other',                    key: 'refundReasonOther' },
 ]
 
 type Props = {
@@ -19,6 +20,7 @@ type Props = {
 }
 
 export default function RequestRefundModal({ campaignId, campaignTitle, hasAcceptedCreators, onClose }: Props) {
+  const t = useTranslations('sponsor.actions')
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [reasonCategory, setReasonCategory] = useState('')
@@ -28,7 +30,7 @@ export default function RequestRefundModal({ campaignId, campaignTitle, hasAccep
 
   const handleSubmit = () => {
     if (!reasonCategory) {
-      setError('Please select a reason.')
+      setError(t('refundSelectReason'))
       return
     }
     setError('')
@@ -40,7 +42,7 @@ export default function RequestRefundModal({ campaignId, campaignTitle, hasAccep
       })
       const data = await res.json() as { error?: string }
       if (!res.ok || data.error) {
-        setError(data.error ?? 'Something went wrong. Please try again.')
+        setError(data.error ?? t('refundGenericError'))
       } else {
         setDone(true)
         router.refresh()
@@ -60,9 +62,9 @@ export default function RequestRefundModal({ campaignId, campaignTitle, hasAccep
               </svg>
             </div>
             <div>
-              <p className="text-base font-semibold text-[#e8f4ff]">Refund requested</p>
+              <p className="text-base font-semibold text-[#e8f4ff]">{t('refundRequestedTitle')}</p>
               <p className="mt-1 text-sm text-[#a9abb5]">
-                Your refund is being processed. An admin will review your reason and you&apos;ll be notified of the outcome.
+                {t('refundRequestedDesc')}
               </p>
             </div>
             <button
@@ -70,15 +72,15 @@ export default function RequestRefundModal({ campaignId, campaignTitle, hasAccep
               onClick={onClose}
               className="w-full rounded-lg bg-white/5 border border-white/10 py-2 text-sm font-medium text-[#c8dff0] hover:bg-white/10 transition-colors"
             >
-              Close
+              {t('close')}
             </button>
           </div>
         ) : (
           <div className="space-y-5">
             <div>
-              <h2 className="text-base font-semibold text-[#e8f4ff]">Request a refund</h2>
+              <h2 className="text-base font-semibold text-[#e8f4ff]">{t('refundModalTitle')}</h2>
               <p className="mt-1 text-sm text-[#a9abb5]">
-                Campaign: <span className="text-[#c8dff0] font-medium">{campaignTitle}</span>
+                {t('refundCampaignLabel')} <span className="text-[#c8dff0] font-medium">{campaignTitle}</span>
               </p>
             </div>
 
@@ -88,7 +90,7 @@ export default function RequestRefundModal({ campaignId, campaignTitle, hasAccep
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
                 </svg>
                 <p className="text-xs text-orange-300">
-                  You have accepted creators on this campaign. Cancelling will affect their accepted applications and may carry a higher reputation penalty.
+                  {t('refundAcceptedWarning')}
                 </p>
               </div>
             )}
@@ -98,33 +100,32 @@ export default function RequestRefundModal({ campaignId, campaignTitle, hasAccep
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
               </svg>
               <p className="text-xs text-red-300">
-                This action is irreversible. Your refund will be issued immediately and your campaign will be cancelled.
-                An admin will review your reason, which may affect your reputation score.
+                {t('refundIrreversibleWarning')}
               </p>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-xs font-medium text-[#c8dff0]">Reason for refund</label>
+              <label className="block text-xs font-medium text-[#c8dff0]">{t('refundReasonLabel')}</label>
               <select
                 value={reasonCategory}
                 onChange={(e) => setReasonCategory(e.target.value)}
                 className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-[#c8dff0] focus:outline-none focus:ring-1 focus:ring-[#99f7ff]/40"
               >
-                <option value="" disabled>Select a reason…</option>
+                <option value="" disabled>{t('refundSelectPlaceholder')}</option>
                 {REFUND_REASONS.map((r) => (
-                  <option key={r.value} value={r.value}>{r.label}</option>
+                  <option key={r.value} value={r.value}>{t(r.key)}</option>
                 ))}
               </select>
             </div>
 
             <div className="space-y-2">
               <label className="block text-xs font-medium text-[#a9abb5]">
-                Give a more detailed explanation <span className="text-[#6b7280]">(optional)</span>
+                {t('refundDetailLabel')} <span className="text-[#6b7280]">{t('optional')}</span>
               </label>
               <textarea
                 value={reasonDetail}
                 onChange={(e) => setReasonDetail(e.target.value)}
-                placeholder="Provide any additional context…"
+                placeholder={t('refundDetailPlaceholder')}
                 rows={3}
                 className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-[#c8dff0] placeholder-[#6b7280] focus:outline-none focus:ring-1 focus:ring-[#99f7ff]/40 resize-none"
               />
@@ -139,7 +140,7 @@ export default function RequestRefundModal({ campaignId, campaignTitle, hasAccep
                 disabled={isPending}
                 className="flex-1 rounded-lg border border-white/10 bg-white/5 py-2 text-sm font-medium text-[#c8dff0] hover:bg-white/10 transition-colors disabled:opacity-50"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 type="button"
@@ -147,7 +148,7 @@ export default function RequestRefundModal({ campaignId, campaignTitle, hasAccep
                 disabled={isPending || !reasonCategory}
                 className="flex-1 rounded-lg bg-red-500/80 py-2 text-sm font-semibold text-white hover:bg-red-500 transition-colors disabled:opacity-50"
               >
-                {isPending ? 'Submitting…' : 'Request refund'}
+                {isPending ? t('submitting') : t('requestRefund')}
               </button>
             </div>
           </div>

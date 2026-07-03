@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { launchCampaign } from '@/app/sponsor/campaigns/_actions'
+import { launchCampaign } from '@/app/[locale]/sponsor/campaigns/_actions'
 
 type Props = { id: string }
 
 export default function LaunchCampaignButton({ id }: Props) {
+  const t = useTranslations('sponsor.actions')
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
@@ -31,7 +33,7 @@ export default function LaunchCampaignButton({ id }: Props) {
         disabled={isPending}
         className="rounded-lg bg-[#c084fc] px-2.5 py-1 text-xs font-semibold text-slate-950 transition-opacity hover:opacity-90 disabled:opacity-50"
       >
-        {isPending ? 'Launching...' : 'Launch'}
+        {isPending ? t('launching') : t('launch')}
       </button>
       {error && <p className="text-xs text-red-400">{error}</p>}
     </div>

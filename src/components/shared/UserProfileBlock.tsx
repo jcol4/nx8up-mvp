@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
+import { useState, useEffect } from "react";
 
 function CreatorProfileIcon() {
   return (
@@ -46,6 +47,9 @@ export default function UserProfileBlock({
   compact = false,
   editLinkClassName,
 }: Props) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
   const prefix = variant === "creator" ? "cr" : variant === "sponsor" ? "sp" : "dash";
   const name = displayName || username || (variant === "creator" ? "Creator" : variant === "sponsor" ? "Sponsor" : "Admin");
   const showCreatorProfile = role === "creator" || role === "admin";
@@ -57,30 +61,34 @@ export default function UserProfileBlock({
         showDivider ? "pl-3 border-l border-white/10" : ""
       }`}
     >
-      <UserButton
-        appearance={{
-          elements: {
-            avatarBox: compact ? "w-8 h-8 ring-2 ring-[#00c8ff]" : "w-9 h-9 ring-2 ring-[#00c8ff]",
-          },
-        }}
-      >
-        <UserButton.MenuItems>
-          {showCreatorProfile && (
-            <UserButton.Link
-              label="Creator profile"
-              labelIcon={<CreatorProfileIcon />}
-              href="/creator/profile"
-            />
-          )}
-          {showSponsorProfile && (
-            <UserButton.Link
-              label="Sponsor profile"
-              labelIcon={<SponsorProfileIcon />}
-              href="/sponsor/profile"
-            />
-          )}
-        </UserButton.MenuItems>
-      </UserButton>
+      {mounted ? (
+        <UserButton
+          appearance={{
+            elements: {
+              avatarBox: compact ? "w-8 h-8 ring-2 ring-[#00c8ff]" : "w-9 h-9 ring-2 ring-[#00c8ff]",
+            },
+          }}
+        >
+          <UserButton.MenuItems>
+            {showCreatorProfile && (
+              <UserButton.Link
+                label="Creator profile"
+                labelIcon={<CreatorProfileIcon />}
+                href="/creator/profile"
+              />
+            )}
+            {showSponsorProfile && (
+              <UserButton.Link
+                label="Sponsor profile"
+                labelIcon={<SponsorProfileIcon />}
+                href="/sponsor/profile"
+              />
+            )}
+          </UserButton.MenuItems>
+        </UserButton>
+      ) : (
+        <div className={compact ? "w-8 h-8" : "w-9 h-9"} />
+      )}
       {editProfileLink ? (
         <div className="hidden sm:block text-left">
           <p className="text-sm font-medium text-white">{name}</p>

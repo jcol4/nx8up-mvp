@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { deleteCreatorAccount } from '../../app/creator/profile/_actions'
+import { deleteCreatorAccount } from '../../app/[locale]/creator/profile/_actions'
 import { prisma } from '../prisma'
 
 vi.mock('@clerk/nextjs/server', () => ({

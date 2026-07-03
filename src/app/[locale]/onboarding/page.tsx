@@ -1,0 +1,292 @@
+'use client'
+
+import * as React from 'react'
+import { useTranslations } from 'next-intl'
+import { useClerk, useUser } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
+import { completeOnboarding } from './_actions'
+import { AuthLayout } from '@/components/layout'
+import { BirthdateSelect } from '@/components/ui'
+
+function OnboardingTermsContent() {
+  const t = useTranslations('onboarding')
+  return (
+    <div className="space-y-4 text-left text-nx-13 leading-relaxed text-[#a9abb5]">
+      <p className="text-[#e8f4ff]">{t('termsIntro')}</p>
+      <section>
+        <h3 className="mb-1 font-semibold text-[#e8f4ff]">{t('termsEligibilityTitle')}</h3>
+        <p>{t('termsEligibilityText')}</p>
+      </section>
+      <section>
+        <h3 className="mb-1 font-semibold text-[#e8f4ff]">{t('termsCreatorsSponsorsTitle')}</h3>
+        <p>{t('termsCreatorsSponsorsText')}</p>
+      </section>
+      <section>
+        <h3 className="mb-1 font-semibold text-[#e8f4ff]">{t('termsContentTitle')}</h3>
+        <p>{t('termsContentText')}</p>
+      </section>
+      <section>
+        <h3 className="mb-1 font-semibold text-[#e8f4ff]">{t('termsDisclaimersTitle')}</h3>
+        <p>{t('termsDisclaimersText')}</p>
+      </section>
+      <section>
+        <h3 className="mb-1 font-semibold text-[#e8f4ff]">{t('termsChangesTitle')}</h3>
+        <p>{t('termsChangesText')}</p>
+      </section>
+    </div>
+  )
+}
+
+export default function OnboardingComponent() {
+  const t = useTranslations('onboarding')
+  const formRef = React.useRef<HTMLFormElement>(null)
+  const [error, setError] = React.useState('')
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [showTermsModal, setShowTermsModal] = React.useState(false)
+  const [termsReadChecked, setTermsReadChecked] = React.useState(false)
+  const { user } = useUser()
+  const { signOut } = useClerk()
+  const router = useRouter()
+
+  const maxDob = React.useMemo(() => new Date().toISOString().split('T')[0], [])
+  const minDob = React.useMemo(() => {
+    const d = new Date()
+    d.setFullYear(d.getFullYear() - 120)
+    return d.toISOString().split('T')[0]
+  }, [])
+
+  const closeTermsModal = React.useCallback(() => {
+    setShowTermsModal(false)
+    setTermsReadChecked(false)
+  }, [])
+
+  React.useEffect(() => {
+    if (!showTermsModal) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeTermsModal()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [showTermsModal, closeTermsModal])
+
+  const validateForm = React.useCallback((): boolean => {
+    const form = formRef.current
+    if (!form) return false
+    const fd = new FormData(form)
+    const dob = (fd.get('userDateOfBirth') as string | null) ?? ''
+    const role = (fd.get('role') as string | null) ?? ''
+    if (!dob.trim()) {
+      setError(t('errorDobRequired'))
+      return false
+    }
+    if (!role) {
+      setError(t('errorRoleRequired'))
+      return false
+    }
+    return true
+  }, [t])
+
+  const onFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setError('')
+    if (!validateForm()) return
+    setTermsReadChecked(false)
+    setShowTermsModal(true)
+  }
+
+  const confirmTermsAndOnboard = async () => {
+    if (!termsReadChecked || !formRef.current) return
+    setError('')
+    setIsLoading(true)
+    const formData = new FormData(formRef.current)
+    const res = await completeOnboarding(formData)
+    if (res?.message) {
+      setShowTermsModal(false)
+      await user?.reload()
+      const roleFromRes = (res.message as { role?: string })?.role
+      if (roleFromRes === 'creator') router.push('/creator')
+      else if (roleFromRes === 'sponsor') router.push('/sponsor')
+      else router.push('/')
+    }
+    if (res?.error) {
+      setError(res.error)
+      setIsLoading(false)
+    }
+  }
+
+  const roleCardClass =
+    'flex cursor-pointer items-start gap-3 rounded-lg border border-white/[0.12] bg-[rgb(0_0_0_/0.22)] px-3 py-3 transition-colors hover:border-[#99f7ff]/30 has-[:checked]:border-[#99f7ff]/50 has-[:checked]:bg-[#99f7ff]/[0.07]'
+
+  return (
+    <AuthLayout>
+      <h1 className="nx-title">
+        Account <span>{t('titleAccent')}</span>
+      </h1>
+      <p className="nx-subtitle">{t('subtitle')}</p>
+
+      <div className="mt-4 rounded-lg border border-[#99f7ff]/20 bg-[#99f7ff]/[0.06] px-4 py-3 text-nx-13 leading-relaxed text-[#a9abb5]">
+        <span className="font-semibold text-[#99f7ff]">{t('betaNoticeLabel')} </span>
+        {t('betaNoticeText')}
+      </div>
+
+      <div className="nx-divider" />
+
+      <form ref={formRef} noValidate onSubmit={onFormSubmit}>
+        <div className="nx-field">
+          <span className="nx-label">{t('dobLabel')}</span>
+          <BirthdateSelect name="userDateOfBirth" max={maxDob} min={minDob} />
+          <p className="mt-2 text-center text-nx-12 leading-relaxed text-[#a9abb5]">
+            {t('dobHint')}
+          </p>
+        </div>
+
+        <div className="nx-field">
+          <span className="nx-label">{t('roleLabel')}</span>
+          <div className="flex flex-col gap-2">
+            <label className={roleCardClass}>
+              <input
+                type="radio"
+                name="role"
+                value="creator"
+                className="mt-1 accent-[#99f7ff]"
+                aria-required="true"
+              />
+              <span>
+                <span className="font-semibold text-[#e8f4ff]">{t('creatorTitle')}</span>
+                <span className="mt-0.5 block text-nx-13 font-normal leading-snug text-[#a9abb5]">
+                  {t('creatorDesc')}
+                </span>
+              </span>
+            </label>
+            <label className={roleCardClass}>
+              <input
+                type="radio"
+                name="role"
+                value="sponsor"
+                className="mt-1 accent-[#99f7ff]"
+                aria-required="true"
+              />
+              <span>
+                <span className="font-semibold text-[#e8f4ff]">{t('sponsorTitle')}</span>
+                <span className="mt-0.5 block text-nx-13 font-normal leading-snug text-[#a9abb5]">
+                  {t('sponsorDesc')}
+                </span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        {error && (
+          <div className="nx-error" role="alert">
+            <svg className="nx-error__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+              <circle cx="7" cy="7" r="6.5" stroke="currentColor" />
+              <path d="M7 4v3M7 9v.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+            </svg>
+            {error}
+          </div>
+        )}
+
+        <button className="nx-submit" type="submit" disabled={isLoading || showTermsModal}>
+          <span className="nx-submit-inner">
+            {isLoading ? (
+              <>
+                <span className="nx-spinner" /> {t('saving')}
+              </>
+            ) : (
+              <>
+                {t('continue')}
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+                  <path
+                    d="M3 7h8M7 3l4 4-4 4"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </>
+            )}
+          </span>
+        </button>
+      </form>
+
+      {showTermsModal && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+          role="presentation"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) closeTermsModal()
+          }}
+        >
+          <div
+            className="absolute inset-0 bg-[#030712]/75 backdrop-blur-sm"
+            aria-hidden
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="onboarding-terms-title"
+            className="relative z-[1] flex max-h-[min(90vh,640px)] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-white/[0.14] bg-[rgb(8_14_28_/0.96)] shadow-[0_25px_50px_-12px_rgb(0_0_0_/0.5)]"
+          >
+            <div className="border-b border-white/[0.08] px-5 py-4">
+              <h2 id="onboarding-terms-title" className="text-lg font-semibold text-[#e8f4ff]">
+                {t('termsTitle')}
+              </h2>
+              <p className="mt-1 text-nx-12 text-[#a9abb5]">{t('termsSubtitle')}</p>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+              <OnboardingTermsContent />
+            </div>
+            <div className="border-t border-white/[0.08] px-5 py-4">
+              <label className="flex cursor-pointer items-start gap-3 text-left text-nx-13 text-[#e8f4ff]">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 size-4 shrink-0 rounded border border-white/20 bg-black/30 accent-[#99f7ff]"
+                  checked={termsReadChecked}
+                  onChange={(e) => setTermsReadChecked(e.target.checked)}
+                />
+                <span>{t('termsAgreeCheckbox')}</span>
+              </label>
+              <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  className="nx-text-btn w-full justify-center py-2 sm:w-auto"
+                  onClick={closeTermsModal}
+                  disabled={isLoading}
+                >
+                  {t('termsCancel')}
+                </button>
+                <button
+                  type="button"
+                  className="nx-submit w-full sm:w-auto"
+                  disabled={!termsReadChecked || isLoading}
+                  onClick={() => void confirmTermsAndOnboard()}
+                >
+                  <span className="nx-submit-inner">
+                    {isLoading ? (
+                      <>
+                        <span className="nx-spinner" /> {t('saving')}
+                      </>
+                    ) : (
+                      t('termsAgreeButton')
+                    )}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="nx-footer">
+        <button
+          type="button"
+          className="nx-text-btn"
+          onClick={() => void signOut({ redirectUrl: '/sign-in' })}
+        >
+          {t('backToSignIn')}
+        </button>
+      </div>
+    </AuthLayout>
+  )
+}

@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
-import { publishCampaign } from '@/app/sponsor/campaigns/_actions'
+import { publishCampaign } from '@/app/[locale]/sponsor/campaigns/_actions'
 
 type Props = { id: string }
 
 export default function PublishCampaignButton({ id }: Props) {
+  const t = useTranslations('sponsor.actions')
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
@@ -31,7 +33,7 @@ export default function PublishCampaignButton({ id }: Props) {
         disabled={isPending}
         className="rounded-lg bg-[#99f7ff] px-2.5 py-1 text-xs font-semibold text-slate-900 transition-opacity hover:opacity-90 disabled:opacity-50"
       >
-        {isPending ? 'Publishing...' : 'Publish'}
+        {isPending ? t('publishing') : t('publish')}
       </button>
       {error && <p className="text-xs text-red-400">{error}</p>}
     </div>

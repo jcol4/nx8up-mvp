@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { requestOptOut } from '../../app/creator/campaigns/_actions'
+import { requestOptOut } from '../../app/[locale]/creator/campaigns/_actions'
 import { prisma } from '../prisma'
 
 vi.mock('@clerk/nextjs/server', () => ({

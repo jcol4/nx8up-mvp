@@ -9,10 +9,9 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useClickOutside } from '@/hooks/useClickOutside'
 import { formatRelativeTime } from '@/lib/utils'
-import { NOTIFICATION_LABELS } from '@/lib/notification-types'
-import type { NotificationType } from '@/lib/notification-types'
 
 type Notification = {
   id: string
@@ -49,6 +48,8 @@ function isToday(dateStr: string): boolean {
 }
 
 export default function NotificationBell() {
+  const t = useTranslations('notificationBell')
+  const tEnum = useTranslations('enums')
   const router = useRouter()
   const panelRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
@@ -163,7 +164,7 @@ export default function NotificationBell() {
     setSubmitError('')
     const unanswered = activeSurvey.questions.filter(q => !surveyAnswers[q.id])
     if (unanswered.length > 0) {
-      setSubmitError('Please answer all questions before submitting.')
+      setSubmitError(t('errorAnswerAll'))
       return
     }
     setSubmitting(true)
@@ -178,14 +179,17 @@ export default function NotificationBell() {
         setSurveyView(false)
         setSurveyAnswers({})
       } else {
-        setSubmitError('Failed to submit. Please try again.')
+        setSubmitError(t('errorSubmit'))
       }
     } catch {
-      setSubmitError('Something went wrong. Please try again.')
+      setSubmitError(t('errorGeneric'))
     } finally {
       setSubmitting(false)
     }
   }
+
+  const typeLabel = (type: string) =>
+    tEnum.has(`notificationLabel.${type}`) ? tEnum(`notificationLabel.${type}`) : t('defaultLabel')
 
   const todayItems = notifications.filter((n) => isToday(n.createdAt))
   const earlierItems = notifications.filter((n) => !isToday(n.createdAt))
@@ -198,7 +202,7 @@ export default function NotificationBell() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         className="relative rounded-lg p-2 text-[#b8c6d6] transition-colors hover:bg-white/5 hover:text-[#e8f4ff]"
-        aria-label="Notifications"
+        aria-label={t('ariaBell')}
         aria-expanded={open}
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -215,7 +219,7 @@ export default function NotificationBell() {
         <div className="nx-notif-panel absolute right-0 top-full z-50 mt-2 flex max-h-[480px] w-80 flex-col overflow-hidden rounded-xl">
           <div className="nx-notif-header flex flex-shrink-0 items-center justify-between border-b p-3">
             <span className="nx-notif-title text-sm font-semibold">
-              {surveyView ? 'Survey' : 'Notifications'}
+              {surveyView ? t('survey') : t('notifications')}
             </span>
             <div className="flex items-center gap-3">
               {!surveyView && hasRead && (
@@ -224,7 +228,7 @@ export default function NotificationBell() {
                   onClick={handleClearRead}
                   className="nx-notif-action nx-notif-action--danger"
                 >
-                  Clear read
+                  {t('clearRead')}
                 </button>
               )}
               {!surveyView && unread > 0 && (
@@ -233,7 +237,7 @@ export default function NotificationBell() {
                   onClick={handleMarkAllRead}
                   className="nx-notif-action font-semibold text-[#99f7ff] hover:text-[#bffcff]"
                 >
-                  Mark all read
+                  {t('markAllRead')}
                 </button>
               )}
             </div>
@@ -285,14 +289,14 @@ export default function NotificationBell() {
                   disabled={submitting}
                   className="flex-1 py-2 rounded-lg text-xs font-medium bg-[#00c8ff] text-black hover:bg-[#00b8ef] disabled:opacity-50 transition-colors"
                 >
-                  {submitting ? 'Submitting…' : 'Submit'}
+                  {submitting ? t('submitting') : t('submit')}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setSurveyView(false); setSurveyAnswers({}); setSubmitError('') }}
                   className="nx-notif-action rounded-lg bg-white/5 px-3 py-2 text-xs hover:bg-white/10"
                 >
-                  Back
+                  {t('back')}
                 </button>
               </div>
             </div>
@@ -307,7 +311,7 @@ export default function NotificationBell() {
                       </svg>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="nx-notif-type-label">Survey</p>
+                      <p className="nx-notif-type-label">{t('survey')}</p>
                       <p className="nx-notif-item-title mt-0.5 text-sm font-medium">{activeSurvey.title}</p>
                       {activeSurvey.description && (
                         <p className="nx-notif-body mt-1 line-clamp-2">{activeSurvey.description}</p>
@@ -317,7 +321,7 @@ export default function NotificationBell() {
                         onClick={() => setSurveyView(true)}
                         className="mt-2 px-3 py-1 rounded-md text-xs font-medium bg-[#00c8ff] text-black hover:bg-[#00b8ef] transition-colors"
                       >
-                        Take Survey
+                        {t('takeSurvey')}
                       </button>
                     </div>
                   </div>
@@ -329,28 +333,32 @@ export default function NotificationBell() {
                   <svg className="mb-3 h-10 w-10 text-[#7a8ea4] opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
-                  <p className="nx-notif-empty text-sm">You&apos;re all caught up</p>
-                  <p className="nx-notif-empty-sub mt-1 text-xs">No notifications yet</p>
+                  <p className="nx-notif-empty text-sm">{t('emptyTitle')}</p>
+                  <p className="nx-notif-empty-sub mt-1 text-xs">{t('emptySub')}</p>
                 </div>
               ) : notifications.length === 0 && activeSurvey ? null : (
                 <>
                   {todayItems.length > 0 && (
                     <div>
-                      <p className="nx-notif-section-label px-3 pt-2 pb-1">Today</p>
+                      <p className="nx-notif-section-label px-3 pt-2 pb-1">{t('today')}</p>
                       <NotificationList
                         items={todayItems}
                         onDelete={handleDelete}
                         onNotificationClick={handleNotificationClick}
+                        typeLabel={typeLabel}
+                        deleteLabel={t('ariaDelete')}
                       />
                     </div>
                   )}
                   {earlierItems.length > 0 && (
                     <div>
-                      <p className="nx-notif-section-label px-3 pt-2 pb-1">Earlier</p>
+                      <p className="nx-notif-section-label px-3 pt-2 pb-1">{t('earlier')}</p>
                       <NotificationList
                         items={earlierItems}
                         onDelete={handleDelete}
                         onNotificationClick={handleNotificationClick}
+                        typeLabel={typeLabel}
+                        deleteLabel={t('ariaDelete')}
                       />
                     </div>
                   )}
@@ -368,15 +376,19 @@ function NotificationList({
   items,
   onDelete,
   onNotificationClick,
+  typeLabel,
+  deleteLabel,
 }: {
   items: Notification[]
   onDelete: (e: React.MouseEvent, id: string) => void
   onNotificationClick: (n: Notification) => void
+  typeLabel: (type: string) => string
+  deleteLabel: string
 }) {
   return (
     <ul className="nx-notif-divider divide-y">
       {items.map((n) => {
-        const label = NOTIFICATION_LABELS[n.type as NotificationType] ?? 'Notification'
+        const label = typeLabel(n.type)
         return (
           <li key={n.id}>
             <div
@@ -402,7 +414,7 @@ function NotificationList({
                 type="button"
                 onClick={(e) => onDelete(e, n.id)}
                 className="shrink-0 rounded p-1.5 text-[#a8b8cc] transition-colors hover:bg-red-500/10 hover:text-red-400"
-                aria-label="Delete notification"
+                aria-label={deleteLabel}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

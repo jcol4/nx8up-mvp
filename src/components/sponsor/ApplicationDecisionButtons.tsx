@@ -5,9 +5,10 @@
 'use client'
 
 import { useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import SecondaryButton from '@/components/ui/SecondaryButton'
-import { setApplicationStatus } from '@/app/sponsor/campaigns/_actions'
+import { setApplicationStatus } from '@/app/[locale]/sponsor/campaigns/_actions'
 
 type Props = {
   applicationId: string
@@ -16,6 +17,7 @@ type Props = {
 }
 
 export default function ApplicationDecisionButtons({ applicationId, campaignId, currentStatus }: Props) {
+  const t = useTranslations('sponsor.actions')
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
@@ -33,7 +35,7 @@ export default function ApplicationDecisionButtons({ applicationId, campaignId, 
         disabled={isPending || currentStatus === 'accepted'}
         onClick={() => handleUpdate('accepted')}
       >
-        {currentStatus === 'accepted' ? 'Accepted' : isPending ? 'Accepting…' : 'Accept'}
+        {currentStatus === 'accepted' ? t('accepted') : isPending ? t('accepting') : t('accept')}
       </SecondaryButton>
       <SecondaryButton
         variant="danger"
@@ -41,7 +43,7 @@ export default function ApplicationDecisionButtons({ applicationId, campaignId, 
         disabled={isPending || currentStatus === 'rejected'}
         onClick={() => handleUpdate('rejected')}
       >
-        {currentStatus === 'rejected' ? 'Rejected' : isPending ? 'Rejecting…' : 'Reject'}
+        {currentStatus === 'rejected' ? t('rejected') : isPending ? t('rejecting') : t('reject')}
       </SecondaryButton>
     </div>
   )

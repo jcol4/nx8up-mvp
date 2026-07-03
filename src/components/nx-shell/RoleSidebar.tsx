@@ -22,6 +22,7 @@ import {
   Users,
 } from 'lucide-react'
 import SocialTemplateLinks from '@/components/nx-shell/SocialTemplateLinks'
+import LocaleSwitcher from '@/components/shared/LocaleSwitcher'
 
 export type SidebarIconName =
   | 'dashboard'
@@ -224,6 +225,7 @@ export default function RoleSidebar({
 
       <div className="mt-auto flex flex-col gap-1.5 px-4 pb-4">
         <SocialTemplateLinks variant="sidebar" />
+        <LocaleSwitcher collapsed={collapsed} />
         <SignOutButton signOutOptions={{ redirectUrl: '/' }}>
           <button
             type="button"

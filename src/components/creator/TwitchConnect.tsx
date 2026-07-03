@@ -8,7 +8,7 @@
 
 import * as React from 'react'
 import Image from 'next/image'
-import { unlinkTwitchAccount } from '@/app/creator/profile/_actions'
+import { unlinkTwitchAccount } from '@/app/[locale]/creator/profile/_actions'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 interface TwitchData {

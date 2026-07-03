@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import RequestRefundModal from './RequestRefundModal'
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
 }
 
 export default function RequestRefundButton({ campaignId, campaignTitle, hasAcceptedCreators }: Props) {
+  const t = useTranslations('sponsor.actions')
   const [open, setOpen] = useState(false)
 
   return (
@@ -19,7 +21,7 @@ export default function RequestRefundButton({ campaignId, campaignTitle, hasAcce
         onClick={() => setOpen(true)}
         className="text-xs text-red-400 hover:text-red-300 underline-offset-2 hover:underline"
       >
-        Request refund
+        {t('requestRefund')}
       </button>
       {open && (
         <RequestRefundModal

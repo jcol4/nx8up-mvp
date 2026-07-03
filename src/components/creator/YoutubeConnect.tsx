@@ -6,7 +6,7 @@
 'use client'
 
 import * as React from 'react'
-import { unlinkYouTubeAccount } from '@/app/creator/profile/_actions'
+import { unlinkYouTubeAccount } from '@/app/[locale]/creator/profile/_actions'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 interface YouTubeData {

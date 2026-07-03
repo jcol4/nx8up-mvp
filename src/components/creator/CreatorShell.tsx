@@ -1,4 +1,5 @@
 import { auth } from '@clerk/nextjs/server'
+import { getTranslations, getFormatter } from 'next-intl/server'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import { getCreatorSidebarStatsCached } from '@/lib/creator-sidebar-cache'
 import type { SidebarStatRow } from '@/components/nx-shell/RoleSidebar'
@@ -8,42 +9,43 @@ type Props = {
   children: React.ReactNode
 }
 
-function buildStatsRows(stats: Awaited<ReturnType<typeof getCreatorSidebarStatsCached>>): SidebarStatRow[] {
-  return [
+export default async function CreatorShell({ children }: Props) {
+  const { sessionClaims, userId } = await auth()
+  const role = (sessionClaims?.metadata as { role?: string })?.role
+  const t = await getTranslations('nav')
+  const format = await getFormatter()
+
+  const notLinked = t('notLinked')
+  const buildStatsRows = (stats: Awaited<ReturnType<typeof getCreatorSidebarStatsCached>>): SidebarStatRow[] => [
     {
-      label: 'Level',
-      value: `Lv. ${stats.level} · ${stats.rankName}`,
+      label: t('statLevel'),
+      value: t('levelValue', { level: stats.level, rank: stats.rankName }),
       valueClassName: 'font-medium text-[#00c8ff]',
     },
     {
-      label: 'Avg VOD views',
-      value: stats.averageVodViews != null ? stats.averageVodViews.toLocaleString() : '—',
+      label: t('statAvgVodViews'),
+      value: stats.averageVodViews != null ? format.number(stats.averageVodViews) : '—',
     },
     {
       label: 'Twitch',
-      value: stats.twitchUsername ? `@${stats.twitchUsername}` : 'Not linked',
+      value: stats.twitchUsername ? `@${stats.twitchUsername}` : notLinked,
       valueClassName: stats.twitchUsername ? 'font-medium text-[#7b4fff]' : 'italic text-white/75',
       valueHref: stats.twitchUsername ? undefined : '/creator/profile',
     },
     {
       label: 'YouTube',
-      value: stats.youtubeChannelName ? `@${stats.youtubeChannelName}` : 'Not linked',
+      value: stats.youtubeChannelName ? `@${stats.youtubeChannelName}` : notLinked,
       valueClassName: stats.youtubeChannelName ? 'font-medium text-[#ff4444]' : 'italic text-white/75',
       valueHref: stats.youtubeChannelName ? undefined : '/creator/profile',
     },
   ]
-}
 
-const FALLBACK_STATS_ROWS: SidebarStatRow[] = [
-  { label: 'Level', value: '—' },
-  { label: 'Avg VOD views', value: '—' },
-  { label: 'Twitch', value: 'Not linked', valueHref: '/creator/profile', valueClassName: 'italic text-white/75' },
-  { label: 'YouTube', value: 'Not linked', valueHref: '/creator/profile', valueClassName: 'italic text-white/75' },
-]
-
-export default async function CreatorShell({ children }: Props) {
-  const { sessionClaims, userId } = await auth()
-  const role = (sessionClaims?.metadata as { role?: string })?.role
+  const fallbackStatsRows: SidebarStatRow[] = [
+    { label: t('statLevel'), value: '—' },
+    { label: t('statAvgVodViews'), value: '—' },
+    { label: 'Twitch', value: notLinked, valueHref: '/creator/profile', valueClassName: 'italic text-white/75' },
+    { label: 'YouTube', value: notLinked, valueHref: '/creator/profile', valueClassName: 'italic text-white/75' },
+  ]
 
   const [{ displayName, username }, statsResult] = await Promise.all([
     getUserDisplayInfo(),
@@ -54,7 +56,7 @@ export default async function CreatorShell({ children }: Props) {
       : Promise.resolve({ ok: false as const }),
   ])
 
-  let statsRows: SidebarStatRow[] = FALLBACK_STATS_ROWS
+  let statsRows: SidebarStatRow[] = fallbackStatsRows
   let statsUnavailable = false
   if (statsResult.ok) {
     statsRows = buildStatsRows(statsResult.stats)

@@ -10,7 +10,7 @@
 // 'use client'
 
 // import * as React from 'react'
-// import { linkSteamAccount, unlinkSteamAccount } from '@/app/creator/profile/_actions'
+// import { linkSteamAccount, unlinkSteamAccount } from '@/app/[locale]/creator/profile/_actions'
 
 // interface SteamData {
 //   steam_id: string | null
@@ -285,7 +285,7 @@
 'use client'
 
 import * as React from 'react'
-import { unlinkSteamAccount } from '@/app/creator/profile/_actions'
+import { unlinkSteamAccount } from '@/app/[locale]/creator/profile/_actions'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 interface SteamData {

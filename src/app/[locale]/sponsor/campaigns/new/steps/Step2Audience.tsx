@@ -1,0 +1,239 @@
+'use client'
+
+import { useState } from 'react'
+import { useTranslations } from 'next-intl'
+import FormInput from '@/components/ui/FormInput'
+import type { CampaignDraft } from '../_shared'
+import {
+  labelClass, sectionClass, sectionTitle, toggleBtn,
+  GENDERS, AUDIENCE_LOCATIONS,
+} from '../_shared'
+
+function AgeStepper({
+  value,
+  onChange,
+  min = 13,
+  max = 100,
+  placeholder,
+}: {
+  value: string
+  onChange: (val: string) => void
+  min?: number
+  max?: number
+  placeholder: string
+}) {
+  const num = parseInt(value, 10)
+  const decrement = () => {
+    if (!value) { onChange(String(max)); return }
+    if (num > min) onChange(String(num - 1))
+  }
+  const increment = () => {
+    if (!value) { onChange(String(min)); return }
+    if (num < max) onChange(String(num + 1))
+  }
+  const btnClass =
+    'w-8 h-8 flex items-center justify-center rounded-lg border dash-border dash-text-muted hover:text-[#c8dff0] hover:border-[rgba(153,247,255,0.35)] hover:bg-[rgba(153,247,255,0.05)] transition-all select-none shrink-0'
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <button type="button" onClick={decrement} className={btnClass} aria-label="Decrease">
+        <svg width="10" height="2" viewBox="0 0 10 2" fill="none">
+          <path d="M1 1h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      </button>
+      <input
+        type="number"
+        value={value}
+        onChange={e => {
+          const v = e.target.value
+          if (v === '') { onChange(''); return }
+          const n = parseInt(v, 10)
+          if (!isNaN(n) && n >= min && n <= max) onChange(String(n))
+        }}
+        placeholder={placeholder}
+        min={min}
+        max={max}
+        className="w-14 text-center px-2 py-1.5 rounded-lg border dash-border dash-bg-inner dash-text text-sm focus:outline-none focus:ring-1 focus:ring-[#99f7ff]/50 hover:border-[rgba(153,247,255,0.3)] transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+      />
+      <button type="button" onClick={increment} className={btnClass} aria-label="Increase">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <path d="M5 1v8M1 5h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      </button>
+    </div>
+  )
+}
+
+type Props = {
+  draft: CampaignDraft
+  setDraft: React.Dispatch<React.SetStateAction<CampaignDraft>>
+  onNext: () => void
+  onBack: () => void
+  sponsorAgeRestriction?: string | null
+}
+
+export default function Step2Audience({ draft, setDraft, onNext, onBack, sponsorAgeRestriction }: Props) {
+  const tr = useTranslations('sponsor.campaignWizard')
+  const [interestInput, setInterestInput] = useState('')
+  const restrictionMinAge = sponsorAgeRestriction === '21+' ? 21 : sponsorAgeRestriction === '18+' ? 18 : 13
+
+  const toggle = <K extends 'target_genders' | 'required_audience_locations' | 'target_interests'>(
+    key: K,
+    val: string
+  ) => setDraft(prev => ({
+    ...prev,
+    [key]: (prev[key] as string[]).includes(val)
+      ? (prev[key] as string[]).filter(x => x !== val)
+      : [...(prev[key] as string[]), val],
+  }))
+
+  const addInterest = () => {
+    const t = interestInput.trim()
+    if (t && !draft.target_interests.includes(t)) {
+      setDraft(prev => ({ ...prev, target_interests: [...prev.target_interests, t] }))
+      setInterestInput('')
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Age */}
+      <div className={sectionClass}>
+        <p className={sectionTitle}>{tr('s2Reach')}</p>
+
+        {sponsorAgeRestriction && (
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20 text-xs text-orange-400">
+            <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+            <span>
+              {tr.rich('s2AgeRestrictionNotice', {
+                restriction: sponsorAgeRestriction,
+                min: restrictionMinAge,
+                b: (chunks) => <strong>{chunks}</strong>,
+              })}
+            </span>
+          </div>
+        )}
+
+        <div>
+          <label className={labelClass}>{tr('s2AudienceAge')}</label>
+          <div className="flex items-center gap-3">
+            <AgeStepper
+              value={draft.audience_age_min}
+              onChange={val => {
+                const num = parseInt(val, 10)
+                if (!isNaN(num) && num < restrictionMinAge) return
+                setDraft(prev => ({ ...prev, audience_age_min: val }))
+              }}
+              placeholder={tr('s2Min')}
+              min={restrictionMinAge}
+            />
+            <span className="dash-text-muted text-sm">{tr('s2To')}</span>
+            <AgeStepper
+              value={draft.audience_age_max}
+              onChange={val => setDraft(prev => ({ ...prev, audience_age_max: val }))}
+              placeholder={tr('s2Max')}
+              min={restrictionMinAge}
+            />
+          </div>
+          <p className="text-xs dash-text-muted mt-1.5">
+            {sponsorAgeRestriction
+              ? tr('s2AgeHintRestricted', { min: restrictionMinAge })
+              : tr('s2AgeHint')}
+          </p>
+        </div>
+
+        <div>
+          <label className={labelClass}>{tr('s2Gender')}</label>
+          <div className="flex flex-wrap gap-2">
+            {GENDERS.map(g => (
+              <button key={g} type="button" onClick={() => toggle('target_genders', g)} className={toggleBtn(draft.target_genders.includes(g))}>
+                {g}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Location */}
+      <div className={sectionClass}>
+        <p className={sectionTitle}>{tr('s2Location')}</p>
+
+        <div>
+          <label className={labelClass}>{tr('s2Countries')}</label>
+          <div className="flex flex-wrap gap-2">
+            {AUDIENCE_LOCATIONS.map(loc => (
+              <button key={loc} type="button" onClick={() => toggle('required_audience_locations', loc)} className={toggleBtn(draft.required_audience_locations.includes(loc))}>
+                {loc}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className={labelClass}>{tr('s2Cities')} <span className="font-normal dash-text-muted">{tr('s2Optional')}</span></label>
+          <FormInput
+            type="text"
+            variant="dashboard"
+            value={draft.target_cities}
+            onChange={e => setDraft(prev => ({ ...prev, target_cities: e.target.value }))}
+            placeholder={tr('s2CitiesPlaceholder')}
+          />
+        </div>
+      </div>
+
+      {/* Interests */}
+      <div className="space-y-3">
+        <p className={sectionTitle}>{tr('s2Interests')}</p>
+        <p className="text-xs dash-text-muted -mt-2">{tr('s2InterestsDesc')}</p>
+
+        <div className="flex flex-wrap gap-1.5 mb-2">
+          {draft.target_interests.map(t => (
+            <span key={t} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#99f7ff]/20 text-[#99f7ff] text-sm">
+              {t}
+              <button
+                type="button"
+                onClick={() => toggle('target_interests', t)}
+                className="hover:text-red-400 transition-colors"
+                aria-label={tr('s2Remove', { tag: t })}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </span>
+          ))}
+        </div>
+
+        <div className="flex gap-2">
+          <FormInput
+            type="text"
+            variant="dashboard"
+            value={interestInput}
+            onChange={e => setInterestInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addInterest())}
+            placeholder={tr('s2InterestsPlaceholder')}
+            className="flex-1"
+          />
+          <button
+            type="button"
+            onClick={addInterest}
+            className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 border dash-border dash-text-muted hover:text-[#c8dff0] hover:border-[rgba(153,247,255,0.35)] hover:bg-[rgba(153,247,255,0.05)]"
+          >
+            {tr('add')}
+          </button>
+        </div>
+      </div>
+
+      <div className="flex justify-between pt-2 border-t dash-border">
+        <button type="button" onClick={onBack} className="py-2.5 px-5 rounded-lg border dash-border dash-text-muted text-sm font-medium hover:text-[#c8dff0] transition-colors">
+          {tr('back')}
+        </button>
+        <button type="button" onClick={onNext} className="py-2.5 px-6 rounded-lg bg-[#99f7ff] text-slate-900 text-sm font-semibold hover:opacity-90 transition-opacity">
+          {tr('nextPlain')}
+        </button>
+      </div>
+    </div>
+  )
+}

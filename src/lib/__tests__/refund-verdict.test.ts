@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { submitRefundVerdict } from '../../app/admin/refund-requests/_actions'
+import { submitRefundVerdict } from '../../app/[locale]/admin/refund-requests/_actions'
 import { prisma } from '../prisma'
 
 vi.mock('@clerk/nextjs/server', () => ({
