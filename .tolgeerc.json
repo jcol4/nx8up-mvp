@@ -1,13 +1,7 @@
 {
   "apiUrl": "https://app.tolgee.io",
-  "projectId": "",
   "push": {
-    "files": [
-      {
-        "path": "./messages/{languageTag}.json",
-        "filterNamespace": []
-      }
-    ]
+    "filesTemplate": "./messages/{languageTag}.json"
   },
   "pull": {
     "path": "./messages",

@@ -8,6 +8,7 @@ import { updateUserLocale } from '@/app/[locale]/_actions/locale'
 const LOCALES = [
   { code: 'en', label: 'English', flag: '🇺🇸', short: 'EN' },
   { code: 'pt-BR', label: 'Português', flag: '🇧🇷', short: 'PT' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷', short: 'FR' },
 ] as const
 
 type Props = {

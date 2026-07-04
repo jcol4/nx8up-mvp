@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { ClerkProvider } from '@clerk/nextjs'
-import { enUS, ptBR } from '@clerk/localizations'
+import { enUS, ptBR, frFR } from '@clerk/localizations'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
 }
 
-const clerkLocaleMap = { en: enUS, 'pt-BR': ptBR }
+const clerkLocaleMap = { en: enUS, 'pt-BR': ptBR, fr: frFR }
 
 export default async function RootLayout({
   children,
