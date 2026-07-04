@@ -4,7 +4,7 @@
  * Hard blocks (eligible = false):
  *   - Creator is not available
  *   - Numeric minimums (followers, avg viewers, engagement): creator is more than
- *     25% below the requirement (i.e. < 75% of required value)
+ *     33% below the requirement (i.e. < 67% of required value — see TOLERANCE)
  *
  * Soft criteria (contribute to score, never block):
  *   - Platform, Creator types, sizes, game categories, content types

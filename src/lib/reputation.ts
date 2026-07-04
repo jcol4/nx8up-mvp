@@ -49,6 +49,8 @@ export const OPT_OUT_SCORE_DELTAS = {
 } as const
 
 export const COMPLETION_BONUS = 5
+/** Awarded to a sponsor once every accepted creator on a campaign has been paid out. */
+export const SPONSOR_FULL_PAYOUT_BONUS = 3
 export const LATE_PENALTY_PER_DAY = 1
 export const LATE_PENALTY_CAP = 10
 
