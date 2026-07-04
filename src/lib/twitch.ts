@@ -235,9 +235,3 @@ export async function getTwitchStreamStats(
 
   return { average_vod_views, most_played_games }
 }
-/** Returns true if the last Twitch sync is older than `thresholdHours` (default 24h), or has never run. */
-export function isTwitchDataStale(syncedAt: Date | null, thresholdHours = 24): boolean {
-  if (!syncedAt) return true
-  const ageMs = Date.now() - new Date(syncedAt).getTime()
-  return ageMs > thresholdHours * 60 * 60 * 1000
-}

@@ -239,10 +239,3 @@ export async function getYouTubeChannelStats(
 
   return { avg_views, top_categories }
 }
-
-/** Returns true if the last YouTube sync is older than `thresholdHours` (default 24h), or has never run. */
-export function isYouTubeDataStale(syncedAt: Date | null, thresholdHours = 24): boolean {
-  if (!syncedAt) return true
-  const ageMs = Date.now() - new Date(syncedAt).getTime()
-  return ageMs > thresholdHours * 60 * 60 * 1000
-}

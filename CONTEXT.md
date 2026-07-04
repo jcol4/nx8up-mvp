@@ -209,6 +209,16 @@ self-report views) by the daily `recalculate-ctr` cron. Per-submission CTR is st
   games, visibility. Used for game-category signal and the admin/creator/sponsor
   **Steam lookup** tools.
 
+**Platform sync seam** (`platform-sync.ts`) — "refresh this creator's platform stats
+onto their row, if stale" lives behind one interface, `CreatorPlatformSyncer`.
+`syncCreatorPlatform(userId, syncer)` owns the shared skeleton (configured? → linked? →
+stale? → sync → `recomputeCreatorSize` → recompute CTR → revalidate); each platform is
+an adapter. **Twitch and YouTube are the two adapters today**; a new stat platform is a
+new adapter, not another copy of the skeleton. **Steam is deliberately *not* a syncer** —
+it has no staleness/follower/refresh cadence (it's a read-only lookup). It becomes an
+adapter only if it grows a sync cadence (a `steam_synced_at` column + a stale re-pull) —
+so don't re-suggest folding Steam behind this seam without that.
+
 ---
 
 ## Conventions & gotchas
