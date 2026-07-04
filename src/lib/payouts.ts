@@ -22,12 +22,7 @@ import { stripe } from '@/lib/stripe'
 import { calcFeeBreakdown } from '@/lib/constants'
 import { createNotification } from '@/lib/notifications'
 import { NOTIFICATION_TYPES } from '@/lib/notification-types'
-import {
-  adjustCreatorReputation,
-  adjustSponsorReputation,
-  COMPLETION_BONUS,
-  SPONSOR_FULL_PAYOUT_BONUS,
-} from '@/lib/reputation'
+import { recordReputationEvent } from '@/lib/reputation'
 
 /**
  * Why a creator payout could not be initiated. Adapters translate these to their own
@@ -169,7 +164,7 @@ export async function settleCreatorPayout(
     dedupeKey: transferId,
   })
 
-  await adjustCreatorReputation(app.creator_id, COMPLETION_BONUS)
+  await recordReputationEvent({ type: 'deal_completed', creatorId: app.creator_id })
 
   // Sponsor rollup: reward once the campaign's last accepted creator is paid.
   // NOTE: still has a rare cross-creator race (two settling within the same few ms
@@ -182,7 +177,7 @@ export async function settleCreatorPayout(
     },
   })
   if (unpaidCount === 0) {
-    await adjustSponsorReputation(app.campaign.sponsor_id, SPONSOR_FULL_PAYOUT_BONUS)
+    await recordReputationEvent({ type: 'campaign_fully_paid', sponsorId: app.campaign.sponsor_id })
   }
 
   return 'settled'

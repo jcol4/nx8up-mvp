@@ -9,7 +9,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-import { adjustSponsorReputation, REFUND_SCORE_DELTAS } from '@/lib/reputation'
+import { recordReputationEvent } from '@/lib/reputation'
 import { createNotification } from '@/lib/notifications'
 import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 
@@ -41,11 +41,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     data: { verdict, admin_notes: adminNotes ?? null },
   })
 
-  const deltaKey = `${verdict}_${req.had_accepted_applications ? 'had_accepted' : 'no_accepted'}` as keyof typeof REFUND_SCORE_DELTAS
-  const delta = REFUND_SCORE_DELTAS[deltaKey]
-  if (delta !== 0) {
-    await adjustSponsorReputation(req.sponsor.id, delta)
-  }
+  const change = await recordReputationEvent({
+    type: 'refund_ruled',
+    sponsorId: req.sponsor.id,
+    verdict,
+    hadAcceptedApplications: req.had_accepted_applications,
+  })
+  const delta = change?.delta ?? 0
 
   const verdictLabel = verdict === 'valid' ? 'accepted as valid' : 'marked as invalid'
   const scoreMsg = delta < 0 ? ` Your reputation score has been adjusted by ${delta}.` : ''

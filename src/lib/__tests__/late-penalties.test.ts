@@ -16,17 +16,17 @@ vi.mock('../prisma', () => ({
 }))
 
 vi.mock('../reputation', () => ({
-  adjustCreatorReputation: vi.fn().mockResolvedValue(undefined),
+  recordReputationEvent: vi.fn().mockResolvedValue({ delta: 0 }),
   proofDeadline: vi.fn((d: Date) => {
     const r = new Date(d)
     r.setDate(r.getDate() + 7)
     return r
   }),
-  LATE_PENALTY_PER_DAY: 1,
+  latePenaltyOwed: vi.fn((daysLate: number) => Math.min(daysLate * 1, 10)),
   LATE_PENALTY_CAP: 10,
 }))
 
-import { adjustCreatorReputation } from '../reputation'
+import { recordReputationEvent } from '../reputation'
 
 const MS_PER_DAY = 86_400_000
 
@@ -79,7 +79,12 @@ describe('applyLatePenalties', () => {
 
     await applyLatePenalties()
 
-    expect(adjustCreatorReputation).toHaveBeenCalledWith('creator-1', -3)
+    expect(recordReputationEvent).toHaveBeenCalledWith({
+      type: 'proof_late',
+      creatorId: 'creator-1',
+      daysLate: 3,
+      alreadyPenalized: 0,
+    })
     expect(prisma.campaign_applications.update).toHaveBeenCalledWith({
       where: { id: 'app-1' },
       data: { late_penalty_applied: 3 },
@@ -92,7 +97,12 @@ describe('applyLatePenalties', () => {
     await applyLatePenalties()
 
     // 12 days since end_date → deadline 5 days ago → 5 days late total, 2 already charged → charge 3
-    expect(adjustCreatorReputation).toHaveBeenCalledWith('creator-2', -3)
+    expect(recordReputationEvent).toHaveBeenCalledWith({
+      type: 'proof_late',
+      creatorId: 'creator-2',
+      daysLate: 5,
+      alreadyPenalized: 2,
+    })
     expect(prisma.campaign_applications.update).toHaveBeenCalledWith({
       where: { id: 'app-2' },
       data: { late_penalty_applied: 5 },
@@ -104,7 +114,7 @@ describe('applyLatePenalties', () => {
 
     await applyLatePenalties()
 
-    expect(adjustCreatorReputation).not.toHaveBeenCalled()
+    expect(recordReputationEvent).not.toHaveBeenCalled()
     expect(prisma.campaign_applications.update).not.toHaveBeenCalled()
   })
 
@@ -120,8 +130,13 @@ describe('applyLatePenalties', () => {
 
     await applyLatePenalties()
 
-    // 30 days since end → 23 days past deadline, already charged 8 → would charge 15, but cap is 10
-    expect(adjustCreatorReputation).toHaveBeenCalledWith('creator-4', -2)
+    // 30 days since end → 23 days past deadline, already charged 8 → owed capped at 10 (delta -2)
+    expect(recordReputationEvent).toHaveBeenCalledWith({
+      type: 'proof_late',
+      creatorId: 'creator-4',
+      daysLate: 23,
+      alreadyPenalized: 8,
+    })
     expect(prisma.campaign_applications.update).toHaveBeenCalledWith({
       where: { id: 'app-4' },
       data: { late_penalty_applied: 10 },
@@ -133,6 +148,6 @@ describe('applyLatePenalties', () => {
 
     await applyLatePenalties()
 
-    expect(adjustCreatorReputation).not.toHaveBeenCalled()
+    expect(recordReputationEvent).not.toHaveBeenCalled()
   })
 })

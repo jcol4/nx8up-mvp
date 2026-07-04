@@ -24,15 +24,14 @@ vi.mock('../notifications', () => ({
 }))
 
 vi.mock('../reputation', () => ({
-  adjustCreatorReputation: vi.fn().mockResolvedValue(undefined),
-  OPT_OUT_SCORE_DELTAS: { valid: 0, invalid: -10 },
+  recordReputationEvent: vi.fn().mockResolvedValue({ delta: 0 }),
 }))
 
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
 import { auth } from '@clerk/nextjs/server'
 import { createNotification } from '../notifications'
-import { adjustCreatorReputation } from '../reputation'
+import { recordReputationEvent } from '../reputation'
 
 const adminClaims = { sessionClaims: { metadata: { role: 'admin' } } }
 const creatorClaims = { sessionClaims: { metadata: { role: 'creator' } } }
@@ -75,16 +74,16 @@ describe('submitOptOutVerdict', () => {
     expect(res.error).toMatch(/already/i)
   })
 
-  it('valid verdict: does not adjust reputation', async () => {
+  it('valid verdict: records the event (penalty is 0)', async () => {
     const res = await submitOptOutVerdict('opt-1', 'valid')
     expect(res.success).toBe(true)
-    expect(adjustCreatorReputation).not.toHaveBeenCalled()
+    expect(recordReputationEvent).toHaveBeenCalledWith({ type: 'opt_out_ruled', creatorId: 'creator-1', verdict: 'valid' })
   })
 
-  it('invalid verdict: adjusts reputation by -10', async () => {
+  it('invalid verdict: records an opt_out_ruled event', async () => {
     const res = await submitOptOutVerdict('opt-1', 'invalid')
     expect(res.success).toBe(true)
-    expect(adjustCreatorReputation).toHaveBeenCalledWith('creator-1', -10)
+    expect(recordReputationEvent).toHaveBeenCalledWith({ type: 'opt_out_ruled', creatorId: 'creator-1', verdict: 'invalid' })
   })
 
   it('saves verdict and admin notes to the record', async () => {
@@ -107,6 +106,7 @@ describe('submitOptOutVerdict', () => {
   })
 
   it('sends notification to creator on invalid verdict with score impact', async () => {
+    vi.mocked(recordReputationEvent).mockResolvedValue({ delta: -10, score: -10, tier: 'restricted' })
     await submitOptOutVerdict('opt-1', 'invalid')
     expect(createNotification).toHaveBeenCalledWith(
       expect.objectContaining({

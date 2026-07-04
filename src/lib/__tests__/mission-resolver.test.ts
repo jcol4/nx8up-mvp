@@ -12,7 +12,7 @@ vi.mock('../prisma', () => ({
 }))
 
 vi.mock('../reputation', () => ({
-  adjustCreatorReputation: vi.fn().mockResolvedValue(undefined),
+  recordReputationEvent: vi.fn().mockResolvedValue({ delta: 1 }),
 }))
 
 vi.mock('@clerk/nextjs/server', () => ({
@@ -28,7 +28,7 @@ vi.mock('../notifications', () => ({
   createNotification: vi.fn().mockResolvedValue(undefined),
 }))
 
-import { adjustCreatorReputation } from '../reputation'
+import { recordReputationEvent } from '../reputation'
 
 const WEEK_START = new Date('2026-05-05T00:00:00.000Z') // Monday
 
@@ -263,7 +263,7 @@ describe('resolveCreatorMissions — XP award', () => {
 
     const result = await resolveCreatorMissions('creator-1')
 
-    expect(adjustCreatorReputation).toHaveBeenCalledWith('creator-1', 1)
+    expect(recordReputationEvent).toHaveBeenCalledWith({ type: 'leveled_up', creatorId: 'creator-1', levelsGained: 1 })
     expect(result.levelsGained).toBe(1)
   })
 })

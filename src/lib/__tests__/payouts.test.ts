@@ -20,16 +20,13 @@ vi.mock('../notifications', () => ({
 }))
 
 vi.mock('../reputation', () => ({
-  adjustCreatorReputation: vi.fn().mockResolvedValue(undefined),
-  adjustSponsorReputation: vi.fn().mockResolvedValue(undefined),
-  COMPLETION_BONUS: 5,
-  SPONSOR_FULL_PAYOUT_BONUS: 3,
+  recordReputationEvent: vi.fn().mockResolvedValue({ delta: 0 }),
 }))
 
 import { prisma } from '../prisma'
 import { stripe } from '../stripe'
 import { createNotification } from '../notifications'
-import { adjustCreatorReputation, adjustSponsorReputation } from '../reputation'
+import { recordReputationEvent } from '../reputation'
 import { settleCreatorPayout, initiateCreatorPayout } from '../payouts'
 
 afterEach(() => {
@@ -66,8 +63,7 @@ describe('settleCreatorPayout', () => {
     const result = await settleCreatorPayout('app-1', { transferId: 'tr_1' })
     expect(result).toBe('noop')
     expect(createNotification).not.toHaveBeenCalled()
-    expect(adjustCreatorReputation).not.toHaveBeenCalled()
-    expect(adjustSponsorReputation).not.toHaveBeenCalled()
+    expect(recordReputationEvent).not.toHaveBeenCalled()
   })
 
   it('notifies the creator, deduped on the transfer id', async () => {
@@ -84,19 +80,21 @@ describe('settleCreatorPayout', () => {
 
   it('awards the creator completion bonus on a real transition', async () => {
     await settleCreatorPayout('app-1', { transferId: 'tr_1' })
-    expect(adjustCreatorReputation).toHaveBeenCalledWith('creator-1', 5)
+    expect(recordReputationEvent).toHaveBeenCalledWith({ type: 'deal_completed', creatorId: 'creator-1' })
   })
 
   it('awards the sponsor rollup bonus when no unpaid submissions remain', async () => {
     vi.mocked(prisma.deal_submissions.count).mockResolvedValue(0)
     await settleCreatorPayout('app-1', { transferId: 'tr_1' })
-    expect(adjustSponsorReputation).toHaveBeenCalledWith('sponsor-1', 3)
+    expect(recordReputationEvent).toHaveBeenCalledWith({ type: 'campaign_fully_paid', sponsorId: 'sponsor-1' })
   })
 
   it('does not award the sponsor rollup while unpaid submissions remain', async () => {
     vi.mocked(prisma.deal_submissions.count).mockResolvedValue(2)
     await settleCreatorPayout('app-1', { transferId: 'tr_1' })
-    expect(adjustSponsorReputation).not.toHaveBeenCalled()
+    expect(recordReputationEvent).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'campaign_fully_paid' }),
+    )
   })
 
   it('marks paid but fires no consequences when the application is gone', async () => {
@@ -104,7 +102,7 @@ describe('settleCreatorPayout', () => {
     const result = await settleCreatorPayout('app-1', { transferId: 'tr_1' })
     expect(result).toBe('settled')
     expect(createNotification).not.toHaveBeenCalled()
-    expect(adjustCreatorReputation).not.toHaveBeenCalled()
+    expect(recordReputationEvent).not.toHaveBeenCalled()
   })
 })
 
@@ -212,7 +210,7 @@ describe('initiateCreatorPayout', () => {
     )
     expect(result).toEqual({ kind: 'paid', transferId: 'tr_new' })
     // The settle it triggered fired the completion bonus.
-    expect(adjustCreatorReputation).toHaveBeenCalledWith('creator-1', 5)
+    expect(recordReputationEvent).toHaveBeenCalledWith({ type: 'deal_completed', creatorId: 'creator-1' })
   })
 
   it('returns in_progress when the atomic claim is lost to a concurrent caller', async () => {

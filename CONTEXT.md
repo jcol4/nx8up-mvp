@@ -133,11 +133,25 @@ Both creators and sponsors carry a `reputation_score` (Int) and derived
 request** queue.
 
 **Score deltas:**
-- Creator completion bonus `+5`; late penalty `−1`/day capped at `−10`.
+- Creator completion bonus `+5`; late penalty `−1`/day capped at `−10`; level-up `+1`
+  per level gained.
 - Creator opt-out: valid `0`, invalid `−10` (`OPT_OUT_SCORE_DELTAS`).
+- Sponsor full-payout bonus `+3` once every accepted creator on a campaign is paid.
 - Sponsor refund (`REFUND_SCORE_DELTAS`, keyed on verdict × whether the campaign had
   accepted applications): `valid_no_accepted 0`, `valid_had_accepted −5`,
   `invalid_no_accepted −10`, `invalid_had_accepted −15`.
+
+**Reputation event seam** — reputation only moves through **`recordReputationEvent(event)`**.
+Callers name the domain event that happened (`deal_completed`, `opt_out_ruled`,
+`leveled_up`, `proof_late`, `refund_ruled`, `campaign_fully_paid`); the module owns *how
+much* it's worth (`reputationDelta`, the single source of the encoding above), *who* it
+lands on, and the atomic apply. No caller writes `reputation_score` directly or re-derives
+a delta — the raw-delta escape hatch is gone, so the encoding can't drift across call
+sites (it used to be duplicated byte-for-byte across the two refund-verdict handlers). The
+score is moved with an atomic `increment` (concurrent events can't lose each other's
+delta); the derived tier can lag one event under true concurrency and self-heals on the
+next. `recordReputationEvent` is the single choke point where the audit ledger (issue #7)
+will slot in with zero caller changes.
 
 **Proof deadline** = campaign `end_date` + 7 days (`proofDeadline`). Missing it accrues
 late penalties (daily `late-penalties` cron).

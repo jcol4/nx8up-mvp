@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { adjustCreatorReputation, proofDeadline, LATE_PENALTY_PER_DAY, LATE_PENALTY_CAP } from '@/lib/reputation'
+import { recordReputationEvent, proofDeadline, latePenaltyOwed, LATE_PENALTY_CAP } from '@/lib/reputation'
 
 const MS_PER_DAY = 86_400_000
 
@@ -27,11 +27,15 @@ export async function applyLatePenalties() {
     if (msLate <= 0) continue
 
     const daysLate = Math.floor(msLate / MS_PER_DAY)
-    const totalOwed = Math.min(daysLate * LATE_PENALTY_PER_DAY, LATE_PENALTY_CAP)
-    const delta = totalOwed - app.late_penalty_applied
-    if (delta <= 0) continue
+    const totalOwed = latePenaltyOwed(daysLate)
+    if (totalOwed <= app.late_penalty_applied) continue
 
-    await adjustCreatorReputation(app.creator_id, -delta)
+    await recordReputationEvent({
+      type: 'proof_late',
+      creatorId: app.creator_id,
+      daysLate,
+      alreadyPenalized: app.late_penalty_applied,
+    })
     await prisma.campaign_applications.update({
       where: { id: app.id },
       data: { late_penalty_applied: totalOwed },

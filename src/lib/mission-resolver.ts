@@ -4,7 +4,7 @@ import { clerkClient } from '@clerk/nextjs/server'
 import { prisma } from './prisma'
 import { MISSIONS } from './missions'
 import { addXpToState, getRankName, getXpForNextLevel } from './creator-xp'
-import { adjustCreatorReputation } from './reputation'
+import { recordReputationEvent } from './reputation'
 import { createNotification } from './notifications'
 import { NOTIFICATION_TYPES } from './notification-types'
 
@@ -186,7 +186,7 @@ export async function resolveCreatorMissions(creatorId: string): Promise<Resolve
   })
 
   if (levelsGained > 0) {
-    await adjustCreatorReputation(creatorId, levelsGained)
+    await recordReputationEvent({ type: 'leveled_up', creatorId, levelsGained })
     await createNotification({
       userId: creator.clerk_user_id,
       role: 'creator',

@@ -12,11 +12,11 @@ vi.mock('../prisma', () => ({
       findUnique: vi.fn(),
       update: vi.fn(),
     },
-    sponsors: {
-      findUnique: vi.fn(),
-      update: vi.fn(),
-    },
   },
+}))
+
+vi.mock('../reputation', () => ({
+  recordReputationEvent: vi.fn().mockResolvedValue({ delta: 0 }),
 }))
 
 vi.mock('../notifications', () => ({
@@ -28,6 +28,7 @@ vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
 import { auth } from '@clerk/nextjs/server'
 import { createNotification } from '../notifications'
+import { recordReputationEvent } from '../reputation'
 
 const adminClaims = { sessionClaims: { metadata: { role: 'admin' } } }
 const sponsorClaims = { sessionClaims: { metadata: { role: 'sponsor' } } }
@@ -44,8 +45,6 @@ beforeEach(() => {
   vi.mocked(auth).mockResolvedValue(adminClaims as any)
   vi.mocked(prisma.refund_requests.findUnique).mockResolvedValue(pendingRequest as any)
   vi.mocked(prisma.refund_requests.update).mockResolvedValue({} as any)
-  vi.mocked(prisma.sponsors.findUnique).mockResolvedValue({ reputation_score: 0 } as any)
-  vi.mocked(prisma.sponsors.update).mockResolvedValue({} as any)
 })
 
 afterEach(() => {
@@ -71,34 +70,35 @@ describe('submitRefundVerdict', () => {
     expect(res.error).toBe('Verdict already recorded.')
   })
 
-  it('valid + no accepted: delta = 0, reputation NOT updated', async () => {
+  it('valid + no accepted: records refund_ruled with hadAcceptedApplications false', async () => {
     const res = await submitRefundVerdict('req-1', 'valid')
     expect(res.success).toBe(true)
-    expect(prisma.sponsors.update).not.toHaveBeenCalled()
+    expect(recordReputationEvent).toHaveBeenCalledWith({
+      type: 'refund_ruled', sponsorId: 'sponsor-1', verdict: 'valid', hadAcceptedApplications: false,
+    })
   })
 
-  it('valid + had accepted: delta = -5, reputation updated', async () => {
+  it('valid + had accepted: records refund_ruled with hadAcceptedApplications true', async () => {
     vi.mocked(prisma.refund_requests.findUnique).mockResolvedValue({ ...pendingRequest, had_accepted_applications: true } as any)
     await submitRefundVerdict('req-1', 'valid')
-    expect(prisma.sponsors.update).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ reputation_score: -5, reputation_tier: 'neutral' }) }),
-    )
+    expect(recordReputationEvent).toHaveBeenCalledWith({
+      type: 'refund_ruled', sponsorId: 'sponsor-1', verdict: 'valid', hadAcceptedApplications: true,
+    })
   })
 
-  it('invalid + no accepted: delta = -10, reputation updated', async () => {
+  it('invalid + no accepted: records an invalid refund_ruled event', async () => {
     await submitRefundVerdict('req-1', 'invalid')
-    expect(prisma.sponsors.update).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ reputation_score: -10, reputation_tier: 'restricted' }) }),
-    )
+    expect(recordReputationEvent).toHaveBeenCalledWith({
+      type: 'refund_ruled', sponsorId: 'sponsor-1', verdict: 'invalid', hadAcceptedApplications: false,
+    })
   })
 
-  it('invalid + had accepted: delta = -15, reputation updated', async () => {
+  it('invalid + had accepted: records an invalid refund_ruled event', async () => {
     vi.mocked(prisma.refund_requests.findUnique).mockResolvedValue({ ...pendingRequest, had_accepted_applications: true } as any)
     await submitRefundVerdict('req-1', 'invalid')
-    // score 0 + (-15) = -15 → restricted tier (sanctioned requires ≤ -30)
-    expect(prisma.sponsors.update).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ reputation_score: -15, reputation_tier: 'restricted' }) }),
-    )
+    expect(recordReputationEvent).toHaveBeenCalledWith({
+      type: 'refund_ruled', sponsorId: 'sponsor-1', verdict: 'invalid', hadAcceptedApplications: true,
+    })
   })
 
   it('sends notification with "accepted as valid" for valid verdict', async () => {
@@ -109,6 +109,7 @@ describe('submitRefundVerdict', () => {
   })
 
   it('sends notification with "marked as invalid" and score delta for invalid verdict', async () => {
+    vi.mocked(recordReputationEvent).mockResolvedValue({ delta: -10, score: -10, tier: 'restricted' })
     await submitRefundVerdict('req-1', 'invalid')
     expect(createNotification).toHaveBeenCalledWith(
       expect.objectContaining({

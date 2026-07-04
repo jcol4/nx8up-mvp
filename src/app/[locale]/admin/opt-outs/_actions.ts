@@ -3,7 +3,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { adjustCreatorReputation, OPT_OUT_SCORE_DELTAS } from '@/lib/reputation'
+import { recordReputationEvent } from '@/lib/reputation'
 import { createNotification } from '@/lib/notifications'
 import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 
@@ -43,10 +43,8 @@ export async function submitOptOutVerdict(
     data: { verdict, admin_notes: adminNotes ?? null },
   })
 
-  const delta = OPT_OUT_SCORE_DELTAS[verdict]
-  if (delta !== 0) {
-    await adjustCreatorReputation(optOut.creator_id, delta)
-  }
+  const change = await recordReputationEvent({ type: 'opt_out_ruled', creatorId: optOut.creator_id, verdict })
+  const delta = change?.delta ?? 0
 
   const campaignTitle = optOut.application.campaign.title
 

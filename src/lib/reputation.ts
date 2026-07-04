@@ -54,28 +54,6 @@ export const SPONSOR_FULL_PAYOUT_BONUS = 3
 export const LATE_PENALTY_PER_DAY = 1
 export const LATE_PENALTY_CAP = 10
 
-export function proofDeadline(endDate: Date): Date {
-  const d = new Date(endDate)
-  d.setDate(d.getDate() + 7)
-  return d
-}
-
-export async function adjustCreatorReputation(creatorId: string, delta: number) {
-  const creator = await prisma.content_creators.findUnique({
-    where: { id: creatorId },
-    select: { reputation_score: true },
-  })
-  if (!creator) return
-
-  const newScore = creator.reputation_score + delta
-  const newTier = tierFromScore(newScore)
-
-  await prisma.content_creators.update({
-    where: { id: creatorId },
-    data: { reputation_score: newScore, reputation_tier: newTier },
-  })
-}
-
 /** Score deltas keyed by (verdict, hadAcceptedApplications). */
 export const REFUND_SCORE_DELTAS = {
   valid_no_accepted:    0,
@@ -84,21 +62,139 @@ export const REFUND_SCORE_DELTAS = {
   invalid_had_accepted: -15,
 } as const
 
-/** Applies a score delta to a sponsor, recalculates tier, and persists both. */
-export async function adjustSponsorReputation(sponsorId: string, delta: number) {
-  const sponsor = await prisma.sponsors.findUnique({
-    where: { id: sponsorId },
-    select: { reputation_score: true },
-  })
-  if (!sponsor) return
+export function proofDeadline(endDate: Date): Date {
+  const d = new Date(endDate)
+  d.setDate(d.getDate() + 7)
+  return d
+}
 
-  const newScore = sponsor.reputation_score + delta
-  const newTier = tierFromScore(newScore)
+/**
+ * Cumulative late-proof penalty owed for a submission `daysLate` past its deadline:
+ * `LATE_PENALTY_PER_DAY` per day, floored at `LATE_PENALTY_CAP`. Pure — the daily
+ * cron uses it both to persist `late_penalty_applied` and (via `proof_late`) to derive
+ * the incremental reputation delta, so the accrual formula lives in exactly one place.
+ */
+export function latePenaltyOwed(daysLate: number): number {
+  return Math.min(daysLate * LATE_PENALTY_PER_DAY, LATE_PENALTY_CAP)
+}
 
-  await prisma.sponsors.update({
-    where: { id: sponsorId },
-    data: { reputation_score: newScore, reputation_tier: newTier },
+// ── Reputation events ────────────────────────────────────────────────────────
+//
+// Reputation only moves for a handful of named domain events. Callers name the
+// event that happened; this module owns *how much* it's worth (`reputationDelta`),
+// *who* it lands on, and the atomic apply (`recordReputationEvent`). No caller
+// re-encodes a delta table or writes `reputation_score` directly — the raw-delta
+// escape hatch is gone, so the encoding can't drift across call sites (it used to
+// be duplicated byte-for-byte across the two refund-verdict handlers).
+
+/** A reputation-moving domain event, carrying the subject it lands on. */
+export type ReputationEvent =
+  // creator events
+  | { type: 'deal_completed'; creatorId: string }
+  | { type: 'opt_out_ruled'; creatorId: string; verdict: 'valid' | 'invalid' }
+  | { type: 'leveled_up'; creatorId: string; levelsGained: number }
+  | { type: 'proof_late'; creatorId: string; daysLate: number; alreadyPenalized: number }
+  // sponsor events
+  | { type: 'refund_ruled'; sponsorId: string; verdict: 'valid' | 'invalid'; hadAcceptedApplications: boolean }
+  | { type: 'campaign_fully_paid'; sponsorId: string }
+
+/**
+ * The signed score change an event is worth. Pure and total over the union — the one
+ * source of truth for the reputation encoding. `0` means "recorded, no movement".
+ */
+export function reputationDelta(event: ReputationEvent): number {
+  switch (event.type) {
+    case 'deal_completed':
+      return COMPLETION_BONUS
+    case 'campaign_fully_paid':
+      return SPONSOR_FULL_PAYOUT_BONUS
+    case 'opt_out_ruled':
+      return OPT_OUT_SCORE_DELTAS[event.verdict]
+    case 'leveled_up':
+      return event.levelsGained // +1 reputation per level gained
+    case 'refund_ruled': {
+      const key =
+        `${event.verdict}_${event.hadAcceptedApplications ? 'had_accepted' : 'no_accepted'}` as keyof typeof REFUND_SCORE_DELTAS
+      return REFUND_SCORE_DELTAS[key]
+    }
+    case 'proof_late':
+      return -(latePenaltyOwed(event.daysLate) - event.alreadyPenalized)
+  }
+}
+
+/** The subject table + id an event lands on. */
+function eventSubject(event: ReputationEvent): { table: 'creator' | 'sponsor'; id: string } {
+  switch (event.type) {
+    case 'deal_completed':
+    case 'opt_out_ruled':
+    case 'leveled_up':
+    case 'proof_late':
+      return { table: 'creator', id: event.creatorId }
+    case 'refund_ruled':
+    case 'campaign_fully_paid':
+      return { table: 'sponsor', id: event.sponsorId }
+  }
+}
+
+/** Outcome of recording an event: what was applied and the resulting standing. */
+export interface ReputationChange {
+  /** The signed delta applied. `0` when the event carries no score movement. */
+  delta: number
+  /** Subject's score after applying — present only when `delta !== 0`. */
+  score?: number
+  tier?: ReputationTier
+}
+
+/**
+ * Records a reputation event: computes its delta, applies it atomically to the subject,
+ * and recomputes the tier. Returns the applied delta + resulting standing so callers can
+ * craft their own messaging, or `null` if the subject row no longer exists.
+ *
+ * The score is moved with an atomic `increment` (not a read-modify-write), so two
+ * concurrent events on the same subject can't lose each other's delta — the score is
+ * always exact. The derived tier can lag by one event under rare true concurrency but
+ * self-heals on the next event.
+ *
+ * This is the single choke point for every reputation change — the natural home for the
+ * append-only audit ledger tracked in issue #7 (one insert here, zero caller changes).
+ */
+export async function recordReputationEvent(event: ReputationEvent): Promise<ReputationChange | null> {
+  const delta = reputationDelta(event)
+  if (delta === 0) return { delta: 0 } // recorded; nothing to persist
+
+  const { table, id } = eventSubject(event)
+  const score = table === 'creator' ? await applyCreatorDelta(id, delta) : await applySponsorDelta(id, delta)
+  if (score === null) return null
+
+  return { delta, score, tier: tierFromScore(score) }
+}
+
+async function applyCreatorDelta(id: string, delta: number): Promise<number | null> {
+  const res = await prisma.content_creators.updateMany({
+    where: { id },
+    data: { reputation_score: { increment: delta } },
   })
+  if (res.count === 0) return null
+
+  const row = await prisma.content_creators.findUnique({ where: { id }, select: { reputation_score: true } })
+  if (!row) return null
+
+  await prisma.content_creators.update({ where: { id }, data: { reputation_tier: tierFromScore(row.reputation_score) } })
+  return row.reputation_score
+}
+
+async function applySponsorDelta(id: string, delta: number): Promise<number | null> {
+  const res = await prisma.sponsors.updateMany({
+    where: { id },
+    data: { reputation_score: { increment: delta } },
+  })
+  if (res.count === 0) return null
+
+  const row = await prisma.sponsors.findUnique({ where: { id }, select: { reputation_score: true } })
+  if (!row) return null
+
+  await prisma.sponsors.update({ where: { id }, data: { reputation_tier: tierFromScore(row.reputation_score) } })
+  return row.reputation_score
 }
 
 /**
