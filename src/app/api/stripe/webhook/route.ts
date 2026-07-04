@@ -24,7 +24,7 @@ import { prisma } from '@/lib/prisma'
 import { createNotification } from '@/lib/notifications'
 import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 import { onDisputeCreated } from '@/lib/disputes'
-import { adjustSponsorReputation, adjustCreatorReputation, COMPLETION_BONUS } from '@/lib/reputation'
+import { settleCreatorPayout } from '@/lib/payouts'
 import type Stripe from 'stripe'
 
 /** Verifies webhook signature and dispatches to per-event handlers. */
@@ -213,44 +213,9 @@ export async function POST(request: Request) {
         const applicationId = transfer.metadata?.applicationId
         if (!applicationId) break
 
-        await prisma.deal_submissions.updateMany({
-          where: { application_id: applicationId },
-          data: { stripe_transfer_id: transfer.id, payout_status: 'paid' },
-        })
-
-        const app = await prisma.campaign_applications.findUnique({
-          where: { id: applicationId },
-          select: {
-            campaign_id: true,
-            creator_id: true,
-            campaign: { select: { title: true, sponsor_id: true } },
-            creator: { select: { clerk_user_id: true } },
-          },
-        })
-        if (app) {
-          await createNotification({
-            userId: app.creator.clerk_user_id,
-            role: 'creator',
-            type: NOTIFICATION_TYPES.PAYOUT_SENT,
-            title: 'Payout sent',
-            message: `Your payout for "${app.campaign.title}" has been sent to your bank account.`,
-            link: '/creator/campaigns',
-            dedupeKey: transfer.id,
-          })
-
-          await adjustCreatorReputation(app.creator_id, COMPLETION_BONUS)
-
-          // Check if all creators for this campaign are now paid out → +3 reputation for sponsor
-          const unpaidCount = await prisma.deal_submissions.count({
-            where: {
-              payout_status: { not: 'paid' },
-              application: { campaign_id: app.campaign_id, status: 'accepted' },
-            },
-          })
-          if (unpaidCount === 0) {
-            await adjustSponsorReputation(app.campaign.sponsor_id, 3)
-          }
-        }
+        // Idempotent confirmation — the sync payout path usually settles first; this
+        // is the safety net. settleCreatorPayout fires consequences exactly once.
+        await settleCreatorPayout(applicationId, { transferId: transfer.id })
         break
       }
 
