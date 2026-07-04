@@ -8,6 +8,7 @@ import {
   labelClass, sectionClass, sectionTitle, toggleBtn,
   GENDERS, AUDIENCE_LOCATIONS,
 } from '../_shared'
+import { regionsForCountry } from '@/lib/audience-regions'
 
 function AgeStepper({
   value,
@@ -74,10 +75,11 @@ type Props = {
 
 export default function Step2Audience({ draft, setDraft, onNext, onBack, sponsorAgeRestriction }: Props) {
   const tr = useTranslations('sponsor.campaignWizard')
+  const tEnum = useTranslations('enums')
   const [interestInput, setInterestInput] = useState('')
   const restrictionMinAge = sponsorAgeRestriction === '21+' ? 21 : sponsorAgeRestriction === '18+' ? 18 : 13
 
-  const toggle = <K extends 'target_genders' | 'required_audience_locations' | 'target_interests'>(
+  const toggle = <K extends 'target_genders' | 'required_audience_locations' | 'required_audience_regions' | 'target_interests'>(
     key: K,
     val: string
   ) => setDraft(prev => ({
@@ -86,6 +88,21 @@ export default function Step2Audience({ draft, setDraft, onNext, onBack, sponsor
       ? (prev[key] as string[]).filter(x => x !== val)
       : [...(prev[key] as string[]), val],
   }))
+
+  // Toggling a country also strips any of its region selections when it is
+  // deselected, so stale region values don't linger invisibly.
+  const toggleCountry = (country: string) => setDraft(prev => {
+    const selected = prev.required_audience_locations.includes(country)
+    if (selected) {
+      const dropped = new Set<string>(regionsForCountry(country).map(r => r.value))
+      return {
+        ...prev,
+        required_audience_locations: prev.required_audience_locations.filter(c => c !== country),
+        required_audience_regions: prev.required_audience_regions.filter(r => !dropped.has(r)),
+      }
+    }
+    return { ...prev, required_audience_locations: [...prev.required_audience_locations, country] }
+  })
 
   const addInterest = () => {
     const t = interestInput.trim()
@@ -164,12 +181,35 @@ export default function Step2Audience({ draft, setDraft, onNext, onBack, sponsor
           <label className={labelClass}>{tr('s2Countries')}</label>
           <div className="flex flex-wrap gap-2">
             {AUDIENCE_LOCATIONS.map(loc => (
-              <button key={loc} type="button" onClick={() => toggle('required_audience_locations', loc)} className={toggleBtn(draft.required_audience_locations.includes(loc))}>
+              <button key={loc} type="button" onClick={() => toggleCountry(loc)} className={toggleBtn(draft.required_audience_locations.includes(loc))}>
                 {loc}
               </button>
             ))}
           </div>
         </div>
+
+        {/* Region sub-selection, revealed per selected country that has a region tier */}
+        {draft.required_audience_locations.map(country => {
+          const regions = regionsForCountry(country)
+          if (regions.length === 0) return null
+          return (
+            <div key={country}>
+              <label className={labelClass}>{tr('s2Regions', { country })}</label>
+              <div className="flex flex-wrap gap-2">
+                {regions.map(r => (
+                  <button
+                    key={r.value}
+                    type="button"
+                    onClick={() => toggle('required_audience_regions', r.value)}
+                    className={toggleBtn(draft.required_audience_regions.includes(r.value))}
+                  >
+                    {tEnum(`region.${r.value}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )
+        })}
 
         <div>
           <label className={labelClass}>{tr('s2Cities')} <span className="font-normal dash-text-muted">{tr('s2Optional')}</span></label>

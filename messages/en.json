@@ -1,63 +1,180 @@
 {
   "enums": {
     "creatorType": {
-      "competitive_gamer": { "label": "Competitive Gamer", "desc": "Tournament and ranked competitive play" },
-      "streamer": { "label": "Streamer", "desc": "Live streaming on Twitch or YouTube" },
-      "content_creator": { "label": "Content Creator", "desc": "Produced video, shorts, VOD content" }
+      "competitive_gamer": {
+        "label": "Competitive Gamer",
+        "desc": "Tournament and ranked competitive play"
+      },
+      "streamer": {
+        "label": "Streamer",
+        "desc": "Live streaming on Twitch or YouTube"
+      },
+      "content_creator": {
+        "label": "Content Creator",
+        "desc": "Produced video, shorts, VOD content"
+      }
     },
     "targetCreatorType": {
-      "competitive_gamers": { "label": "Competitive Gamers", "desc": "Build trust through real gameplay" },
-      "streamers": { "label": "Streamers", "desc": "Drive real-time engagement and repeat exposure" },
-      "content_creators": { "label": "Content Creators", "desc": "Create scalable, discoverable content" }
+      "competitive_gamers": {
+        "label": "Competitive Gamers",
+        "desc": "Build trust through real gameplay"
+      },
+      "streamers": {
+        "label": "Streamers",
+        "desc": "Drive real-time engagement and repeat exposure"
+      },
+      "content_creators": {
+        "label": "Content Creators",
+        "desc": "Create scalable, discoverable content"
+      }
     },
     "creatorSize": {
-      "nano": { "label": "Nano", "desc": "1K – 10K" },
-      "micro": { "label": "Micro", "desc": "10K – 50K" },
-      "mid": { "label": "Mid", "desc": "50K – 250K" },
-      "large": { "label": "Large", "desc": "250K+" }
+      "nano": {
+        "label": "Nano",
+        "desc": "1K – 10K"
+      },
+      "micro": {
+        "label": "Micro",
+        "desc": "10K – 50K"
+      },
+      "mid": {
+        "label": "Mid",
+        "desc": "50K – 250K"
+      },
+      "large": {
+        "label": "Large",
+        "desc": "250K+"
+      }
     },
     "creatorCampaignType": {
-      "use_and_show": { "label": "Use & Show", "desc": "Feature product naturally in content" },
-      "explain_and_demo": { "label": "Explain & Demo", "desc": "Dedicated product walkthrough" },
-      "mention_and_repeat": { "label": "Mention & Repeat", "desc": "Verbal sponsor mentions" },
-      "compete_and_feature": { "label": "Compete & Feature", "desc": "Tournament / event sponsorship" }
+      "use_and_show": {
+        "label": "Use & Show",
+        "desc": "Feature product naturally in content"
+      },
+      "explain_and_demo": {
+        "label": "Explain & Demo",
+        "desc": "Dedicated product walkthrough"
+      },
+      "mention_and_repeat": {
+        "label": "Mention & Repeat",
+        "desc": "Verbal sponsor mentions"
+      },
+      "compete_and_feature": {
+        "label": "Compete & Feature",
+        "desc": "Tournament / event sponsorship"
+      }
     },
     "missionType": {
-      "use_and_show": { "label": "Use + Show", "desc": "Creator actively uses the product on stream" },
-      "explain_and_demo": { "label": "Explain + Demo", "desc": "Creator explains and demonstrates the product" },
-      "mention_and_repeat": { "label": "Mention + Repeat", "desc": "Recurring brand mentions across content" },
-      "compete_and_feature": { "label": "Compete + Feature", "desc": "Product featured in competitive gameplay" }
+      "use_and_show": {
+        "label": "Use + Show",
+        "desc": "Creator actively uses the product on stream"
+      },
+      "explain_and_demo": {
+        "label": "Explain + Demo",
+        "desc": "Creator explains and demonstrates the product"
+      },
+      "mention_and_repeat": {
+        "label": "Mention + Repeat",
+        "desc": "Recurring brand mentions across content"
+      },
+      "compete_and_feature": {
+        "label": "Compete + Feature",
+        "desc": "Product featured in competitive gameplay"
+      }
     },
     "creatorProductType": {
-      "consumable": { "label": "Consumable", "desc": "Food, drinks, supplements" },
-      "gaming_hardware": { "label": "Gaming Hardware", "desc": "Peripherals, gear, setups" },
-      "digital_product": { "label": "Digital Product", "desc": "Software, games, subscriptions" },
-      "fashion_lifestyle": { "label": "Fashion & Lifestyle", "desc": "Apparel, accessories" },
-      "event_experience": { "label": "Event / Experience", "desc": "Tournaments, events, venues" }
+      "consumable": {
+        "label": "Consumable",
+        "desc": "Food, drinks, supplements"
+      },
+      "gaming_hardware": {
+        "label": "Gaming Hardware",
+        "desc": "Peripherals, gear, setups"
+      },
+      "digital_product": {
+        "label": "Digital Product",
+        "desc": "Software, games, subscriptions"
+      },
+      "fashion_lifestyle": {
+        "label": "Fashion & Lifestyle",
+        "desc": "Apparel, accessories"
+      },
+      "event_experience": {
+        "label": "Event / Experience",
+        "desc": "Tournaments, events, venues"
+      }
     },
     "productType": {
-      "consumable": { "label": "Consumable", "desc": "Drinks, snacks, supplements" },
-      "gaming_hardware": { "label": "Gaming Hardware", "desc": "Headsets, keyboards, gear" },
-      "digital_product": { "label": "Digital Product", "desc": "Apps, fintech, services" },
-      "fashion_lifestyle": { "label": "Fashion / Lifestyle", "desc": "Apparel, accessories" },
-      "event_experience": { "label": "Event / Experience", "desc": "Tickets, live events" }
+      "consumable": {
+        "label": "Consumable",
+        "desc": "Drinks, snacks, supplements"
+      },
+      "gaming_hardware": {
+        "label": "Gaming Hardware",
+        "desc": "Headsets, keyboards, gear"
+      },
+      "digital_product": {
+        "label": "Digital Product",
+        "desc": "Apps, fintech, services"
+      },
+      "fashion_lifestyle": {
+        "label": "Fashion / Lifestyle",
+        "desc": "Apparel, accessories"
+      },
+      "event_experience": {
+        "label": "Event / Experience",
+        "desc": "Tickets, live events"
+      }
     },
     "objective": {
-      "awareness": { "label": "Awareness", "desc": "Grow brand recognition & reach" },
-      "engagement": { "label": "Engagement", "desc": "Drive likes, comments & shares" },
-      "traffic": { "label": "Traffic", "desc": "Send audiences to your site" },
-      "conversions": { "label": "Conversions", "desc": "Generate sign-ups or purchases" }
+      "awareness": {
+        "label": "Awareness",
+        "desc": "Grow brand recognition & reach"
+      },
+      "engagement": {
+        "label": "Engagement",
+        "desc": "Drive likes, comments & shares"
+      },
+      "traffic": {
+        "label": "Traffic",
+        "desc": "Send audiences to your site"
+      },
+      "conversions": {
+        "label": "Conversions",
+        "desc": "Generate sign-ups or purchases"
+      }
     },
     "mediaType": {
-      "youtube_video": { "label": "YouTube Video", "desc": "Standard long-form YouTube upload" },
-      "youtube_short": { "label": "YouTube Short", "desc": "Vertical short-form (≤ 60 sec)" },
-      "twitch_stream": { "label": "Twitch Stream", "desc": "Live stream VOD" },
-      "twitch_clip": { "label": "Twitch Clip", "desc": "Short highlight clip from a stream" }
+      "youtube_video": {
+        "label": "YouTube Video",
+        "desc": "Standard long-form YouTube upload"
+      },
+      "youtube_short": {
+        "label": "YouTube Short",
+        "desc": "Vertical short-form (≤ 60 sec)"
+      },
+      "twitch_stream": {
+        "label": "Twitch Stream",
+        "desc": "Live stream VOD"
+      },
+      "twitch_clip": {
+        "label": "Twitch Clip",
+        "desc": "Short highlight clip from a stream"
+      }
     },
     "trackingType": {
-      "unique_link": { "label": "Unique Link", "desc": "Auto-generated tracking URL per creator" },
-      "promo_code": { "label": "Promo Code", "desc": "Creator shares a custom discount code" },
-      "both": { "label": "Both", "desc": "Link + promo code for maximum coverage" }
+      "unique_link": {
+        "label": "Unique Link",
+        "desc": "Auto-generated tracking URL per creator"
+      },
+      "promo_code": {
+        "label": "Promo Code",
+        "desc": "Creator shares a custom discount code"
+      },
+      "both": {
+        "label": "Both",
+        "desc": "Link + promo code for maximum coverage"
+      }
     },
     "conversionGoal": {
       "purchase": "Purchase",
@@ -97,6 +214,17 @@
       "Female": "Female",
       "Mixed": "Mixed",
       "All": "All"
+    },
+    "region": {
+      "us_northeast": "Northeast",
+      "us_southeast": "Southeast",
+      "us_midwest": "Midwest",
+      "us_west": "West",
+      "br_norte": "North",
+      "br_nordeste": "Northeast",
+      "br_centro_oeste": "Center-West",
+      "br_sudeste": "Southeast",
+      "br_sul": "South"
     },
     "campaignFormat": {
       "one_time": "One-time",
@@ -671,7 +799,8 @@
       "deleteModalWarning": "This is permanent and cannot be undone. Your profile will be removed from all sponsor dashboards, campaigns, and metrics. Your Clerk account will be deleted immediately.",
       "deleteCancel": "Cancel",
       "deleteConfirm": "Yes, delete my account",
-      "deleteDeleting": "Deleting…"
+      "deleteDeleting": "Deleting…",
+      "s4Regions": "Regions in {country}"
     },
     "dealRoom": {
       "heading": "Deal Room",
@@ -1199,7 +1328,9 @@
       "s7ConversionGoal": "Conversion goal",
       "s7EscrowNotice": "Funds are held securely by nx8up and released to creators upon verified campaign completion.",
       "s7Launching": "Launching...",
-      "s7Launch": "Launch Campaign"
+      "s7Launch": "Launch Campaign",
+      "s2Regions": "Regions in {country}",
+      "s7Regions": "Regions"
     },
     "actions": {
       "delete": "Delete",

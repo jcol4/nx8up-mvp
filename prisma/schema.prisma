@@ -59,6 +59,7 @@ model content_creators {
   audience_age_min           Int?
   audience_age_max           Int?
   audience_locations         String[]
+  audience_regions           String[]                @default([])
   youtube_member_count       Int?
   creator_types              String[]
   content_style              String[]
@@ -160,6 +161,7 @@ model campaigns {
   min_audience_age            Int?
   max_audience_age            Int?
   required_audience_locations String[]
+  required_audience_regions   String[]                @default([])
   campaign_code               String?                 @unique
   brand_name                  String?
   objective                   String?
@@ -223,6 +225,8 @@ model campaign_applications {
   app_audience_age_max   Int?
   app_audience_locations String[]
   app_location           String?
+  app_audience_regions   String[]          @default([])
+  app_required_regions   String[]          @default([])
   app_media_types        String[]
   tracking_short_code    String?           @unique
   late_penalty_applied   Int               @default(0)

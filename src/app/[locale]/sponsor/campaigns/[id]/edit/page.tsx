@@ -36,6 +36,7 @@ export default async function EditCampaignPage({ params }: { params: Promise<{ i
     audience_age_max: campaign.max_audience_age?.toString() ?? '',
     target_genders: campaign.target_genders ?? [],
     required_audience_locations: campaign.required_audience_locations ?? [],
+    required_audience_regions: campaign.required_audience_regions ?? [],
     target_cities: campaign.target_cities ?? '',
     target_interests: campaign.target_interests ?? [],
     creator_types: campaign.creator_types ?? [],

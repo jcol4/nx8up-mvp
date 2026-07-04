@@ -14,6 +14,7 @@ export type CampaignDraft = {
   audience_age_max: string
   target_genders: string[]
   required_audience_locations: string[]
+  required_audience_regions: string[]
   target_cities: string
   target_interests: string[]
 
@@ -66,6 +67,7 @@ export const EMPTY_DRAFT: CampaignDraft = {
   audience_age_max: '',
   target_genders: [],
   required_audience_locations: [],
+  required_audience_regions: [],
   target_cities: '',
   target_interests: [],
   is_direct_invite: false,

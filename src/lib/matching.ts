@@ -17,6 +17,7 @@
  */
 
 import { SYNONYMS } from './tag-synonyms'
+import { REGION_TO_COUNTRY } from './audience-regions'
 
 /** All targeting criteria defined by a sponsor when creating a campaign. */
 export type CampaignCriteria = {
@@ -34,6 +35,8 @@ export type CampaignCriteria = {
   max_audience_age: number | null
   /** Required audience country/region tags (e.g. ["US", "Canada"]). Empty = any location. */
   required_audience_locations: string[]
+  /** Required macro-region canonical keys (e.g. ["us_northeast"]). Empty = no region targeting. */
+  required_audience_regions: string[]
   /** Target audience genders (e.g. ["Male", "Female", "All"]). Empty = any gender. */
   target_genders: string[]
   /** Audience interest tags the campaign wants to reach. Empty = any interests. */
@@ -72,6 +75,8 @@ export type CreatorForMatching = {
   audience_age_max: number | null
   /** Country/region tags describing where the creator's audience is located. */
   audience_locations: string[]
+  /** Macro-region canonical keys the creator's audience covers (e.g. ["us_west"]). */
+  audience_regions: string[]
   /** Audience gender breakdown tags (e.g. ["Male", "Female"]). */
   audience_gender: string[]
   /** Interest/topic tags describing the creator's audience. */
@@ -325,6 +330,25 @@ export function matchCreatorToCampaign(
     }
   }
 
+  // ── Audience regions (bonus on top of country score, not independently weighted) ──
+  // Region overlap nudges the numerator only; it deliberately does NOT touch
+  // totalWeight, so location can't dominate the score as two weighted dimensions.
+  if (campaign.required_audience_regions.length > 0) {
+    let regionRatio = 0
+    if (creator.audience_regions.length > 0) {
+      regionRatio = overlapRatio(campaign.required_audience_regions, creator.audience_regions)
+    } else {
+      // Partial credit: creator has country-level data only, no regions set yet.
+      const requiredCountries = campaign.required_audience_regions
+        .map(r => REGION_TO_COUNTRY[r])
+        .filter((c): c is string => !!c)
+      const countryMatch = requiredCountries.some(c => creator.audience_locations.includes(c))
+      regionRatio = countryMatch ? 0.5 : 0
+    }
+    const REGION_BONUS_CAP = 2
+    earnedScore += REGION_BONUS_CAP * regionRatio
+  }
+
   // ── Audience age range (soft) ─────────────────────────────────────────────
   if (
     (campaign.min_audience_age != null || campaign.max_audience_age != null) &&
@@ -388,7 +412,9 @@ export function matchCreatorToCampaign(
     }
   }
 
-  const rawScore = totalWeight > 0 ? Math.round((earnedScore / totalWeight) * 100) : 100
+  // The region bonus adds to earnedScore without touching totalWeight, so the
+  // ratio can slightly exceed 1 — clamp the final score to 100.
+  const rawScore = totalWeight > 0 ? Math.round(Math.min(1, earnedScore / totalWeight) * 100) : 100
   const score = Number.isFinite(rawScore) ? rawScore : 0
   const eligible = reasons.length === 0
 

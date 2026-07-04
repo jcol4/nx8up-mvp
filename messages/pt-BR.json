@@ -1,63 +1,180 @@
 {
   "enums": {
     "creatorType": {
-      "competitive_gamer": { "label": "Jogador Competitivo", "desc": "Jogo competitivo em torneios e ranqueado" },
-      "streamer": { "label": "Streamer", "desc": "Transmissões ao vivo no Twitch ou YouTube" },
-      "content_creator": { "label": "Criador de Conteúdo", "desc": "Vídeos produzidos, shorts, conteúdo VOD" }
+      "competitive_gamer": {
+        "label": "Jogador Competitivo",
+        "desc": "Jogo competitivo em torneios e ranqueado"
+      },
+      "streamer": {
+        "label": "Streamer",
+        "desc": "Transmissões ao vivo no Twitch ou YouTube"
+      },
+      "content_creator": {
+        "label": "Criador de Conteúdo",
+        "desc": "Vídeos produzidos, shorts, conteúdo VOD"
+      }
     },
     "targetCreatorType": {
-      "competitive_gamers": { "label": "Jogadores Competitivos", "desc": "Gere confiança com jogo real" },
-      "streamers": { "label": "Streamers", "desc": "Gere engajamento em tempo real e exposição recorrente" },
-      "content_creators": { "label": "Criadores de Conteúdo", "desc": "Crie conteúdo escalável e descobrível" }
+      "competitive_gamers": {
+        "label": "Jogadores Competitivos",
+        "desc": "Gere confiança com jogo real"
+      },
+      "streamers": {
+        "label": "Streamers",
+        "desc": "Gere engajamento em tempo real e exposição recorrente"
+      },
+      "content_creators": {
+        "label": "Criadores de Conteúdo",
+        "desc": "Crie conteúdo escalável e descobrível"
+      }
     },
     "creatorSize": {
-      "nano": { "label": "Nano", "desc": "1K – 10K" },
-      "micro": { "label": "Micro", "desc": "10K – 50K" },
-      "mid": { "label": "Médio", "desc": "50K – 250K" },
-      "large": { "label": "Grande", "desc": "250K+" }
+      "nano": {
+        "label": "Nano",
+        "desc": "1K – 10K"
+      },
+      "micro": {
+        "label": "Micro",
+        "desc": "10K – 50K"
+      },
+      "mid": {
+        "label": "Médio",
+        "desc": "50K – 250K"
+      },
+      "large": {
+        "label": "Grande",
+        "desc": "250K+"
+      }
     },
     "creatorCampaignType": {
-      "use_and_show": { "label": "Usar e Mostrar", "desc": "Apresentar o produto naturalmente no conteúdo" },
-      "explain_and_demo": { "label": "Explicar e Demonstrar", "desc": "Demonstração dedicada do produto" },
-      "mention_and_repeat": { "label": "Mencionar e Repetir", "desc": "Menções verbais ao patrocinador" },
-      "compete_and_feature": { "label": "Competir e Destacar", "desc": "Patrocínio de torneio / evento" }
+      "use_and_show": {
+        "label": "Usar e Mostrar",
+        "desc": "Apresentar o produto naturalmente no conteúdo"
+      },
+      "explain_and_demo": {
+        "label": "Explicar e Demonstrar",
+        "desc": "Demonstração dedicada do produto"
+      },
+      "mention_and_repeat": {
+        "label": "Mencionar e Repetir",
+        "desc": "Menções verbais ao patrocinador"
+      },
+      "compete_and_feature": {
+        "label": "Competir e Destacar",
+        "desc": "Patrocínio de torneio / evento"
+      }
     },
     "missionType": {
-      "use_and_show": { "label": "Usar + Mostrar", "desc": "O criador usa ativamente o produto na transmissão" },
-      "explain_and_demo": { "label": "Explicar + Demonstrar", "desc": "O criador explica e demonstra o produto" },
-      "mention_and_repeat": { "label": "Mencionar + Repetir", "desc": "Menções recorrentes à marca no conteúdo" },
-      "compete_and_feature": { "label": "Competir + Destacar", "desc": "Produto destacado em jogo competitivo" }
+      "use_and_show": {
+        "label": "Usar + Mostrar",
+        "desc": "O criador usa ativamente o produto na transmissão"
+      },
+      "explain_and_demo": {
+        "label": "Explicar + Demonstrar",
+        "desc": "O criador explica e demonstra o produto"
+      },
+      "mention_and_repeat": {
+        "label": "Mencionar + Repetir",
+        "desc": "Menções recorrentes à marca no conteúdo"
+      },
+      "compete_and_feature": {
+        "label": "Competir + Destacar",
+        "desc": "Produto destacado em jogo competitivo"
+      }
     },
     "creatorProductType": {
-      "consumable": { "label": "Consumível", "desc": "Alimentos, bebidas, suplementos" },
-      "gaming_hardware": { "label": "Hardware de Games", "desc": "Periféricos, equipamentos, setups" },
-      "digital_product": { "label": "Produto Digital", "desc": "Softwares, games, assinaturas" },
-      "fashion_lifestyle": { "label": "Moda e Lifestyle", "desc": "Vestuário, acessórios" },
-      "event_experience": { "label": "Evento / Experiência", "desc": "Torneios, eventos, locais" }
+      "consumable": {
+        "label": "Consumível",
+        "desc": "Alimentos, bebidas, suplementos"
+      },
+      "gaming_hardware": {
+        "label": "Hardware de Games",
+        "desc": "Periféricos, equipamentos, setups"
+      },
+      "digital_product": {
+        "label": "Produto Digital",
+        "desc": "Softwares, games, assinaturas"
+      },
+      "fashion_lifestyle": {
+        "label": "Moda e Lifestyle",
+        "desc": "Vestuário, acessórios"
+      },
+      "event_experience": {
+        "label": "Evento / Experiência",
+        "desc": "Torneios, eventos, locais"
+      }
     },
     "productType": {
-      "consumable": { "label": "Consumível", "desc": "Bebidas, snacks, suplementos" },
-      "gaming_hardware": { "label": "Hardware de Games", "desc": "Headsets, teclados, equipamentos" },
-      "digital_product": { "label": "Produto Digital", "desc": "Apps, fintech, serviços" },
-      "fashion_lifestyle": { "label": "Moda / Lifestyle", "desc": "Vestuário, acessórios" },
-      "event_experience": { "label": "Evento / Experiência", "desc": "Ingressos, eventos ao vivo" }
+      "consumable": {
+        "label": "Consumível",
+        "desc": "Bebidas, snacks, suplementos"
+      },
+      "gaming_hardware": {
+        "label": "Hardware de Games",
+        "desc": "Headsets, teclados, equipamentos"
+      },
+      "digital_product": {
+        "label": "Produto Digital",
+        "desc": "Apps, fintech, serviços"
+      },
+      "fashion_lifestyle": {
+        "label": "Moda / Lifestyle",
+        "desc": "Vestuário, acessórios"
+      },
+      "event_experience": {
+        "label": "Evento / Experiência",
+        "desc": "Ingressos, eventos ao vivo"
+      }
     },
     "objective": {
-      "awareness": { "label": "Reconhecimento", "desc": "Aumentar reconhecimento e alcance da marca" },
-      "engagement": { "label": "Engajamento", "desc": "Gerar curtidas, comentários e compartilhamentos" },
-      "traffic": { "label": "Tráfego", "desc": "Enviar o público para o seu site" },
-      "conversions": { "label": "Conversões", "desc": "Gerar cadastros ou compras" }
+      "awareness": {
+        "label": "Reconhecimento",
+        "desc": "Aumentar reconhecimento e alcance da marca"
+      },
+      "engagement": {
+        "label": "Engajamento",
+        "desc": "Gerar curtidas, comentários e compartilhamentos"
+      },
+      "traffic": {
+        "label": "Tráfego",
+        "desc": "Enviar o público para o seu site"
+      },
+      "conversions": {
+        "label": "Conversões",
+        "desc": "Gerar cadastros ou compras"
+      }
     },
     "mediaType": {
-      "youtube_video": { "label": "Vídeo do YouTube", "desc": "Upload padrão de vídeo longo no YouTube" },
-      "youtube_short": { "label": "YouTube Short", "desc": "Vídeo vertical curto (≤ 60 seg)" },
-      "twitch_stream": { "label": "Stream do Twitch", "desc": "VOD de transmissão ao vivo" },
-      "twitch_clip": { "label": "Clip do Twitch", "desc": "Clip curto de destaque de uma transmissão" }
+      "youtube_video": {
+        "label": "Vídeo do YouTube",
+        "desc": "Upload padrão de vídeo longo no YouTube"
+      },
+      "youtube_short": {
+        "label": "YouTube Short",
+        "desc": "Vídeo vertical curto (≤ 60 seg)"
+      },
+      "twitch_stream": {
+        "label": "Stream do Twitch",
+        "desc": "VOD de transmissão ao vivo"
+      },
+      "twitch_clip": {
+        "label": "Clip do Twitch",
+        "desc": "Clip curto de destaque de uma transmissão"
+      }
     },
     "trackingType": {
-      "unique_link": { "label": "Link Único", "desc": "URL de rastreamento gerada automaticamente por criador" },
-      "promo_code": { "label": "Código Promocional", "desc": "O criador compartilha um código de desconto personalizado" },
-      "both": { "label": "Ambos", "desc": "Link + código promocional para cobertura máxima" }
+      "unique_link": {
+        "label": "Link Único",
+        "desc": "URL de rastreamento gerada automaticamente por criador"
+      },
+      "promo_code": {
+        "label": "Código Promocional",
+        "desc": "O criador compartilha um código de desconto personalizado"
+      },
+      "both": {
+        "label": "Ambos",
+        "desc": "Link + código promocional para cobertura máxima"
+      }
     },
     "conversionGoal": {
       "purchase": "Compra",
@@ -97,6 +214,17 @@
       "Female": "Feminino",
       "Mixed": "Misto",
       "All": "Todos"
+    },
+    "region": {
+      "us_northeast": "Nordeste dos EUA",
+      "us_southeast": "Sudeste dos EUA",
+      "us_midwest": "Meio-Oeste dos EUA",
+      "us_west": "Oeste dos EUA",
+      "br_norte": "Norte",
+      "br_nordeste": "Nordeste",
+      "br_centro_oeste": "Centro-Oeste",
+      "br_sudeste": "Sudeste",
+      "br_sul": "Sul"
     },
     "campaignFormat": {
       "one_time": "Única",
@@ -671,7 +799,8 @@
       "deleteModalWarning": "Esta ação é permanente e não pode ser desfeita. Seu perfil será removido de todos os painéis de patrocinadores, campanhas e métricas. Sua conta Clerk será excluída imediatamente.",
       "deleteCancel": "Cancelar",
       "deleteConfirm": "Sim, excluir minha conta",
-      "deleteDeleting": "Excluindo…"
+      "deleteDeleting": "Excluindo…",
+      "s4Regions": "Regiões em {country}"
     },
     "dealRoom": {
       "heading": "Sala de Negócios",
@@ -1199,7 +1328,9 @@
       "s7ConversionGoal": "Meta de conversão",
       "s7EscrowNotice": "Os fundos ficam retidos com segurança pela nx8up e são liberados aos criadores após a conclusão verificada da campanha.",
       "s7Launching": "Lançando...",
-      "s7Launch": "Lançar Campanha"
+      "s7Launch": "Lançar Campanha",
+      "s2Regions": "Regiões em {country}",
+      "s7Regions": "Regiões"
     },
     "actions": {
       "delete": "Excluir",

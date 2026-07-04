@@ -108,6 +108,7 @@ export default function NewCampaignForm({ initialDraft, editingId, sponsorAgeRes
     fd.set('audience_age_max', draft.audience_age_max)
     fd.set('target_genders', JSON.stringify(draft.target_genders))
     fd.set('required_audience_locations', JSON.stringify(draft.required_audience_locations))
+    fd.set('required_audience_regions', JSON.stringify(draft.required_audience_regions))
     fd.set('target_cities', draft.target_cities)
     fd.set('target_interests', JSON.stringify(draft.target_interests))
     fd.set('is_direct_invite', String(draft.is_direct_invite))

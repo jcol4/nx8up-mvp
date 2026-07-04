@@ -31,6 +31,8 @@ export type CreatorProfile = {
   audience_age_max?: number
   /** Country/region tags for where the creator's audience is located. */
   audience_locations?: string[]
+  /** Macro-region canonical keys the creator's audience covers (e.g. ["us_west"]). */
+  audience_regions?: string[]
   /** Audience gender tags (e.g. ["Male", "Female"]). */
   audience_gender?: string[]
   /** Creator archetype tags (e.g. ["Streamer", "Educator"]). */

@@ -52,6 +52,7 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
   const conversionGoalLabel = draft.conversion_goal ? tEnum(`conversionGoal.${draft.conversion_goal}`) : undefined
   const creatorTypeLabels = CREATOR_TYPES.filter(c => draft.creator_types.includes(c.value)).map(c => tEnum(`targetCreatorType.${c.value}.label`))
   const creatorSizeLabels = CREATOR_SIZES.filter(c => draft.creator_sizes.includes(c.value)).map(c => `${tEnum(`creatorSize.${c.value}.label`)} (${tEnum(`creatorSize.${c.value}.desc`)})`)
+  const regionLabels = draft.required_audience_regions.map(r => tEnum(`region.${r}`))
 
   return (
     <div className="space-y-5">
@@ -84,6 +85,7 @@ export default function Step7Review({ draft, error, isSubmitting, onSubmit, onBa
             )}
             <Pills label={t('s7Gender')} values={draft.target_genders} />
             <Pills label={t('s7Countries')} values={draft.required_audience_locations} />
+            <Pills label={t('s7Regions')} values={regionLabels} />
             <Row label={t('s7Cities')} value={draft.target_cities || undefined} />
             <Pills label={t('s7Interests')} values={draft.target_interests} />
           </div>

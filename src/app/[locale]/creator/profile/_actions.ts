@@ -99,6 +99,7 @@ export async function getCreatorProfile(): Promise<CreatorProfile | null> {
     audience_age_min: fromDb?.audience_age_min ?? undefined,
     audience_age_max: fromDb?.audience_age_max ?? undefined,
     audience_locations: fromDb?.audience_locations?.length ? fromDb.audience_locations : undefined,
+    audience_regions: fromDb?.audience_regions?.length ? fromDb.audience_regions : undefined,
     audience_gender: fromDb?.audience_gender?.length ? fromDb.audience_gender : undefined,
     // Creator identity
     creator_types: fromDb?.creator_types?.length ? fromDb.creator_types : undefined,
@@ -252,6 +253,7 @@ export async function updateCreatorProfileWizard(data: import('./_shared').Creat
         audience_age_min: data.audience_age_min ? parseInt(data.audience_age_min, 10) : undefined,
         audience_age_max: data.audience_age_max ? parseInt(data.audience_age_max, 10) : undefined,
         audience_locations: data.audience_locations,
+        audience_regions: data.audience_regions,
         audience_gender: data.audience_gender,
         creator_types: data.creator_types,
         primary_platform: data.primary_platform || null,
@@ -272,6 +274,7 @@ export async function updateCreatorProfileWizard(data: import('./_shared').Creat
         audience_age_min: data.audience_age_min ? parseInt(data.audience_age_min, 10) : null,
         audience_age_max: data.audience_age_max ? parseInt(data.audience_age_max, 10) : null,
         audience_locations: data.audience_locations,
+        audience_regions: data.audience_regions,
         audience_gender: data.audience_gender,
         creator_types: data.creator_types,
         primary_platform: data.primary_platform || null,

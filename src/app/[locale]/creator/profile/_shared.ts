@@ -41,6 +41,7 @@ export type CreatorProfileDraft = {
   audience_age_min: string
   audience_age_max: string
   audience_locations: string[]
+  audience_regions: string[]
   // Step 5 - Brand & Campaign Preferences
   preferred_campaign_types: string[]
   preferred_product_types: string[]
@@ -67,6 +68,7 @@ export const EMPTY_DRAFT: CreatorProfileDraft = {
   audience_age_min: '',
   audience_age_max: '',
   audience_locations: [],
+  audience_regions: [],
   preferred_campaign_types: [],
   preferred_product_types: [],
   is_available: true,

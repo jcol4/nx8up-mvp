@@ -66,6 +66,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             audience_age_min: true,
             audience_age_max: true,
             audience_locations: true,
+            audience_regions: true,
             audience_gender: true,
             audience_interests: true,
             creator_types: true,

@@ -31,6 +31,7 @@ import {
   toggleBtn,
   type CreatorProfileDraft,
 } from '../_shared'
+import { regionsForCountry } from '@/lib/audience-regions'
 
 type Props = {
   draft: CreatorProfileDraft
@@ -68,6 +69,22 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
       return { ...d, [field]: [...arr, t] }
     })
     clear()
+  }
+
+  // Toggling an audience country also strips its region selections on deselect.
+  const toggleAudienceCountry = (country: string) => {
+    setDraft(d => {
+      const selected = d.audience_locations.includes(country)
+      if (selected) {
+        const dropped = new Set<string>(regionsForCountry(country).map(r => r.value))
+        return {
+          ...d,
+          audience_locations: d.audience_locations.filter(c => c !== country),
+          audience_regions: d.audience_regions.filter(r => !dropped.has(r)),
+        }
+      }
+      return { ...d, audience_locations: [...d.audience_locations, country] }
+    })
   }
 
   const removeTag = (field: 'game_category' | 'audience_interests', val: string) => {
@@ -268,13 +285,36 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
               <button
                 key={loc}
                 type="button"
-                onClick={() => toggle('audience_locations', loc)}
+                onClick={() => toggleAudienceCountry(loc)}
                 className={toggleBtn(draft.audience_locations.includes(loc))}
               >
                 {loc}
               </button>
             ))}
           </div>
+
+          {/* Region sub-selection, revealed per selected country with a region tier */}
+          {draft.audience_locations.map(country => {
+            const regions = regionsForCountry(country)
+            if (regions.length === 0) return null
+            return (
+              <div key={country} className="mt-3">
+                <label className={labelClass}>{tr('s4Regions', { country })}</label>
+                <div className="flex flex-wrap gap-2">
+                  {regions.map(r => (
+                    <button
+                      key={r.value}
+                      type="button"
+                      onClick={() => toggle('audience_regions', r.value)}
+                      className={toggleBtn(draft.audience_regions.includes(r.value))}
+                    >
+                      {tEnum(`region.${r.value}`)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
 

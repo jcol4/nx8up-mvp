@@ -97,6 +97,7 @@ export async function saveCampaignDraft(formData: FormData): Promise<CreateCampa
     max_audience_age: parseOptionalInt(formData.get('audience_age_max') as string | null),
     target_genders: parseStringArray(formData.get('target_genders') as string | null),
     required_audience_locations: parseStringArray(formData.get('required_audience_locations') as string | null),
+    required_audience_regions: parseStringArray(formData.get('required_audience_regions') as string | null),
     target_cities: (formData.get('target_cities') as string | null)?.trim() || null,
     target_interests: parseStringArray(formData.get('target_interests') as string | null),
     creator_types: parseStringArray(formData.get('creator_types') as string | null),
@@ -254,6 +255,7 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
 
   const target_genders = parseStringArray(formData.get('target_genders') as string | null)
   const required_audience_locations = parseStringArray(formData.get('required_audience_locations') as string | null)
+  const required_audience_regions = parseStringArray(formData.get('required_audience_regions') as string | null)
   const target_interests = parseStringArray(formData.get('target_interests') as string | null)
   const creator_types = parseStringArray(formData.get('creator_types') as string | null)
   const creator_sizes = parseStringArray(formData.get('creator_sizes') as string | null)
@@ -294,6 +296,7 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
     max_audience_age,
     target_genders,
     required_audience_locations,
+    required_audience_regions,
     target_cities,
     target_interests,
     creator_types,
@@ -355,6 +358,8 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
           creator_id: invited_creator_id,
           status: 'invited',
           app_audience_locations: [],
+          app_audience_regions: [],
+          app_required_regions: required_audience_regions,
           app_media_types: [],
         },
       })

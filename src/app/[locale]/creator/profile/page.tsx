@@ -119,6 +119,7 @@ export default async function CreatorProfilePage() {
     audience_age_min: profile?.audience_age_min?.toString() ?? '',
     audience_age_max: profile?.audience_age_max?.toString() ?? '',
     audience_locations: profile?.audience_locations ?? [],
+    audience_regions: profile?.audience_regions ?? [],
     preferred_campaign_types: profile?.preferred_campaign_types ?? [],
     preferred_product_types: profile?.preferred_product_types ?? [],
     is_available: profile?.is_available ?? true,
