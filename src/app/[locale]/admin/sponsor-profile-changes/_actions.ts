@@ -1,17 +1,11 @@
 'use server'
 
-import { auth } from '@clerk/nextjs/server'
+import { requireAdmin } from '@/lib/admin-auth'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 
-async function assertAdmin() {
-  const { sessionClaims } = await auth()
-  const role = (sessionClaims?.metadata as { role?: string })?.role
-  if (role !== 'admin') throw new Error('Unauthorized')
-}
-
 export async function getAgeRestrictionChangeQueue() {
-  await assertAdmin()
+  await requireAdmin()
 
   return prisma.sponsor_age_restriction_requests.findMany({
     where: { status: 'pending' },
@@ -31,7 +25,7 @@ export async function getAgeRestrictionChangeQueue() {
 }
 
 export async function getAgeRestrictionChangeRequest(id: string) {
-  await assertAdmin()
+  await requireAdmin()
 
   return prisma.sponsor_age_restriction_requests.findUnique({
     where: { id },
@@ -55,7 +49,7 @@ export async function reviewAgeRestrictionRequest(
   adminNotes?: string,
 ): Promise<{ error?: string; success?: boolean }> {
   try {
-    await assertAdmin()
+    await requireAdmin()
   } catch {
     return { error: 'Unauthorized' }
   }

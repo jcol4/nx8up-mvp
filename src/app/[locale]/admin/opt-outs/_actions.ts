@@ -1,6 +1,6 @@
 'use server'
 
-import { auth } from '@clerk/nextjs/server'
+import { getSessionRole } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { recordReputationEvent } from '@/lib/reputation'
@@ -23,9 +23,7 @@ export async function submitOptOutVerdict(
   verdict: 'valid' | 'invalid',
   adminNotes?: string,
 ) {
-  const { sessionClaims } = await auth()
-  const role = (sessionClaims?.metadata as { role?: string })?.role
-  if (role !== 'admin') return { error: 'Unauthorized' }
+  if ((await getSessionRole()) !== 'admin') return { error: 'Unauthorized' }
 
   const optOut = await prisma.creator_opt_outs.findUnique({
     where: { id: optOutId },

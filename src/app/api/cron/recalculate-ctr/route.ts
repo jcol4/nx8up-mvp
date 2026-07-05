@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { computeAndStoreSubmissionCtr, recomputeCreatorAggregateCtr } from '@/lib/ctr'
+import { assertCronRequest } from '@/lib/cron-auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,10 +16,8 @@ export const dynamic = 'force-dynamic'
  * Then recomputes aggregate CTR for each affected creator (DB-only, no API calls).
  */
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('Authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const denied = assertCronRequest(request)
+  if (denied) return denied
 
   // Target submissions whose views haven't been fetched in the last 23h
   const cutoff = new Date(Date.now() - 23 * 60 * 60 * 1000)

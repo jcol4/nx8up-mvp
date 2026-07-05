@@ -1,19 +1,13 @@
 'use server'
 
-import { auth } from '@clerk/nextjs/server'
+import { requireAdmin } from '@/lib/admin-auth'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { createNotification } from '@/lib/notifications'
 import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 
-async function assertAdmin() {
-  const { sessionClaims } = await auth()
-  const role = (sessionClaims?.metadata as { role?: string })?.role
-  if (role !== 'admin') throw new Error('Unauthorized')
-}
-
 export async function getAdminDealRoomQueue() {
-  await assertAdmin()
+  await requireAdmin()
 
   return prisma.deal_submissions.findMany({
     where: { status: 'submitted' },
@@ -38,7 +32,7 @@ export async function getAdminDealRoomQueue() {
 }
 
 export async function getAdminDealRoomSubmission(applicationId: string) {
-  await assertAdmin()
+  await requireAdmin()
 
   return prisma.deal_submissions.findUnique({
     where: { application_id: applicationId },
@@ -69,7 +63,7 @@ export async function adminReviewSubmission(
   notes?: string,
 ): Promise<{ error?: string; success?: boolean }> {
   try {
-    await assertAdmin()
+    await requireAdmin()
   } catch {
     return { error: 'Unauthorized' }
   }

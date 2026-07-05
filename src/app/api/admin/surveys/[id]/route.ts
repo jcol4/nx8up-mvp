@@ -1,9 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-
-function isAdmin(sessionClaims: Record<string, unknown> | null | undefined) {
-  return (sessionClaims?.metadata as { role?: string })?.role === 'admin'
-}
+import { isAdmin } from '@/lib/admin-auth'
 
 /** PATCH /api/admin/surveys/[id] — Updates title/description/status/targetRoles. */
 export async function PATCH(

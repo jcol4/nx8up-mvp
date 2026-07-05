@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server'
 import { applyLatePenalties } from '@/lib/late-penalties'
+import { assertCronRequest } from '@/lib/cron-auth'
 
 export async function GET(req: Request) {
-  const authHeader = req.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const denied = assertCronRequest(req)
+  if (denied) return denied
 
   await applyLatePenalties()
   return NextResponse.json({ ok: true })

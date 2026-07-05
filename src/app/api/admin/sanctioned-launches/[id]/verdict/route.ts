@@ -8,14 +8,14 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
+import { isAdmin } from '@/lib/admin-auth'
 import { createNotification } from '@/lib/notifications'
 import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 import { revalidatePath } from 'next/cache'
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { sessionClaims } = await auth()
-  const role = (sessionClaims?.metadata as { role?: string })?.role
-  if (role !== 'admin') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!isAdmin(sessionClaims)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
   const { verdict, adminNotes } = await request.json()

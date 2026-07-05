@@ -249,7 +249,13 @@ so don't re-suggest folding Steam behind this seam without that.
   `NotificationPreference.prefs` before sending.
 - **i18n**: UI strings are extracted to `en` / `pt-BR`; option/enum labels live in a
   shared catalog with locale-aware date/number formatting. (See the auto-memory notes.)
-- **Cron endpoints** require `Authorization: Bearer <CRON_SECRET>`; Vercel injects it.
+- **Admin authorization** on mutating surfaces goes through `admin-auth.ts`: server
+  actions call `requireAdmin()` (throws) or gate on `getSessionRole()`; API routes gate on
+  `isAdmin(sessionClaims)`. Don't re-inline `metadata.role === 'admin'`. (Server-Component
+  page guards using `redirect('/')` are a separate, already-uniform pattern.)
+- **Cron endpoints** require `Authorization: Bearer <CRON_SECRET>` (Vercel injects it),
+  checked via `assertCronRequest(req)` from `cron-auth.ts` — which fails closed if the secret
+  is unset and compares in constant time. Don't re-inline the bearer check.
 - **Stack**: Next.js 16 (App Router) · React 19 · Prisma 7 + Neon serverless adapter ·
   Tailwind 4 · Clerk · Stripe · Resend · Vitest.
 

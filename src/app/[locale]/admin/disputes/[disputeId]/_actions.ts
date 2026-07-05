@@ -1,18 +1,12 @@
 'use server'
 
-import { auth } from '@clerk/nextjs/server'
+import { requireAdmin } from '@/lib/admin-auth'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 
-async function assertAdmin() {
-  const { sessionClaims } = await auth()
-  const role = (sessionClaims?.metadata as { role?: string })?.role
-  if (role !== 'admin') throw new Error('Unauthorized')
-}
-
 export async function getDisputeById(disputeId: string) {
-  await assertAdmin()
+  await requireAdmin()
   return prisma.disputes.findUnique({
     where: { id: disputeId },
     include: {
@@ -30,7 +24,7 @@ export async function getDisputeById(disputeId: string) {
 }
 
 export async function getDisputes() {
-  await assertAdmin()
+  await requireAdmin()
   return prisma.disputes.findMany({
     orderBy: { created_at: 'desc' },
     include: {
@@ -46,7 +40,7 @@ export async function updateAdminNotes(
   notes: string,
 ): Promise<{ error?: string; success?: boolean }> {
   try {
-    await assertAdmin()
+    await requireAdmin()
   } catch {
     return { error: 'Unauthorized' }
   }
@@ -64,7 +58,7 @@ export async function submitToStripe(
   disputeId: string,
 ): Promise<{ error?: string; success?: boolean }> {
   try {
-    await assertAdmin()
+    await requireAdmin()
   } catch {
     return { error: 'Unauthorized' }
   }

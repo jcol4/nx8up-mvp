@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { assignWeeklyMissions } from '@/lib/mission-assignment'
+import { assertCronRequest } from '@/lib/cron-auth'
 
 export async function GET(req: Request) {
-  const authHeader = req.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const denied = assertCronRequest(req)
+  if (denied) return denied
 
   const creators = await prisma.content_creators.findMany({ select: { id: true } })
   await Promise.all(creators.map((c) => assignWeeklyMissions(c.id)))
