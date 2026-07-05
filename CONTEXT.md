@@ -187,6 +187,14 @@ Campaign status and payout status are **webhook-driven** — see the README's St
 webhook table for the full event→action map. A `charge.dispute.created` webhook opens
 a **dispute** (`disputes` + `dispute_events` audit log) for admin handling.
 
+**Stripe webhook seam** (`stripe-webhook.ts`) — the `/api/stripe/webhook` route is a thin
+adapter that verifies the signature (the webhook's only authentication) and hands the
+verified event to `handleStripeEvent`, which dispatches to a named per-event handler
+(`onPaymentIntentSucceeded`, `onChargeSucceeded`, `onPayoutFailed`, …). The money-critical
+paths — campaign go-live, invoicing, payout-failure — live in those handlers, unit-testable
+without HTTP or signature forging. Handlers assume the event is already verified (auth lives
+in the adapter). New events are a new handler + a `switch` arm, not more inline route code.
+
 ---
 
 ## CTR — the trust signal (`src/lib/ctr.ts`)
