@@ -9,6 +9,7 @@ const LOCALES = [
   { code: 'en', label: 'English', flag: '🇺🇸', short: 'EN' },
   { code: 'pt-BR', label: 'Português', flag: '🇧🇷', short: 'PT' },
   { code: 'fr', label: 'Français', flag: '🇫🇷', short: 'FR' },
+  { code: 'es-419', label: 'Español', flag: '🇲🇽', short: 'ES' },
 ] as const
 
 type Props = {
