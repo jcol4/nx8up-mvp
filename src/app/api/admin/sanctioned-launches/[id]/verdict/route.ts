@@ -9,8 +9,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { isAdmin } from '@/lib/admin-auth'
-import { createNotification } from '@/lib/notifications'
-import { NOTIFICATION_TYPES } from '@/lib/notification-types'
+import { notify } from '@/lib/notification-events'
 import { revalidatePath } from 'next/cache'
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -52,27 +51,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     })
     await Promise.all(
       acceptedApps.map((app) =>
-        createNotification({
+        notify({
+          type: 'campaign_live',
           userId: app.creator.clerk_user_id,
-          role: 'creator',
-          type: NOTIFICATION_TYPES.CAMPAIGN_LAUNCHED,
-          title: 'Campaign is live!',
-          message: `"${req.campaign.title}" has launched. Head to your deal room to get started.`,
-          link: '/creator/deal-room',
+          campaignTitle: req.campaign.title,
         }),
       ),
     )
   }
 
-  await createNotification({
+  await notify({
+    type: 'launch_verdict',
     userId: req.sponsor.clerk_user_id,
-    role: 'sponsor',
-    type: verdict === 'approved' ? NOTIFICATION_TYPES.LAUNCH_APPROVED : NOTIFICATION_TYPES.LAUNCH_DENIED,
-    title: verdict === 'approved' ? 'Campaign launch approved' : 'Campaign launch denied',
-    message: verdict === 'approved'
-      ? `Your campaign "${req.campaign.title}" has been approved and is now launched.`
-      : `Your launch request for "${req.campaign.title}" was denied.${adminNotes ? ` Reason: ${adminNotes}` : ''}`,
-    link: '/sponsor/campaigns',
+    campaignTitle: req.campaign.title,
+    approved: verdict === 'approved',
+    adminNotes,
   })
 
   revalidatePath('/admin/verification-queue')

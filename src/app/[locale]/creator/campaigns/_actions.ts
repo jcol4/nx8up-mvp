@@ -45,9 +45,8 @@ import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { matchCreatorToCampaign } from '@/lib/matching'
-import { createNotification } from '@/lib/notifications'
+import { notify } from '@/lib/notification-events'
 import { resolveCreatorMissions } from '@/lib/mission-resolver'
-import { NOTIFICATION_TYPES } from '@/lib/notification-types'
 
 /**
  * Returns whether the creator has a verified platform connection and a
@@ -359,13 +358,12 @@ export async function applyToCampaign(
     select: { clerk_user_id: true },
   })
   if (sponsor) {
-    await createNotification({
+    await notify({
+      type: 'creator_applied',
       userId: sponsor.clerk_user_id,
-      role: 'sponsor',
-      type: NOTIFICATION_TYPES.CREATOR_APPLIED,
-      title: 'New creator application',
-      message: `A creator has applied to your campaign "${campaign.title}".`,
-      link: `/sponsor/campaigns/${campaignId}/applications`,
+      campaignId,
+      campaignTitle: campaign.title,
+      viaInvite: false,
     })
   }
 
@@ -454,13 +452,12 @@ export async function respondToInvitation(
   })
 
   if (response === 'accept') {
-    await createNotification({
+    await notify({
+      type: 'creator_applied',
       userId: application.campaign.sponsor.clerk_user_id,
-      role: 'sponsor',
-      type: NOTIFICATION_TYPES.CREATOR_APPLIED,
-      title: 'Creator accepted your invite',
-      message: `A creator has accepted your direct invite to "${application.campaign.title}".`,
-      link: `/sponsor/campaigns/${application.campaign.id}/applications`,
+      campaignId: application.campaign.id,
+      campaignTitle: application.campaign.title,
+      viaInvite: true,
     })
   }
 

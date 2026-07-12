@@ -20,8 +20,7 @@
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { calcFeeBreakdown } from '@/lib/constants'
-import { createNotification } from '@/lib/notifications'
-import { NOTIFICATION_TYPES } from '@/lib/notification-types'
+import { notify } from '@/lib/notification-events'
 import { recordReputationEvent } from '@/lib/reputation'
 
 /**
@@ -154,14 +153,11 @@ export async function settleCreatorPayout(
   })
   if (!app) return 'settled'
 
-  await createNotification({
+  await notify({
+    type: 'payout_sent',
     userId: app.creator.clerk_user_id,
-    role: 'creator',
-    type: NOTIFICATION_TYPES.PAYOUT_SENT,
-    title: 'Payout sent',
-    message: `Your payout for "${app.campaign.title}" has been sent to your bank account.`,
-    link: '/creator/campaigns',
-    dedupeKey: transferId,
+    campaignTitle: app.campaign.title,
+    transferId,
   })
 
   await recordReputationEvent({ type: 'deal_completed', creatorId: app.creator_id })

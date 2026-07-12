@@ -5,8 +5,7 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import { sponsorDashboardCacheTag } from '@/lib/sponsor-dashboard-cache'
 import { randomBytes } from 'crypto'
 import { prisma } from '@/lib/prisma'
-import { createNotification } from '@/lib/notifications'
-import { NOTIFICATION_TYPES } from '@/lib/notification-types'
+import { notify } from '@/lib/notification-events'
 import { TIER_COOLDOWN_DAYS, earliestStartDate } from '@/lib/reputation'
 import type { ReputationTier } from '@/lib/reputation'
 
@@ -104,13 +103,10 @@ export async function launchCampaign(id: string): Promise<{ error?: string; succ
 
   await Promise.all(
     campaign.applications.map((app) =>
-      createNotification({
+      notify({
+        type: 'campaign_live',
         userId: app.creator.clerk_user_id,
-        role: 'creator',
-        type: NOTIFICATION_TYPES.CAMPAIGN_LAUNCHED,
-        title: 'Campaign is live!',
-        message: `"${campaign.title}" has launched. Head to your deal room to get started.`,
-        link: '/creator/deal-room',
+        campaignTitle: campaign.title,
       })
     )
   )
@@ -181,15 +177,11 @@ export async function setApplicationStatus(
     data: { status, ...(tracking_short_code ? { tracking_short_code } : {}) },
   })
 
-  await createNotification({
+  await notify({
+    type: 'application_decided',
     userId: application.creator.clerk_user_id,
-    role: 'creator',
-    type: status === 'accepted' ? NOTIFICATION_TYPES.APPLICATION_ACCEPTED : NOTIFICATION_TYPES.APPLICATION_REJECTED,
-    title: status === 'accepted' ? 'Application accepted!' : 'Application update',
-    message: status === 'accepted'
-      ? `You've been accepted for "${application.campaign.title}". Check your deal room.`
-      : `Your application for "${application.campaign.title}" was not selected.`,
-    link: '/creator/campaigns',
+    campaignTitle: application.campaign.title,
+    accepted: status === 'accepted',
   })
 
   revalidatePath(`/sponsor/campaigns/${campaignId}/applications`)

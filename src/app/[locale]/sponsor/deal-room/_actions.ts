@@ -3,8 +3,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
-import { createNotification } from '@/lib/notifications'
-import { NOTIFICATION_TYPES } from '@/lib/notification-types'
+import { notify } from '@/lib/notification-events'
 import { initiateCreatorPayout, payoutIneligibleMessage } from '@/lib/payouts'
 
 async function getSponsor(userId: string) {
@@ -107,15 +106,12 @@ export async function updateSubmissionStatus(
     data: { status, sponsor_notes: sponsorNotes ?? null },
   })
 
-  await createNotification({
+  await notify({
+    type: 'submission_reviewed',
     userId: app.creator.clerk_user_id,
-    role: 'creator',
-    type: status === 'approved' ? NOTIFICATION_TYPES.SUBMISSION_APPROVED : NOTIFICATION_TYPES.SUBMISSION_REVISION,
-    title: status === 'approved' ? 'Submission approved!' : 'Revision requested',
-    message: status === 'approved'
-      ? `Your content for "${app.campaign.title}" has been approved.`
-      : `The sponsor has requested changes to your "${app.campaign.title}" submission.${sponsorNotes ? ` Note: ${sponsorNotes}` : ''}`,
-    link: '/creator/campaigns',
+    campaignTitle: app.campaign.title,
+    approved: status === 'approved',
+    sponsorNotes,
   })
 
   // Trigger payout when the sponsor approves. Best-effort: the approval still succeeds

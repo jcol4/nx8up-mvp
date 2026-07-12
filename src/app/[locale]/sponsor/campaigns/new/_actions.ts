@@ -6,8 +6,7 @@ import { sponsorDashboardCacheTag } from '@/lib/sponsor-dashboard-cache'
 import { randomUUID } from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { BUDGET_MAX } from '@/lib/constants'
-import { createNotification } from '@/lib/notifications'
-import { NOTIFICATION_TYPES } from '@/lib/notification-types'
+import { notify } from '@/lib/notification-events'
 
 export type CreateCampaignResult = { error?: string; success?: boolean; id?: string }
 
@@ -369,13 +368,10 @@ export async function createCampaign(formData: FormData): Promise<CreateCampaign
         select: { clerk_user_id: true },
       })
       if (invitedCreator) {
-        await createNotification({
+        await notify({
+          type: 'direct_invite',
           userId: invitedCreator.clerk_user_id,
-          role: 'creator',
-          type: NOTIFICATION_TYPES.DIRECT_INVITE,
-          title: 'You have a direct invite',
-          message: `A sponsor has personally invited you to their campaign "${title}". Check your campaigns to respond.`,
-          link: '/creator/campaigns',
+          campaignTitle: title,
         })
       }
     }
