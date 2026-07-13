@@ -4,8 +4,7 @@ import { getSessionRole } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { recordReputationEvent } from '@/lib/reputation'
-import { createNotification } from '@/lib/notifications'
-import { NOTIFICATION_TYPES } from '@/lib/notification-types'
+import { notify } from '@/lib/notification-events'
 
 export async function getOptOutQueue() {
   return prisma.creator_opt_outs.findMany({
@@ -47,22 +46,19 @@ export async function submitOptOutVerdict(
   const campaignTitle = optOut.application.campaign.title
 
   if (verdict === 'valid') {
-    await createNotification({
+    await notify({
+      type: 'opt_out_verdict',
       userId: optOut.creator.clerk_user_id,
-      role: 'creator',
-      type: NOTIFICATION_TYPES.OPT_OUT_VERDICT,
-      title: 'Opt-Out Approved',
-      message: `Your opt-out request for "${campaignTitle}" has been approved. No reputation penalty was applied.`,
-      link: '/creator/campaigns',
+      campaignTitle,
+      approved: true,
     })
   } else {
-    await createNotification({
+    await notify({
+      type: 'opt_out_verdict',
       userId: optOut.creator.clerk_user_id,
-      role: 'creator',
-      type: NOTIFICATION_TYPES.OPT_OUT_VERDICT,
-      title: 'Opt-Out Rejected',
-      message: `Your opt-out request for "${campaignTitle}" was marked as invalid or rejected. Your reputation score has been adjusted by ${delta}.`,
-      link: '/creator/campaigns',
+      campaignTitle,
+      approved: false,
+      scoreDelta: delta,
     })
   }
 

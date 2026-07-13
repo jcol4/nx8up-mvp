@@ -13,8 +13,7 @@
  */
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
-import { createNotification } from '@/lib/notifications'
-import { NOTIFICATION_TYPES } from '@/lib/notification-types'
+import { notify } from '@/lib/notification-events'
 import { onDisputeCreated } from '@/lib/disputes'
 import { settleCreatorPayout } from '@/lib/payouts'
 import type Stripe from 'stripe'
@@ -82,14 +81,11 @@ export async function onPaymentIntentSucceeded(pi: Stripe.PaymentIntent): Promis
   if (sponsorId) {
     const sponsor = await prisma.sponsors.findUnique({ where: { id: sponsorId }, select: { clerk_user_id: true } })
     if (sponsor) {
-      await createNotification({
+      await notify({
+        type: 'payment_confirmed',
         userId: sponsor.clerk_user_id,
-        role: 'sponsor',
-        type: NOTIFICATION_TYPES.PAYMENT_SUCCESS,
-        title: 'Payment confirmed',
-        message: `Your campaign "${campaignTitle ?? 'campaign'}" is now live.`,
-        link: `/sponsor/campaigns`,
-        dedupeKey: pi.id,
+        campaignTitle: campaignTitle ?? null,
+        paymentIntentId: pi.id,
       })
     }
   }
@@ -155,13 +151,10 @@ export async function onPaymentIntentFailed(pi: Stripe.PaymentIntent): Promise<v
   if (sponsorId) {
     const sponsor = await prisma.sponsors.findUnique({ where: { id: sponsorId }, select: { clerk_user_id: true } })
     if (sponsor) {
-      await createNotification({
+      await notify({
+        type: 'payment_failed',
         userId: sponsor.clerk_user_id,
-        role: 'sponsor',
-        type: NOTIFICATION_TYPES.PAYMENT_FAILED,
-        title: 'Payment failed',
-        message: `Payment for "${campaignTitle ?? 'your campaign'}" could not be processed. Please retry.`,
-        link: `/sponsor/campaigns`,
+        campaignTitle: campaignTitle ?? null,
       })
     }
   }
@@ -244,13 +237,9 @@ export async function onPayoutFailed(event: Stripe.Event): Promise<void> {
     select: { clerk_user_id: true },
   })
   if (creator) {
-    await createNotification({
+    await notify({
+      type: 'payout_failed',
       userId: creator.clerk_user_id,
-      role: 'creator',
-      type: NOTIFICATION_TYPES.PAYOUT_FAILED,
-      title: 'Payout failed',
-      message: `A payout to your bank account failed. Please check your Stripe payout settings.`,
-      link: '/creator/profile',
     })
   }
 }

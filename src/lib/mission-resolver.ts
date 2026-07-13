@@ -5,8 +5,7 @@ import { prisma } from './prisma'
 import { MISSIONS } from './missions'
 import { addXpToState, getRankName, getXpForNextLevel } from './creator-xp'
 import { recordReputationEvent } from './reputation'
-import { createNotification } from './notifications'
-import { NOTIFICATION_TYPES } from './notification-types'
+import { notify } from './notification-events'
 
 type ResolveResult = {
   completed: string[]
@@ -187,13 +186,11 @@ export async function resolveCreatorMissions(creatorId: string): Promise<Resolve
 
   if (levelsGained > 0) {
     await recordReputationEvent({ type: 'leveled_up', creatorId, levelsGained })
-    await createNotification({
+    await notify({
+      type: 'level_up',
       userId: creator.clerk_user_id,
-      role: 'creator',
-      type: NOTIFICATION_TYPES.LEVEL_UP,
-      title: `Level ${next.level}`,
-      message: `Rank updated to ${next.rankName}.`,
-      link: '/creator',
+      level: next.level,
+      rankName: next.rankName,
     })
   }
 

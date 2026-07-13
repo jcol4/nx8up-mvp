@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { ClerkProvider } from '@clerk/nextjs'
 import { enUS, ptBR, frFR, esMX } from '@clerk/localizations'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 const geistSans = Geist({
@@ -80,6 +81,7 @@ export default async function RootLayout({
       <html lang={locale}>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           {children}
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>

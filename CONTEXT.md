@@ -253,7 +253,16 @@ so don't re-suggest folding Steam behind this seam without that.
   PascalCase models. Both coexist.
 - **Statuses/tiers/verdicts are plain strings**, not enums — validate against the
   values documented above.
-- **Notifications** are deduplicated via `dedupeKey` (`notifications.ts`); respect
+- **Notification event seam** — emit notifications with **`notify(event)`**
+  (`notification-events.ts`), naming the domain moment (`payout_sent`, `refund_verdict`,
+  `application_decided`, …) and passing only domain data. The registry's pure
+  `renderNotification` owns the storage `type`, the title/message wording (including every
+  accepted/rejected branch), the `link`, and the dedupe key — it is the test surface. The
+  feed `role` is **derived** from the resolved type (`roleForType`, inverted from the
+  per-role arrays in `notification-types.ts`), so a notification can't be filed into the
+  wrong dashboard; no caller assembles a `CreateNotificationInput` by hand. `notify`
+  delegates to `createNotification` (`notifications.ts`), which owns `dedupeKey`
+  deduplication, optional Resend email, and silent error-swallowing. Respect
   `NotificationPreference.prefs` before sending.
 - **i18n**: UI strings are extracted to `en` / `pt-BR`; option/enum labels live in a
   shared catalog with locale-aware date/number formatting. (See the auto-memory notes.)

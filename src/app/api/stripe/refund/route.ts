@@ -12,8 +12,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
-import { createNotification } from '@/lib/notifications'
-import { NOTIFICATION_TYPES } from '@/lib/notification-types'
+import { notify } from '@/lib/notification-events'
 
 export async function POST(request: Request) {
   const { userId } = await auth()
@@ -88,13 +87,10 @@ export async function POST(request: Request) {
   // Notify accepted and pending creators that the campaign was cancelled
   await Promise.all(
     campaign.applications.map((app) =>
-      createNotification({
+      notify({
+        type: 'campaign_cancelled',
         userId: app.creator.clerk_user_id,
-        role: 'creator',
-        type: NOTIFICATION_TYPES.CAMPAIGN_CANCELLED_CREATOR,
-        title: 'Campaign cancelled',
-        message: `"${campaign.title}" has been cancelled by the sponsor. Your application has been closed.`,
-        link: '/creator/campaigns',
+        campaignTitle: campaign.title,
       }),
     ),
   )

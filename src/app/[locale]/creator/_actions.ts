@@ -40,8 +40,7 @@ import {
   getRankName,
   type CreatorXpState,
 } from '@/lib/creator-xp'
-import { createNotification } from '@/lib/notifications'
-import { NOTIFICATION_TYPES } from '@/lib/notification-types'
+import { notify } from '@/lib/notification-events'
 
 /**
  * Parses raw Clerk `publicMetadata` into a typed `CreatorXpState`.
@@ -172,13 +171,11 @@ export async function addCreatorXp(amount: number): Promise<{ error?: string }> 
     })
 
     if (leveledUp) {
-      await createNotification({
+      await notify({
+        type: 'level_up',
         userId,
-        role: 'creator',
-        type: NOTIFICATION_TYPES.LEVEL_UP,
-        title: `Level ${next.level}`,
-        message: `Rank updated to ${next.rankName}.`,
-        link: '/creator',
+        level: next.level,
+        rankName: next.rankName,
       })
     }
 

@@ -13,8 +13,7 @@
  */
 import { prisma } from '@/lib/prisma'
 import { recordReputationEvent } from '@/lib/reputation'
-import { createNotification } from '@/lib/notifications'
-import { NOTIFICATION_TYPES } from '@/lib/notification-types'
+import { notify } from '@/lib/notification-events'
 
 /** The result of attempting to resolve a refund verdict — each transport maps this to its own response. */
 export type RefundVerdictOutcome =
@@ -57,16 +56,12 @@ export async function resolveRefundVerdict(
   })
   const delta = change?.delta ?? 0
 
-  const verdictLabel = verdict === 'valid' ? 'accepted as valid' : 'marked as invalid'
-  const scoreMsg = delta < 0 ? ` Your reputation score has been adjusted by ${delta}.` : ''
-
-  await createNotification({
+  await notify({
+    type: 'refund_verdict',
     userId: req.sponsor.clerk_user_id,
-    role: 'sponsor',
-    type: NOTIFICATION_TYPES.REFUND_VERDICT,
-    title: 'Refund request reviewed',
-    message: `Your refund request for "${req.campaign.title}" has been ${verdictLabel}.${scoreMsg}`,
-    link: '/sponsor/campaigns',
+    campaignTitle: req.campaign.title,
+    verdict,
+    scoreDelta: delta,
   })
 
   return { kind: 'resolved' }

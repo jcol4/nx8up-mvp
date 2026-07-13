@@ -3,8 +3,7 @@
 import { requireAdmin } from '@/lib/admin-auth'
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
-import { createNotification } from '@/lib/notifications'
-import { NOTIFICATION_TYPES } from '@/lib/notification-types'
+import { notify } from '@/lib/notification-events'
 
 export async function getAdminDealRoomQueue() {
   await requireAdmin()
@@ -87,15 +86,12 @@ export async function adminReviewSubmission(
     data: { status: decision, admin_notes: notes ?? null },
   })
 
-  await createNotification({
+  await notify({
+    type: 'admin_submission_verdict',
     userId: submission.application.creator.clerk_user_id,
-    role: 'creator',
-    type: decision === 'admin_verified' ? NOTIFICATION_TYPES.ADMIN_VERIFIED : NOTIFICATION_TYPES.ADMIN_REJECTED,
-    title: decision === 'admin_verified' ? 'Submission verified' : 'Submission rejected',
-    message: decision === 'admin_verified'
-      ? `Your content for "${submission.application.campaign.title}" has been verified by admin.`
-      : `Your submission for "${submission.application.campaign.title}" was rejected by admin.${notes ? ` Reason: ${notes}` : ''}`,
-    link: '/creator/campaigns',
+    campaignTitle: submission.application.campaign.title,
+    verified: decision === 'admin_verified',
+    notes,
   })
 
   revalidatePath('/admin/verification-queue')

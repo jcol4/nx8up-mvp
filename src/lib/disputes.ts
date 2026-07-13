@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { createNotification } from '@/lib/notifications'
-import { NOTIFICATION_TYPES } from '@/lib/notification-types'
+import { notify } from '@/lib/notification-events'
 import type Stripe from 'stripe'
 
 type Creator = {
@@ -306,14 +305,14 @@ export async function onDisputeCreated(stripeDispute: Stripe.Dispute) {
   const amountStr = `$${(stripeDispute.amount / 100).toFixed(2)}`
   await Promise.all(
     admins.map(admin =>
-      createNotification({
+      notify({
+        type: 'dispute_created',
         userId: admin.clerk_user_id,
-        role: 'admin',
-        type: NOTIFICATION_TYPES.DISPUTE_CREATED,
-        title: 'New dispute received',
-        message: `A ${amountStr} dispute (${stripeDispute.reason.replace(/_/g, ' ')}) needs your review. Evidence due ${dueBy.toLocaleDateString()}.`,
-        link: `/admin/disputes/${dispute.id}`,
-        dedupeKey: stripeDispute.id,
+        amountLabel: amountStr,
+        reason: stripeDispute.reason,
+        dueBy,
+        disputeId: dispute.id,
+        stripeDisputeId: stripeDispute.id,
       }),
     ),
   )
