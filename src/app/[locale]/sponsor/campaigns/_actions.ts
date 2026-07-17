@@ -89,9 +89,10 @@ export async function launchCampaign(id: string): Promise<{ error?: string; succ
     return { success: true, pendingApproval: true }
   }
 
-  // Cooldown: start date must be at least N days after payment confirmation
+  // Cooldown: start date must be at least N days after payment confirmation.
+  // test_cooldown_bypass is a per-sponsor testing flag toggled directly in the DB.
   const cooldownDays = TIER_COOLDOWN_DAYS[tier] ?? 7
-  if (cooldownDays > 0 && campaign.payment_confirmed_at && campaign.start_date) {
+  if (!sponsor.test_cooldown_bypass && cooldownDays > 0 && campaign.payment_confirmed_at && campaign.start_date) {
     const earliest = earliestStartDate(tier, campaign.payment_confirmed_at)
     if (earliest && campaign.start_date < earliest) {
       const fmt = earliest.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
