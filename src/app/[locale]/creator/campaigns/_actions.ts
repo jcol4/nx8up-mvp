@@ -230,13 +230,20 @@ export async function getActiveCampaigns({ all = false }: { all?: boolean } = {}
 }
 
 export async function getCampaignById(id: string) {
-  return prisma.campaigns.findUnique({
-    where: { id },
-    include: {
-      sponsor: { select: { company_name: true, clerk_user_id: true } },
-      _count: { select: { applications: true } },
-    },
-  })
+  const [campaign, acceptedCount] = await Promise.all([
+    prisma.campaigns.findUnique({
+      where: { id },
+      include: {
+        sponsor: { select: { company_name: true, clerk_user_id: true } },
+        _count: { select: { applications: true } },
+      },
+    }),
+    prisma.campaign_applications.count({
+      where: { campaign_id: id, status: 'accepted' },
+    }),
+  ])
+  if (!campaign) return null
+  return { ...campaign, acceptedCount }
 }
 
 export async function getMyApplication(campaignId: string) {

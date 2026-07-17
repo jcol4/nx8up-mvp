@@ -118,6 +118,7 @@ model sponsors {
   stripe_customer_id       String?
   reputation_score         Int                                @default(0)
   reputation_tier          String                             @default("neutral")
+  test_cooldown_bypass     Boolean                            @default(false)
   campaigns                campaigns[]
   age_restriction_requests sponsor_age_restriction_requests[]
   refund_requests          refund_requests[]

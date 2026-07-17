@@ -158,6 +158,21 @@ describe('launchCampaign', () => {
       const res = await launchCampaign('campaign-1')
       expect(res.success).toBe(true)
     })
+
+    it('test_cooldown_bypass sponsor skips the cooldown check', async () => {
+      vi.mocked(prisma.sponsors.findUnique).mockResolvedValue({
+        ...validSponsor,
+        test_cooldown_bypass: true,
+      } as any)
+      vi.mocked(prisma.campaigns.findUnique).mockResolvedValue({
+        ...validCampaign,
+        payment_confirmed_at: NOW,
+        start_date: IN_1_DAY,
+      } as any)
+      const res = await launchCampaign('campaign-1')
+      expect(res.success).toBe(true)
+      expect(res.error).toBeUndefined()
+    })
   })
 
   it('updates campaign to launched on success', async () => {

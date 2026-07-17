@@ -35,7 +35,6 @@ import ApplyButton from './ApplyButton'
 import InviteResponseButtons from '@/components/creator/InviteResponseButtons'
 import { prisma } from '@/lib/prisma'
 import { matchCreatorToCampaign } from '@/lib/matching'
-import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
 import Image from 'next/image'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import CreatorShell from '@/components/creator/CreatorShell'
@@ -433,31 +432,6 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
         {/* ── Sidebar ── */}
         <div className="space-y-4 lg:sticky lg:top-24 lg:self-start">
           <NxHudCard as="div" className="p-5">
-            {campaign.budget != null && (() => {
-              const { fee, creatorPool, perCreator } = calcFeeBreakdown(campaign.budget, campaign.creator_count)
-              return (
-                <div className="mb-4 pb-4 border-b cr-border">
-                  <div className="text-center mb-3">
-                    <p className="text-3xl font-bold cr-success">${format.number(creatorPool)}</p>
-                    <p className="text-sm cr-meta-label mt-1">{t('payoutPool')}</p>
-                    {perCreator && (
-                      <p className="text-sm font-semibold text-[#22c55e] mt-1">≈ ${format.number(perCreator)} {t('perCreator')}</p>
-                    )}
-                  </div>
-                  <div className="space-y-1 pt-2 border-t cr-border">
-                    <div className="flex justify-between text-sm">
-                      <span className="cr-meta-label">{t('totalBudget')}</span>
-                      <span className="cr-text-bright font-medium">${format.number(campaign.budget)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="cr-meta-label">{t('nx8upFee')} ({Math.round(NX_FEE_RATE * 100)}%)</span>
-                      <span className="text-red-400/80">−${format.number(fee)}</span>
-                    </div>
-                  </div>
-                </div>
-              )
-            })()}
-
             <ul className="space-y-3 text-sm">
               <li className="flex justify-between items-center">
                 <span className="cr-meta-label">{t('status')}</span>
@@ -488,7 +462,9 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
               {campaign.creator_count != null && (
                 <li className="flex justify-between items-center">
                   <span className="cr-meta-label">{t('spotsAvailable')}</span>
-                  <span className="cr-text-bright font-medium text-xs">{campaign.creator_count}</span>
+                  <span className="cr-text-bright font-medium text-xs">
+                    {Math.max(0, campaign.creator_count - campaign.acceptedCount)}
+                  </span>
                 </li>
               )}
               {campaign.target_cities && (
