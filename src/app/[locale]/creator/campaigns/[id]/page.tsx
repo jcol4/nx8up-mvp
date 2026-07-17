@@ -40,6 +40,7 @@ import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import CreatorShell from '@/components/creator/CreatorShell'
 import NxHudCard from '@/components/nx-shell/NxHudCard'
 import { getClerkImageUrls } from '@/lib/get-clerk-images'
+import { calcFeeBreakdown } from '@/lib/constants'
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -432,6 +433,15 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
         {/* ── Sidebar ── */}
         <div className="space-y-4 lg:sticky lg:top-24 lg:self-start">
           <NxHudCard as="div" className="p-5">
+            {campaign.budget != null && (() => {
+              const { perCreator } = calcFeeBreakdown(campaign.budget, campaign.creator_count)
+              return perCreator ? (
+                <div className="mb-4 pb-4 border-b cr-border">
+                  <p className="text-2xl font-bold cr-success">${format.number(perCreator)}</p>
+                  <p className="cr-stat-caption mt-0.5">{t('yourPayout')}</p>
+                </div>
+              ) : null
+            })()}
             <ul className="space-y-3 text-sm">
               <li className="flex justify-between items-center">
                 <span className="cr-meta-label">{t('status')}</span>
