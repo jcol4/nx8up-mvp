@@ -30,7 +30,8 @@ function AgeStepper({
   }
   const increment = () => {
     if (!value) { onChange(String(min)); return }
-    if (num < max) onChange(String(num + 1))
+    if (num >= max) { onChange(String(min)); return }
+    onChange(String(num + 1))
   }
   const btnClass =
     'w-8 h-8 flex items-center justify-center rounded-lg border dash-border dash-text-muted hover:text-[#c8dff0] hover:border-[rgba(153,247,255,0.35)] hover:bg-[rgba(153,247,255,0.05)] transition-all select-none shrink-0'
@@ -47,9 +48,13 @@ function AgeStepper({
         value={value}
         onChange={e => {
           const v = e.target.value
-          if (v === '') { onChange(''); return }
-          const n = parseInt(v, 10)
-          if (!isNaN(n) && n >= min && n <= max) onChange(String(n))
+          if (v === '' || /^\d+$/.test(v)) onChange(v)
+        }}
+        onBlur={() => {
+          if (!value) return
+          if (isNaN(num)) { onChange(''); return }
+          if (num < min) { onChange(String(min)); return }
+          if (num > max) { onChange(String(max)); return }
         }}
         placeholder={placeholder}
         min={min}
@@ -138,11 +143,7 @@ export default function Step2Audience({ draft, setDraft, onNext, onBack, sponsor
           <div className="flex items-center gap-3">
             <AgeStepper
               value={draft.audience_age_min}
-              onChange={val => {
-                const num = parseInt(val, 10)
-                if (!isNaN(num) && num < restrictionMinAge) return
-                setDraft(prev => ({ ...prev, audience_age_min: val }))
-              }}
+              onChange={val => setDraft(prev => ({ ...prev, audience_age_min: val }))}
               placeholder={tr('s2Min')}
               min={restrictionMinAge}
             />
