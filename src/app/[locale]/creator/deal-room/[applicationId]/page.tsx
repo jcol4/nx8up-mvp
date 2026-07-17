@@ -32,7 +32,7 @@ import { headers } from 'next/headers'
 import { auth } from '@clerk/nextjs/server'
 import { getDealRoom } from '../_actions'
 import ProofSubmitForm from './ProofSubmitForm'
-import { NX_FEE_RATE, calcFeeBreakdown } from '@/lib/constants'
+import { calcFeeBreakdown } from '@/lib/constants'
 import CopyButton from './CopyButton'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import CreatorShell from '@/components/creator/CreatorShell'
@@ -126,13 +126,13 @@ export default async function CreatorDealRoomDetailPage({
           </div>
           <div className="text-right">
             {c.budget != null && (() => {
-              const { perCreator, creatorPool } = calcFeeBreakdown(c.budget, c.creator_count)
-              return (
+              const { perCreator } = calcFeeBreakdown(c.budget, c.creator_count)
+              return perCreator ? (
                 <>
-                  <p className="text-lg font-bold cr-success">${format.number(perCreator ?? creatorPool)}</p>
-                  <p className="cr-stat-caption">{perCreator ? t('yourPayout') : t('creatorPool')}</p>
+                  <p className="text-lg font-bold cr-success">${format.number(perCreator)}</p>
+                  <p className="cr-stat-caption">{t('yourPayout')}</p>
                 </>
-              )
+              ) : null
             })()}
             {c.end_date && (
               <p className="text-sm cr-meta-label mt-0.5">
@@ -395,29 +395,13 @@ export default async function CreatorDealRoomDetailPage({
                 </div>
               )}
               {c.budget != null && (() => {
-                const { fee, creatorPool, perCreator } = calcFeeBreakdown(c.budget, c.creator_count)
-                return (
-                  <>
-                    {perCreator && (
-                      <div className="flex justify-between gap-2">
-                        <dt className="cr-meta-label">{t('payoutLabel')}</dt>
-                        <dd className="cr-success font-bold">${format.number(perCreator)}</dd>
-                      </div>
-                    )}
-                    <div className="flex justify-between gap-2">
-                      <dt className="cr-meta-label">{t('creatorPoolLabel')}</dt>
-                      <dd className="cr-success font-semibold">${format.number(creatorPool)}</dd>
-                    </div>
-                    <div className="flex justify-between gap-2 text-sm">
-                      <dt className="cr-meta-label">{t('totalBudget')}</dt>
-                      <dd className="cr-text-bright font-medium">${format.number(c.budget)}</dd>
-                    </div>
-                    <div className="flex justify-between gap-2 text-sm">
-                      <dt className="cr-meta-label">{t('nx8upFee')} ({Math.round(NX_FEE_RATE * 100)}%)</dt>
-                      <dd className="text-red-400/70">−${format.number(fee)}</dd>
-                    </div>
-                  </>
-                )
+                const { perCreator } = calcFeeBreakdown(c.budget, c.creator_count)
+                return perCreator ? (
+                  <div className="flex justify-between gap-2">
+                    <dt className="cr-meta-label">{t('payoutLabel')}</dt>
+                    <dd className="cr-success font-bold">${format.number(perCreator)}</dd>
+                  </div>
+                ) : null
               })()}
               {c.start_date && (
                 <div className="flex justify-between gap-2">
