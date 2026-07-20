@@ -11,6 +11,10 @@ const isCreatorRoute = createRouteMatcher(['/:locale/creator(.*)'])
 const isSponsorRoute = createRouteMatcher(['/:locale/sponsor(.*)'])
 const isOnboardingRoute = createRouteMatcher(['/:locale/onboarding'])
 
+// Public marketing landing page: the locale root (and bare root) render for
+// signed-out visitors instead of bouncing them to sign-in.
+const isLandingRoute = createRouteMatcher(['/', '/:locale'])
+
 // Auth routes stay flat (outside [locale])
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
@@ -49,8 +53,10 @@ export default clerkMiddleware(async (auth, req) => {
   const role = (sessionClaims?.metadata as { role?: string })?.role
   const locale = getLocaleFromReq(req)
 
-  // Not signed in → sign-in (flat route, no locale prefix needed)
+  // Not signed in → sign-in (flat route, no locale prefix needed),
+  // except the public landing page, which renders for signed-out visitors.
   if (!userId) {
+    if (isLandingRoute(req)) return handleI18n(req)
     return redirectToSignIn()
   }
 
