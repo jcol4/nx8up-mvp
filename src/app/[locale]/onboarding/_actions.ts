@@ -30,7 +30,36 @@
 'use server'
 
 import { auth, clerkClient, currentUser } from '@clerk/nextjs/server'
+import { cookies } from 'next/headers'
 import { prisma } from '@/lib/prisma'
+
+const REFERRAL_COOKIE = 'nx8_ref'
+
+/**
+ * Attributes a newly created creator to whoever referred them, if the `nx8_ref`
+ * affiliate-link cookie is present and names a real creator's referral code.
+ * Never throws — a referral hiccup should never block onboarding.
+ */
+async function attributeReferralIfPresent(referredCreatorId: string) {
+  try {
+    const cookieStore = await cookies()
+    const code = cookieStore.get(REFERRAL_COOKIE)?.value
+    if (!code) return
+
+    const referrer = await prisma.content_creators.findUnique({
+      where: { referral_code: code },
+      select: { id: true },
+    })
+    if (referrer && referrer.id !== referredCreatorId) {
+      await prisma.creator_referrals.create({
+        data: { referrer_id: referrer.id, referred_id: referredCreatorId },
+      })
+    }
+    cookieStore.delete(REFERRAL_COOKIE)
+  } catch (err) {
+    console.error('Referral attribution error:', err)
+  }
+}
 
 /**
  * Server action called when the user submits the onboarding form.
@@ -79,7 +108,7 @@ export const completeOnboarding = async (formData: FormData) => {
       })
 
       if (!existing) {
-        await prisma.content_creators.create({
+        const newCreator = await prisma.content_creators.create({
           data: {
             clerk_user_id: userId,
             email,
@@ -98,6 +127,8 @@ export const completeOnboarding = async (formData: FormData) => {
             audience_gender: [],
           }
         })
+
+        await attributeReferralIfPresent(newCreator.id)
       }
     } else if (role === 'sponsor') {
       const existing = await prisma.sponsors.findUnique({

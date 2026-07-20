@@ -20,6 +20,7 @@ import { getCreatorCalendarTasks, getCreatorXp, getCreatorMissions } from "./_ac
 import { getUserDisplayInfo } from "@/lib/get-user-display-info";
 import { CreatorCommandCenter } from "./_components";
 import { prisma } from "@/lib/prisma";
+import { maybeGrantReferralReward } from "@/lib/reputation";
 
 /**
  * Renders the creator dashboard grid — missions, progress/calendar,
@@ -78,8 +79,11 @@ export default async function CreatorDashboardPage() {
           twitch_username: true,
           youtube_channel_name: true,
           platform: true,
+          stripe_onboarding_complete: true,
         },
       })
+
+      if (creator?.id) void maybeGrantReferralReward(creator.id)
 
       creatorStats = creator
         ? {

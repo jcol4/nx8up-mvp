@@ -29,12 +29,15 @@ import { getTranslations } from 'next-intl/server'
 import { getCreatorProfile, refreshTwitchDataIfStale, refreshYouTubeDataIfStale } from './_actions'
 import CreatorProfileWizard from './CreatorProfileWizard'
 import PayoutBanner from './PayoutBanner'
+import AffiliateLinkCard from './AffiliateLinkCard'
 import { prisma } from '@/lib/prisma'
 import { parseLocation } from '@/lib/location-options'
 import type { CreatorProfileDraft } from './_shared'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import CreatorShell from '@/components/creator/CreatorShell'
 import DeleteAccountSection from './DeleteAccountSection'
+import { isCreatorFullySetUp } from '@/lib/creator-eligibility'
+import { REFERRAL_BONUS } from '@/lib/reputation'
 
 /**
  * Returns true if the creator has completed enough of the profile wizard to
@@ -140,6 +143,16 @@ export default async function CreatorProfilePage() {
         {!creator?.stripe_onboarding_complete && (
           <PayoutBanner hasAccount={!!creator?.stripe_connect_id} />
         )}
+
+        <AffiliateLinkCard
+          eligible={isCreatorFullySetUp({
+            platform: initialDraft.platform,
+            twitch_username: creator?.twitch_username ?? null,
+            youtube_channel_name: creator?.youtube_channel_name ?? null,
+            stripe_onboarding_complete: creator?.stripe_onboarding_complete ?? false,
+          })}
+          bonus={REFERRAL_BONUS}
+        />
 
         <CreatorProfileWizard
           initialDraft={initialDraft}

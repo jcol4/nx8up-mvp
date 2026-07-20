@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { isCreatorFullySetUp } from '@/lib/creator-eligibility'
 
 export type ReputationTier = 'sanctioned' | 'restricted' | 'neutral' | 'trusted' | 'verified'
 
@@ -49,6 +50,8 @@ export const OPT_OUT_SCORE_DELTAS = {
 } as const
 
 export const COMPLETION_BONUS = 5
+/** Awarded to a referrer once a creator they referred fully sets up their own account. */
+export const REFERRAL_BONUS = 10
 /** Awarded to a sponsor once every accepted creator on a campaign has been paid out. */
 export const SPONSOR_FULL_PAYOUT_BONUS = 3
 export const LATE_PENALTY_PER_DAY = 1
@@ -94,6 +97,7 @@ export type ReputationEvent =
   | { type: 'opt_out_ruled'; creatorId: string; verdict: 'valid' | 'invalid' }
   | { type: 'leveled_up'; creatorId: string; levelsGained: number }
   | { type: 'proof_late'; creatorId: string; daysLate: number; alreadyPenalized: number }
+  | { type: 'referral_converted'; creatorId: string }
   // sponsor events
   | { type: 'refund_ruled'; sponsorId: string; verdict: 'valid' | 'invalid'; hadAcceptedApplications: boolean }
   | { type: 'campaign_fully_paid'; sponsorId: string }
@@ -119,6 +123,8 @@ export function reputationDelta(event: ReputationEvent): number {
     }
     case 'proof_late':
       return -(latePenaltyOwed(event.daysLate) - event.alreadyPenalized)
+    case 'referral_converted':
+      return REFERRAL_BONUS
   }
 }
 
@@ -129,6 +135,7 @@ function eventSubject(event: ReputationEvent): { table: 'creator' | 'sponsor'; i
     case 'opt_out_ruled':
     case 'leveled_up':
     case 'proof_late':
+    case 'referral_converted':
       return { table: 'creator', id: event.creatorId }
     case 'refund_ruled':
     case 'campaign_fully_paid':
@@ -208,4 +215,33 @@ export function earliestStartDate(tier: ReputationTier, paymentConfirmedAt: Date
   const d = new Date(paymentConfirmedAt)
   d.setDate(d.getDate() + cooldown)
   return d
+}
+
+/**
+ * Checks whether a referred creator has just crossed the "fully set up" bar and,
+ * if so, grants their referrer the one-time referral reputation bonus.
+ *
+ * Safe to call repeatedly (e.g. on every dashboard load) — the `reward_granted_at
+ * IS NULL` claim in the update is atomic, so concurrent calls can't double-grant.
+ */
+export async function maybeGrantReferralReward(creatorId: string): Promise<void> {
+  const referral = await prisma.creator_referrals.findFirst({
+    where: { referred_id: creatorId, reward_granted_at: null },
+    select: { id: true, referrer_id: true },
+  })
+  if (!referral) return
+
+  const creator = await prisma.content_creators.findUnique({
+    where: { id: creatorId },
+    select: { platform: true, twitch_username: true, youtube_channel_name: true, stripe_onboarding_complete: true },
+  })
+  if (!creator || !isCreatorFullySetUp(creator)) return
+
+  const claimed = await prisma.creator_referrals.updateMany({
+    where: { id: referral.id, reward_granted_at: null },
+    data: { reward_granted_at: new Date() },
+  })
+  if (claimed.count !== 1) return // another concurrent call already claimed it
+
+  await recordReputationEvent({ type: 'referral_converted', creatorId: referral.referrer_id })
 }

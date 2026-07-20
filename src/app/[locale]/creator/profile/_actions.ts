@@ -2,6 +2,7 @@
 
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
+import { randomBytes } from 'crypto'
 import { revalidateCreatorSidebarCache } from '@/lib/creator-sidebar-cache'
 import type { CreatorProfile } from '@/lib/creator-profile'
 import { prisma } from '@/lib/prisma'
@@ -472,4 +473,44 @@ export async function deleteCreatorAccount(): Promise<{ error?: string; success?
   }
 
   return { success: true }
+}
+
+/** 8-character alphanumeric code generator, matching the pattern used for
+ *  campaign tracking short codes (see creator/deal-room/_actions.ts). */
+function generateReferralCode(): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+  const bytes = randomBytes(8)
+  return Array.from(bytes)
+    .map((b) => chars[b % chars.length])
+    .join('')
+    .slice(0, 8)
+}
+
+/**
+ * Returns the authenticated creator's affiliate `referral_code`, generating
+ * and persisting one lazily on first request (collision-checked via a
+ * uniqueness while-loop, same approach as tracking short codes).
+ */
+export async function getOrCreateReferralCode(): Promise<string | null> {
+  const { userId } = await auth()
+  if (!userId) return null
+
+  const creator = await prisma.content_creators.findUnique({
+    where: { clerk_user_id: userId },
+    select: { id: true, referral_code: true },
+  })
+  if (!creator) return null
+  if (creator.referral_code) return creator.referral_code
+
+  let code = generateReferralCode()
+  while (await prisma.content_creators.findUnique({ where: { referral_code: code } })) {
+    code = generateReferralCode()
+  }
+
+  const updated = await prisma.content_creators.update({
+    where: { id: creator.id },
+    data: { referral_code: code },
+    select: { referral_code: true },
+  })
+  return updated.referral_code
 }

@@ -74,9 +74,12 @@ model content_creators {
   creator_size               String?
   stripe_connect_id          String?
   stripe_onboarding_complete Boolean                 @default(false)
+  referral_code              String?                 @unique
   applications               campaign_applications[]
   opt_outs                   creator_opt_outs[]
   missions                   creator_missions[]
+  referrals_made             creator_referrals[]     @relation("ReferralsMade")
+  referred_by                creator_referrals?      @relation("ReferredBy")
 
   @@index([average_vod_views])
   @@index([content_type], type: Gin)
@@ -90,6 +93,21 @@ model content_creators {
   @@index([steam_id])
   @@index([youtube_channel_id])
   @@index([youtube_subscribers])
+}
+
+/// Tracks which creator referred which other creator via an affiliate link,
+/// and whether the referrer's reputation reward has been granted yet.
+model creator_referrals {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  referrer_id       String    @db.Uuid
+  referred_id       String    @unique @db.Uuid
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  reward_granted_at DateTime? @db.Timestamptz(6)
+
+  referrer content_creators @relation("ReferralsMade", fields: [referrer_id], references: [id])
+  referred content_creators @relation("ReferredBy", fields: [referred_id], references: [id])
+
+  @@index([referrer_id])
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -144,32 +162,32 @@ model admins {
 }
 
 model campaigns {
-  id                          String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sponsor_id                  String                  @db.Uuid
+  id                          String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sponsor_id                  String                       @db.Uuid
   title                       String
   description                 String?
-  status                      String                  @default("draft")
+  status                      String                       @default("draft")
   budget                      Int?
   platform                    String[]
   content_type                String[]
   game_category               String[]
   min_avg_viewers             Int?
   min_subs_followers          Int?
-  min_engagement_rate         Decimal?                @db.Decimal(5, 2)
+  min_engagement_rate         Decimal?                     @db.Decimal(5, 2)
   creative_package            String[]
-  created_at                  DateTime?               @default(now()) @db.Timestamptz(6)
-  updated_at                  DateTime?               @default(now()) @db.Timestamptz(6)
+  created_at                  DateTime?                    @default(now()) @db.Timestamptz(6)
+  updated_at                  DateTime?                    @default(now()) @db.Timestamptz(6)
   min_audience_age            Int?
   max_audience_age            Int?
   required_audience_locations String[]
-  required_audience_regions   String[]                @default([])
-  campaign_code               String?                 @unique
+  required_audience_regions   String[]                     @default([])
+  campaign_code               String?                      @unique
   brand_name                  String?
   objective                   String?
   campaign_type               String?
   payment_model               String?
-  start_date                  DateTime?               @db.Timestamptz(6)
-  end_date                    DateTime?               @db.Timestamptz(6)
+  start_date                  DateTime?                    @db.Timestamptz(6)
+  end_date                    DateTime?                    @db.Timestamptz(6)
   product_name                String?
   product_type                String?
   target_genders              String[]
@@ -185,23 +203,23 @@ model campaigns {
   num_posts                   Int?
   num_short_videos            Int?
   content_guidelines          String?
-  must_include_link           Boolean                 @default(false)
-  must_include_promo_code     Boolean                 @default(false)
-  must_tag_brand              Boolean                 @default(false)
+  must_include_link           Boolean                      @default(false)
+  must_include_promo_code     Boolean                      @default(false)
+  must_tag_brand              Boolean                      @default(false)
   landing_page_url            String?
   tracking_type               String?
   conversion_goal             String?
   legal_age_restriction       String?
-  is_direct_invite            Boolean                 @default(false)
+  is_direct_invite            Boolean                      @default(false)
   num_youtube_shorts          Int?
   num_twitch_clips            Int?
   stripe_authorized_amount    Int?
   stripe_payment_intent_id    String?
   stripe_charge_id            String?
-  preferred_payment_method    String?                 @default("card")
-  payment_confirmed_at        DateTime?               @db.Timestamptz(6)
+  preferred_payment_method    String?                      @default("card")
+  payment_confirmed_at        DateTime?                    @db.Timestamptz(6)
   applications                campaign_applications[]
-  sponsor                     sponsors                @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
+  sponsor                     sponsors                     @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
   disputes                    disputes[]
   refund_requests             refund_requests[]
   sanctioned_launch_reqs      sanctioned_launch_requests[]
@@ -391,18 +409,18 @@ model SurveyResponse {
 }
 
 model refund_requests {
-  id                       String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  campaign_id              String    @db.Uuid
-  sponsor_id               String    @db.Uuid
-  reason_category          String
-  reason_detail            String?
-  had_accepted_applications Boolean  @default(false)
-  verdict                  String    @default("pending")
-  admin_notes              String?
-  created_at               DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
-  campaign                 campaigns @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
-  sponsor                  sponsors  @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
+  id                        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaign_id               String    @db.Uuid
+  sponsor_id                String    @db.Uuid
+  reason_category           String
+  reason_detail             String?
+  had_accepted_applications Boolean   @default(false)
+  verdict                   String    @default("pending")
+  admin_notes               String?
+  created_at                DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime  @updatedAt @db.Timestamptz(6)
+  campaign                  campaigns @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
+  sponsor                   sponsors  @relation(fields: [sponsor_id], references: [id], onDelete: Cascade)
 
   @@index([verdict])
   @@index([sponsor_id])
