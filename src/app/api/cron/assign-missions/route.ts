@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma'
 import { assignWeeklyMissions } from '@/lib/mission-assignment'
 import { assertCronRequest } from '@/lib/cron-auth'
 
+// Fans out assignWeeklyMissions across all creators; scales with creator count.
+export const maxDuration = 300
+
 export async function GET(req: Request) {
   const denied = assertCronRequest(req)
   if (denied) return denied

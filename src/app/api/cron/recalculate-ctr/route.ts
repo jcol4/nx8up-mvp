@@ -4,6 +4,8 @@ import { computeAndStoreSubmissionCtr, recomputeCreatorAggregateCtr } from '@/li
 import { assertCronRequest } from '@/lib/cron-auth'
 
 export const dynamic = 'force-dynamic'
+// Sequential YouTube/Twitch API calls per submission can run long; give the loop headroom.
+export const maxDuration = 300
 
 /**
  * GET /api/cron/recalculate-ctr
