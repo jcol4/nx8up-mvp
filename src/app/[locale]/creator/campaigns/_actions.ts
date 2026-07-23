@@ -43,7 +43,7 @@
 
 import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, unstable_cache } from 'next/cache'
 import { matchCreatorToCampaign } from '@/lib/matching'
 import { missingLinkedPlatforms } from '@/lib/platforms'
 import { notify } from '@/lib/notification-events'
@@ -106,6 +106,39 @@ export async function getOpenCampaigns(limit = 10) {
 }
 
 /**
+ * Fetches the live, open (non-direct-invite) campaign list, newest first.
+ *
+ * The raw list is identical for every creator — personalization happens later
+ * during scoring — so it is cached across requests/creators with a short TTL.
+ * This keeps pagination and tab switches from re-running the 100-row scan (with
+ * its per-row application-count subquery) on every navigation.
+ *
+ * `min_engagement_rate` (a Prisma Decimal) is normalized to a plain number
+ * before caching so the payload survives the data-cache serializer; the value
+ * is still accepted structurally by `matchCreatorToCampaign`.
+ */
+const getLiveOpenCampaignsCached = (limit: number) =>
+  unstable_cache(
+    async () => {
+      const campaigns = await prisma.campaigns.findMany({
+        where: { status: 'live', is_direct_invite: false },
+        orderBy: { created_at: 'desc' },
+        take: limit,
+        include: {
+          sponsor: { select: { company_name: true, clerk_user_id: true } },
+          _count: { select: { applications: true } },
+        },
+      })
+      return campaigns.map((c) => ({
+        ...c,
+        min_engagement_rate: c.min_engagement_rate == null ? null : c.min_engagement_rate.toNumber(),
+      }))
+    },
+    ['open-campaigns-eligibility', String(limit)],
+    { revalidate: 60, tags: ['open-campaigns'] },
+  )()
+
+/**
  * Fetches live campaigns and scores them against the authenticated creator's
  * profile using `matchCreatorToCampaign`. Filters out campaigns where the
  * score is below 75 or the legal age restriction is not met by the creator's
@@ -118,15 +151,7 @@ export async function getOpenCampaignsWithEligibility(limit = 50) {
   const { userId } = await auth()
 
   const [campaigns, creator] = await Promise.all([
-    prisma.campaigns.findMany({
-      where: { status: 'live', is_direct_invite: false },
-      orderBy: { created_at: 'desc' },
-      take: limit,
-      include: {
-        sponsor: { select: { company_name: true, clerk_user_id: true } },
-        _count: { select: { applications: true } },
-      },
-    }),
+    getLiveOpenCampaignsCached(limit),
     userId
       ? prisma.content_creators.findUnique({
           where: { clerk_user_id: userId },
@@ -240,6 +265,41 @@ export async function getActiveCampaigns({ all = false }: { all?: boolean } = {}
   })
 
   return apps
+}
+
+/**
+ * Returns the authenticated creator's pending applications (status "pending"),
+ * newest first, with the campaign + sponsor fields needed to render a card.
+ */
+export async function getPendingApplications() {
+  const { userId } = await auth()
+  if (!userId) return []
+
+  const creator = await prisma.content_creators.findUnique({
+    where: { clerk_user_id: userId },
+    select: { id: true },
+  })
+  if (!creator) return []
+
+  return prisma.campaign_applications.findMany({
+    where: { creator_id: creator.id, status: 'pending' },
+    orderBy: { submitted_at: 'desc' },
+    include: {
+      campaign: {
+        select: {
+          id: true,
+          title: true,
+          platform: true,
+          start_date: true,
+          end_date: true,
+          budget: true,
+          creator_count: true,
+          brand_name: true,
+          sponsor: { select: { company_name: true, clerk_user_id: true } },
+        },
+      },
+    },
+  })
 }
 
 export async function getCampaignById(id: string) {

@@ -432,6 +432,7 @@
       "tabOpen": "Ouvertes",
       "tabActive": "Actives",
       "tabPending": "En attente",
+      "tabInvited": "Invité",
       "tabPayoutDue": "Versement dû",
       "emptyCampaigns": "Aucune {tab} pour l'instant.",
       "viewAvailable": "Voir les campagnes disponibles",
@@ -489,7 +490,9 @@
       "dayDetailLog": "JOURNAL_DÉTAIL_JOUR",
       "deleteNote": "Supprimer la note",
       "markNoteOpen": "Marquer la note comme ouverte",
-      "markNoteDone": "Marquer la note comme terminée"
+      "markNoteDone": "Marquer la note comme terminée",
+      "tabLabelInvited": "campagnes sur invitation",
+      "tabDescInvited": "Campagnes auxquelles vous avez été directement invité."
     },
     "campaigns": {
       "heading": "Campagnes",
@@ -498,6 +501,7 @@
       "tabOpen": "Ouvertes",
       "tabInvites": "Invitations",
       "tabActive": "Actives",
+      "tabPending": "En attente",
       "openCampaignsHeading": "Campagnes ouvertes",
       "noPayoutHeading": "Configurez d'abord votre compte de versement",
       "noPayoutDesc": "Vous devez connecter un compte de versement Stripe avant de pouvoir parcourir les campagnes ou y postuler.",
@@ -794,6 +798,7 @@
       "payoutHeading": "Compte de versement requis",
       "payoutIncompleteDesc": "Votre configuration de versement est incomplète. Terminez la connexion pour recevoir des paiements.",
       "payoutConnectDesc": "Connectez un compte bancaire pour recevoir des paiements des sponsors.",
+      "payoutWhyStripe": "nx8up utilise Stripe pour traiter les paiements en toute sécurité. C'est obligatoire pour que les sponsors puissent vous payer directement une fois vos livrables approuvés.",
       "payoutRedirecting": "Redirection…",
       "payoutCompleteSetup": "Terminer la configuration",
       "payoutConnect": "Connecter le versement",

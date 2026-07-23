@@ -69,6 +69,9 @@ type Props = {
     end_date: Date | string | null
     sponsor: { company_name: string | null }
   }[]
+  invitedCampaigns: Application[]
+  pendingCampaigns: Application[]
+  activeCampaigns: Application[]
   creatorStats: {
     twitchFollowers: number | null
     averageVodViews: number | null
@@ -90,7 +93,7 @@ type Props = {
 }
 
 type CalendarView = 'month' | 'week'
-type CampaignTab = 'active' | 'open' | 'pending' | 'payout'
+type CampaignTab = 'open' | 'invited' | 'pending' | 'active'
 type CalendarEvent = {
   label: string
   color: 'primary' | 'secondary' | 'neutral'
@@ -191,6 +194,9 @@ export default function CreatorCommandCenter({
   xpForNext,
   applications,
   openCampaigns,
+  invitedCampaigns,
+  pendingCampaigns,
+  activeCampaigns,
   creatorStats,
   missions,
   statsUnavailable = false,
@@ -214,17 +220,13 @@ export default function CreatorCommandCenter({
   const [featuredLesson] = useState(() => LESSONS[Math.floor(Math.random() * LESSONS.length)])
   const displayedMissions = missions
 
-  const accepted = applications.filter((a) => a.status === 'accepted').slice(0, 3)
   const open = openCampaigns.slice(0, 3)
-  const payoutCandidates = applications.filter((a) =>
-    ['payout_due', 'paid', 'completed', 'approved'].includes(a.status)
-  )
   const nonOpenCampaignItems: Application[] =
-    campaignTab === 'active'
-      ? accepted
+    campaignTab === 'invited'
+      ? invitedCampaigns
       : campaignTab === 'pending'
-        ? applications.filter((a) => a.status === 'pending')
-        : payoutCandidates
+        ? pendingCampaigns
+        : activeCampaigns
   const tabLabel =
     campaignTab === 'active'
       ? t('tabLabelActive')
@@ -232,7 +234,7 @@ export default function CreatorCommandCenter({
         ? t('tabLabelOpen')
         : campaignTab === 'pending'
           ? t('tabLabelPending')
-          : t('tabLabelPayout')
+          : t('tabLabelInvited')
   const tabDescription =
     campaignTab === 'open'
       ? t('tabDescOpen')
@@ -240,7 +242,7 @@ export default function CreatorCommandCenter({
         ? t('tabDescActive')
         : campaignTab === 'pending'
           ? t('tabDescPending')
-          : t('tabDescPayout')
+          : t('tabDescInvited')
   const displayedCampaigns: Array<{
     id: string
     campaignId: string
@@ -257,7 +259,7 @@ export default function CreatorCommandCenter({
       budget: campaign.budget,
       endDate: campaign.end_date,
     }))
-    : nonOpenCampaignItems.map((app) => ({
+    : nonOpenCampaignItems.slice(0, 3).map((app) => ({
       id: app.id,
       campaignId: app.campaign.id,
       title: app.campaign.title,
@@ -594,13 +596,13 @@ export default function CreatorCommandCenter({
                     </button>
                     <button
                       type="button"
-                      onClick={() => setCampaignTab('active')}
-                      className={`h-9 rounded-lg px-4 text-nx-10 font-bold uppercase tracking-widest transition ${campaignTab === 'active'
+                      onClick={() => setCampaignTab('invited')}
+                      className={`h-9 rounded-lg px-3 text-nx-10 uppercase tracking-widest transition ${campaignTab === 'invited'
                         ? 'border border-[#99f7ff]/40 bg-[#99f7ff]/10 text-[#99f7ff]'
                         : 'border border-white/10 text-white/90 hover:border-white/20 hover:text-white'
                         }`}
                     >
-                      {t('tabActive')}
+                      {t('tabInvited')}
                     </button>
                     <button
                       type="button"
@@ -614,13 +616,13 @@ export default function CreatorCommandCenter({
                     </button>
                     <button
                       type="button"
-                      onClick={() => setCampaignTab('payout')}
-                      className={`h-9 rounded-lg px-3 text-nx-10 uppercase tracking-widest transition ${campaignTab === 'payout'
+                      onClick={() => setCampaignTab('active')}
+                      className={`h-9 rounded-lg px-4 text-nx-10 font-bold uppercase tracking-widest transition ${campaignTab === 'active'
                         ? 'border border-[#99f7ff]/40 bg-[#99f7ff]/10 text-[#99f7ff]'
                         : 'border border-white/10 text-white/90 hover:border-white/20 hover:text-white'
                         }`}
                     >
-                      {t('tabPayoutDue')}
+                      {t('tabActive')}
                     </button>
                   </div>
                   <p className="mb-4 text-xs font-medium text-white/90">{tabDescription}</p>
@@ -670,8 +672,10 @@ export default function CreatorCommandCenter({
                       campaignTab === 'active'
                         ? '/creator/campaigns?tab=active'
                         : campaignTab === 'pending'
-                          ? '/creator/campaigns/pending'
-                          : '/creator/campaigns'
+                          ? '/creator/campaigns?tab=pending'
+                          : campaignTab === 'invited'
+                            ? '/creator/campaigns?tab=invites'
+                            : '/creator/campaigns'
                     }
                     className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-xl border border-white/25 bg-white/[0.03] text-sm font-semibold text-white/90 transition hover:border-[#99f7ff]/35 hover:bg-[#99f7ff]/10 hover:text-white"
                   >

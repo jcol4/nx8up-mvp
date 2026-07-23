@@ -1,10 +1,11 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect, notFound } from 'next/navigation'
 import { getTranslations, getFormatter } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import { prisma } from '@/lib/prisma'
 import { BackLink } from '@/components/shared'
 import SponsorHeader from '../../../_components/dashboard/SponsorHeader'
+import { getRankName } from '@/lib/creator-xp'
 
 const STATUS_STYLES: Record<string, { badge: string; border: string }> = {
   pending: {
@@ -32,6 +33,14 @@ const STATUS_KEY: Record<string, string> = {
   rejected: 'statusRejected',
 }
 
+const TIER_BADGE: Record<string, string> = {
+  verified: 'bg-[#22c55e]/15 border-[#22c55e]/30 text-[#4ade80]',
+  trusted: 'bg-[#99f7ff]/12 border-[#99f7ff]/30 text-[#99f7ff]',
+  restricted: 'bg-orange-500/15 border-orange-500/30 text-orange-400',
+  sanctioned: 'bg-red-500/15 border-red-500/30 text-red-400',
+  neutral: 'bg-white/10 border-white/20 text-[#c8d4e4]',
+}
+
 function StatCell({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-[7rem]">
@@ -50,6 +59,7 @@ export default async function CampaignApplicationsPage({ params }: Props) {
   if (!userId) redirect('/sign-in')
 
   const t = await getTranslations('sponsor.applications')
+  const tEnum = await getTranslations('enums')
   const format = await getFormatter()
 
   const sponsor = await prisma.sponsors.findUnique({ where: { clerk_user_id: userId } })
@@ -75,6 +85,26 @@ export default async function CampaignApplicationsPage({ params }: Props) {
   }
 
   const applicantCount = campaign.applications.length
+
+  // XP level lives in Clerk publicMetadata, not the DB — batch every applicant's
+  // creator into one getUserList call so the list doesn't fan out to N requests.
+  const clerkUserIds = [
+    ...new Set(campaign.applications.map((a) => a.creator.clerk_user_id).filter(Boolean)),
+  ]
+  const creatorLevels: Record<string, number> = {}
+  if (clerkUserIds.length) {
+    try {
+      const { data: users } = await (await clerkClient()).users.getUserList({
+        userId: clerkUserIds,
+        limit: clerkUserIds.length,
+      })
+      for (const u of users) {
+        creatorLevels[u.id] = Math.max(1, Number((u.publicMetadata || {}).creatorLevel) || 1)
+      }
+    } catch {
+      // Clerk unavailable — fall back to no level badge rather than failing the page.
+    }
+  }
 
   return (
     <>
@@ -126,6 +156,7 @@ export default async function CampaignApplicationsPage({ params }: Props) {
                   t('creatorFallback')
                 const statusKey = app.status in STATUS_STYLES ? app.status : 'rejected'
                 const status = STATUS_STYLES[statusKey]
+                const creatorLevel = creatorLevels[app.creator.clerk_user_id] ?? 1
 
                 const stats: { label: string; value: string }[] = []
                 if (app.creator.subs_followers != null) {
@@ -171,6 +202,20 @@ export default async function CampaignApplicationsPage({ params }: Props) {
                         {app.creator.email && (
                           <p className="mt-0.5 text-sm cr-text-muted">{app.creator.email}</p>
                         )}
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          <span className="rounded-full border border-[#99f7ff]/30 bg-[#99f7ff]/10 px-2.5 py-1 text-xs font-medium text-[#99f7ff]">
+                            Lv. {creatorLevel} · {getRankName(creatorLevel)}
+                          </span>
+                          {app.creator.reputation_tier && (
+                            <span
+                              className={`rounded-full border px-2.5 py-1 text-xs font-medium ${TIER_BADGE[app.creator.reputation_tier] ?? TIER_BADGE.neutral}`}
+                            >
+                              {tEnum.has(`tier.${app.creator.reputation_tier}`)
+                                ? tEnum(`tier.${app.creator.reputation_tier}`)
+                                : app.creator.reputation_tier}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="text-left sm:text-right">
                         <span

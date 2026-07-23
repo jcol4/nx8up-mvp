@@ -37,7 +37,7 @@ import CopyButton from './CopyButton'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import CreatorShell from '@/components/creator/CreatorShell'
 import NxHudCard from '@/components/nx-shell/NxHudCard'
-import { getClerkImageUrls } from '@/lib/get-clerk-images'
+import { getClerkImageUrls, clerkAvatarUrl } from '@/lib/get-clerk-images'
 
 export default async function CreatorDealRoomDetailPage({
   params,
@@ -110,7 +110,7 @@ export default async function CreatorDealRoomDetailPage({
             <div className="mt-1 flex items-center gap-3">
               {sponsorImageUrl && (
                 <Image
-                  src={sponsorImageUrl}
+                  src={clerkAvatarUrl(sponsorImageUrl, 112)}
                   alt={c.sponsor.company_name ?? 'Sponsor'}
                   width={56}
                   height={56}

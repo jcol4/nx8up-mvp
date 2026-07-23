@@ -17,6 +17,12 @@
  */
 import { auth } from "@clerk/nextjs/server";
 import { getCreatorCalendarTasks, getCreatorXp, getCreatorMissions } from "./_actions";
+import {
+  getOpenCampaignsWithEligibility,
+  getMyInvitations,
+  getPendingApplications,
+  getActiveCampaigns,
+} from "./campaigns/_actions";
 import { getUserDisplayInfo } from "@/lib/get-user-display-info";
 import { CreatorCommandCenter } from "./_components";
 import { prisma } from "@/lib/prisma";
@@ -59,6 +65,51 @@ export default async function CreatorDashboardPage() {
     end_date: Date | null
     sponsor: { company_name: string | null }
   }[] = []
+  // Minimal, fully-serializable shape for the (client) dashboard panel. The raw
+  // action results can contain Prisma Decimal fields (e.g. min_engagement_rate on
+  // the full campaign from getMyInvitations), which cannot cross the
+  // server→client boundary, so we project down to plain values here.
+  type PanelApplication = {
+    id: string
+    status: string
+    submitted_at: Date | null
+    campaign: {
+      id: string
+      title: string
+      budget: number | null
+      start_date: Date | null
+      end_date: Date | null
+      sponsor: { company_name: string | null }
+    }
+  }
+  const toPanelApplication = (a: {
+    id: string
+    status: string
+    submitted_at: Date | null
+    campaign: {
+      id: string
+      title: string
+      budget: number | null
+      start_date: Date | null
+      end_date: Date | null
+      sponsor: { company_name: string | null }
+    }
+  }): PanelApplication => ({
+    id: a.id,
+    status: a.status,
+    submitted_at: a.submitted_at,
+    campaign: {
+      id: a.campaign.id,
+      title: a.campaign.title,
+      budget: a.campaign.budget,
+      start_date: a.campaign.start_date,
+      end_date: a.campaign.end_date,
+      sponsor: { company_name: a.campaign.sponsor.company_name },
+    },
+  })
+  let invitedApplications: PanelApplication[] = []
+  let pendingApplications: PanelApplication[] = []
+  let activeApplications: PanelApplication[] = []
   let creatorStats: {
     subs_followers: number | null
     average_vod_views: number | null
@@ -122,23 +173,41 @@ export default async function CreatorDashboardPage() {
         })
       }
 
-      openCampaigns = await prisma.campaigns.findMany({
-        where: { status: 'live', is_direct_invite: false },
-        select: {
-          id: true,
-          title: true,
-          budget: true,
-          end_date: true,
-          sponsor: { select: { company_name: true } },
-        },
-        orderBy: { created_at: 'desc' },
-        take: 3,
-      })
+      // The dashboard Campaigns panel mirrors the /creator/campaigns tabs
+      // exactly by pulling from the same server actions, so "Open", "Invited",
+      // "Pending", and "Active" show the identical, creator-relevant sets.
+      const [eligibleOpen, invited, pending, active] = await Promise.all([
+        getOpenCampaignsWithEligibility(50),
+        getMyInvitations(),
+        getPendingApplications(),
+        getActiveCampaigns({ all: true }),
+      ])
+
+      // Open campaigns: only campaigns this creator is actually eligible for
+      // (score-filtered + legal-age gated), ranked by match score.
+      openCampaigns = eligibleOpen
+        .filter((e) => e.eligible)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3)
+        .map((e) => ({
+          id: e.campaign.id,
+          title: e.campaign.title,
+          budget: e.campaign.budget,
+          end_date: e.campaign.end_date,
+          sponsor: { company_name: e.campaign.sponsor.company_name },
+        }))
+
+      invitedApplications = invited.map(toPanelApplication)
+      pendingApplications = pending.map(toPanelApplication)
+      activeApplications = active.map(toPanelApplication)
     } catch (error) {
       console.error('Creator dashboard DB query failed:', error)
       // Graceful fallback: still render dashboard with empty applications/stats.
       campaignApplications = []
       openCampaigns = []
+      invitedApplications = []
+      pendingApplications = []
+      activeApplications = []
       creatorStats = null
       statsUnavailable = true
     }
@@ -154,6 +223,9 @@ export default async function CreatorDashboardPage() {
       xpForNext={xpState.xpForNext}
       applications={campaignApplications}
       openCampaigns={openCampaigns}
+      invitedCampaigns={invitedApplications}
+      pendingCampaigns={pendingApplications}
+      activeCampaigns={activeApplications}
       creatorStats={{
         twitchFollowers: creatorStats?.subs_followers ?? null,
         averageVodViews: creatorStats?.average_vod_views ?? null,

@@ -1,6 +1,7 @@
 import { auth, clerkClient } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { clerkAvatarUrl } from '@/lib/get-clerk-images'
 
 export const metadata = { title: 'Admin Profile — nx8up Admin' }
 
@@ -45,7 +46,7 @@ export default async function AdminProfilePage() {
       <div className={`${themedCardClass} p-6 flex items-start gap-5`}>
         {user.imageUrl && (
           <img
-            src={user.imageUrl}
+            src={clerkAvatarUrl(user.imageUrl, 128)}
             alt={displayName ?? 'Admin'}
             className="w-16 h-16 rounded-full border border-white/10 shrink-0 object-cover"
           />

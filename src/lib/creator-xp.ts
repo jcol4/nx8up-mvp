@@ -19,13 +19,13 @@ export function getXpForNextLevel(level: number): number {
 
 /** Display name for each rank tier. Capped at level 7; levels above 7 show "Rank N". */
 const RANK_NAMES: Record<number, string> = {
-  1: 'Starter',
+  1: 'Rookie',
   2: 'Rising',
-  3: 'Setton',
-  4: 'Reliable',
-  5: 'Pro',
-  6: 'Elite',
-  7: 'Champion',
+  3: 'Breakout',
+  4: 'Headliner',
+  5: 'Star',
+  6: 'Icon',
+  7: 'Legend',
 }
 
 /** Returns the rank display name for the given level. */

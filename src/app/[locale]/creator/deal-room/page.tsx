@@ -22,7 +22,7 @@ import { Link } from '@/i18n/navigation'
 import { getMyDealRooms } from './_actions'
 import { calcFeeBreakdown } from '@/lib/constants'
 import CreatorShell from '@/components/creator/CreatorShell'
-import { getClerkImageUrls } from '@/lib/get-clerk-images'
+import { getClerkImageUrls, clerkAvatarUrl } from '@/lib/get-clerk-images'
 
 const SUBMISSION_STATUS_CLASS: Record<string, string> = {
   pending: 'border border-white/12 bg-white/8 cr-text-muted',
@@ -102,7 +102,7 @@ export default async function CreatorDealRoomPage() {
                         const imgSrc = sponsor?.clerk_user_id ? sponsorImages[sponsor.clerk_user_id] : undefined
                         return imgSrc ? (
                           <Image
-                            src={imgSrc}
+                            src={clerkAvatarUrl(imgSrc, 80)}
                             alt={sponsor?.company_name ?? 'Sponsor'}
                             width={40}
                             height={40}

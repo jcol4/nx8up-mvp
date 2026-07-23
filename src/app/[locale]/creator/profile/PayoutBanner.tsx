@@ -45,6 +45,9 @@ export default function PayoutBanner({ hasAccount }: { hasAccount: boolean }) {
         <p className="mt-0.5 text-xs cr-text-muted">
           {hasAccount ? t('payoutIncompleteDesc') : t('payoutConnectDesc')}
         </p>
+        {!hasAccount && (
+          <p className="mt-1 text-xs cr-text-muted">{t('payoutWhyStripe')}</p>
+        )}
         {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
       </div>
       <button

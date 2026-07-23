@@ -432,6 +432,7 @@
       "tabOpen": "Abiertas",
       "tabActive": "Activas",
       "tabPending": "Pendientes",
+      "tabInvited": "Invitado",
       "tabPayoutDue": "Pago pendiente",
       "emptyCampaigns": "Aún no hay {tab}.",
       "viewAvailable": "Ver campañas disponibles",
@@ -489,7 +490,9 @@
       "dayDetailLog": "DAY_DETAIL_LOG",
       "deleteNote": "Eliminar nota",
       "markNoteOpen": "Marcar nota como abierta",
-      "markNoteDone": "Marcar nota como hecha"
+      "markNoteDone": "Marcar nota como hecha",
+      "tabLabelInvited": "campañas con invitación",
+      "tabDescInvited": "Campañas a las que te invitaron directamente."
     },
     "campaigns": {
       "heading": "Campañas",
@@ -498,6 +501,7 @@
       "tabOpen": "Abiertas",
       "tabInvites": "Invitaciones",
       "tabActive": "Activas",
+      "tabPending": "Pendientes",
       "openCampaignsHeading": "Campañas abiertas",
       "noPayoutHeading": "Configura tu cuenta de pagos primero",
       "noPayoutDesc": "Debes conectar una cuenta de pagos de Stripe antes de poder explorar o postularte a campañas.",
@@ -794,6 +798,7 @@
       "payoutHeading": "Se requiere una cuenta de pagos",
       "payoutIncompleteDesc": "La configuración de tu cuenta de pagos está incompleta. Termina de conectarla para recibir pagos.",
       "payoutConnectDesc": "Conecta una cuenta bancaria para recibir pagos de los patrocinadores.",
+      "payoutWhyStripe": "nx8up usa Stripe para procesar los pagos de forma segura. Es obligatorio para que los patrocinadores puedan pagarte directamente una vez que tus entregables sean aprobados.",
       "payoutRedirecting": "Redirigiendo…",
       "payoutCompleteSetup": "Completar configuración",
       "payoutConnect": "Conectar pagos",

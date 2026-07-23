@@ -432,6 +432,7 @@
       "tabOpen": "Open",
       "tabActive": "Active",
       "tabPending": "Pending",
+      "tabInvited": "Invited",
       "tabPayoutDue": "Payout due",
       "emptyCampaigns": "No {tab} yet.",
       "viewAvailable": "View available campaigns",
@@ -489,7 +490,9 @@
       "dayDetailLog": "DAY_DETAIL_LOG",
       "deleteNote": "Delete note",
       "markNoteOpen": "Mark note as open",
-      "markNoteDone": "Mark note as done"
+      "markNoteDone": "Mark note as done",
+      "tabLabelInvited": "invited campaigns",
+      "tabDescInvited": "Campaigns you have been directly invited to."
     },
     "campaigns": {
       "heading": "Campaigns",
@@ -498,6 +501,7 @@
       "tabOpen": "Open",
       "tabInvites": "Invites",
       "tabActive": "Active",
+      "tabPending": "Pending",
       "openCampaignsHeading": "Open Campaigns",
       "noPayoutHeading": "Set up your payout account first",
       "noPayoutDesc": "You need to connect a Stripe payout account before you can browse or apply to campaigns.",
@@ -794,6 +798,7 @@
       "payoutHeading": "Payout account required",
       "payoutIncompleteDesc": "Your payout setup is incomplete. Finish connecting to receive payments.",
       "payoutConnectDesc": "Connect a bank account to receive payments from sponsors.",
+      "payoutWhyStripe": "nx8up uses Stripe to securely process payouts. It's required so sponsors can pay you directly and safely once your deliverables are approved.",
       "payoutRedirecting": "Redirecting…",
       "payoutCompleteSetup": "Complete setup",
       "payoutConnect": "Connect payout",

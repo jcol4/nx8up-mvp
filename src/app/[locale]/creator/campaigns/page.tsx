@@ -73,7 +73,8 @@ export default async function CreatorCampaignsPage({
   }
 
   const { tab } = await searchParams
-  const activeTab = tab === 'active' ? 'active' : tab === 'invites' ? 'invites' : 'open'
+  const activeTab =
+    tab === 'active' ? 'active' : tab === 'invites' ? 'invites' : tab === 'pending' ? 'pending' : 'open'
 
   return (
     <CreatorShell>
@@ -104,6 +105,16 @@ export default async function CreatorCampaignsPage({
             }`}
           >
             {t('tabInvites')}
+          </Link>
+          <Link
+            href="/creator/campaigns?tab=pending"
+            className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+              activeTab === 'pending'
+                ? 'text-[#eab308] border-b-2 border-[#eab308] -mb-px'
+                : 'cr-text-muted hover:text-[#e8f4ff]'
+            }`}
+          >
+            {t('tabPending')}
           </Link>
           <Link
             href="/creator/campaigns?tab=active"

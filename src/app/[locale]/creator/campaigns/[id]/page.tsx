@@ -40,7 +40,7 @@ import Image from 'next/image'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import CreatorShell from '@/components/creator/CreatorShell'
 import NxHudCard from '@/components/nx-shell/NxHudCard'
-import { getClerkImageUrls } from '@/lib/get-clerk-images'
+import { getClerkImageUrls, clerkAvatarUrl } from '@/lib/get-clerk-images'
 import { calcFeeBreakdown } from '@/lib/constants'
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -179,7 +179,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             <div className="flex items-center gap-3 mb-4">
               {sponsorImageUrl && (
                 <Image
-                  src={sponsorImageUrl}
+                  src={clerkAvatarUrl(sponsorImageUrl, 112)}
                   alt={campaign.sponsor.company_name ?? 'Sponsor'}
                   width={56}
                   height={56}

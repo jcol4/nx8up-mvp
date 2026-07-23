@@ -5,13 +5,14 @@ import {
   getOpenCampaignsWithEligibility,
   getActiveCampaigns,
   getMyInvitations,
+  getPendingApplications,
 } from './_actions'
 import { OPEN_CAMPAIGNS_SCAN_LIMIT, CAMPAIGNS_PAGE_SIZE } from './_constants'
 import Panel from '@/components/shared/Panel'
 import InviteResponseButtons from '@/components/creator/InviteResponseButtons'
 import OptOutButton from '@/components/creator/OptOutButton'
 import { calcFeeBreakdown } from '@/lib/constants'
-import { getClerkImageUrls } from '@/lib/get-clerk-images'
+import { getClerkImageUrls, clerkAvatarUrl } from '@/lib/get-clerk-images'
 
 const APPLICATION_STATUS_STYLES: Record<string, string> = {
   accepted: 'border border-green-500/30 bg-green-500/15 text-green-300',
@@ -32,21 +33,29 @@ export default async function CreatorCampaignsList({ searchParams }: Props) {
   const t = await getTranslations('creator.campaigns')
   const format = await getFormatter()
   const { tab, page, filter } = await searchParams
-  const activeTab = tab === 'active' ? 'active' : tab === 'invites' ? 'invites' : 'open'
+  const activeTab =
+    tab === 'active' ? 'active' : tab === 'invites' ? 'invites' : tab === 'pending' ? 'pending' : 'open'
   const showAll = filter === 'all'
   const pageNumber = Number(page)
   const currentPage = Number.isFinite(pageNumber) && pageNumber > 0 ? Math.floor(pageNumber) : 1
   const pageSize = CAMPAIGNS_PAGE_SIZE
 
-  const [allEntries, activeApps, invitations] = await Promise.all([
+  const [allEntries, activeApps, invitations, pendingApps] = await Promise.all([
     activeTab === 'open' ? getOpenCampaignsWithEligibility(OPEN_CAMPAIGNS_SCAN_LIMIT) : Promise.resolve([]),
     activeTab === 'active' ? getActiveCampaigns({ all: showAll }) : Promise.resolve([]),
     activeTab === 'invites' ? getMyInvitations() : Promise.resolve([]),
+    activeTab === 'pending' ? getPendingApplications() : Promise.resolve([]),
   ])
 
   const openEntries = allEntries.filter((e) => e.eligible).sort((a, b) => b.score - a.score)
   const totalEntries =
-    activeTab === 'invites' ? invitations.length : activeTab === 'open' ? openEntries.length : activeApps.length
+    activeTab === 'invites'
+      ? invitations.length
+      : activeTab === 'open'
+        ? openEntries.length
+        : activeTab === 'pending'
+          ? pendingApps.length
+          : activeApps.length
   const totalPages = Math.max(1, Math.ceil(totalEntries / pageSize))
   const safePage = Math.min(currentPage, totalPages)
   const startIndex = (safePage - 1) * pageSize
@@ -56,15 +65,21 @@ export default async function CreatorCampaignsList({ searchParams }: Props) {
   const paginatedInvitations = invitations.slice(startIndex, endIndex)
   const paginatedOpenEntries = openEntries.slice(startIndex, endIndex)
   const paginatedActiveApps = activeApps.slice(startIndex, endIndex)
+  const paginatedPendingApps = pendingApps.slice(startIndex, endIndex)
 
   const sponsorClerkIds = [
     ...paginatedOpenEntries.map((e) => e.campaign.sponsor.clerk_user_id),
     ...paginatedActiveApps.map((a) => a.campaign.sponsor.clerk_user_id),
     ...paginatedInvitations.map((a) => a.campaign.sponsor.clerk_user_id),
+    ...paginatedPendingApps.map((a) => a.campaign.sponsor.clerk_user_id),
   ].filter((id): id is string => !!id)
   const sponsorImages = await getClerkImageUrls(sponsorClerkIds)
 
-  const buildCampaignsHref = (tabValue: 'open' | 'invites' | 'active', nextPage: number, filterValue?: string) => {
+  const buildCampaignsHref = (
+    tabValue: 'open' | 'invites' | 'active' | 'pending',
+    nextPage: number,
+    filterValue?: string,
+  ) => {
     const params = new URLSearchParams()
     if (tabValue !== 'open') params.set('tab', tabValue)
     if (nextPage > 1) params.set('page', String(nextPage))
@@ -80,7 +95,7 @@ export default async function CreatorCampaignsList({ searchParams }: Props) {
     if (!src) return null
     return (
       <Image
-        src={src}
+        src={clerkAvatarUrl(src, 80)}
         alt={name}
         width={40}
         height={40}
@@ -258,6 +273,62 @@ export default async function CreatorCampaignsList({ searchParams }: Props) {
                 </Link>
               </li>
             ))}
+          </ul>
+        )
+      ) : activeTab === 'pending' ? (
+        pendingApps.length === 0 ? (
+          <Panel variant="creator" className={CREATOR_CAMPAIGN_EMPTY_CLASS}>
+            <p className="py-8 text-center text-sm cr-text-muted">{t('emptyPending')}</p>
+          </Panel>
+        ) : (
+          <ul className="space-y-3.5">
+            {paginatedPendingApps.map((app) => {
+              const c = app.campaign
+              return (
+                <li key={app.id}>
+                  <Link
+                    href={`/creator/campaigns/${c.id}`}
+                    className={`group block ${CREATOR_CAMPAIGN_CARD_CLASS} hover:border-[#99f7ff]/35`}
+                    style={{ borderTopWidth: '2px', borderTopColor: '#bffcff' }}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <SponsorAvatar
+                          clerkUserId={c.sponsor.clerk_user_id}
+                          name={c.sponsor.company_name ?? 'Sponsor'}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                            <span className="text-sm font-semibold text-[#e8f4ff] group-hover:text-[#f4fdff]">
+                              {c.title}
+                            </span>
+                            <span className="rounded border border-[#eab308]/30 bg-[#eab308]/12 px-2 py-0.5 text-xs text-[#eab308]">
+                              {t('pendingBadge')}
+                            </span>
+                          </div>
+                          <p className="mt-0.5 text-xs cr-text-muted">
+                            {c.sponsor.company_name ?? c.brand_name ?? 'Sponsor'} · {c.platform.join(', ')}
+                            {c.end_date ? ` · ${t('deadline')} ${format.dateTime(new Date(c.end_date), 'numeric')}` : ''}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        {c.budget != null &&
+                          (() => {
+                            const { creatorPool } = calcFeeBreakdown(c.budget, c.creator_count)
+                            return (
+                              <>
+                                <span className="text-sm font-bold cr-success">${format.number(creatorPool)}</span>
+                                <p className="text-nx-10 cr-text-muted">{t('creatorPool')}</p>
+                              </>
+                            )
+                          })()}
+                      </div>
+                    </div>
+                  </Link>
+                </li>
+              )
+            })}
           </ul>
         )
       ) : (

@@ -432,6 +432,7 @@
       "tabOpen": "Abertas",
       "tabActive": "Ativas",
       "tabPending": "Pendentes",
+      "tabInvited": "Convidado",
       "tabPayoutDue": "Pagamento pendente",
       "emptyCampaigns": "Nenhuma campanha {tab} ainda.",
       "viewAvailable": "Ver campanhas disponíveis",
@@ -489,7 +490,9 @@
       "dayDetailLog": "DAY_DETAIL_LOG",
       "deleteNote": "Excluir nota",
       "markNoteOpen": "Marcar nota como aberta",
-      "markNoteDone": "Marcar nota como concluída"
+      "markNoteDone": "Marcar nota como concluída",
+      "tabLabelInvited": "campanhas com convite",
+      "tabDescInvited": "Campanhas para as quais você foi convidado diretamente."
     },
     "campaigns": {
       "heading": "Campanhas",
@@ -498,6 +501,7 @@
       "tabOpen": "Abertas",
       "tabInvites": "Convites",
       "tabActive": "Ativas",
+      "tabPending": "Pendentes",
       "openCampaignsHeading": "Campanhas Abertas",
       "noPayoutHeading": "Configure sua conta de pagamento primeiro",
       "noPayoutDesc": "Você precisa conectar uma conta Stripe antes de navegar ou se candidatar a campanhas.",
@@ -794,6 +798,7 @@
       "payoutHeading": "Conta de pagamento necessária",
       "payoutIncompleteDesc": "Sua configuração de pagamento está incompleta. Conclua a conexão para receber pagamentos.",
       "payoutConnectDesc": "Conecte uma conta bancária para receber pagamentos de patrocinadores.",
+      "payoutWhyStripe": "A nx8up usa o Stripe para processar pagamentos com segurança. É obrigatório para que os patrocinadores possam pagar você diretamente assim que seus entregáveis forem aprovados.",
       "payoutRedirecting": "Redirecionando…",
       "payoutCompleteSetup": "Concluir configuração",
       "payoutConnect": "Conectar pagamento",
