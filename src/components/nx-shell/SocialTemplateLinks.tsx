@@ -53,7 +53,7 @@ export default function SocialTemplateLinks({ variant = 'sidebar', className = '
     <nav aria-label="Nx8up on social" className={`${wrap} ${className}`}>
       {/* SOCIAL_URL_TEMPLATE — Discord: replace `href` with your permanent invite URL */}
       <a
-        href="https://discord.gg/REPLACE_ME_NX8UP"
+        href="https://discord.gg/QfVjRj3hQ"
         target="_blank"
         rel="noopener noreferrer"
         className={btn}
@@ -64,7 +64,7 @@ export default function SocialTemplateLinks({ variant = 'sidebar', className = '
 
       {/* SOCIAL_URL_TEMPLATE — YouTube: replace `href` with your channel or handle URL */}
       <a
-        href="https://www.youtube.com/@REPLACE_ME_NX8UP"
+        href="https://www.youtube.com/@nx8up"
         target="_blank"
         rel="noopener noreferrer"
         className={btn}
@@ -75,7 +75,7 @@ export default function SocialTemplateLinks({ variant = 'sidebar', className = '
 
       {/* SOCIAL_URL_TEMPLATE — Instagram: replace `href` with your profile URL */}
       <a
-        href="https://www.instagram.com/REPLACE_ME_NX8UP/"
+        href="https://www.instagram.com/nx8up/"
         target="_blank"
         rel="noopener noreferrer"
         className={btn}
