@@ -1,5 +1,7 @@
 // Shared types and style helpers for the campaign creation wizard
 
+import { SUPPORTED_PLATFORMS } from '@/lib/platforms'
+
 export type CampaignDraft = {
   // Step 1 — Basics
   title: string
@@ -138,7 +140,10 @@ export const OBJECTIVES = [
   { value: 'conversions', label: 'Conversions', description: 'Generate sign-ups or purchases' },
 ]
 
-export const PLATFORMS = ['YouTube', 'Twitch', 'TikTok', 'Instagram'] as const
+// Campaign creation is limited to the platforms nx8up can verify end-to-end
+// (a creator links the OAuth account, and proof URLs are checked against it).
+// TikTok / Instagram return once their OAuth integration ships.
+export const PLATFORMS = SUPPORTED_PLATFORMS
 
 export const MEDIA_TYPES = [
   { value: 'youtube_video', label: 'YouTube Video',  platform: 'YouTube', description: 'Standard long-form YouTube upload' },

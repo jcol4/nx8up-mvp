@@ -38,6 +38,11 @@ import { revalidatePath } from 'next/cache'
 import { randomBytes } from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { verifyProofUrl, fetchPostTimestamp } from '@/lib/verify-proof-url'
+import {
+  detectProofPlatform,
+  linkedPlatformsForCreator,
+  requiredPlatformsForCampaign,
+} from '@/lib/platforms'
 
 /**
  * Generates a random 8-character alphanumeric short code for tracking links.
@@ -161,6 +166,7 @@ export async function submitProof(
 
   const application = await prisma.campaign_applications.findUnique({
     where: { id: applicationId, creator_id: creator.id, status: 'accepted' },
+    include: { campaign: { select: { platform: true, content_type: true } } },
   })
   if (!application) return { error: 'Deal room not found.' }
 
@@ -170,10 +176,28 @@ export async function submitProof(
   if (!data.posted_at) return { error: 'Post timestamp is required.' }
   if (!data.disclosure_confirmed) return { error: 'You must confirm the disclosure.' }
 
-  // Verify every URL belongs to this creator's account
+  // Every proof link must genuinely come from the creator's linked account, on
+  // a platform this campaign requested. Ordered checks (hard-block first):
+  //   1. unsupported host          → only Twitch / YouTube links are accepted
+  //   2. platform ≠ requested      → off-brief link
+  //   3. platform not linked       → creator hasn't connected that account
+  //   4. verifyProofUrl ownership  → 'failed' blocks; 'unverifiable' (transient
+  //      API issues only, after the checks above) is a soft warning.
   const creatorIds = { twitch_id: creator.twitch_id, youtube_channel_id: creator.youtube_channel_id }
+  const requiredPlatforms = requiredPlatformsForCampaign(application.campaign)
+  const linkedPlatforms = linkedPlatformsForCreator(creator)
   const warnings: string[] = []
   for (const url of urls) {
+    const urlPlatform = detectProofPlatform(url)
+    if (urlPlatform == null) {
+      return { error: `${url}: Only YouTube and Twitch links are accepted.` }
+    }
+    if (requiredPlatforms.length > 0 && !requiredPlatforms.includes(urlPlatform)) {
+      return { error: `${url}: This campaign requests ${requiredPlatforms.join(' and ')} content. A ${urlPlatform} link cannot be submitted.` }
+    }
+    if (!linkedPlatforms.includes(urlPlatform)) {
+      return { error: `${url}: Connect your ${urlPlatform} account in your profile before submitting ${urlPlatform} links.` }
+    }
     const result = await verifyProofUrl(url, creatorIds)
     if (result.status === 'failed') return { error: `${url}: ${result.error}` }
     if (result.status === 'unverifiable') warnings.push(result.reason)

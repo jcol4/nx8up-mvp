@@ -17,6 +17,7 @@
  */
 'use client'
 
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import FormInput from '@/components/ui/FormInput'
 import FormTextarea from '@/components/ui/FormTextarea'
@@ -31,6 +32,7 @@ import {
   CREATOR_TYPE_OPTIONS,
   PLATFORM_OPTIONS,
   COMMON_LANGUAGES,
+  ALL_LANGUAGES,
   labelClass,
   sectionTitle,
   toggleBtn,
@@ -59,6 +61,19 @@ const sectionCardClass =
 export default function Step3CreatorIdentity({ draft, setDraft, error, onNext, onBack, returnToSummary }: Props) {
   const t = useTranslations('creator.profile')
   const tEnum = useTranslations('enums')
+  const [showAllLanguages, setShowAllLanguages] = useState(false)
+
+  /**
+   * Languages to render as toggle buttons. Collapsed shows the top 10 plus any
+   * already-selected languages beyond it (so a previous selection stays visible
+   * and removable); expanded shows the full top-50 list.
+   */
+  const visibleLanguages = showAllLanguages
+    ? ALL_LANGUAGES
+    : [
+        ...COMMON_LANGUAGES,
+        ...draft.language.filter(l => !COMMON_LANGUAGES.includes(l)),
+      ]
   /**
    * Generic toggle helper for array-type fields in the draft.
    * Adds `val` if absent, removes it if present.
@@ -165,7 +180,7 @@ export default function Step3CreatorIdentity({ draft, setDraft, error, onNext, o
         <p className={sectionTitle}>{t('s3LanguagesTitle')}</p>
         <p className="mb-3 text-xs cr-text-muted">{t('s3LanguagesDesc')}</p>
         <div className="flex flex-wrap gap-2">
-          {COMMON_LANGUAGES.map(lang => (
+          {visibleLanguages.map(lang => (
             <button
               key={lang}
               type="button"
@@ -180,6 +195,13 @@ export default function Step3CreatorIdentity({ draft, setDraft, error, onNext, o
             </button>
           ))}
         </div>
+        <button
+          type="button"
+          onClick={() => setShowAllLanguages(v => !v)}
+          className="mt-3 text-xs font-medium text-[#c084fc] transition-colors hover:text-[#e9d5ff]"
+        >
+          {showAllLanguages ? t('s3LanguagesShowLess') : t('s3LanguagesShowMore')}
+        </button>
       </div>
 
       {/* Creator type */}

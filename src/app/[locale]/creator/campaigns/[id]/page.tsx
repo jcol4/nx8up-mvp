@@ -35,6 +35,7 @@ import ApplyButton from './ApplyButton'
 import InviteResponseButtons from '@/components/creator/InviteResponseButtons'
 import { prisma } from '@/lib/prisma'
 import { matchCreatorToCampaign } from '@/lib/matching'
+import { missingLinkedPlatforms } from '@/lib/platforms'
 import Image from 'next/image'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import CreatorShell from '@/components/creator/CreatorShell'
@@ -58,6 +59,8 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
           select: {
             location: true,
             platform: true,
+            twitch_id: true,
+            youtube_channel_id: true,
             subs_followers: true,
             youtube_subscribers: true,
             average_vod_views: true,
@@ -95,6 +98,15 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
   const { eligible, score, reasons, notes } = creatorProfile
     ? matchCreatorToCampaign(creatorProfile, campaign)
     : { eligible: true, score: 100, reasons: [] as string[], notes: [] as string[] }
+
+  // Hard gate: creator must have linked the OAuth account for every supported
+  // platform this campaign requests content on.
+  const missingPlatforms = creatorProfile ? missingLinkedPlatforms(campaign, creatorProfile) : []
+  const applyEligible = eligible && missingPlatforms.length === 0
+  const applyReasons = [
+    ...missingPlatforms.map((p) => t('applyMissingPlatform', { platform: p })),
+    ...reasons,
+  ]
 
   const alreadyApplied = myApplication != null
 
@@ -543,8 +555,8 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             profileAudienceAgeMax={creatorProfile?.audience_age_max ?? null}
             profileAudienceLocations={creatorProfile?.audience_locations ?? []}
             acceptedMediaTypes={campaign.content_type}
-            eligible={eligible}
-            ineligibleReasons={reasons}
+            eligible={applyEligible}
+            ineligibleReasons={applyReasons}
             legalAgeRestriction={campaign.legal_age_restriction ?? null}
           />
         )}

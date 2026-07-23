@@ -82,7 +82,9 @@ type Props = {
   checklist: {
     profileComplete: boolean
     platformConnected: boolean
+    payoutConnected: boolean
     appliedToCampaign: boolean
+    dealRoomAvailable: boolean
     academyStarted: boolean
   }
 }
@@ -492,7 +494,9 @@ export default function CreatorCommandCenter({
                 <GettingStartedCard
                   profileComplete={checklist.profileComplete}
                   platformConnected={checklist.platformConnected}
+                  payoutConnected={checklist.payoutConnected}
                   appliedToCampaign={checklist.appliedToCampaign}
+                  dealRoomAvailable={checklist.dealRoomAvailable}
                   academyStarted={checklist.academyStarted}
                 />
               )}

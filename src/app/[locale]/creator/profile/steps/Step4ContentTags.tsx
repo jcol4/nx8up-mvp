@@ -49,6 +49,24 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
   const tEnum = useTranslations('enums')
   const [gameTagInput, setGameTagInput] = useState('')
   const [interestInput, setInterestInput] = useState('')
+  const [categoryInput, setCategoryInput] = useState('')
+
+  // "Other" reveals a free-form input; custom categories are any content_type
+  // values that aren't one of the predefined presets.
+  const categoryPresets = CONTENT_CATEGORY_OPTIONS.filter(c => c !== 'Other')
+  const customCategories = draft.content_type.filter(c => !categoryPresets.includes(c))
+  const [showOtherCategory, setShowOtherCategory] = useState(customCategories.length > 0)
+
+  const toggleOtherCategory = () => {
+    setShowOtherCategory(open => {
+      // Closing the panel discards any custom categories the user added.
+      if (open) {
+        setDraft(d => ({ ...d, content_type: d.content_type.filter(c => categoryPresets.includes(c)) }))
+        setCategoryInput('')
+      }
+      return !open
+    })
+  }
 
   const toggle = (field: keyof CreatorProfileDraft, val: string) => {
     setDraft(d => {
@@ -60,7 +78,7 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
     })
   }
 
-  const addTag = (field: 'game_category' | 'audience_interests', value: string, clear: () => void) => {
+  const addTag = (field: 'game_category' | 'audience_interests' | 'content_type', value: string, clear: () => void) => {
     const t = value.trim()
     if (!t) return
     setDraft(d => {
@@ -87,7 +105,7 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
     })
   }
 
-  const removeTag = (field: 'game_category' | 'audience_interests', val: string) => {
+  const removeTag = (field: 'game_category' | 'audience_interests' | 'content_type', val: string) => {
     setDraft(d => ({ ...d, [field]: (d[field] as string[]).filter(x => x !== val) }))
   }
 
@@ -182,7 +200,7 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
         <div className="mt-5">
           <p className={sectionTitle}>{tr('s4ContentCategoriesTitle')}</p>
           <div className="flex flex-wrap gap-2">
-            {CONTENT_CATEGORY_OPTIONS.map(c => (
+            {categoryPresets.map(c => (
               <button
                 key={c}
                 type="button"
@@ -192,7 +210,56 @@ export default function Step4ContentTags({ draft, setDraft, onNext, onBack, retu
                 {tEnum(`contentCategory.${c}`)}
               </button>
             ))}
+            <button
+              type="button"
+              onClick={toggleOtherCategory}
+              className={toggleBtn(showOtherCategory)}
+            >
+              {tEnum('contentCategory.Other')}
+            </button>
           </div>
+
+          {showOtherCategory && (
+            <div className="mt-3">
+              {customCategories.length > 0 && (
+                <div className="mb-2 flex flex-wrap gap-2">
+                  {customCategories.map(t => (
+                    <span key={t} className="inline-flex items-center gap-1 rounded-lg border border-[#99f7ff]/35 bg-[#99f7ff]/12 px-2.5 py-1 text-sm text-[#99f7ff]">
+                      {t}
+                      <button
+                        type="button"
+                        onClick={() => removeTag('content_type', t)}
+                        className="transition-colors hover:text-red-400"
+                        aria-label={tr('s4Remove', { tag: t })}
+                      >
+                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div className="flex gap-2">
+                <FormInput
+                  type="text"
+                  variant="creator"
+                  value={categoryInput}
+                  onChange={e => setCategoryInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTag('content_type', categoryInput, () => setCategoryInput('')))}
+                  placeholder={tr('s4OtherCategoryPlaceholder')}
+                  className="flex-1"
+                />
+                <button
+                  type="button"
+                  onClick={() => addTag('content_type', categoryInput, () => setCategoryInput(''))}
+                  className="shrink-0 rounded-lg bg-[#99f7ff]/15 px-4 py-2.5 text-sm font-medium text-[#99f7ff] transition-colors hover:bg-[#99f7ff]/20"
+                >
+                  {tr('s4AddBtn')}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

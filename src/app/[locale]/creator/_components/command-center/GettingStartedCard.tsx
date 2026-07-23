@@ -4,20 +4,26 @@ import { CheckCircle2, Circle } from 'lucide-react'
 type Props = {
   profileComplete: boolean
   platformConnected: boolean
+  payoutConnected: boolean
   appliedToCampaign: boolean
+  dealRoomAvailable: boolean
   academyStarted: boolean
 }
 
 export default function GettingStartedCard({
   profileComplete,
   platformConnected,
+  payoutConnected,
   appliedToCampaign,
+  dealRoomAvailable,
   academyStarted,
 }: Props) {
   const items = [
     { label: 'Complete your profile', done: profileComplete, href: '/creator/profile' },
     { label: 'Connect Twitch or YouTube', done: platformConnected, href: '/creator/profile' },
+    { label: 'Connect payouts', done: payoutConnected, href: '/creator/profile' },
     { label: 'Apply to your first campaign', done: appliedToCampaign, href: '/creator/campaigns' },
+    { label: 'Check the Deal Room', done: dealRoomAvailable, href: '/creator/deal-room' },
     { label: 'Check the Academy', done: academyStarted, href: '/creator/academy' },
   ]
   const doneCount = items.filter((i) => i.done).length

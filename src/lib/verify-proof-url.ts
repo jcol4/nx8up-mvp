@@ -12,6 +12,7 @@
 
 import { getAppToken } from './twitch'
 import { extractYouTubeVideoId, extractTwitchVideoId } from './url-parsers'
+import { detectProofPlatform } from './platforms'
 
 /** Discriminated union returned by verifyProofUrl and its internal helpers. */
 export type VerifyResult =
@@ -229,10 +230,10 @@ export async function verifyProofUrl(rawUrl: string, creator: CreatorIds): Promi
     return { status: 'failed', platform: 'Unknown', error: 'Invalid URL.' }
   }
 
-  const { hostname } = url
+  const platform = detectProofPlatform(rawUrl)
 
   // YouTube
-  if (hostname === 'youtube.com' || hostname === 'www.youtube.com' || hostname === 'youtu.be') {
+  if (platform === 'YouTube') {
     if (!creator.youtube_channel_id) {
       return {
         status: 'unverifiable',
@@ -248,7 +249,7 @@ export async function verifyProofUrl(rawUrl: string, creator: CreatorIds): Promi
   }
 
   // Twitch
-  if (hostname === 'twitch.tv' || hostname === 'www.twitch.tv' || hostname === 'clips.twitch.tv') {
+  if (platform === 'Twitch') {
     if (!creator.twitch_id) {
       return {
         status: 'unverifiable',

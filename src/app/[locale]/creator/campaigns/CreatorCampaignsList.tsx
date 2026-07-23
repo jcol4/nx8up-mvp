@@ -193,7 +193,7 @@ export default async function CreatorCampaignsList({ searchParams }: Props) {
           </Panel>
         ) : (
           <ul className="space-y-3.5">
-            {paginatedOpenEntries.map(({ campaign: c }) => (
+            {paginatedOpenEntries.map(({ campaign: c, missingPlatforms }) => (
               <li key={c.id}>
                 <Link
                   href={`/creator/campaigns/${c.id}`}
@@ -244,9 +244,15 @@ export default async function CreatorCampaignsList({ searchParams }: Props) {
                           )
                         })()}
                       <p className="mt-0.5 text-xs cr-text-muted">{c._count.applications} {t('applied')}</p>
-                      <span className="mt-1 inline-block rounded-full border border-[#22c55e]/25 bg-[#22c55e]/10 px-2 py-0.5 text-nx-10 font-medium text-[#22c55e]">
-                        {t('eligible')}
-                      </span>
+                      {missingPlatforms.length > 0 ? (
+                        <span className="mt-1 inline-block rounded-full border border-[#eab308]/30 bg-[#eab308]/10 px-2 py-0.5 text-nx-10 font-medium text-[#eab308]">
+                          {t('ineligibleMissingAccount')}
+                        </span>
+                      ) : (
+                        <span className="mt-1 inline-block rounded-full border border-[#22c55e]/25 bg-[#22c55e]/10 px-2 py-0.5 text-nx-10 font-medium text-[#22c55e]">
+                          {t('eligible')}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </Link>

@@ -154,6 +154,12 @@ export const PREFERRED_PRODUCT_TYPE_OPTIONS = [
   { value: 'event_experience', label: 'Event / Experience', description: 'Tournaments, events, venues' },
 ]
 
+/**
+ * Top 10 most popular content-creation languages, shown by default in the
+ * Languages picker. `ALL_LANGUAGES` extends this to the top 50 (revealed via
+ * the "Show more" toggle). `COMMON_LANGUAGES` keeps its original name for the
+ * collapsed default so existing imports stay valid.
+ */
 export const COMMON_LANGUAGES = [
   'English',
   'Spanish',
@@ -165,6 +171,51 @@ export const COMMON_LANGUAGES = [
   'Chinese',
   'Russian',
   'Arabic',
+]
+
+/** Top 50 languages — the first 10 are `COMMON_LANGUAGES`, in the same order. */
+export const ALL_LANGUAGES = [
+  ...COMMON_LANGUAGES,
+  'Hindi',
+  'Italian',
+  'Indonesian',
+  'Turkish',
+  'Dutch',
+  'Polish',
+  'Vietnamese',
+  'Thai',
+  'Filipino',
+  'Bengali',
+  'Urdu',
+  'Persian',
+  'Ukrainian',
+  'Romanian',
+  'Greek',
+  'Czech',
+  'Swedish',
+  'Hungarian',
+  'Hebrew',
+  'Malay',
+  'Danish',
+  'Finnish',
+  'Norwegian',
+  'Slovak',
+  'Bulgarian',
+  'Croatian',
+  'Serbian',
+  'Tamil',
+  'Telugu',
+  'Marathi',
+  'Punjabi',
+  'Swahili',
+  'Catalan',
+  'Cantonese',
+  'Burmese',
+  'Khmer',
+  'Nepali',
+  'Sinhala',
+  'Afrikaans',
+  'Icelandic',
 ]
 
 export const labelClass = 'block text-sm font-medium cr-text-muted mb-1.5'

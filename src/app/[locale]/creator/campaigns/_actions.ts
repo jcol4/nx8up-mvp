@@ -45,6 +45,7 @@ import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { matchCreatorToCampaign } from '@/lib/matching'
+import { missingLinkedPlatforms } from '@/lib/platforms'
 import { notify } from '@/lib/notification-events'
 import { resolveCreatorMissions } from '@/lib/mission-resolver'
 
@@ -129,16 +130,28 @@ export async function getOpenCampaignsWithEligibility(limit = 50) {
     userId
       ? prisma.content_creators.findUnique({
           where: { clerk_user_id: userId },
-          select: CREATOR_MATCHING_SELECT,
+          select: { ...CREATOR_MATCHING_SELECT, twitch_id: true, youtube_channel_id: true },
         })
       : null,
   ])
 
   return campaigns
     .map((campaign) => {
-      if (!creator) return { campaign, eligible: true, score: 100, reasons: [] as string[], notes: [] as string[] }
+      if (!creator)
+        return {
+          campaign,
+          eligible: true,
+          score: 100,
+          reasons: [] as string[],
+          notes: [] as string[],
+          missingPlatforms: [] as string[],
+        }
       const { eligible, score, reasons, notes } = matchCreatorToCampaign(creator, campaign)
-      return { campaign, eligible, score, reasons, notes }
+      // Campaigns the creator matches on but hasn't linked the required account
+      // for still surface in the open tab, badged as "missing connected account"
+      // — a nudge to link the platform rather than a hard hide.
+      const missingPlatforms = missingLinkedPlatforms(campaign, creator)
+      return { campaign, eligible, score, reasons, notes, missingPlatforms }
     })
     .filter(({ campaign, score }) => {
       if (score < 75) return false
@@ -293,7 +306,7 @@ export async function applyToCampaign(
 
   const creator = await prisma.content_creators.findUnique({
     where: { clerk_user_id: userId },
-    select: { id: true, ...CREATOR_MATCHING_SELECT },
+    select: { id: true, twitch_id: true, youtube_channel_id: true, ...CREATOR_MATCHING_SELECT },
   })
   if (!creator) return { error: 'Creator profile not found. Please complete your profile first.' }
 
@@ -330,6 +343,15 @@ export async function applyToCampaign(
     const restrictionAge = campaign.legal_age_restriction === '21+' ? 21 : 18
     if (creator.audience_age_min < restrictionAge) {
       return { error: `This campaign requires an audience aged ${campaign.legal_age_restriction} or older. Your audience age minimum does not meet this requirement.` }
+    }
+  }
+
+  // Hard gate: the creator must have linked the OAuth account for every
+  // supported platform this campaign requests content on.
+  const missingPlatforms = missingLinkedPlatforms(campaign, creator)
+  if (missingPlatforms.length > 0) {
+    return {
+      error: `This campaign requires content on ${missingPlatforms.join(' and ')}. Connect your ${missingPlatforms.join(' and ')} account in your profile to apply.`,
     }
   }
 

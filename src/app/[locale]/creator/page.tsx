@@ -45,6 +45,7 @@ export default async function CreatorDashboardPage() {
     campaign: {
       id: string
       title: string
+      status: string
       budget: number | null
       start_date: Date | null
       end_date: Date | null
@@ -64,6 +65,7 @@ export default async function CreatorDashboardPage() {
     twitch_username: string | null
     youtube_channel_name: string | null
     platform: string[]
+    stripe_onboarding_complete: boolean
   } | null = null
   let statsUnavailable = false
 
@@ -92,6 +94,7 @@ export default async function CreatorDashboardPage() {
           twitch_username: creator.twitch_username,
           youtube_channel_name: creator.youtube_channel_name,
           platform: creator.platform,
+          stripe_onboarding_complete: creator.stripe_onboarding_complete,
         }
         : null
 
@@ -106,6 +109,7 @@ export default async function CreatorDashboardPage() {
               select: {
                 id: true,
                 title: true,
+                status: true,
                 budget: true,
                 start_date: true,
                 end_date: true,
@@ -163,7 +167,13 @@ export default async function CreatorDashboardPage() {
       checklist={{
         profileComplete: (creatorStats?.platform.length ?? 0) > 0,
         platformConnected: !!(creatorStats?.twitch_username || creatorStats?.youtube_channel_name),
+        payoutConnected: !!creatorStats?.stripe_onboarding_complete,
         appliedToCampaign: campaignApplications.length > 0,
+        // Mirrors the Deal Room listing gate (getMyDealRooms): accepted application
+        // on a launched campaign. Only these deals actually appear in the Deal Room.
+        dealRoomAvailable: campaignApplications.some(
+          (a) => a.status === 'accepted' && a.campaign.status === 'launched',
+        ),
         academyStarted: xpState.xp > 0,
       }}
     />
