@@ -264,7 +264,7 @@ model campaign_applications {
 model deal_submissions {
   id                   String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   application_id       String                @unique @db.Uuid
-  screenshot_url       String?
+  screenshot_urls      String[]              @default([])
   posted_at            DateTime?             @db.Timestamptz(6)
   disclosure_confirmed Boolean               @default(false)
   submitted_at         DateTime?             @db.Timestamptz(6)

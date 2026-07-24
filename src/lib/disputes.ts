@@ -12,7 +12,7 @@ type Creator = {
 type Submission = {
   id: string
   proof_urls: string[]
-  screenshot_url: string | null
+  screenshot_urls: string[]
   posted_at: Date | null
   submitted_at: Date | null
   disclosure_confirmed: boolean
@@ -90,7 +90,7 @@ export async function fetchDisputeData(stripeDispute: Stripe.Dispute): Promise<D
                 select: {
                   id: true,
                   proof_urls: true,
-                  screenshot_url: true,
+                  screenshot_urls: true,
                   posted_at: true,
                   submitted_at: true,
                   disclosure_confirmed: true,
@@ -181,7 +181,7 @@ export function generateEvidence(data: DisputeData) {
   const proofLines = submissions.flatMap(s => {
     const lines: string[] = []
     if (s.proof_urls.length > 0) lines.push(`Proof URLs: ${s.proof_urls.join(', ')}`)
-    if (s.screenshot_url) lines.push(`Screenshot: ${s.screenshot_url}`)
+    if (s.screenshot_urls.length > 0) lines.push(`Screenshots: ${s.screenshot_urls.join(', ')}`)
     if (s.posted_at) lines.push(`Posted: ${s.posted_at.toISOString()}`)
     if (s.stripe_transfer_id) lines.push(`Payout transfer: ${s.stripe_transfer_id}`)
     return lines
@@ -233,7 +233,7 @@ export function generateEvidence(data: DisputeData) {
             ? `@${s.creator.youtube_channel_name}`
             : s.creator?.email ?? 'unknown',
       proof_urls: s.proof_urls,
-      screenshot_url: s.screenshot_url,
+      screenshot_urls: s.screenshot_urls,
       posted_at: s.posted_at?.toISOString() ?? null,
       submitted_at: s.submitted_at?.toISOString() ?? null,
       disclosure_confirmed: s.disclosure_confirmed,

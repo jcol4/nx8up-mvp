@@ -1,9 +1,9 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { SignOutButton } from '@clerk/nextjs'
-import { usePathname } from 'next/navigation'
+import { usePathname } from '@/i18n/navigation'
 import {
   Bell,
   BookOpen,

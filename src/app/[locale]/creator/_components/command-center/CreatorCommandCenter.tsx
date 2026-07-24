@@ -13,7 +13,6 @@ import {
   Info,
   LayoutDashboard,
   Megaphone,
-  Play,
   Plus,
   PlusCircle,
   Trash2,
@@ -922,11 +921,6 @@ export default function CreatorCommandCenter({
                       allow="autoplay; encrypted-media"
                       referrerPolicy="strict-origin-when-cross-origin"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="flex items-center justify-center rounded-full border border-white/15 bg-black/35 p-2 shadow-[0_0_24px_-12px_rgba(153,247,255,0.3)]">
-                        <Play className="h-5 w-5 text-[#99f7ff]" />
-                      </div>
-                    </div>
                   </div>
                 </div>
                 <div className="mt-4 space-y-1">

@@ -131,16 +131,21 @@ export default async function AdminDealRoomDetailPage({
               </div>
             </Field>
           )}
-          {sub.screenshot_url && (
-            <Field label="Screenshot">
-              <a
-                href={sub.screenshot_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="break-all text-sm text-[#bffcff] hover:text-[#99f7ff] hover:underline"
-              >
-                {sub.screenshot_url}
-              </a>
+          {sub.screenshot_urls.length > 0 && (
+            <Field label={`Screenshot${sub.screenshot_urls.length !== 1 ? 's' : ''}`}>
+              <div className="space-y-1">
+                {sub.screenshot_urls.map((url, i) => (
+                  <a
+                    key={i}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block break-all text-sm text-[#bffcff] hover:text-[#99f7ff] hover:underline"
+                  >
+                    {url}
+                  </a>
+                ))}
+              </div>
             </Field>
           )}
           {sub.posted_at && (

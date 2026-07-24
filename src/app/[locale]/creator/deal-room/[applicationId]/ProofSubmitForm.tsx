@@ -3,14 +3,17 @@
  * delivery in the deal room.
  *
  * Features:
- *  - Dynamic URL list: add/remove rows; minimum one row required.
+ *  - Fixed, labeled required link slots — one per deliverable the campaign
+ *    requested (e.g. "YouTube Video 1", "Twitch Stream 1"), derived from
+ *    `deliverableSlots` computed server-side via `buildDeliverableSlots`.
+ *  - Optional "additional link" rows beyond the requirement (add/remove).
  *  - Auto-fill timestamp: on blur of a URL input, calls `getPostTimestamp`
- *    (server action) to fetch the publish time from Twitch/YouTube. Also
- *    re-fetches on submit from the first non-empty URL.
+ *    (server action) to fetch the publish time from Twitch/YouTube, shown
+ *    inline under that row (read-only, not user-editable).
  *  - Duplicate URL detection: validated client-side in real-time and
  *    server-side in `submitProof`.
- *  - Screenshot URL: optional direct image link.
- *  - Posted-at datetime: auto-filled but manually editable.
+ *  - Screenshot URLs: optional list of direct image links, in its own
+ *    section at the bottom of the form.
  *  - Disclosure checkbox: FTC-required acknowledgement.
  *
  * Form states:
@@ -20,11 +23,8 @@
  *    admin/sponsor notes shown at the top.
  *  - **Default** → standard submission form.
  *
- * The `isoToLocal` helper converts an ISO UTC timestamp to a
- * `datetime-local` input value in the user's local timezone.
- *
- * Warning messages from `submitProof` (e.g. "URL could not be verified")
- * are shown alongside the success message so the submission is not blocked.
+ * The overall `posted_at` sent to `submitProof` is the earliest resolved
+ * per-row timestamp, since the server still stores one representative date.
  */
 'use client'
 
@@ -32,12 +32,22 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { submitProof, getPostTimestamp } from '../_actions'
+import { detectProofPlatform } from '@/lib/platforms'
+import type { DeliverableSlot, DeliverableType } from '@/lib/deliverable-slots'
+
+const PLACEHOLDER_BY_TYPE: Record<DeliverableType, string> = {
+  youtube_video: 'https://youtube.com/watch?v=...',
+  youtube_short: 'https://youtube.com/shorts/...',
+  twitch_stream: 'https://twitch.tv/videos/...',
+  twitch_clip: 'https://clips.twitch.tv/...',
+}
 
 type Props = {
   applicationId: string
+  deliverableSlots: DeliverableSlot[]
   existing: {
     proof_urls: string[]
-    screenshot_url: string | null
+    screenshot_urls: string[]
     posted_at: Date | null
     disclosure_confirmed: boolean
     status: string
@@ -46,29 +56,67 @@ type Props = {
   } | null
 }
 
-/**
- * Converts an ISO UTC timestamp to a `datetime-local` input value
- * (YYYY-MM-DDTHH:mm) in the user's local timezone by subtracting the
- * timezone offset before slicing.
- */
-function isoToLocal(iso: string): string {
-  const d = new Date(iso)
-  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60_000)
-  return local.toISOString().slice(0, 16)
+type LinkRow = {
+  id: string
+  label: string | null
+  type: DeliverableType | null
+  platform: string | null
+  url: string
+  postedAtIso: string | null
+  fetching: boolean
 }
 
-export default function ProofSubmitForm({ applicationId, existing }: Props) {
+let rowIdCounter = 0
+function nextRowId(): string {
+  rowIdCounter += 1
+  return `row-${rowIdCounter}`
+}
+
+function seedRequiredRows(slots: DeliverableSlot[], existingUrls: string[]): LinkRow[] {
+  return slots.map((slot, i) => ({
+    id: nextRowId(),
+    label: slot.label,
+    type: slot.type,
+    platform: slot.platform,
+    url: existingUrls[i] ?? '',
+    postedAtIso: null,
+    fetching: false,
+  }))
+}
+
+function formatPostedAt(iso: string): string {
+  return new Date(iso).toLocaleString(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  })
+}
+
+export default function ProofSubmitForm({ applicationId, deliverableSlots, existing }: Props) {
   const t = useTranslations('creator.dealRoom')
   const router = useRouter()
-  const [urls, setUrls] = useState<string[]>(
-    existing?.proof_urls.length ? existing.proof_urls : ['']
+
+  const requiredCount = deliverableSlots.length
+  const existingUrls = existing?.proof_urls ?? []
+
+  const [requiredRows, setRequiredRows] = useState<LinkRow[]>(
+    seedRequiredRows(deliverableSlots, existingUrls)
   )
-  const [fetchingIndex, setFetchingIndex] = useState<number | null>(null)
-  const [screenshotUrl, setScreenshotUrl] = useState(existing?.screenshot_url ?? '')
-  const [postedAt, setPostedAt] = useState(
-    existing?.posted_at ? isoToLocal(existing.posted_at.toISOString()) : ''
+  const [extraRows, setExtraRows] = useState<LinkRow[]>(
+    existingUrls.length > requiredCount
+      ? existingUrls.slice(requiredCount).map((url) => ({
+          id: nextRowId(),
+          label: null,
+          type: null,
+          platform: null,
+          url,
+          postedAtIso: null,
+          fetching: false,
+        }))
+      : []
   )
-  const [timestampAutoFilled, setTimestampAutoFilled] = useState(false)
+  const [screenshotUrls, setScreenshotUrls] = useState<string[]>(
+    existing?.screenshot_urls.length ? existing.screenshot_urls : ['']
+  )
   const [disclosureConfirmed, setDisclosureConfirmed] = useState(
     existing?.disclosure_confirmed ?? false
   )
@@ -77,41 +125,70 @@ export default function ProofSubmitForm({ applicationId, existing }: Props) {
   const [warning, setWarning] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  function updateUrl(index: number, value: string) {
-    setUrls((prev) => {
-      const next = prev.map((u, i) => (i === index ? value : u))
-      const trimmed = next.map((u) => u.trim()).filter(Boolean)
-      if (new Set(trimmed).size !== trimmed.length) {
-        setError(t('proofDuplicate'))
-      } else {
-        setError(null)
-      }
+  function checkDuplicates(rows: LinkRow[]) {
+    const trimmed = rows.map((r) => r.url.trim()).filter(Boolean)
+    if (new Set(trimmed).size !== trimmed.length) {
+      setError(t('proofDuplicate'))
+    } else {
+      setError(null)
+    }
+  }
+
+  function updateRequiredUrl(id: string, value: string) {
+    setRequiredRows((prev) => {
+      const next = prev.map((r) => (r.id === id ? { ...r, url: value } : r))
+      checkDuplicates([...next, ...extraRows])
       return next
     })
   }
 
-  function addUrl() {
-    setUrls((prev) => [...prev, ''])
+  function updateExtraUrl(id: string, value: string) {
+    setExtraRows((prev) => {
+      const next = prev.map((r) => (r.id === id ? { ...r, url: value } : r))
+      checkDuplicates([...requiredRows, ...next])
+      return next
+    })
   }
 
-  function removeUrl(index: number) {
-    setUrls((prev) => prev.filter((_, i) => i !== index))
+  function addExtraRow() {
+    setExtraRows((prev) => [
+      ...prev,
+      { id: nextRowId(), label: null, type: null, platform: null, url: '', postedAtIso: null, fetching: false },
+    ])
   }
 
-  async function handleUrlBlur(index: number) {
-    const url = urls[index]?.trim()
+  function removeExtraRow(id: string) {
+    setExtraRows((prev) => prev.filter((r) => r.id !== id))
+  }
+
+  async function handleUrlBlur(id: string, isExtra: boolean) {
+    const setRows = isExtra ? setExtraRows : setRequiredRows
+    const rows = isExtra ? extraRows : requiredRows
+    const row = rows.find((r) => r.id === id)
+    const url = row?.url.trim()
     if (!url) return
-    setFetchingIndex(index)
+
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, fetching: true } : r)))
     try {
       const result = await getPostTimestamp(url)
-      if (result?.iso) {
-        const formatted = isoToLocal(result.iso)
-        setPostedAt(formatted)
-        setTimestampAutoFilled(true)
-      }
-    } finally {
-      setFetchingIndex(null)
+      setRows((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, fetching: false, postedAtIso: result?.iso ?? r.postedAtIso } : r))
+      )
+    } catch {
+      setRows((prev) => prev.map((r) => (r.id === id ? { ...r, fetching: false } : r)))
     }
+  }
+
+  function updateScreenshotUrl(index: number, value: string) {
+    setScreenshotUrls((prev) => prev.map((u, i) => (i === index ? value : u)))
+  }
+
+  function addScreenshotUrl() {
+    setScreenshotUrls((prev) => [...prev, ''])
+  }
+
+  function removeScreenshotUrl(index: number) {
+    setScreenshotUrls((prev) => prev.filter((_, i) => i !== index))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -119,36 +196,50 @@ export default function ProofSubmitForm({ applicationId, existing }: Props) {
     setError(null)
     setWarning(null)
 
-    const trimmedUrls = urls.map((u) => u.trim()).filter(Boolean)
+    const rows = [...requiredRows, ...extraRows]
+    const trimmedUrls = rows.map((r) => r.url.trim()).filter(Boolean)
     if (new Set(trimmedUrls).size !== trimmedUrls.length) {
-      setError('Duplicate URLs are not allowed. Each video must be unique.')
+      setError(t('proofDuplicate'))
+      return
+    }
+    const missingRequired = requiredRows.some((r) => !r.url.trim())
+    if (missingRequired) {
+      setError(t('proofMissingRequired'))
       return
     }
 
     setLoading(true)
 
-    // Re-fetch timestamp from the first valid URL
-    const firstUrl = urls.find((u) => u.trim())
-    let finalPostedAt = postedAt
-    if (firstUrl) {
-      setFetchingIndex(0)
-      try {
-        const ts = await getPostTimestamp(firstUrl.trim())
-        if (ts?.iso) {
-          const formatted = isoToLocal(ts.iso)
-          setPostedAt(formatted)
-          setTimestampAutoFilled(true)
-          finalPostedAt = formatted
-        }
-      } finally {
-        setFetchingIndex(null)
-      }
+    // Re-fetch timestamps for any row missing one, then use the earliest.
+    const updatedRows = await Promise.all(
+      rows.map(async (r) => {
+        const url = r.url.trim()
+        if (!url || r.postedAtIso) return r
+        const ts = await getPostTimestamp(url)
+        return ts?.iso ? { ...r, postedAtIso: ts.iso } : r
+      })
+    )
+    setRequiredRows(updatedRows.slice(0, requiredRows.length))
+    setExtraRows(updatedRows.slice(requiredRows.length))
+
+    const resolvedTimestamps = updatedRows
+      .filter((r) => r.url.trim() && r.postedAtIso)
+      .map((r) => r.postedAtIso as string)
+
+    if (resolvedTimestamps.length === 0) {
+      setLoading(false)
+      setError(t('proofNoTimestamp'))
+      return
     }
 
+    const earliestPostedAt = resolvedTimestamps.reduce((earliest, iso) =>
+      new Date(iso) < new Date(earliest) ? iso : earliest
+    )
+
     const result = await submitProof(applicationId, {
-      proof_urls: urls,
-      screenshot_url: screenshotUrl,
-      posted_at: finalPostedAt,
+      proof_urls: updatedRows.map((r) => r.url),
+      screenshot_urls: screenshotUrls,
+      posted_at: earliestPostedAt,
       disclosure_confirmed: disclosureConfirmed,
     })
     setLoading(false)
@@ -192,6 +283,56 @@ export default function ProofSubmitForm({ applicationId, existing }: Props) {
     )
   }
 
+  function renderRow(row: LinkRow, isExtra: boolean) {
+    const mismatch =
+      row.platform && row.url.trim() && detectProofPlatform(row.url.trim()) != null &&
+      detectProofPlatform(row.url.trim()) !== row.platform
+
+    return (
+      <div key={row.id} className="space-y-1">
+        <div className="flex gap-2 items-center">
+          <div className="flex-1">
+            {row.label && (
+              <p className="text-xs cr-text-muted mb-1">{row.label}</p>
+            )}
+            <input
+              type="url"
+              value={row.url}
+              onChange={(e) =>
+                isExtra ? updateExtraUrl(row.id, e.target.value) : updateRequiredUrl(row.id, e.target.value)
+              }
+              onBlur={() => handleUrlBlur(row.id, isExtra)}
+              placeholder={row.type ? PLACEHOLDER_BY_TYPE[row.type] : t('proofUrlPlaceholder')}
+              className={`${inputClass} ${row.fetching ? 'opacity-50' : ''}`}
+              disabled={row.fetching}
+            />
+          </div>
+          {isExtra && (
+            <button
+              type="button"
+              onClick={() => removeExtraRow(row.id)}
+              className="shrink-0 w-8 h-8 rounded-lg border cr-border flex items-center justify-center cr-text-muted hover:text-red-400 hover:border-red-400/30 transition-colors self-end"
+              title={t('proofRemove')}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+        {row.fetching && (
+          <p className="text-xs cr-text-muted animate-pulse">{t('proofFetching')}</p>
+        )}
+        {!row.fetching && row.postedAtIso && (
+          <p className="text-xs text-green-400">{t('proofPostedAtInline', { date: formatPostedAt(row.postedAtIso) })}</p>
+        )}
+        {mismatch && row.platform && (
+          <p className="text-xs text-orange-400">{t('proofPlatformMismatch', { platform: row.platform })}</p>
+        )}
+      </div>
+    )
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {existing?.status === 'revision_requested' && (
@@ -229,39 +370,28 @@ export default function ProofSubmitForm({ applicationId, existing }: Props) {
         </div>
       )}
 
-      {/* Post URLs */}
+      {/* Required deliverable links */}
+      {requiredRows.length > 0 && (
+        <div>
+          <label className={labelClass}>{t('proofUrlsLabel')}</label>
+          <div className="space-y-3">
+            {requiredRows.map((row) => renderRow(row, false))}
+          </div>
+          <p className="text-xs cr-text-muted mt-1.5">{t('proofUrlVerifyNote')}</p>
+        </div>
+      )}
+
+      {/* Additional (optional) links */}
       <div>
-        <label className={labelClass}>{t('proofUrlsLabel')} <span className="normal-case font-normal cr-text-muted-subtle">{t('proofUrlsHint')}</span></label>
-        <div className="space-y-2">
-          {urls.map((url, i) => (
-            <div key={i} className="flex gap-2 items-center">
-              <input
-                type="url"
-                value={url}
-                onChange={(e) => updateUrl(i, e.target.value)}
-                onBlur={() => handleUrlBlur(i)}
-                placeholder={t('proofUrlPlaceholder')}
-                className={`${inputClass} ${fetchingIndex === i ? 'opacity-50' : ''}`}
-                disabled={fetchingIndex === i}
-              />
-              {urls.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeUrl(i)}
-                  className="shrink-0 w-8 h-8 rounded-lg border cr-border flex items-center justify-center cr-text-muted hover:text-red-400 hover:border-red-400/30 transition-colors"
-                  title={t('proofRemove')}
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              )}
-            </div>
-          ))}
+        <label className={labelClass}>
+          {t('proofAdditionalLinksLabel')} <span className="normal-case font-normal cr-text-muted-subtle">{t('proofOptional')}</span>
+        </label>
+        <div className="space-y-3">
+          {extraRows.map((row) => renderRow(row, true))}
         </div>
         <button
           type="button"
-          onClick={addUrl}
+          onClick={addExtraRow}
           className="mt-2 text-xs cr-accent hover:underline flex items-center gap-1"
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -269,52 +399,6 @@ export default function ProofSubmitForm({ applicationId, existing }: Props) {
           </svg>
           {t('proofAddUrl')}
         </button>
-        <p className="text-xs cr-text-muted mt-1.5">
-          {t('proofUrlVerifyNote')}
-        </p>
-      </div>
-
-      {/* Screenshot — optional */}
-      <div>
-        <label className={labelClass}>
-          {t('proofScreenshotLabel')} <span className="normal-case cr-text-muted-subtle font-normal">{t('proofOptional')}</span>
-        </label>
-        <input
-          type="url"
-          value={screenshotUrl}
-          onChange={(e) => setScreenshotUrl(e.target.value)}
-          placeholder={t('proofScreenshotPlaceholder')}
-          className={inputClass}
-        />
-        <p className="text-xs cr-text-muted mt-1">
-          {t('proofScreenshotHint')}
-        </p>
-      </div>
-
-      {/* Timestamp */}
-      <div>
-        <div className="flex items-center justify-between mb-1.5">
-          <label className="block text-xs font-medium cr-text-muted uppercase tracking-wide">
-            {t('proofPostedAtLabel')}
-          </label>
-          {fetchingIndex !== null && (
-            <span className="text-xs cr-text-muted animate-pulse">{t('proofFetching')}</span>
-          )}
-          {fetchingIndex === null && timestampAutoFilled && postedAt && (
-            <span className="text-xs text-green-400">{t('proofAutoFilled')}</span>
-          )}
-        </div>
-        <input
-          type="datetime-local"
-          value={postedAt}
-          onChange={(e) => { setPostedAt(e.target.value); setTimestampAutoFilled(false) }}
-          className={`${inputClass} ${fetchingIndex !== null ? 'opacity-50' : ''}`}
-          required
-          disabled={fetchingIndex !== null}
-        />
-        <p className="text-xs cr-text-muted mt-1">
-          {t('proofPostedAtHint')}
-        </p>
       </div>
 
       {/* Disclosure */}
@@ -331,6 +415,51 @@ export default function ProofSubmitForm({ applicationId, existing }: Props) {
             {t('proofDisclosureCheckbox')}
           </span>
         </label>
+      </div>
+
+      {/* Screenshots — optional, at the bottom */}
+      <div>
+        <label className={labelClass}>
+          {t('proofScreenshotLabel')} <span className="normal-case cr-text-muted-subtle font-normal">{t('proofOptional')}</span>
+        </label>
+        <div className="space-y-2">
+          {screenshotUrls.map((url, i) => (
+            <div key={i} className="flex gap-2 items-center">
+              <input
+                type="url"
+                value={url}
+                onChange={(e) => updateScreenshotUrl(i, e.target.value)}
+                placeholder={t('proofScreenshotPlaceholder')}
+                className={inputClass}
+              />
+              {screenshotUrls.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeScreenshotUrl(i)}
+                  className="shrink-0 w-8 h-8 rounded-lg border cr-border flex items-center justify-center cr-text-muted hover:text-red-400 hover:border-red-400/30 transition-colors"
+                  title={t('proofRemove')}
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={addScreenshotUrl}
+          className="mt-2 text-xs cr-accent hover:underline flex items-center gap-1"
+        >
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          {t('proofAddScreenshot')}
+        </button>
+        <p className="text-xs cr-text-muted mt-1">
+          {t('proofScreenshotHint')}
+        </p>
       </div>
 
       {error && (

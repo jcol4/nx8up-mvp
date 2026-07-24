@@ -220,18 +220,23 @@ export default async function SponsorDealRoomDetailPage({
                             }
                           />
                         )}
-                        {sub.screenshot_url && (
+                        {sub.screenshot_urls.length > 0 && (
                           <Field
                             label={t('screenshot')}
                             value={
-                              <a
-                                href={sub.screenshot_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="break-all text-[#99f7ff] hover:text-[#bffcff] hover:underline"
-                              >
-                                {sub.screenshot_url}
-                              </a>
+                              <span className="space-y-1 block">
+                                {sub.screenshot_urls.map((url, i) => (
+                                  <a
+                                    key={i}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block break-all text-[#99f7ff] hover:text-[#bffcff] hover:underline"
+                                  >
+                                    {url}
+                                  </a>
+                                ))}
+                              </span>
                             }
                           />
                         )}

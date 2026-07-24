@@ -30,7 +30,7 @@ type EvidenceJson = {
   delivery_proof?: {
     creator_handle?: string
     proof_urls?: string[]
-    screenshot_url?: string | null
+    screenshot_urls?: string[]
     posted_at?: string | null
     submitted_at?: string | null
     disclosure_confirmed?: boolean
@@ -282,16 +282,21 @@ export default async function DisputeDetailPage({
                       </div>
                     </Field>
                   )}
-                  {d.screenshot_url && (
-                    <Field label="Screenshot">
-                      <a
-                        href={d.screenshot_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="break-all text-[#bffcff] hover:text-[#99f7ff] hover:underline"
-                      >
-                        {d.screenshot_url}
-                      </a>
+                  {d.screenshot_urls && d.screenshot_urls.length > 0 && (
+                    <Field label={`Screenshot${d.screenshot_urls.length !== 1 ? 's' : ''}`}>
+                      <div className="space-y-1">
+                        {d.screenshot_urls.map((url, j) => (
+                          <a
+                            key={j}
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block break-all text-[#bffcff] hover:text-[#99f7ff] hover:underline"
+                          >
+                            {url}
+                          </a>
+                        ))}
+                      </div>
                     </Field>
                   )}
                   {d.posted_at && (

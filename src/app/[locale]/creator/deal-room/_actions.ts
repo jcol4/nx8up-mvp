@@ -113,6 +113,7 @@ export async function getDealRoom(applicationId: string) {
         include: { sponsor: { select: { company_name: true } } },
       },
       deal_submission: true,
+      _count: { select: { link_clicks: true } },
     },
   })
 
@@ -131,6 +132,7 @@ export async function getDealRoom(applicationId: string) {
           include: { sponsor: { select: { company_name: true, clerk_user_id: true } } },
         },
         deal_submission: true,
+        _count: { select: { link_clicks: true } },
       },
     })
   }
@@ -147,8 +149,8 @@ export async function getPostTimestamp(url: string): Promise<{ iso: string } | n
 /** Payload submitted by the creator via `ProofSubmitForm`. */
 export type ProofData = {
   proof_urls: string[]
-  /** Optional URL to a screenshot image showing sponsor branding in content. */
-  screenshot_url: string
+  /** Optional URLs to screenshot images showing sponsor branding in content. */
+  screenshot_urls: string[]
   /** ISO datetime string of when the content was published. */
   posted_at: string
   disclosure_confirmed: boolean
@@ -205,9 +207,11 @@ export async function submitProof(
 
   const warning = warnings.length > 0 ? warnings[0] : undefined
 
-  const screenshotUrl = data.screenshot_url.trim()
-  if (screenshotUrl && !/^https:\/\//i.test(screenshotUrl)) {
-    return { error: 'Screenshot URL must begin with https://' }
+  const screenshotUrls = data.screenshot_urls.map((u) => u.trim()).filter(Boolean)
+  for (const url of screenshotUrls) {
+    if (!/^https:\/\//i.test(url)) {
+      return { error: 'Screenshot URLs must begin with https://' }
+    }
   }
 
   await prisma.deal_submissions.upsert({
@@ -215,7 +219,7 @@ export async function submitProof(
     create: {
       application_id: applicationId,
       proof_urls: urls,
-      screenshot_url: screenshotUrl || null,
+      screenshot_urls: screenshotUrls,
       posted_at: new Date(data.posted_at),
       disclosure_confirmed: true,
       submitted_at: new Date(),
@@ -223,7 +227,7 @@ export async function submitProof(
     },
     update: {
       proof_urls: urls,
-      screenshot_url: screenshotUrl || null,
+      screenshot_urls: screenshotUrls,
       posted_at: new Date(data.posted_at),
       disclosure_confirmed: true,
       submitted_at: new Date(),

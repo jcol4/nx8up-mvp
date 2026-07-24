@@ -32,11 +32,13 @@ import { headers } from 'next/headers'
 import { auth } from '@clerk/nextjs/server'
 import { getDealRoom } from '../_actions'
 import ProofSubmitForm from './ProofSubmitForm'
+import { buildDeliverableSlots } from '@/lib/deliverable-slots'
 import { calcFeeBreakdown } from '@/lib/constants'
 import CopyButton from './CopyButton'
 import { getUserDisplayInfo } from '@/lib/get-user-display-info'
 import CreatorShell from '@/components/creator/CreatorShell'
 import NxHudCard from '@/components/nx-shell/NxHudCard'
+import CollapsibleSection from '@/components/nx-shell/CollapsibleSection'
 import { getClerkImageUrls, clerkAvatarUrl } from '@/lib/get-clerk-images'
 
 export default async function CreatorDealRoomDetailPage({
@@ -67,7 +69,21 @@ export default async function CreatorDealRoomDetailPage({
     ? `${proto}://${host}/r/${app.tracking_short_code}`
     : null
 
-  const hasDeliverables = c.num_videos || c.num_streams || c.num_posts || c.num_short_videos
+  const hasDeliverables =
+    c.num_videos || c.num_streams || c.num_posts || c.num_short_videos || c.num_youtube_shorts || c.num_twitch_clips
+  const deliverableSlots = buildDeliverableSlots(c)
+
+  const hasBrief = c.description || c.campaign_type || c.product_type || c.campaign_code
+  const hasCompliance = c.must_include_link || c.must_include_promo_code || c.must_tag_brand || c.legal_age_restriction
+
+  const ctr = sub?.ctr != null ? Number(sub.ctr).toFixed(2) : null
+  const videoViews = sub?.video_views as Record<string, number> | null | undefined
+  const avgVideoViews =
+    videoViews && Object.keys(videoViews).length > 0
+      ? Math.round(Object.values(videoViews).reduce((a, b) => a + b, 0) / Object.values(videoViews).length)
+      : null
+  const clickCount = app._count.link_clicks
+  const hasLinkPerformance = ctr !== null || avgVideoViews !== null || clickCount > 0
 
   return (
     <CreatorShell>
@@ -181,6 +197,12 @@ export default async function CreatorDealRoomDetailPage({
                     <p className="cr-stat-caption mt-1">{t('boxVideos', { n: c.num_videos })}</p>
                   </div>
                 ) : null}
+                {c.num_youtube_shorts ? (
+                  <div className="text-center p-3 rounded-lg bg-[#00c8ff]/5 border border-[#00c8ff]/15">
+                    <p className="text-xl font-bold cr-text-bright">{c.num_youtube_shorts}</p>
+                    <p className="cr-stat-caption mt-1">{t('boxYoutubeShorts', { n: c.num_youtube_shorts })}</p>
+                  </div>
+                ) : null}
                 {c.num_streams ? (
                   <div className="text-center p-3 rounded-lg bg-[#7b4fff]/5 border border-[#7b4fff]/15">
                     <p className="text-xl font-bold cr-text-bright">{c.num_streams}</p>
@@ -188,6 +210,12 @@ export default async function CreatorDealRoomDetailPage({
                     {c.min_stream_duration && (
                       <p className="text-nx-10 text-[#c4ccd8]">{t('streamMin', { n: c.min_stream_duration })}</p>
                     )}
+                  </div>
+                ) : null}
+                {c.num_twitch_clips ? (
+                  <div className="text-center p-3 rounded-lg bg-[#7b4fff]/5 border border-[#7b4fff]/15">
+                    <p className="text-xl font-bold cr-text-bright">{c.num_twitch_clips}</p>
+                    <p className="cr-stat-caption mt-1">{t('boxTwitchClips', { n: c.num_twitch_clips })}</p>
                   </div>
                 ) : null}
                 {c.num_posts ? (
@@ -203,73 +231,39 @@ export default async function CreatorDealRoomDetailPage({
                   </div>
                 ) : null}
               </div>
-
-              {/* Checklist */}
-              <h3 className="cr-field-label mb-3">{t('deliveryChecklist')}</h3>
-              <ul className="space-y-2">
-                {c.num_videos ? (
-                  <li className="flex items-center gap-2 text-sm cr-text">
-                    <span className="w-4 h-4 rounded border border-[#00c8ff]/40 flex-shrink-0 flex items-center justify-center">
-                      {sub?.status === 'approved' ? <span className="text-green-400 text-xs">✓</span> : null}
-                    </span>
-                    {t('checklistVideo', { n: c.num_videos })}
-                  </li>
-                ) : null}
-                {c.num_streams ? (
-                  <li className="flex items-center gap-2 text-sm cr-text">
-                    <span className="w-4 h-4 rounded border border-[#00c8ff]/40 flex-shrink-0 flex items-center justify-center">
-                      {sub?.status === 'approved' ? <span className="text-green-400 text-xs">✓</span> : null}
-                    </span>
-                    {t('checklistStream', { n: c.num_streams })}
-                    {c.min_stream_duration ? ` (${t('checklistStreamMin', { n: c.min_stream_duration })})` : ''}
-                  </li>
-                ) : null}
-                {c.num_posts ? (
-                  <li className="flex items-center gap-2 text-sm cr-text">
-                    <span className="w-4 h-4 rounded border border-[#00c8ff]/40 flex-shrink-0 flex items-center justify-center">
-                      {sub?.status === 'approved' ? <span className="text-green-400 text-xs">✓</span> : null}
-                    </span>
-                    {t('checklistPost', { n: c.num_posts })}
-                  </li>
-                ) : null}
-                {c.num_short_videos ? (
-                  <li className="flex items-center gap-2 text-sm cr-text">
-                    <span className="w-4 h-4 rounded border border-[#00c8ff]/40 flex-shrink-0 flex items-center justify-center">
-                      {sub?.status === 'approved' ? <span className="text-green-400 text-xs">✓</span> : null}
-                    </span>
-                    {t('checklistShort', { n: c.num_short_videos })}
-                  </li>
-                ) : null}
-                {c.must_include_link && (
-                  <li className="flex items-center gap-2 text-sm cr-text">
-                    <span className="w-4 h-4 rounded border border-[#00c8ff]/40 flex-shrink-0 flex items-center justify-center">
-                      {sub?.status === 'approved' ? <span className="text-green-400 text-xs">✓</span> : null}
-                    </span>
-                    {t('checklistLink')}
-                  </li>
-                )}
-                {c.must_include_promo_code && (
-                  <li className="flex items-center gap-2 text-sm cr-text">
-                    <span className="w-4 h-4 rounded border border-[#00c8ff]/40 flex-shrink-0" />
-                    {t('checklistCode')}
-                  </li>
-                )}
-                {c.must_tag_brand && (
-                  <li className="flex items-center gap-2 text-sm cr-text">
-                    <span className="w-4 h-4 rounded border border-[#00c8ff]/40 flex-shrink-0" />
-                    {t('checklistTag')}
-                  </li>
-                )}
-                <li className="flex items-center gap-2 text-sm cr-text">
-                  <span className="w-4 h-4 rounded border border-[#00c8ff]/40 flex-shrink-0" />
-                  {t('checklistDisclosure')}
-                </li>
-                <li className="flex items-center gap-2 text-sm cr-text">
-                  <span className="w-4 h-4 rounded border border-[#00c8ff]/40 flex-shrink-0" />
-                  {t('checklistSubmit')}
-                </li>
-              </ul>
             </NxHudCard>
+          )}
+
+          {/* Campaign Brief */}
+          {hasBrief && (
+            <CollapsibleSection title={t('campaignBrief')} description={t('campaignBriefDesc')}>
+              <dl className="space-y-3">
+                {c.description && (
+                  <div>
+                    <dt className="cr-field-label mb-1">{t('descriptionLabel')}</dt>
+                    <dd className="text-sm cr-text mt-0.5 whitespace-pre-line leading-relaxed">{c.description}</dd>
+                  </div>
+                )}
+                {c.campaign_type && (
+                  <div>
+                    <dt className="cr-field-label mb-1">{t('campaignType')}</dt>
+                    <dd className="text-sm cr-text mt-0.5 capitalize">{c.campaign_type}</dd>
+                  </div>
+                )}
+                {c.product_type && (
+                  <div>
+                    <dt className="cr-field-label mb-1">{t('productType')}</dt>
+                    <dd className="text-sm cr-text mt-0.5 capitalize">{c.product_type}</dd>
+                  </div>
+                )}
+                {c.campaign_code && (
+                  <div>
+                    <dt className="cr-field-label mb-1">{t('campaignCode')}</dt>
+                    <dd className="text-sm cr-text mt-0.5">{c.campaign_code}</dd>
+                  </div>
+                )}
+              </dl>
+            </CollapsibleSection>
           )}
 
           {/* Creative Package */}
@@ -343,6 +337,35 @@ export default async function CreatorDealRoomDetailPage({
             </dl>
           </NxHudCard>
 
+          {/* Compliance Requirements */}
+          {hasCompliance && (
+            <CollapsibleSection title={t('complianceTitle')} description={t('complianceDesc')} defaultOpen>
+              <ul className="space-y-2 text-sm cr-text">
+                {c.must_include_link && (
+                  <li className="flex gap-2">
+                    <span className="text-[#00c8ff] mt-0.5">▸</span> {t('compIncludeLink')}
+                  </li>
+                )}
+                {c.must_include_promo_code && (
+                  <li className="flex gap-2">
+                    <span className="text-[#00c8ff] mt-0.5">▸</span> {t('compIncludePromo')}
+                  </li>
+                )}
+                {c.must_tag_brand && (
+                  <li className="flex gap-2">
+                    <span className="text-[#00c8ff] mt-0.5">▸</span> {t('compTagBrand')}
+                  </li>
+                )}
+                {c.legal_age_restriction && (
+                  <li className="flex gap-2">
+                    <span className="text-[#00c8ff] mt-0.5">▸</span>
+                    {t('legalAgeRestriction')}: {c.legal_age_restriction}
+                  </li>
+                )}
+              </ul>
+            </CollapsibleSection>
+          )}
+
           {/* Disclosure Reminder */}
           <NxHudCard className="p-5 border-[#eab308]/25">
             <h2 className="cr-panel-title" style={{ color: '#eab308' }}>{t('disclosureTitle')}</h2>
@@ -378,7 +401,7 @@ export default async function CreatorDealRoomDetailPage({
           <NxHudCard className="p-5">
             <h2 className="cr-panel-title">{t('submitProofTitle')}</h2>
             <p className="mb-4 mt-1 text-sm cr-text-muted">{t('submitProofDesc')}</p>
-            <ProofSubmitForm applicationId={applicationId} existing={sub ?? null} />
+            <ProofSubmitForm applicationId={applicationId} existing={sub ?? null} deliverableSlots={deliverableSlots} />
           </NxHudCard>
 
         </div>
@@ -477,6 +500,31 @@ export default async function CreatorDealRoomDetailPage({
                 )}
               </dl>
             </NxHudCard>
+          )}
+
+          {sub && hasLinkPerformance && (
+            <CollapsibleSection title={t('linkPerformanceTitle')}>
+              <dl className="space-y-2.5 text-sm">
+                {clickCount > 0 && (
+                  <div className="flex justify-between gap-2">
+                    <dt className="cr-meta-label">{t('totalClicks')}</dt>
+                    <dd className="cr-text-bright">{format.number(clickCount)}</dd>
+                  </div>
+                )}
+                {ctr !== null && (
+                  <div className="flex justify-between gap-2">
+                    <dt className="cr-meta-label">{t('ctr')}</dt>
+                    <dd className="cr-text-bright font-medium">{ctr}%</dd>
+                  </div>
+                )}
+                {avgVideoViews !== null && (
+                  <div className="flex justify-between gap-2">
+                    <dt className="cr-meta-label">{t('avgVideoViews')}</dt>
+                    <dd className="cr-text-bright">{format.number(avgVideoViews)}</dd>
+                  </div>
+                )}
+              </dl>
+            </CollapsibleSection>
           )}
         </div>
       </div>
