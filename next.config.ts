@@ -69,6 +69,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'static-cdn.jtvnw.net' },          // Twitch
       { protocol: 'https', hostname: 'yt3.googleusercontent.com' },     // YouTube avatars
       { protocol: 'https', hostname: 'i.ytimg.com' },                   // YouTube thumbnails
+      { protocol: 'https', hostname: 'avatars.akamai.steamstatic.com' }, // Steam avatars
+      { protocol: 'https', hostname: 'avatars.steamstatic.com' },        // Steam avatars (alt host)
     ],
   },
 };

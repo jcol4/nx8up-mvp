@@ -12,6 +12,7 @@ function formatCompactFollowers(value: number | null): string {
 export type SponsorMatchedCreatorPreview = {
   id: string
   username: string
+  pfpUrl: string | null
   categories: string[]
   followers: string
   matchScore: number
@@ -165,12 +166,22 @@ export function getSponsorMatchedCreatorsPreviewCached(sponsorId: string) {
       }
 
       const creators = await prisma.content_creators.findMany({
-        where: { is_available: true, is_deleted: false },
+        where: {
+          is_available: true,
+          is_deleted: false,
+          OR: [
+            { twitch_username: { not: null } },
+            { youtube_handle: { not: null } },
+            { youtube_channel_name: { not: null } },
+          ],
+        },
         select: {
           id: true,
           twitch_username: true,
+          twitch_profile_image: true,
           youtube_handle: true,
           youtube_channel_name: true,
+          steam_avatar_url: true,
           subs_followers: true,
           youtube_subscribers: true,
           platform: true,
@@ -206,9 +217,11 @@ export function getSponsorMatchedCreatorsPreviewCached(sponsorId: string) {
           return {
             id: creator.id,
             username,
+            pfpUrl: creator.twitch_profile_image ?? creator.steam_avatar_url ?? null,
             categories:
               creator.game_category.length > 0 ? creator.game_category : creator.content_type,
             followers: formatCompactFollowers(totalFollowers),
+            totalFollowers,
             matchScore: match.score,
             eligible: match.eligible,
             href: `/sponsor/creators/${creator.id}`,
@@ -216,8 +229,10 @@ export function getSponsorMatchedCreatorsPreviewCached(sponsorId: string) {
         })
         .sort((a, b) => {
           if (a.eligible !== b.eligible) return a.eligible ? -1 : 1
-          return b.matchScore - a.matchScore
+          if (a.matchScore !== b.matchScore) return b.matchScore - a.matchScore
+          return b.totalFollowers - a.totalFollowers
         })
+        .map(({ totalFollowers: _totalFollowers, ...rest }) => rest)
         .slice(0, 3)
 
       return { hasBaseCampaign: true, topMatches }
